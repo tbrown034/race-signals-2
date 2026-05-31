@@ -1,6 +1,7 @@
 import Link from "next/link";
+import { CoverageWarning } from "@/src/components/coverage-warning";
 import { PageShell } from "@/src/components/page-shell";
-import { getScheduleERecordSummary, getScheduleERecords } from "@/src/lib/db/repository";
+import { getScheduleERecordSummary, getScheduleERecords, getValidationWarningsForScope } from "@/src/lib/db/repository";
 import { formatCount, formatDate, formatMoney } from "@/src/lib/format";
 import { displayCandidateName } from "@/src/lib/names";
 import type { Metadata } from "next";
@@ -38,6 +39,15 @@ export default async function ScheduleERecordsPage({
     }),
     getScheduleERecordSummary(filters),
   ]);
+  const validationWarnings = await getValidationWarningsForScope({
+    sourceIds: [
+      candidateId,
+      sourceId,
+      ...records.map((record) => record.sourceId),
+      ...records.map((record) => record.fecCandidateId),
+    ],
+    sourcePrefixes: state ? [`candidate-scope:${state}:`] : [],
+  });
   const activeScope = [
     state ? `state ${state}` : null,
     raceId ? `race ${raceId}` : null,
@@ -116,6 +126,7 @@ export default async function ScheduleERecordsPage({
               Totals are summed from stored, source-linked Schedule E rows in this database slice, not a completeness claim.
             </p>
           </div>
+          <CoverageWarning issues={validationWarnings} />
 
           {records.length ? (
             <div className="overflow-x-auto">

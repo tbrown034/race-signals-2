@@ -1,4 +1,5 @@
 import { CandidatePhoto } from "@/src/components/candidate-photo";
+import { CoverageWarning } from "@/src/components/coverage-warning";
 import { ElectionTimeline } from "@/src/components/election-timeline";
 import { notFound } from "next/navigation";
 import Link from "next/link";
@@ -7,7 +8,7 @@ import { IncumbentBadge } from "@/src/components/incumbent-badge";
 import { PageShell } from "@/src/components/page-shell";
 import { PartySquare } from "@/src/components/party-square";
 import { ReporterRead } from "@/src/components/reporter-read";
-import { getCandidate, getCandidateElections, getCandidateFilings, getCandidateIndependentExpenditures, getCandidatesForRace, getRace, getSignalsForEntity } from "@/src/lib/db/repository";
+import { getCandidate, getCandidateElections, getCandidateFilings, getCandidateIndependentExpenditures, getCandidatesForRace, getRace, getSignalsForEntity, getValidationWarningsForScope } from "@/src/lib/db/repository";
 import { reportTypeDisplay } from "@/src/lib/fec-report-types";
 import { formatCount, formatDate, formatDateTime, formatMoney } from "@/src/lib/format";
 import { displayCandidateName } from "@/src/lib/names";
@@ -46,9 +47,16 @@ export default async function CandidatePage({
 
   if (!candidate) notFound();
   const candidateDisplayName = displayCandidateName(candidate.name) ?? candidate.name;
-  const [raceCohort, race] = candidate.raceId
-    ? await Promise.all([getCandidatesForRace(candidate.raceId), getRace(candidate.raceId)])
-    : [[], null] as const;
+  const [raceCohort, race, validationWarnings] = candidate.raceId
+    ? await Promise.all([
+      getCandidatesForRace(candidate.raceId),
+      getRace(candidate.raceId),
+      getValidationWarningsForScope({
+        sourceIds: [candidate.fecCandidateId],
+        sourcePrefixes: [`candidate-scope:${candidate.state}:`],
+      }),
+    ])
+    : [[], null, await getValidationWarningsForScope({ sourceIds: [candidate.fecCandidateId] })] as const;
   const signalCounts = countSignals(signals);
   const reporterNotes = candidateReporterNotes(candidate, signalCounts, signals.length, independentExpenditures.length);
 
@@ -146,6 +154,7 @@ export default async function CandidatePage({
             notes={reporterNotes}
           />
         </div>
+        <CoverageWarning issues={validationWarnings} />
         {isAggregateOnlyCandidate(candidate, signals.length, filings.length, independentExpenditures.length) ? (
           <AggregateOnlyNotice candidate={candidate} />
         ) : null}

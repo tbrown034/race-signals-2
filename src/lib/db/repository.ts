@@ -2231,6 +2231,75 @@ export async function getCoverageSummary() {
   };
 }
 
+export async function getValidationWarningsForScope({
+  rules = ["candidate_scope_truncated", "fec_pagination_truncated", "partial_ingestion_error"],
+  sourceIds = [],
+  sourcePrefixes = [],
+}: {
+  rules?: string[];
+  sourceIds?: Array<string | null | undefined>;
+  sourcePrefixes?: string[];
+}): Promise<RecentValidationIssue[]> {
+  const ids = [...new Set(sourceIds.filter((value): value is string => Boolean(value)))];
+  const prefixes = [...new Set(sourcePrefixes.filter(Boolean))];
+  if (!hasDatabase() || (!ids.length && !prefixes.length)) return [];
+
+  const values: unknown[] = [rules];
+  const scopeClauses: string[] = [];
+  if (ids.length) {
+    values.push(ids);
+    scopeClauses.push(`vi.source_id = any($${values.length}::text[])`);
+  }
+  for (const prefix of prefixes) {
+    values.push(`${prefix}%`);
+    scopeClauses.push(`vi.source_id like $${values.length}`);
+  }
+
+  const rows = await sql<{
+    entity_type: string;
+    source_id: string | null;
+    severity: string;
+    rule: string;
+    message: string;
+    source_url: string | null;
+    created_at: string | Date;
+  }>(
+    `
+      select entity_type, source_id, severity, rule, message, source_url, created_at
+      from (
+        select distinct on (vi.rule, coalesce(vi.source_id, ''), vi.message)
+          vi.entity_type,
+          vi.source_id,
+          vi.severity,
+          vi.rule,
+          vi.message,
+          coalesce(ie.source_url, vi.source_url) as source_url,
+          vi.created_at
+        from validation_issues vi
+        left join independent_expenditures ie
+          on vi.entity_type = 'independent_expenditure'
+          and ie.source_id = vi.source_id
+        where vi.rule = any($1::text[])
+          and (${scopeClauses.join(" or ")})
+        order by vi.rule, coalesce(vi.source_id, ''), vi.message, vi.created_at desc
+      ) latest_examples
+      order by created_at desc
+      limit 6
+    `,
+    values,
+  );
+
+  return rows.map((issue) => ({
+    entityType: issue.entity_type,
+    sourceId: issue.source_id,
+    severity: issue.severity,
+    rule: issue.rule,
+    message: issue.message,
+    sourceUrl: issue.source_url,
+    createdAt: toIsoString(issue.created_at),
+  }));
+}
+
 type IngestionRunRow = {
   id: string;
   source: string;

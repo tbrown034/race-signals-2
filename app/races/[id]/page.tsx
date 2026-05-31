@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { CandidatePhoto } from "@/src/components/candidate-photo";
+import { CoverageWarning } from "@/src/components/coverage-warning";
 import { ElectionTimeline } from "@/src/components/election-timeline";
 import { EntityPage } from "@/src/components/entity-page";
 import { IncumbentBadge } from "@/src/components/incumbent-badge";
@@ -14,6 +15,7 @@ import {
   getRaceRatings,
   getRaceStats,
   getSignalsForEntity,
+  getValidationWarningsForScope,
 } from "@/src/lib/db/repository";
 import { formatCount, formatDate, formatDateTime, formatMoney } from "@/src/lib/format";
 import { displayCandidateName } from "@/src/lib/names";
@@ -62,6 +64,10 @@ export default async function RacePage({
     .sort();
   const oldestTotalsFetchedAt = totalsFetchedDates[0] ?? null;
   const latestTotalsFetchedAt = totalsFetchedDates.at(-1) ?? null;
+  const validationWarnings = await getValidationWarningsForScope({
+    sourceIds: candidates.map((candidate) => candidate.fecCandidateId),
+    sourcePrefixes: [`candidate-scope:${race.state}:`],
+  });
 
   return (
     <PageShell>
@@ -126,6 +132,7 @@ export default async function RacePage({
               : "No incumbent candidate is currently matched in this slice; verify ballot and primary context with election-office sources.",
             ]}
         />
+        <CoverageWarning issues={validationWarnings} />
         <div className="grid gap-px border-b border-neutral-300 bg-neutral-300 sm:grid-cols-2 xl:grid-cols-5" id="race-stats">
           <RaceStat
             detail="Source-linked Schedule E rows in this Race Signals slice; verify evidence before publication."

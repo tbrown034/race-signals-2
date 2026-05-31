@@ -30,18 +30,51 @@ async function main() {
       order by pg_total_relation_size(c.oid) desc
       limit 12
     `);
+    const exactCounts = await getExactCounts(
+      pool,
+      tables.rows.map((row) => row.table_name),
+    );
 
     console.log(`Database size: ${formatBytes(Number(databaseSize.rows[0]?.size ?? 0))}`);
     console.table(
       tables.rows.map((row) => ({
         table: row.table_name,
         size: formatBytes(Number(row.total_bytes)),
-        rows_est: Number(row.row_estimate),
+        rows: exactCounts.get(row.table_name) ?? Number(row.row_estimate),
       })),
     );
   } finally {
     await pool.end();
   }
+}
+
+async function getExactCounts(pool: ReturnType<typeof getPool>, tableNames: string[]) {
+  const counts = new Map<string, number>();
+  const budgetSensitiveTables = tableNames.filter((name) =>
+    [
+      "candidates",
+      "committees",
+      "filings",
+      "independent_expenditures",
+      "signals",
+      "source_records",
+      "transactions",
+      "validation_issues",
+    ].includes(name),
+  );
+
+  for (const tableName of budgetSensitiveTables) {
+    const result = await pool.query<{ count: string }>(
+      `select count(*)::text as count from ${quoteIdentifier(tableName)}`,
+    );
+    counts.set(tableName, Number(result.rows[0]?.count ?? 0));
+  }
+
+  return counts;
+}
+
+function quoteIdentifier(identifier: string) {
+  return `"${identifier.replaceAll('"', '""')}"`;
 }
 
 function formatBytes(bytes: number) {

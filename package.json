@@ -11,6 +11,7 @@
     "audit:cost": "tsx scripts/audit-cost.ts",
     "audit:signals": "tsx scripts/audit-signals.ts",
     "repair:cycles": "tsx scripts/prune-cross-cycle-records.ts",
+    "repair:donors": "tsx scripts/prune-donor-transactions.ts",
     "repair:signals": "tsx scripts/regenerate-signals.ts",
     "ingest": "tsx scripts/ingest-fec.ts"
   },

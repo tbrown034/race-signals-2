@@ -78,7 +78,7 @@ Tables use unique constraints on source/source ID pairs. Signals use a `dedupe_k
 
 Upserts update changed metadata without creating duplicate feed entries.
 
-Cycle guardrails prevent old FEC records from being surfaced as current-cycle alerts. For 2026 race shells, filing and Schedule E records must fall inside the 2025-01-01 through 2026-12-31 cycle window before they are stored, displayed or converted into signals. `npm run repair:cycles` prunes legacy cross-cycle rows if a local database was populated before this guardrail existed.
+Cycle guardrails prevent old FEC records from being surfaced as current-cycle alerts. For 2026 race shells, filing and Schedule E records must fall inside the 2025-01-01 through 2026-12-31 cycle window before they are stored, displayed or converted into signals. `npm run repair:cycles` prunes legacy cross-cycle rows if a local database was populated before this guardrail existed. `npm run repair:donors` removes legacy Schedule A donor rows from earlier experiments; current production ingest does not store donor-level receipts.
 
 ## Validation Rules
 
@@ -183,7 +183,7 @@ Cost guardrails:
 
 - Keep the daily scheduled ingest bounded. A scheduled national run can burn GitHub Actions minutes quickly because FEC requests are deliberately rate-limited.
 - The ingest script refuses scheduled GitHub Actions runs unless `RACE_SIGNALS_STATE`, `FEC_MAX_CANDIDATES` and `FEC_MAX_CANDIDATE_PAGES` are set.
-- Keep Schedule A itemized receipts out of production ingest for now. The `transactions` table remains available for future work, but donor-level storage is not part of the low-cost MVP.
+- Keep Schedule A itemized receipts out of production ingest for now. The `transactions` table remains available for future work, but donor-level storage is not part of the low-cost MVP and is not surfaced in the UI.
 - Current production storage should stay small because the app stores candidates, committees, filings, Schedule E independent expenditures, signals, ingestion metadata and source IDs rather than every receipt line item.
 - For the current budget target, use GitHub Actions for bounded ingest, Neon free-tier-compatible Postgres for storage, and Vercel for read-only pages. Avoid adding paid APIs, image storage, or high-frequency cron jobs.
 

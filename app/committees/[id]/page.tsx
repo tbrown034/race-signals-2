@@ -2,11 +2,11 @@ import { notFound } from "next/navigation";
 import { EntityPage } from "@/src/components/entity-page";
 import { PageShell } from "@/src/components/page-shell";
 import { PartySquare } from "@/src/components/party-square";
+import { ReporterRead } from "@/src/components/reporter-read";
 import {
   getCandidate,
   getCommittee,
   getCommitteeIndependentExpenditures,
-  getCommitteeTransactions,
   getSignalsForEntity,
 } from "@/src/lib/db/repository";
 import { committeeContext, committeeDesignationLabel, committeeTypeLabel } from "@/src/lib/fec-codes";
@@ -32,10 +32,9 @@ export default async function CommitteePage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const [committee, signals, transactions, independentExpenditures] = await Promise.all([
+  const [committee, signals, independentExpenditures] = await Promise.all([
     getCommittee(id),
     getSignalsForEntity("committee", id),
-    getCommitteeTransactions(id),
     getCommitteeIndependentExpenditures(id),
   ]);
 
@@ -50,7 +49,6 @@ export default async function CommitteePage({
         titleAccessory={linkedCandidate ? <PartySquare party={linkedCandidate.party} size="md" /> : null}
         sourceUrl={committee.sourceUrl}
         independentExpenditures={independentExpenditures}
-        transactions={transactions}
         signals={signals}
         allSignalsHref={`/?q=${encodeURIComponent(committee.name)}`}
         meta={[
@@ -62,7 +60,19 @@ export default async function CommitteePage({
           ["Race", committee.raceId],
           ["Treasurer", committee.treasurerName],
         ]}
-      />
+      >
+        <ReporterRead
+          notes={[
+            linkedCandidate
+              ? `Directly linked to ${linkedCandidate.name}; party context comes from that candidate record.`
+              : "No direct candidate affiliation is stored for this committee, so the page does not assign a party reading.",
+            independentExpenditures.length
+              ? `${independentExpenditures.length} current-cycle Schedule E independent expenditure records are attached to this committee in this slice.`
+              : "No current-cycle Schedule E independent expenditures are attached to this committee in this slice.",
+            "Low-cost mode does not store itemized Schedule A donor receipts; use the FEC source link for donor-level lookup.",
+          ]}
+        />
+      </EntityPage>
     </PageShell>
   );
 }

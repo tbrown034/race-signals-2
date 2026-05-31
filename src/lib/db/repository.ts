@@ -437,6 +437,26 @@ export async function getRaces(): Promise<Race[]> {
   );
 }
 
+export async function getSitemapEntities() {
+  if (!hasDatabase()) {
+    return {
+      races: demoRaces.map((race) => race.id),
+      candidates: demoCandidates.map((candidate) => candidate.id),
+      committees: demoCommittees.map((committee) => committee.id),
+    };
+  }
+  const [races, candidates, committees] = await Promise.all([
+    sql<{ id: string }>("select id from races order by id limit 50000"),
+    sql<{ id: string }>("select id from candidates order by id limit 50000"),
+    sql<{ id: string }>("select id from committees order by id limit 50000"),
+  ]);
+  return {
+    races: races.map((row) => row.id),
+    candidates: candidates.map((row) => row.id),
+    committees: committees.map((row) => row.id),
+  };
+}
+
 export async function getCandidate(id: string): Promise<Candidate | null> {
   if (!hasDatabase()) return demoCandidates.find((candidate) => candidate.id === id) ?? null;
   const rows = await sql<CandidateRow>("select * from candidates where id = $1", [id]);

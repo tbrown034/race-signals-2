@@ -46,6 +46,7 @@ export default async function Home({
     const value = params[key];
     if (typeof value === "string" && value) exportQuery.set(key, value);
   }
+  const exportSuffix = exportQuery.toString();
   const [signals, races, status] = await Promise.all([
     getSignals(signalFiltersFromSearchParams(params, 51)),
     getRaces(),
@@ -88,13 +89,13 @@ export default async function Home({
               <div className="flex flex-wrap gap-2 text-sm">
               <a
                 className="border border-neutral-400 px-3 py-2 font-medium hover:border-neutral-900"
-                href={`/api/signals/export.csv?${exportQuery.toString()}`}
+                href={`/api/signals/export.csv${exportSuffix ? `?${exportSuffix}` : ""}`}
               >
                 Export CSV
               </a>
               <a
                 className="border border-neutral-400 px-3 py-2 font-medium hover:border-neutral-900"
-                href={`/api/signals/export.json?${exportQuery.toString()}`}
+                href={`/api/signals/export.json${exportSuffix ? `?${exportSuffix}` : ""}`}
               >
                 Export JSON
               </a>

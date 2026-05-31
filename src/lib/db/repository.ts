@@ -470,7 +470,9 @@ export async function getSignals(filters: SignalFilters = {}) {
     });
     const sorted = filters.sort === "ingested"
       ? [...filtered].sort((a, b) => b.dataFreshness.localeCompare(a.dataFreshness) || b.signalDate.localeCompare(a.signalDate))
-      : filtered;
+      : filters.sort === "amount"
+        ? [...filtered].sort((a, b) => (b.amount ?? 0) - (a.amount ?? 0) || b.signalDate.localeCompare(a.signalDate))
+        : filtered;
     return sorted.slice(0, filters.limit ?? 50);
   }
 
@@ -550,6 +552,8 @@ export async function getSignals(filters: SignalFilters = {}) {
       order by ${
         filters.sort === "ingested"
           ? "s.data_freshness desc, s.signal_date desc, s.created_at desc"
+          : filters.sort === "amount"
+            ? "s.amount desc nulls last, s.signal_date desc, s.created_at desc"
           : "s.signal_date desc, s.created_at desc"
       }
       limit $${values.length}

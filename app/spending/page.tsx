@@ -622,6 +622,7 @@ function spendingExportQuery(params: { [key: string]: string | string[] | undefi
     const value = params[key];
     if (typeof value === "string" && value) next.set(key, key === "state" ? normalizeStateParam(value) : value);
   }
+  next.set("sort", params.sort === "date" ? "date" : "amount");
   next.set("type", "large_independent_expenditure");
   return next;
 }

@@ -13,7 +13,7 @@ export type SignalFilters = {
   targetParty?: string;
   targetStatus?: string;
   limit?: number;
-  sort?: "event" | "ingested";
+  sort?: "amount" | "event" | "ingested";
 };
 
 export function sinceLabel(value?: string) {
@@ -47,6 +47,7 @@ export function signalFiltersFromSearchParams(
     targetParty: first(params.targetParty),
     targetStatus: first(params.targetStatus),
     limit,
+    sort: sortParam(first(params.sort)),
   };
 }
 
@@ -66,10 +67,17 @@ export function signalFiltersFromUrl(url: URL, limit?: number): SignalFilters {
     targetParty: url.searchParams.get("targetParty") ?? undefined,
     targetStatus: url.searchParams.get("targetStatus") ?? undefined,
     limit,
+    sort: sortParam(url.searchParams.get("sort") ?? undefined),
   };
 }
 
 function normalizedState(value?: string | null) {
   if (!value) return undefined;
   return value.length === 2 ? value.toUpperCase() : value;
+}
+
+function sortParam(value?: string | null): SignalFilters["sort"] {
+  if (value === "amount") return "amount";
+  if (value === "ingested") return "ingested";
+  return undefined;
 }

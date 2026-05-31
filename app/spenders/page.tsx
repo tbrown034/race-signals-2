@@ -164,7 +164,7 @@ export default async function SpendersPage({
                           <div>
                             <dt className="inline font-mono uppercase tracking-[0.12em] text-neutral-500">Records </dt>
                             <dd className="inline">
-                              <Link className="font-medium underline underline-offset-4" href={spenderEvidenceHref(spender.committeeId, spender.latestScheduleESourceUrl)}>
+                              <Link className="font-medium underline underline-offset-4" href={spenderEvidenceHref(spender)}>
                                 {spender.recordCount} Schedule E record{spender.recordCount === 1 ? "" : "s"}
                               </Link>
                             </dd>
@@ -189,7 +189,7 @@ export default async function SpendersPage({
                           <div>
                             <dt className="inline font-mono uppercase tracking-[0.12em] text-neutral-500">Source </dt>
                             <dd className="inline">
-                              <Link className="font-medium underline underline-offset-4" href={spenderEvidenceHref(spender.committeeId, spender.latestScheduleESourceUrl)}>
+                              <Link className="font-medium underline underline-offset-4" href={spenderEvidenceHref(spender)}>
                                 Open evidence records
                               </Link>
                             </dd>
@@ -237,13 +237,13 @@ export default async function SpendersPage({
                         {formatMoney(spender.totalAmount)}
                       </td>
                       <td className="hidden px-4 py-3 text-right font-mono md:table-cell">
-                        <Link className="font-medium underline underline-offset-4" href={spenderEvidenceHref(spender.committeeId, spender.latestScheduleESourceUrl)}>
+                        <Link className="font-medium underline underline-offset-4" href={spenderEvidenceHref(spender)}>
                           {spender.recordCount}
                         </Link>
                       </td>
                       <td className="hidden px-4 py-3 md:table-cell">
                         <div className="flex flex-col gap-1">
-                          <Link className="font-medium underline underline-offset-4" href={spenderEvidenceHref(spender.committeeId, spender.latestScheduleESourceUrl)}>
+                          <Link className="font-medium underline underline-offset-4" href={spenderEvidenceHref(spender)}>
                             Open evidence records
                           </Link>
                           <span className="font-mono text-[11px] uppercase tracking-[0.12em] text-neutral-500">
@@ -259,12 +259,16 @@ export default async function SpendersPage({
                                   Committee evidence page
                                 </Link>
                               ) : null}
-                              <a
-                                className="underline underline-offset-4"
-                                href={spender.committeeId ? `/api/schedule-e/export.csv?committee=${spender.committeeId}` : "/api/schedule-e/export.csv"}
-                              >
-                                Export this spender
-                              </a>
+                              {spender.committeeId ? (
+                                <a
+                                  className="underline underline-offset-4"
+                                  href={`/api/schedule-e/export.csv?committee=${spender.committeeId}`}
+                                >
+                                  Export this spender
+                                </a>
+                              ) : (
+                                <span>Spender-scoped export unavailable until committee resolves</span>
+                              )}
                               {spender.latestScheduleESourceUrl ? (
                                 <a
                                   className="underline underline-offset-4"
@@ -327,9 +331,10 @@ function positionConcentrationNote(supportShare: number, opposeShare: number) {
   return null;
 }
 
-function spenderEvidenceHref(committeeId?: string | null, latestSourceUrl?: string | null) {
-  if (committeeId) return `/records/schedule-e?committee=${committeeId}`;
-  return latestSourceUrl ?? "/spending?type=large_independent_expenditure";
+function spenderEvidenceHref(spender: Awaited<ReturnType<typeof getTopSpenders>>[number]) {
+  if (spender.committeeId) return `/records/schedule-e?committee=${spender.committeeId}`;
+  if (spender.latestScheduleESourceId) return `/records/schedule-e?sourceId=${spender.latestScheduleESourceId}`;
+  return spender.latestScheduleESourceUrl ?? "/spending?type=large_independent_expenditure";
 }
 
 function stateSpenderCounts(spenders: Awaited<ReturnType<typeof getTopSpenders>>) {

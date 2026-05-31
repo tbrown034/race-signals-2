@@ -6,7 +6,7 @@ import { SignalCard } from "@/src/components/signal-card";
 import { getCoverageSummary, getRaces, getSignals, getSignalStateCounts, getSignalStateFreshness, getStateRaceBoard } from "@/src/lib/db/repository";
 import { formatDate, formatMoney, formatRelativeTime } from "@/src/lib/format";
 import { signalFiltersFromSearchParams, sinceLabel } from "@/src/lib/signals/filters";
-import type { StateRaceBoardRow } from "@/src/lib/types";
+import type { Signal, StateRaceBoardRow } from "@/src/lib/types";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -72,6 +72,7 @@ export default async function Home({
   const visibleSignals = signals.slice(0, 50);
   const hasMoreSignals = signals.length > visibleSignals.length;
   const selectedRace = raceId ? races.find((race) => race.id === raceId) : null;
+  const triageSignals = feedTriageSignals(visibleSignals);
   const activeFilters = [
     q ? `search "${q}"` : null,
     state ? `state ${state}` : null,
@@ -135,6 +136,7 @@ export default async function Home({
             </div>
           </div>
           <CoverageStrip counts={status.counts} latestRun={status.runs[0]} mode={status.mode} />
+          <FeedTriageStrip signals={triageSignals} />
           {state ? <StateRaceBoard state={state} rows={stateRaceBoard} /> : null}
           <StartPointStrip />
           <FeedFilters
@@ -222,6 +224,65 @@ export default async function Home({
       </main>
     </PageShell>
   );
+}
+
+function FeedTriageStrip({
+  signals,
+}: {
+  signals: ReturnType<typeof feedTriageSignals>;
+}) {
+  return (
+    <section className="border-b border-neutral-300 px-5 py-3" aria-label="Feed triage">
+      <div className="grid gap-2 lg:grid-cols-3">
+        <TriageItem label="Newest" signal={signals.latest} />
+        <TriageItem label="Needs review" signal={signals.review} empty="No review flags in this view" />
+        <TriageItem label="Largest IE" signal={signals.largestIe} empty="No IE alerts in this view" />
+      </div>
+    </section>
+  );
+}
+
+function TriageItem({
+  empty = "No signal in this view",
+  label,
+  signal,
+}: {
+  empty?: string;
+  label: string;
+  signal?: Signal;
+}) {
+  return (
+    <div className="min-w-0 max-w-[calc(100vw-5rem)] overflow-hidden border border-neutral-300 px-3 py-2 sm:max-w-none">
+      <p className="font-mono text-[11px] uppercase tracking-[0.12em] text-neutral-500">{label}</p>
+      {signal ? (
+        <>
+          <Link
+            className="mt-1 block max-w-[270px] truncate text-sm font-medium underline underline-offset-4 sm:max-w-full"
+            href={`#${signalAnchorId(signal.dedupeKey)}`}
+            title={signal.headline}
+          >
+            {signal.headline}
+          </Link>
+          <p className="mt-1 font-mono text-[11px] uppercase tracking-[0.12em] text-neutral-500">
+            {formatDate(signal.signalDate)}
+            {signal.amount ? ` / ${formatMoney(signal.amount)}` : ""}
+          </p>
+        </>
+      ) : (
+        <p className="mt-1 text-sm text-neutral-600">{empty}</p>
+      )}
+    </div>
+  );
+}
+
+function feedTriageSignals(signals: Signal[]) {
+  return {
+    latest: signals[0],
+    review: signals.find((signal) => signal.status === "review"),
+    largestIe: signals
+      .filter((signal) => signal.signalType === "large_independent_expenditure" && signal.amount)
+      .sort((a, b) => (b.amount ?? 0) - (a.amount ?? 0))[0],
+  };
 }
 
 function StartPointStrip() {

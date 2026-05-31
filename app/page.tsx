@@ -1,9 +1,9 @@
+import Link from "next/link";
 import { FeedFilters } from "@/src/components/feed-filters";
 import { PageShell } from "@/src/components/page-shell";
 import { SignalCard } from "@/src/components/signal-card";
 import { getRaces, getSignals, getStatus } from "@/src/lib/db/repository";
 import { signalFiltersFromSearchParams } from "@/src/lib/signals/filters";
-import Link from "next/link";
 
 export default async function Home({
   searchParams,
@@ -119,50 +119,6 @@ export default async function Home({
               <dd className="mt-1">{races.length} configured House and Senate races</dd>
             </div>
           </dl>
-
-          <form className="mt-6 border-t border-neutral-300 pt-5" action="/api/saved-filters" method="post">
-            <h2 className="text-sm font-semibold uppercase tracking-[0.14em] text-neutral-600">
-              Save this view
-            </h2>
-            {["q", "state", "office", "race", "type", "status"].map((key) => {
-              const value = params[key];
-              return typeof value === "string" && value ? (
-                <input name={key} type="hidden" value={value} key={key} />
-              ) : null;
-            })}
-            <label className="mt-3 block text-xs font-medium uppercase tracking-[0.12em] text-neutral-500">
-              Name
-              <input
-                className="mt-1 block h-9 w-full border border-neutral-300 px-3 text-sm normal-case tracking-normal text-neutral-950"
-                name="name"
-                defaultValue="Race Signals feed"
-              />
-            </label>
-            <label className="mt-3 block text-xs font-medium uppercase tracking-[0.12em] text-neutral-500">
-              Email
-              <input
-                className="mt-1 block h-9 w-full border border-neutral-300 px-3 text-sm normal-case tracking-normal text-neutral-950"
-                name="owner_email"
-                placeholder="reporter@example.com"
-                type="email"
-              />
-            </label>
-            <label className="mt-3 block text-xs font-medium uppercase tracking-[0.12em] text-neutral-500">
-              Cadence
-              <select
-                className="mt-1 block h-9 w-full border border-neutral-300 px-3 text-sm normal-case tracking-normal text-neutral-950"
-                name="cadence"
-                defaultValue="off"
-              >
-                <option value="off">RSS only</option>
-                <option value="daily">Daily webhook digest</option>
-                <option value="hourly">Hourly webhook digest</option>
-              </select>
-            </label>
-            <button className="mt-3 w-full border border-neutral-900 bg-neutral-950 px-4 py-2 text-sm font-medium text-white">
-              Save view
-            </button>
-          </form>
         </aside>
       </main>
     </PageShell>

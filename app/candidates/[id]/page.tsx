@@ -1,10 +1,11 @@
 import { CandidatePhoto } from "@/src/components/candidate-photo";
+import { ElectionTimeline } from "@/src/components/election-timeline";
 import { notFound } from "next/navigation";
 import { EntityPage } from "@/src/components/entity-page";
 import { IncumbentBadge } from "@/src/components/incumbent-badge";
 import { PageShell } from "@/src/components/page-shell";
 import { PartySquare } from "@/src/components/party-square";
-import { getCandidate, getSignalsForEntity } from "@/src/lib/db/repository";
+import { getCandidate, getCandidateElections, getSignalsForEntity } from "@/src/lib/db/repository";
 import { formatDate, formatMoney } from "@/src/lib/format";
 
 export default async function CandidatePage({
@@ -13,9 +14,10 @@ export default async function CandidatePage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const [candidate, signals] = await Promise.all([
+  const [candidate, signals, elections] = await Promise.all([
     getCandidate(id),
     getSignalsForEntity("candidate", id),
+    getCandidateElections(id),
   ]);
 
   if (!candidate) notFound();
@@ -50,7 +52,13 @@ export default async function CandidatePage({
           ["Cash as of", formatDate(candidate.cashOnHandAsOf)],
           ...(candidate.bioguideId ? ([["Bioguide", candidate.bioguideId]] as Array<[string, string]>) : []),
         ]}
-      />
+      >
+        <ElectionTimeline
+          elections={elections}
+          emptyText={`No election timeline available for this candidate. Wikidata and Wikipedia coverage of House primaries can be thin - follow the ${candidate.state} secretary of state for authoritative results.`}
+          title="Election timeline"
+        />
+      </EntityPage>
     </PageShell>
   );
 }

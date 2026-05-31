@@ -1,12 +1,15 @@
 import { loadEnvConfig } from "@next/env";
 import { migrate } from "@/src/lib/db/schema";
+import { getPool } from "@/src/lib/db/client";
 import {
   createIngestionRun,
   finishIngestionRun,
   insertEndpointRuns,
   insertValidationIssues,
+  markElectionLookupChecked,
   upsertCandidates,
   upsertCommittees,
+  upsertElections,
   upsertFilings,
   upsertIndependentExpenditures,
   upsertRaceRatings,
@@ -32,6 +35,7 @@ import { DEFAULT_CYCLE, TARGET_RACES } from "@/src/lib/scope";
 import { getPublicWatchlistRatings } from "@/src/lib/ratings/public-watchlist";
 import { applyCongressLegislatorIds } from "@/src/lib/sources/congress-legislators/sync";
 import { applyCandidateTotals } from "@/src/lib/sources/fec/totals";
+import { fetchCandidateElections } from "@/src/lib/sources/wikidata/elections";
 import {
   validateCandidate,
   validateCommittee,
@@ -43,6 +47,7 @@ import type {
   Committee,
   Filing,
   IndependentExpenditure,
+  Election,
   ValidationIssue,
 } from "@/src/lib/types";
 
@@ -139,6 +144,7 @@ async function main() {
     schedule_e: 0,
     totals: 0,
     congress_legislators: 0,
+    elections: 0,
   };
 
   try {
@@ -174,8 +180,34 @@ async function main() {
     }
 
     const normalizedCandidates: Candidate[] = [];
+    const elections: Election[] = [];
+    const electionCheckedCandidateIds: string[] = [];
+    const checkedAtByCandidateId = await getElectionCheckedAt(candidatesWithLegislatorIds.map((candidate) => candidate.id));
     for (const candidate of candidatesWithLegislatorIds) {
-      normalizedCandidates.push(await applyCandidateTotals(candidate, cycle));
+      const candidateWithLookupState = {
+        ...candidate,
+        electionsCheckedAt: checkedAtByCandidateId.get(candidate.id) ?? candidate.electionsCheckedAt,
+      };
+      if (shouldRefreshElections(candidateWithLookupState)) {
+        try {
+          const result = await fetchCandidateElections(candidateWithLookupState);
+          elections.push(...result.elections);
+          issues.push(...result.issues);
+          endpointCounts.elections += result.elections.length;
+          electionCheckedCandidateIds.push(candidate.id);
+        } catch (error) {
+          issues.push({
+            entityType: "candidate",
+            sourceId: candidateWithLookupState.fecCandidateId,
+            severity: "warning",
+            rule: "elections_lookup",
+            message: error instanceof Error ? error.message : String(error),
+            sourceUrl: candidateWithLookupState.sourceUrl,
+          });
+          electionCheckedCandidateIds.push(candidateWithLookupState.id);
+        }
+      }
+      normalizedCandidates.push(await applyCandidateTotals(candidateWithLookupState, cycle));
       endpointCounts.totals += 1;
     }
 
@@ -263,6 +295,8 @@ async function main() {
     await upsertRaces(raceScope);
     await upsertRaceRatings(getPublicWatchlistRatings(raceScope, cycle));
     await upsertCandidates(candidates);
+    await upsertElections(elections);
+    await markElectionLookupChecked(electionCheckedCandidateIds);
     await upsertCommittees(committees);
     await upsertFilings(filings);
     await upsertIndependentExpenditures(independentExpenditures);
@@ -284,6 +318,7 @@ async function main() {
       committees.length +
       filings.length +
       independentExpenditures.length +
+      elections.length +
       signals.length;
     await finishIngestionRun(runId, errors.length ? "partial" : "success", recordsSeen, errors);
 
@@ -304,6 +339,32 @@ function endpointForIssue(entityType: string) {
   if (entityType === "independent_expenditure") return "schedule_e";
   if (entityType === "congress_legislators") return "congress_legislators";
   return "unknown";
+}
+
+function shouldRefreshElections(candidate: Candidate) {
+  const refreshHours = numberFromEnv("ELECTIONS_REFRESH_HOURS") ?? 24;
+  if (!candidate.wikidataId && !candidate.wikipediaUrl) return false;
+  if (!candidate.electionsCheckedAt) return true;
+  const checkedAt = Date.parse(candidate.electionsCheckedAt);
+  if (Number.isNaN(checkedAt)) return true;
+  return Date.now() - checkedAt >= refreshHours * 60 * 60 * 1000;
+}
+
+async function getElectionCheckedAt(candidateIds: string[]) {
+  if (!candidateIds.length) return new Map<string, string>();
+  const result = await getPool().query<{ id: string; elections_checked_at: Date | null }>(
+    `
+      select id, elections_checked_at
+      from candidates
+      where id = any($1::text[])
+    `,
+    [candidateIds],
+  );
+  return new Map(
+    result.rows
+      .filter((row) => row.elections_checked_at)
+      .map((row) => [row.id, row.elections_checked_at!.toISOString()]),
+  );
 }
 
 main().catch((error) => {

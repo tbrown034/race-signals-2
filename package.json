@@ -7,8 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "ingest": "tsx scripts/ingest-fec.ts",
-    "send-digests": "tsx scripts/send-digests.ts"
+    "ingest": "tsx scripts/ingest-fec.ts"
   },
   "dependencies": {
     "next": "16.2.6",

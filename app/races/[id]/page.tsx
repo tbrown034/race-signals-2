@@ -1,11 +1,12 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { CandidatePhoto } from "@/src/components/candidate-photo";
+import { ElectionTimeline } from "@/src/components/election-timeline";
 import { EntityPage } from "@/src/components/entity-page";
 import { IncumbentBadge } from "@/src/components/incumbent-badge";
 import { PageShell } from "@/src/components/page-shell";
 import { PartySquare } from "@/src/components/party-square";
-import { getCandidatesForRace, getRace, getRaceRatings, getSignalsForEntity } from "@/src/lib/db/repository";
+import { getCandidatesForRace, getRace, getRaceElections, getRaceRatings, getSignalsForEntity } from "@/src/lib/db/repository";
 import { formatMoney } from "@/src/lib/format";
 
 export default async function RacePage({
@@ -14,11 +15,12 @@ export default async function RacePage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const [race, signals, ratings, candidates] = await Promise.all([
+  const [race, signals, ratings, candidates, elections] = await Promise.all([
     getRace(id),
     getSignalsForEntity("race", id),
     getRaceRatings(id),
     getCandidatesForRace(id),
+    getRaceElections(id),
   ]);
 
   if (!race) notFound();
@@ -55,6 +57,12 @@ export default async function RacePage({
           ["Competitiveness", race.competitiveness],
         ]}
       >
+        <ElectionTimeline
+          elections={elections}
+          emptyText={`No election timeline available for this race. Wikidata and Wikipedia coverage of House primaries can be thin - follow the ${race.state} secretary of state for authoritative results.`}
+          showCandidate
+          title="Race timeline"
+        />
         <div className="border-b border-neutral-300">
           <div className="border-b border-neutral-300 px-5 py-4">
             <h2 className="text-sm font-semibold uppercase tracking-[0.14em] text-neutral-600">

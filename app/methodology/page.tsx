@@ -11,6 +11,10 @@ const steps = [
     "Photos",
     "Member photos are sourced from the U.S. Congressional Biographical Directory, public domain, mirrored via theunitedstates.io. Photos appear only for currently sitting members of Congress. Candidate identifier crosswalk comes from the unitedstates/congress-legislators project, public domain.",
   ],
+  [
+    "Election timeline",
+    "Election dates and results are pulled from Wikidata (CC0) and Wikipedia (CC BY-SA 4.0). Wikidata is the primary source; Wikipedia is used as a fallback when structured data is not yet available. Results trail real-world election calls by 1-3 days for major races and longer for House primaries with limited volunteer coverage. Each row links to its underlying source so reporters can verify. We do not call elections or scrape real-time results. For breaking-night results, use AP, DDHQ, or your state's official tabulator.",
+  ],
 ];
 
 export default function MethodologyPage() {

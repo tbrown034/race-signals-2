@@ -34,6 +34,9 @@ export function PageShell({ children }: { children: ReactNode }) {
         </div>
       </header>
       {children}
+      <footer className="border-t border-neutral-300 bg-white px-5 py-3 text-xs text-neutral-600 sm:px-8">
+        Election timeline data, when available, cites Wikidata (CC0) and Wikipedia (CC BY-SA 4.0).
+      </footer>
     </div>
   );
 }

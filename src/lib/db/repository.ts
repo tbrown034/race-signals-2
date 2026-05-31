@@ -8,7 +8,7 @@ import {
 } from "@/src/lib/demo/data";
 import { hasDatabase, sql } from "@/src/lib/db/client";
 import type { SignalFilters } from "@/src/lib/signals/filters";
-import type { Candidate, Committee, EndpointFreshness, IngestionRun, Race, RaceRating, Signal, Transaction } from "@/src/lib/types";
+import type { Candidate, Committee, Election, EndpointFreshness, IngestionRun, Race, RaceRating, Signal, Transaction } from "@/src/lib/types";
 
 type SignalRow = {
   id: string;
@@ -56,8 +56,10 @@ type CandidateRow = {
   totals_updated_at: string | Date | null;
   general_election_status: string | null;
   bioguide_id: string | null;
+  wikidata_id: string | null;
   photo_url: string | null;
   wikipedia_url: string | null;
+  elections_checked_at: string | Date | null;
   race_id: string | null;
   source_url: string | null;
 };
@@ -113,10 +115,122 @@ function mapCandidateRow(row: CandidateRow): Candidate {
     totalsUpdatedAt: row.totals_updated_at ? toIsoString(row.totals_updated_at) : null,
     generalElectionStatus: row.general_election_status,
     bioguideId: row.bioguide_id,
+    wikidataId: row.wikidata_id,
     photoUrl: row.photo_url,
     wikipediaUrl: row.wikipedia_url,
+    electionsCheckedAt: row.elections_checked_at ? toIsoString(row.elections_checked_at) : null,
     raceId: row.race_id,
     sourceUrl: row.source_url,
+  };
+}
+
+export async function getCandidateElections(candidateId: string): Promise<Election[]> {
+  if (!hasDatabase()) return [];
+  const rows = await sql<{
+    candidate_id: string;
+    candidate_name: string | null;
+    candidate_party: string | null;
+    election_type: Election["electionType"];
+    election_date: string | Date;
+    status: Election["status"];
+    vote_share: string | null;
+    opponent_count: number | null;
+    source: Election["source"];
+    source_url: string;
+    source_entity_id: string | null;
+    fetched_at: string | Date;
+  }>(
+    `
+      select
+        e.candidate_id,
+        c.name as candidate_name,
+        c.party as candidate_party,
+        e.election_type,
+        e.election_date,
+        e.status,
+        e.vote_share,
+        e.opponent_count,
+        e.source,
+        e.source_url,
+        e.source_entity_id,
+        e.fetched_at
+      from elections e
+      left join candidates c on c.id = e.candidate_id
+      where e.candidate_id = $1
+      order by e.election_date asc
+    `,
+    [candidateId],
+  );
+  return rows.map(mapElectionRow);
+}
+
+export async function getRaceElections(raceId: string): Promise<Election[]> {
+  if (!hasDatabase()) return [];
+  const rows = await sql<{
+    candidate_id: string;
+    candidate_name: string | null;
+    candidate_party: string | null;
+    election_type: Election["electionType"];
+    election_date: string | Date;
+    status: Election["status"];
+    vote_share: string | null;
+    opponent_count: number | null;
+    source: Election["source"];
+    source_url: string;
+    source_entity_id: string | null;
+    fetched_at: string | Date;
+  }>(
+    `
+      select
+        e.candidate_id,
+        c.name as candidate_name,
+        c.party as candidate_party,
+        e.election_type,
+        e.election_date,
+        e.status,
+        e.vote_share,
+        e.opponent_count,
+        e.source,
+        e.source_url,
+        e.source_entity_id,
+        e.fetched_at
+      from elections e
+      join candidates c on c.id = e.candidate_id
+      where c.race_id = $1
+      order by e.election_date asc, c.name
+    `,
+    [raceId],
+  );
+  return rows.map(mapElectionRow);
+}
+
+function mapElectionRow(row: {
+  candidate_id: string;
+  candidate_name: string | null;
+  candidate_party: string | null;
+  election_type: Election["electionType"];
+  election_date: string | Date;
+  status: Election["status"];
+  vote_share: string | null;
+  opponent_count: number | null;
+  source: Election["source"];
+  source_url: string;
+  source_entity_id: string | null;
+  fetched_at: string | Date;
+}): Election {
+  return {
+    candidateId: row.candidate_id,
+    candidateName: row.candidate_name,
+    candidateParty: row.candidate_party,
+    electionType: row.election_type,
+    electionDate: toDateString(row.election_date),
+    status: row.status,
+    voteShare: row.vote_share === null ? null : Number(row.vote_share),
+    opponentCount: row.opponent_count,
+    source: row.source,
+    sourceUrl: row.source_url,
+    sourceEntityId: row.source_entity_id,
+    fetchedAt: toIsoString(row.fetched_at),
   };
 }
 

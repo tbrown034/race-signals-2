@@ -10,6 +10,7 @@ type LegislatorRecord = {
     bioguide?: string;
     fec?: string[];
     wikipedia?: string;
+    wikidata?: string;
   };
 };
 
@@ -44,6 +45,7 @@ export async function applyCongressLegislatorIds(
     return {
       ...candidate,
       bioguideId: ids.bioguide,
+      wikidataId: ids.wikidata ?? null,
       photoUrl: `${PHOTO_CDN_BASE}/${ids.bioguide}.jpg`,
       wikipediaUrl: ids.wikipedia
         ? `https://en.wikipedia.org/wiki/${encodeURIComponent(ids.wikipedia.replaceAll(" ", "_"))}`

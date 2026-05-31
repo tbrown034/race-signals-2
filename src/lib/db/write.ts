@@ -6,6 +6,7 @@ import type {
   IndependentExpenditure,
   Race,
   RaceRating,
+  Election,
   Signal,
   Transaction,
   ValidationIssue,
@@ -70,9 +71,9 @@ export async function upsertCandidates(candidates: Candidate[]) {
           incumbent_challenge_status, total_receipts_cycle, total_disbursements_cycle,
           cash_on_hand_latest, cash_on_hand_as_of, individual_contribution_pct,
           pac_contribution_pct, totals_updated_at, general_election_status,
-          bioguide_id, photo_url, wikipedia_url, race_id, source_url
+          bioguide_id, wikidata_id, photo_url, wikipedia_url, elections_checked_at, race_id, source_url
         )
-        values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22)
+        values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24)
         on conflict (fec_candidate_id) do update set
           name = excluded.name,
           party = excluded.party,
@@ -90,8 +91,10 @@ export async function upsertCandidates(candidates: Candidate[]) {
           totals_updated_at = excluded.totals_updated_at,
           general_election_status = coalesce(candidates.general_election_status, excluded.general_election_status),
           bioguide_id = coalesce(excluded.bioguide_id, candidates.bioguide_id),
+          wikidata_id = coalesce(excluded.wikidata_id, candidates.wikidata_id),
           photo_url = coalesce(excluded.photo_url, candidates.photo_url),
           wikipedia_url = coalesce(excluded.wikipedia_url, candidates.wikipedia_url),
+          elections_checked_at = coalesce(excluded.elections_checked_at, candidates.elections_checked_at),
           race_id = excluded.race_id,
           source_url = excluded.source_url,
           updated_at = now()
@@ -115,13 +118,62 @@ export async function upsertCandidates(candidates: Candidate[]) {
         candidate.totalsUpdatedAt,
         candidate.generalElectionStatus,
         candidate.bioguideId,
+        candidate.wikidataId,
         candidate.photoUrl,
         candidate.wikipediaUrl,
+        candidate.electionsCheckedAt,
         candidate.raceId,
         candidate.sourceUrl,
       ],
     );
   }
+}
+
+export async function upsertElections(elections: Election[]) {
+  const pool = getPool();
+  for (const election of elections) {
+    await pool.query(
+      `
+        insert into elections (
+          candidate_id, election_type, election_date, status, vote_share,
+          opponent_count, source, source_url, source_entity_id
+        )
+        values ($1,$2,$3,$4,$5,$6,$7,$8,$9)
+        on conflict (candidate_id, election_type, election_date) do update set
+          status = excluded.status,
+          vote_share = excluded.vote_share,
+          opponent_count = excluded.opponent_count,
+          source = excluded.source,
+          source_url = excluded.source_url,
+          source_entity_id = excluded.source_entity_id,
+          fetched_at = now(),
+          updated_at = now()
+      `,
+      [
+        election.candidateId,
+        election.electionType,
+        election.electionDate,
+        election.status,
+        election.voteShare,
+        election.opponentCount,
+        election.source,
+        election.sourceUrl,
+        election.sourceEntityId,
+      ],
+    );
+  }
+}
+
+export async function markElectionLookupChecked(candidateIds: string[]) {
+  if (!candidateIds.length) return;
+  await getPool().query(
+    `
+      update candidates
+      set elections_checked_at = now(), updated_at = now()
+      where id = any($1::text[])
+    `,
+    [candidateIds],
+  );
 }
 
 export async function upsertCommittees(committees: Committee[]) {

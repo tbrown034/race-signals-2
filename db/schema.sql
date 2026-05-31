@@ -32,8 +32,10 @@ create table if not exists candidates (
   totals_updated_at timestamptz,
   general_election_status text,
   bioguide_id text,
+  wikidata_id text,
   photo_url text,
   wikipedia_url text,
+  elections_checked_at timestamptz,
   race_id text references races(id),
   source_url text,
   created_at timestamptz not null default now(),
@@ -49,8 +51,27 @@ alter table candidates add column if not exists pac_contribution_pct numeric;
 alter table candidates add column if not exists totals_updated_at timestamptz;
 alter table candidates add column if not exists general_election_status text;
 alter table candidates add column if not exists bioguide_id text;
+alter table candidates add column if not exists wikidata_id text;
 alter table candidates add column if not exists photo_url text;
 alter table candidates add column if not exists wikipedia_url text;
+alter table candidates add column if not exists elections_checked_at timestamptz;
+
+create table if not exists elections (
+  id uuid primary key default gen_random_uuid(),
+  candidate_id text not null references candidates(id),
+  election_type text not null,
+  election_date date not null,
+  status text not null,
+  vote_share numeric,
+  opponent_count integer,
+  source text not null,
+  source_url text not null,
+  source_entity_id text,
+  fetched_at timestamptz not null default now(),
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now(),
+  unique (candidate_id, election_type, election_date)
+);
 
 create table if not exists committees (
   id text primary key,
@@ -181,17 +202,6 @@ create table if not exists race_ratings (
   unique (race_id, source_name)
 );
 
-create table if not exists saved_filters (
-  id uuid primary key default gen_random_uuid(),
-  name text not null,
-  owner_email text not null,
-  filter_json jsonb not null default '{}'::jsonb,
-  cadence text not null default 'off',
-  last_sent_at timestamptz,
-  created_at timestamptz not null default now(),
-  constraint saved_filters_cadence_check check (cadence in ('daily', 'hourly', 'off'))
-);
-
 create table if not exists ingestion_runs (
   id uuid primary key default gen_random_uuid(),
   source text not null,
@@ -236,6 +246,7 @@ create table if not exists ingestion_endpoint_runs (
 );
 
 create index if not exists candidates_race_idx on candidates(race_id);
+create index if not exists candidates_elections_checked_idx on candidates(elections_checked_at);
 create index if not exists committees_candidate_idx on committees(candidate_id);
 create index if not exists committees_race_idx on committees(race_id);
 create index if not exists filings_committee_date_idx on filings(committee_id, receipt_date desc);
@@ -247,6 +258,6 @@ create index if not exists signals_type_idx on signals(signal_type);
 create index if not exists signals_race_idx on signals(race_id);
 create index if not exists signals_status_idx on signals(status);
 create index if not exists race_ratings_race_idx on race_ratings(race_id);
-create index if not exists saved_filters_cadence_idx on saved_filters(cadence, last_sent_at);
 create index if not exists ingestion_runs_mode_idx on ingestion_runs(mode, started_at desc);
 create index if not exists ingestion_endpoint_runs_latest_idx on ingestion_endpoint_runs(endpoint, completed_at desc);
+create index if not exists elections_candidate_date_idx on elections(candidate_id, election_date);

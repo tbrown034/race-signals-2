@@ -29,10 +29,27 @@ export type Candidate = {
   totalsUpdatedAt?: string | null;
   generalElectionStatus?: string | null;
   bioguideId?: string | null;
+  wikidataId?: string | null;
   photoUrl?: string | null;
   wikipediaUrl?: string | null;
+  electionsCheckedAt?: string | null;
   raceId?: string | null;
   sourceUrl?: string | null;
+};
+
+export type Election = {
+  candidateId: string;
+  candidateName?: string | null;
+  candidateParty?: string | null;
+  electionType: "primary" | "runoff" | "general" | "special";
+  electionDate: string;
+  status: "scheduled" | "won" | "lost" | "uncontested" | "withdrawn" | "pending" | "unknown";
+  voteShare?: number | null;
+  opponentCount?: number | null;
+  source: "wikidata" | "wikipedia";
+  sourceUrl: string;
+  sourceEntityId?: string | null;
+  fetchedAt?: string | null;
 };
 
 export type Committee = {
@@ -131,16 +148,6 @@ export type RaceRating = {
   rating: string;
   ratingDate?: string | null;
   rationale?: string | null;
-};
-
-export type SavedFilter = {
-  id: string;
-  name: string;
-  ownerEmail: string;
-  filterJson: Record<string, string>;
-  cadence: "daily" | "hourly" | "off";
-  lastSentAt?: string | null;
-  createdAt: string;
 };
 
 export type ValidationIssue = {

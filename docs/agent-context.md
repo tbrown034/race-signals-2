@@ -17,7 +17,7 @@ The core questions are:
 - Who is spending in a race?
 - What looks unusual enough to deserve a reporter's attention?
 
-The MVP is FEC API only and now targets 2026 U.S. House races across all 50 states plus 2026 U.S. Senate races. Do not imply coverage beyond federal House/Senate races or beyond FEC-derived records.
+The MVP is FEC API only for campaign-finance records. The data model contains 2026 U.S. House race shells across all 50 states plus 2026 U.S. Senate races, but stored signals reflect the latest capped ingest slice unless a broader manual run has completed. Do not imply coverage beyond federal House/Senate races or beyond the records actually ingested.
 
 ## Editorial Product Principles
 
@@ -93,7 +93,7 @@ Ingestion controls:
 - `FEC_REQUEST_DELAY_MS` paces API calls. Default is 4000 ms to stay under the normal 1,000-calls/hour FEC limit.
 - `FEC_MAX_RETRIES` controls retry attempts for 429/5xx responses.
 
-National ingestion should be paced and scheduled. Do not put broad FEC ingestion in a route handler.
+Scheduled ingestion is intentionally cost-capped through GitHub Actions. Current scheduled runs use an Indiana House/Senate slice with candidate/page caps; broader national runs are manual `workflow_dispatch` jobs with explicit caps. Do not put broad FEC ingestion in a route handler.
 
 Backfilled signals must use the original event date as `signal_date` and `status = historical`. Do not present old backfilled records as fresh changes.
 
@@ -126,10 +126,14 @@ Core tables:
 - `filings`
 - `transactions`
 - `independent_expenditures`
-- `source_records`
 - `signals`
 - `ingestion_runs`
+- `ingestion_endpoint_runs`
 - `validation_issues`
+- `elections`
+- `race_ratings`
+
+`transactions` exists for future donor-level work, but Schedule A itemized receipt storage is disabled in production. Do not surface donor-level views unless the storage policy is explicitly changed.
 
 Use unique source keys and upserts to prevent duplicates. Preserve FEC IDs, source URLs and raw JSON where useful.
 
@@ -155,10 +159,13 @@ Implemented or expected validation rules:
 - Missing candidate name
 - Missing committee ID
 - Missing date
-- Duplicate or unstable source record
+- Missing or unstable source ID
+- Missing signal source kind
 - Suspiciously large amount
 - Broken or missing source URL
 - Unmatched race
+- Cross-cycle records attached to current-cycle races
+- Schedule E signals missing support/oppose marker
 
 Validation issues should be stored and visible through status/freshness surfaces where practical.
 
@@ -171,8 +178,9 @@ Initial signal types:
 - `new_committee`
 - `new_filing`
 - `large_independent_expenditure`
-- `outside_spending_increase`
 - `committee_activity_spike`
+
+Legacy labels may exist for compatibility, but production low-cost ingest does not store Schedule A itemized receipts and should not generate donor-level signals.
 
 Every signal needs:
 
@@ -191,6 +199,8 @@ Every signal needs:
 - Prefer small, readable changes that preserve the national congressional MVP.
 - Do not invent coverage outside the FEC records currently ingested.
 - Do not add new data sources before the FEC-only MVP works.
+- Do not rebuild saved filters, RSS feeds or email digests; they were deliberately cut.
+- Do not add Schedule A donor storage under the low-cost MVP.
 - Keep README and this context doc in sync when architecture changes.
 - Run `npm run lint` and, when useful, `npm run build` before finalizing.
 - If working on UI, keep it dense, calm and source-transparent.

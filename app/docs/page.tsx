@@ -18,7 +18,11 @@ const sections = [
   },
   {
     title: "FEC API",
-    body: "The first adapter uses FEC candidate search, candidate totals, candidate committees, committee reports and Schedule E independent expenditures. Itemized Schedule A receipts are deferred for cost control. Source URLs and raw IDs must be preserved for verification and deduping.",
+    body: "The first adapter uses FEC candidate search, candidate totals, candidate committees, committee reports and Schedule E independent expenditures. Itemized Schedule A receipts are disabled for cost control. Source URLs, source IDs and source kinds must be preserved for verification and deduping.",
+  },
+  {
+    title: "Coverage Truth",
+    body: "The schema can represent national 2026 House and Senate race shells, but the scheduled ingest is capped to a small daily slice. Stored signal counts should be read as current database coverage, not a national activity total.",
   },
   {
     title: "Implementation",
@@ -26,7 +30,7 @@ const sections = [
   },
   {
     title: "MVP Discipline",
-    body: "Do not add Meta, Google, FCC, IRS, OpenSecrets or dark-money datasets yet. Keep those as future source adapters after the FEC pipeline is working.",
+    body: "Do not add Meta, Google, FCC, IRS, OpenSecrets, dark-money datasets, saved filters, RSS, email digests or donor-level storage yet. Keep future source ideas behind adapter boundaries.",
   },
 ];
 

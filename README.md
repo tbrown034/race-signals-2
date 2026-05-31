@@ -121,8 +121,8 @@ Independent expenditure signals are generated only from current-cycle Schedule E
 
 ## Known Limitations
 
-- Coverage is national for 2026 U.S. House and U.S. Senate races, but not presidential, state or local races.
-- FEC API results are page-limited for development ergonomics.
+- The data model contains national 2026 U.S. House and U.S. Senate race shells, but stored signals reflect the latest capped ingest slice unless a broader manual run has been completed.
+- Scheduled FEC ingest is intentionally capped for cost and rate-limit control.
 - Demo data is illustrative and clearly marked as demo mode.
 - Signal thresholds are simple editorial heuristics, not statistical anomaly detection.
 - Election timeline data from Wikidata/Wikipedia is sparse for House primaries and should be treated as context, not an authoritative results feed.

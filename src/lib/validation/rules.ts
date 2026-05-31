@@ -91,6 +91,16 @@ export function validateCommittee(committee: Committee): ValidationIssue[] {
       sourceUrl: committee.sourceUrl,
     });
   }
+  if (committee.designation === "P" && !committee.firstFileDate) {
+    issues.push({
+      entityType: "committee",
+      sourceId: committee.fecCommitteeId,
+      severity: "warning",
+      rule: "missing_committee_formation_date",
+      message: "Principal campaign committee has no FEC first-file date, so Race Signals cannot date a committee-formation signal.",
+      sourceUrl: committee.sourceUrl,
+    });
+  }
   return issues.concat(sourceUrlIssue("committee", committee.fecCommitteeId, committee.sourceUrl));
 }
 

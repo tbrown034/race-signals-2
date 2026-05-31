@@ -83,6 +83,7 @@ export default async function CandidatePage({
         sourceUrl={candidate.sourceUrl}
         signals={signals}
         allSignalsHref={`/?q=${encodeURIComponent(candidate.name)}`}
+        emptySignalsMessage={<CandidateNoSignalsMessage candidate={candidate} />}
         meta={[
           ["FEC ID", candidate.fecCandidateId],
           ["Party", partyLabel(candidate.party)],
@@ -300,6 +301,31 @@ function AggregateOnlyNotice({
         </Link>
       </div>
     </section>
+  );
+}
+
+function CandidateNoSignalsMessage({
+  candidate,
+}: {
+  candidate: NonNullable<Awaited<ReturnType<typeof getCandidate>>>;
+}) {
+  const hasAggregateMoney = Boolean(candidate.totalReceiptsCycle && candidate.totalReceiptsCycle > 0);
+  return (
+    <div className="max-w-3xl space-y-2">
+      <p className="font-medium text-neutral-950">
+        No source-record signals are matched to this candidate in the current stored slice.
+      </p>
+      <p>
+        {hasAggregateMoney
+          ? "FEC aggregate totals show cycle receipts, but Race Signals has not matched a committee filing or Schedule E record that generates a signal for this candidate yet."
+          : "This is not proof of no activity; it only means the current stored FEC slice has no matched record that meets this product's signal rules."}
+      </p>
+      {candidate.sourceUrl ? (
+        <a className="font-medium underline underline-offset-4" href={candidate.sourceUrl} rel="noreferrer" target="_blank">
+          Open the FEC candidate record
+        </a>
+      ) : null}
+    </div>
   );
 }
 

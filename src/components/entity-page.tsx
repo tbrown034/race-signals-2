@@ -19,6 +19,7 @@ export function EntityPage({
   independentExpenditures = [],
   signals,
   allSignalsHref,
+  emptySignalsMessage,
   primaryMetaCount = 8,
 }: {
   asideMedia?: ReactNode;
@@ -34,6 +35,7 @@ export function EntityPage({
   independentExpenditures?: CommitteeIndependentExpenditure[];
   signals: Signal[];
   allSignalsHref?: string;
+  emptySignalsMessage?: ReactNode;
   primaryMetaCount?: number;
 }) {
   const prioritySignals = [...signals].sort((a, b) => {
@@ -280,7 +282,9 @@ export function EntityPage({
             ))}
           </>
         ) : (
-          <p className="p-5 text-sm text-neutral-600">No related signals in the current slice.</p>
+          <div className="p-5 text-sm leading-6 text-neutral-600">
+            {emptySignalsMessage ?? "No related signals in the current slice."}
+          </div>
         )}
       </section>
     </main>

@@ -109,9 +109,14 @@ function enforceScheduledCostGuard({
   if (process.env.GITHUB_EVENT_NAME === "workflow_dispatch" && process.env.ALLOW_UNBOUNDED_INGEST === "1") {
     return;
   }
-  if (!state || !maxCandidates || !maxCandidatePages) {
+  if (process.env.GITHUB_EVENT_NAME === "schedule" && !state) {
     throw new Error(
-      "GitHub Actions ingest must set RACE_SIGNALS_STATE, FEC_MAX_CANDIDATES and FEC_MAX_CANDIDATE_PAGES. Set ALLOW_UNBOUNDED_INGEST=1 only for an intentional manual uncapped run.",
+      "Scheduled GitHub Actions ingest must set RACE_SIGNALS_STATE. Use workflow_dispatch for broader capped runs.",
+    );
+  }
+  if (!maxCandidates || !maxCandidatePages) {
+    throw new Error(
+      "GitHub Actions ingest must set FEC_MAX_CANDIDATES and FEC_MAX_CANDIDATE_PAGES. Set ALLOW_UNBOUNDED_INGEST=1 only for an intentional manual uncapped run.",
     );
   }
 }

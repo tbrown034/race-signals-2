@@ -2,7 +2,7 @@ import Link from "next/link";
 import { PageShell } from "@/src/components/page-shell";
 import { SignalCard } from "@/src/components/signal-card";
 import { SignalKeyboardNav } from "@/src/components/signal-keyboard-nav";
-import { getSignals, getStatus } from "@/src/lib/db/repository";
+import { getCandidateSignalGaps, getSignals, getStateCoverageBoard, getStatus } from "@/src/lib/db/repository";
 import { formatCount, formatDateTime, formatMoney } from "@/src/lib/format";
 import { displayCandidateName } from "@/src/lib/names";
 import type { Metadata } from "next";
@@ -20,14 +20,13 @@ export default async function ReviewPage({
 }) {
   const params = await searchParams;
   const state = typeof params.state === "string" ? params.state.toUpperCase() : undefined;
-  const [reviewSignals, status] = await Promise.all([
+  const [reviewSignals, status, aggregateGaps, stateCoverage] = await Promise.all([
     getSignals({ status: "review", state, limit: 100, sort: "amount" }),
     getStatus(),
+    getCandidateSignalGaps({ state, limit: 100 }),
+    getStateCoverageBoard(),
   ]);
-  const moneyGaps = status.candidateSignalGaps
-    .filter((candidate) => (candidate.totalReceiptsCycle ?? 0) > 0)
-    .filter((candidate) => !state || candidate.raceId?.includes(`-${state}-`))
-    .sort((a, b) => (b.totalReceiptsCycle ?? 0) - (a.totalReceiptsCycle ?? 0));
+  const moneyGaps = aggregateGaps.rows;
   const retainedWarnings = status.validationIssues.reduce((sum, issue) => sum + issue.count, 0);
   const exportSuffix = reviewExportQuery(state).toString();
 
@@ -84,7 +83,7 @@ export default async function ReviewPage({
 
           <div className="grid gap-px border-b border-neutral-300 bg-neutral-300 md:grid-cols-4">
             <ReviewStat label="Review signals" value={String(reviewSignals.length)} detail="$100k+ and other records marked for verification." />
-            <ReviewStat label="Aggregate-only money" value={String(moneyGaps.length)} detail="Candidates with FEC totals but no matched source-record signal." />
+            <ReviewStat label="Aggregate-only money" value={String(aggregateGaps.total)} detail="Candidates with FEC totals but no matched source-record signal." />
             <ReviewStat label="Retained caveats" value={String(retainedWarnings)} detail="Validation issues still visible in this database slice." />
             <ReviewStat
               label="Latest ingest"
@@ -92,6 +91,30 @@ export default async function ReviewPage({
               detail={status.runs[0] ? `Finished ${formatDateTime(status.runs[0].finishedAt ?? status.runs[0].startedAt)}` : "No run recorded."}
             />
           </div>
+
+          {stateCoverage.length ? (
+            <nav
+              aria-label="Review queue state filters"
+              className="flex min-w-0 max-w-full flex-nowrap gap-2 overflow-x-auto border-b border-neutral-300 px-5 py-3 text-sm"
+            >
+              <Link
+                className={`shrink-0 border px-2.5 py-1.5 font-mono text-[11px] uppercase tracking-[0.12em] ${!state ? "border-neutral-950 bg-neutral-950 text-white" : "border-neutral-300 hover:border-neutral-900"}`}
+                href="/review"
+              >
+                All
+              </Link>
+              {stateCoverage.map((row) => (
+                <Link
+                  className={`shrink-0 border px-2.5 py-1.5 font-mono text-[11px] uppercase tracking-[0.12em] ${state === row.state ? "border-neutral-950 bg-neutral-950 text-white" : "border-neutral-300 hover:border-neutral-900"}`}
+                  href={`/review?state=${row.state}`}
+                  key={row.state}
+                  title={`${row.state}: ${row.signalCount.toLocaleString("en-US")} stored signals`}
+                >
+                  {row.state}
+                </Link>
+              ))}
+            </nav>
+          ) : null}
 
           <section className="border-b border-neutral-300" id="review-signals">
             <div className="border-b border-neutral-300 px-5 py-4">
@@ -184,6 +207,11 @@ export default async function ReviewPage({
                 No aggregate-only money gaps match this scope.
               </p>
             )}
+            {aggregateGaps.total > moneyGaps.length ? (
+              <p className="border-t border-neutral-200 px-5 py-3 text-xs leading-5 text-neutral-600">
+                Showing the top {moneyGaps.length.toLocaleString("en-US")} of {aggregateGaps.total.toLocaleString("en-US")} aggregate-only candidates by stored receipts.
+              </p>
+            ) : null}
           </section>
 
           <section className="px-5 py-4" id="validation-caveats">

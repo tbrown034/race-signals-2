@@ -326,7 +326,7 @@ export default async function SpendingPage({
               isStale={isOlderThanHours(status.runs[0]?.finishedAt ?? status.runs[0]?.startedAt, 48)}
               raceId={raceId}
               state={state}
-              evidenceHref={scheduleERecordsHref({ candidateId: undefined, committeeId, raceId, state })}
+              evidenceHref={scheduleERecordsHref({ candidateId: undefined, committeeId, minAmount, position, raceId, state, targetParty, targetStatus })}
             />
           ) : null}
         </section>
@@ -630,19 +630,31 @@ function spendingExportQuery(params: { [key: string]: string | string[] | undefi
 function scheduleERecordsHref({
   candidateId,
   committeeId,
+  minAmount,
+  position,
   raceId,
   state,
+  targetParty,
+  targetStatus,
 }: {
   candidateId?: string;
   committeeId?: string;
+  minAmount?: string;
+  position?: string;
   raceId?: string;
   state?: string;
+  targetParty?: string;
+  targetStatus?: string;
 }) {
   const params = new URLSearchParams();
   if (candidateId) params.set("candidate", candidateId);
   if (committeeId) params.set("committee", committeeId);
+  if (minAmount) params.set("minAmount", minAmount);
+  if (position) params.set("position", position);
   if (raceId) params.set("race", raceId);
   if (state) params.set("state", state);
+  if (targetParty) params.set("targetParty", targetParty);
+  if (targetStatus) params.set("targetStatus", targetStatus);
   const query = params.toString();
   return query ? `/records/schedule-e?${query}` : "/records/schedule-e";
 }

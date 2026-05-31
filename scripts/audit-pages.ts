@@ -36,7 +36,11 @@ async function main() {
     for (const check of checks) {
       await assertRoute(check);
     }
-    console.log(`Page audit passed for ${checks.length} routes.`);
+    await assertRoute({ path: "/api/signals/export.csv?status=review&sort=amount", text: "signal_date" });
+    await assertJsonRoute("/api/signals/export.json?status=review&sort=amount");
+    await assertRoute({ path: "/api/schedule-e/export.csv?position=O&minAmount=25000&targetParty=REP", text: "expenditure_date" });
+    await assertJsonRoute("/api/schedule-e/export.json?position=O&minAmount=25000&targetParty=REP");
+    console.log(`Page audit passed for ${checks.length} routes and 4 export endpoints.`);
   } finally {
     if (server) {
       server.kill("SIGTERM");
@@ -107,6 +111,19 @@ async function assertRoute({ path, text }: RouteCheck) {
   const body = await response.text();
   if (!body.includes(text)) {
     throw new Error(`${path} did not include expected text: ${text}`);
+  }
+}
+
+async function assertJsonRoute(path: string) {
+  const response = await fetch(`${baseUrl}${path}`);
+  if (!response.ok) {
+    throw new Error(`${path} returned HTTP ${response.status}`);
+  }
+  const body = await response.text();
+  try {
+    JSON.parse(body);
+  } catch {
+    throw new Error(`${path} did not return parseable JSON`);
   }
 }
 

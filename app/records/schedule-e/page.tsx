@@ -26,6 +26,8 @@ export default async function ScheduleERecordsPage({
   const state = textParam(params.state)?.toUpperCase();
   const minAmount = textParam(params.minAmount);
   const position = positionParam(textParam(params.position));
+  const targetParty = targetPartyParam(textParam(params.targetParty));
+  const targetStatus = targetStatusParam(textParam(params.targetStatus));
   const filters = {
     candidateId,
     committeeId,
@@ -35,6 +37,8 @@ export default async function ScheduleERecordsPage({
     raceId,
     sourceId,
     state,
+    targetParty,
+    targetStatus,
   };
   const [records, summary] = await Promise.all([
     getScheduleERecords({
@@ -61,6 +65,8 @@ export default async function ScheduleERecordsPage({
     sourceId ? `Schedule E source ${sourceId}` : null,
     position ? supportLabel(position) : null,
     minAmount ? `amount $${Number(minAmount).toLocaleString("en-US")}+` : null,
+    targetParty ? `target party ${targetParty}` : null,
+    targetStatus ? `target ${targetStatusLabel(targetStatus)}` : null,
   ].filter(Boolean);
   const exportQuery = new URLSearchParams();
   if (state) exportQuery.set("state", state);
@@ -71,6 +77,8 @@ export default async function ScheduleERecordsPage({
   if (sourceId) exportQuery.set("sourceId", sourceId);
   if (position) exportQuery.set("position", position);
   if (minAmount) exportQuery.set("minAmount", minAmount);
+  if (targetParty) exportQuery.set("targetParty", targetParty);
+  if (targetStatus) exportQuery.set("targetStatus", targetStatus);
   const exportSuffix = exportQuery.toString();
 
   return (
@@ -143,6 +151,8 @@ export default async function ScheduleERecordsPage({
             raceId={raceId}
             sourceId={sourceId}
             state={state}
+            targetParty={targetParty}
+            targetStatus={targetStatus}
           />
           <CoverageWarning issues={validationWarnings} />
 
@@ -268,6 +278,16 @@ function positionParam(value?: string) {
   return undefined;
 }
 
+function targetPartyParam(value?: string) {
+  if (value === "REP" || value === "DEM") return value;
+  return undefined;
+}
+
+function targetStatusParam(value?: string) {
+  if (value === "I" || value === "C" || value === "O") return value;
+  return undefined;
+}
+
 function ScheduleEFilters({
   candidateId,
   committeeId,
@@ -277,6 +297,8 @@ function ScheduleEFilters({
   raceId,
   sourceId,
   state,
+  targetParty,
+  targetStatus,
 }: {
   candidateId?: string;
   committeeId?: string;
@@ -286,6 +308,8 @@ function ScheduleEFilters({
   raceId?: string;
   sourceId?: string;
   state?: string;
+  targetParty?: string;
+  targetStatus?: string;
 }) {
   return (
     <form action="/records/schedule-e" className="border-b border-neutral-300 px-5 py-4">
@@ -358,6 +382,23 @@ function ScheduleEFilters({
             <span className="font-mono text-[11px] uppercase tracking-[0.12em] text-neutral-500">FEC spender ID</span>
             <input className="mt-1 w-full border border-neutral-300 bg-white px-2 py-2 font-mono text-sm outline-none focus:border-neutral-900" defaultValue={fecCommitteeId ?? ""} name="fecCommittee" />
           </label>
+          <label className="min-w-0">
+            <span className="font-mono text-[11px] uppercase tracking-[0.12em] text-neutral-500">Target party</span>
+            <select className="mt-1 w-full border border-neutral-300 bg-white px-2 py-2 text-sm outline-none focus:border-neutral-900" defaultValue={targetParty ?? ""} name="targetParty">
+              <option value="">Any</option>
+              <option value="REP">REP</option>
+              <option value="DEM">DEM</option>
+            </select>
+          </label>
+          <label className="min-w-0">
+            <span className="font-mono text-[11px] uppercase tracking-[0.12em] text-neutral-500">Target status</span>
+            <select className="mt-1 w-full border border-neutral-300 bg-white px-2 py-2 text-sm outline-none focus:border-neutral-900" defaultValue={targetStatus ?? ""} name="targetStatus">
+              <option value="">Any</option>
+              <option value="I">Incumbent</option>
+              <option value="C">Challenger</option>
+              <option value="O">Open seat</option>
+            </select>
+          </label>
         </div>
       </details>
       <div className="mt-3 flex flex-wrap gap-2 text-sm">
@@ -403,6 +444,13 @@ function supportLabel(value?: string | null) {
   if (value === "S") return "FEC code: supports target";
   if (value === "O") return "FEC code: opposes target";
   return "Not classified by FEC";
+}
+
+function targetStatusLabel(value?: string | null) {
+  if (value === "I") return "incumbent";
+  if (value === "C") return "challenger";
+  if (value === "O") return "open seat";
+  return "unknown status";
 }
 
 function targetLink(record: Awaited<ReturnType<typeof getScheduleERecords>>[number]) {

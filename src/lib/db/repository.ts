@@ -1302,6 +1302,8 @@ export async function getScheduleERecords(
     state?: string;
     minAmount?: string;
     position?: string;
+    targetParty?: string;
+    targetStatus?: string;
     limit?: number;
   } = {},
 ): Promise<CommitteeIndependentExpenditure[]> {
@@ -1318,6 +1320,9 @@ export async function getScheduleERecords(
         if (filters.minAmount && expenditure.amount < resolveMinAmount(filters.minAmount)) return false;
         if (filters.position === "U" && (expenditure.supportOpposeIndicator === "S" || expenditure.supportOpposeIndicator === "O")) return false;
         if (filters.position && filters.position !== "U" && expenditure.supportOpposeIndicator !== filters.position) return false;
+        const candidate = demoCandidates.find((item) => item.id === expenditure.candidateId);
+        if (filters.targetParty && candidate?.party !== filters.targetParty) return false;
+        if (filters.targetStatus && candidate?.incumbentChallengeStatus !== filters.targetStatus) return false;
         return true;
       })
       .sort((a, b) => String(b.expenditureDate).localeCompare(String(a.expenditureDate)) || b.amount - a.amount)
@@ -1369,6 +1374,14 @@ export async function getScheduleERecords(
   } else if (filters.position) {
     values.push(filters.position);
     where.push(`ie.support_oppose_indicator = $${values.length}`);
+  }
+  if (filters.targetParty) {
+    values.push(filters.targetParty);
+    where.push(`c.party = $${values.length}`);
+  }
+  if (filters.targetStatus) {
+    values.push(filters.targetStatus);
+    where.push(`c.incumbent_challenge_status = $${values.length}`);
   }
   values.push(limit);
 
@@ -1451,6 +1464,8 @@ export async function getScheduleERecordSummary(
     state?: string;
     minAmount?: string;
     position?: string;
+    targetParty?: string;
+    targetStatus?: string;
   } = {},
 ) {
   if (!hasDatabase()) {
@@ -1464,6 +1479,9 @@ export async function getScheduleERecordSummary(
       if (filters.minAmount && expenditure.amount < resolveMinAmount(filters.minAmount)) return false;
       if (filters.position === "U" && (expenditure.supportOpposeIndicator === "S" || expenditure.supportOpposeIndicator === "O")) return false;
       if (filters.position && filters.position !== "U" && expenditure.supportOpposeIndicator !== filters.position) return false;
+      const candidate = demoCandidates.find((item) => item.id === expenditure.candidateId);
+      if (filters.targetParty && candidate?.party !== filters.targetParty) return false;
+      if (filters.targetStatus && candidate?.incumbentChallengeStatus !== filters.targetStatus) return false;
       return true;
     });
     return records.reduce(
@@ -1518,6 +1536,14 @@ export async function getScheduleERecordSummary(
     values.push(filters.position);
     where.push(`ie.support_oppose_indicator = $${values.length}`);
   }
+  if (filters.targetParty) {
+    values.push(filters.targetParty);
+    where.push(`c.party = $${values.length}`);
+  }
+  if (filters.targetStatus) {
+    values.push(filters.targetStatus);
+    where.push(`c.incumbent_challenge_status = $${values.length}`);
+  }
 
   const rows = await sql<{
     oppose_amount: string | null;
@@ -1537,6 +1563,7 @@ export async function getScheduleERecordSummary(
              or ie.support_oppose_indicator not in ('S', 'O')
         ), 0)::text as uncoded_amount
       from independent_expenditures ie
+      left join candidates c on c.id = ie.candidate_id
       left join races r on r.id = ie.race_id
       where ${where.join(" and ")}
     `,
@@ -1930,6 +1957,121 @@ function compareCandidateStanding(a: Candidate, b: Candidate) {
 
 function isIncumbent(status?: string | null) {
   return status === "I" || status === "Incumbent";
+}
+
+export async function getCandidateSignalGaps({
+  limit = 100,
+  state,
+}: {
+  limit?: number;
+  state?: string;
+} = {}): Promise<{ rows: CandidateSignalGap[]; total: number }> {
+  if (!hasDatabase()) {
+    const rows = demoCandidates
+      .filter((candidate) => (candidate.totalReceiptsCycle ?? 0) > 0)
+      .filter((candidate) => !state || candidate.state === state)
+      .filter((candidate) => !demoSignals.some((signal) => signal.candidateId === candidate.id))
+      .sort((a, b) => (b.totalReceiptsCycle ?? 0) - (a.totalReceiptsCycle ?? 0) || a.name.localeCompare(b.name))
+      .map<CandidateSignalGap>((candidate) => ({
+        id: candidate.id,
+        name: candidate.name,
+        fecCandidateId: candidate.fecCandidateId,
+        raceId: candidate.raceId,
+        raceName: demoRaces.find((race) => race.id === candidate.raceId)?.name ?? null,
+        totalReceiptsCycle: candidate.totalReceiptsCycle ?? null,
+        committeeCount: demoCommittees.filter((committee) => committee.candidateId === candidate.id).length,
+        filingCount: 0,
+        independentExpenditureCount: demoIndependentExpenditures.filter((expenditure) => expenditure.candidateId === candidate.id).length,
+        totalsUpdatedAt: candidate.totalsUpdatedAt ?? null,
+        totalsFetchedAt: candidate.totalsFetchedAt ?? null,
+        sourceUrl: candidate.sourceUrl,
+      }));
+    return { rows: rows.slice(0, limit), total: rows.length };
+  }
+
+  const values: unknown[] = [];
+  const stateFilter = state ? `and r.state = $${values.push(state)}` : "";
+  const countRows = await sql<{ count: string }>(
+    `
+      select count(*)::text as count
+      from (
+        select c.id
+        from candidates c
+        left join races r on r.id = c.race_id
+        left join signals s on s.candidate_id = c.id
+          and ${currentCycleSignalPredicate}
+        where coalesce(c.total_receipts_cycle, 0) > 0
+        ${stateFilter}
+        group by c.id
+        having count(s.id) = 0
+      ) gaps
+    `,
+    values,
+  );
+
+  values.push(limit);
+  const rows = await sql<{
+    id: string;
+    name: string;
+    fec_candidate_id: string;
+    race_id: string | null;
+    race_name: string | null;
+    total_receipts_cycle: string | null;
+    committee_count: string;
+    filing_count: string;
+    independent_expenditure_count: string;
+    totals_updated_at: string | Date | null;
+    totals_fetched_at: string | Date | null;
+    source_url: string | null;
+  }>(
+    `
+      select
+        c.id,
+        c.name,
+        c.fec_candidate_id,
+        c.race_id,
+        r.name as race_name,
+        c.total_receipts_cycle::text as total_receipts_cycle,
+        count(distinct cm.id)::text as committee_count,
+        count(distinct f.source_id)::text as filing_count,
+        count(distinct ie.source_id)::text as independent_expenditure_count,
+        c.totals_updated_at,
+        c.totals_fetched_at,
+        c.source_url
+      from candidates c
+      left join races r on r.id = c.race_id
+      left join committees cm on cm.candidate_id = c.id
+      left join filings f on f.committee_id = cm.id
+      left join independent_expenditures ie on ie.candidate_id = c.id
+      left join signals s on s.candidate_id = c.id
+        and ${currentCycleSignalPredicate}
+      where coalesce(c.total_receipts_cycle, 0) > 0
+      ${stateFilter}
+      group by c.id, r.name
+      having count(s.id) = 0
+      order by c.total_receipts_cycle desc nulls last, c.name
+      limit $${values.length}
+    `,
+    values,
+  );
+
+  return {
+    rows: rows.map<CandidateSignalGap>((candidate) => ({
+      id: candidate.id,
+      name: candidate.name,
+      fecCandidateId: candidate.fec_candidate_id,
+      raceId: candidate.race_id,
+      raceName: candidate.race_name,
+      totalReceiptsCycle: candidate.total_receipts_cycle === null ? null : Number(candidate.total_receipts_cycle),
+      committeeCount: Number(candidate.committee_count),
+      filingCount: Number(candidate.filing_count),
+      independentExpenditureCount: Number(candidate.independent_expenditure_count),
+      totalsUpdatedAt: candidate.totals_updated_at ? toIsoString(candidate.totals_updated_at) : null,
+      totalsFetchedAt: candidate.totals_fetched_at ? toIsoString(candidate.totals_fetched_at) : null,
+      sourceUrl: candidate.source_url,
+    })),
+    total: Number(countRows[0]?.count ?? 0),
+  };
 }
 
 export async function getStatus() {

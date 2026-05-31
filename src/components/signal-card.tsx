@@ -284,6 +284,7 @@ function signalEvidence(signal: Signal) {
     const receipts = numberMetadata(signal.metadata?.totalReceipts);
     const cash = numberMetadata(signal.metadata?.cashOnHand);
     const reportType = textMetadata(signal.metadata?.reportType);
+    const receiptsBasis = textMetadata(signal.metadata?.totalReceiptsBasis);
     const versionKind = textMetadata(signal.metadata?.filingVersionKind);
     const sourceId = textMetadata(signal.metadata?.sourceId);
     const coverage = [
@@ -293,7 +294,7 @@ function signalEvidence(signal: Signal) {
     return [
       reportType ? `report ${reportType}` : null,
       versionKind === "likely_refile" ? "likely amendment/refile" : null,
-      receipts !== null ? `receipts ${formatMoney(receipts)}` : null,
+      receipts !== null ? `${receiptBasisLabel(receiptsBasis)} ${formatMoney(receipts)}` : null,
       cash !== null ? `cash ${formatMoney(cash)}` : null,
       coverage.length === 2 ? `period ${coverage.join(" to ")}` : null,
       sourceId ? `filing ${sourceId}` : null,
@@ -343,6 +344,13 @@ function signalEvidence(signal: Signal) {
   }
 
   return null;
+}
+
+function receiptBasisLabel(value?: string | null) {
+  if (value === "period") return "period receipts";
+  if (value === "ytd") return "YTD receipts";
+  if (value === "total") return "total receipts";
+  return "receipts";
 }
 
 function filingComparisonSources(signal: Signal) {

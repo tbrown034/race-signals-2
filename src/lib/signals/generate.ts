@@ -126,6 +126,7 @@ export function generateSignals(input: SignalInput): Signal[] {
         coverageStartDate: filing.coverageStartDate,
         coverageEndDate: filing.coverageEndDate,
         totalReceipts: filing.totalReceipts,
+        totalReceiptsBasis: filing.totalReceiptsBasis,
         cashOnHand: filing.cashOnHand,
         filingVersionKind: filingCopy.versionKind,
         relatedFilingVersions: versionInfo.relatedVersions,

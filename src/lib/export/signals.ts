@@ -33,6 +33,7 @@ export type SignalExportRow = {
   source_url: string | null;
   source_id: string | null;
   source_kind: string | null;
+  total_receipts_basis: string | null;
   signal_permalink: string;
   data_freshness: string;
   dedupe_key: string;
@@ -89,6 +90,7 @@ export function signalToExportRow(
     source_url: signal.sourceUrl ?? null,
     source_id: sourceId(signal),
     source_kind: sourceKind(signal),
+    total_receipts_basis: textMetadata(signal.metadata?.totalReceiptsBasis),
     signal_permalink: `${baseUrl}/#${signalAnchorId(signal.dedupeKey)}`,
     data_freshness: signal.dataFreshness,
     dedupe_key: signal.dedupeKey,
@@ -121,6 +123,7 @@ export function rowsToCsv(rows: SignalExportRow[]) {
     "source_url",
     "source_id",
     "source_kind",
+    "total_receipts_basis",
     "signal_permalink",
     "data_freshness",
     "dedupe_key",
@@ -175,4 +178,8 @@ function sourceKind(signal: Signal) {
   if (signal.signalType === "new_filing" || signal.signalType === "committee_activity_spike") return "filing";
   if (signal.signalType === "new_committee") return "committee";
   return null;
+}
+
+function textMetadata(value: unknown) {
+  return typeof value === "string" && value ? value : null;
 }

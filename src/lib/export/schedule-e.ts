@@ -60,7 +60,7 @@ export function scheduleEToExportRow(
     purpose: record.purpose ?? null,
     source_url: record.sourceUrl ?? null,
     source_id: record.sourceId,
-    evidence_url: manifest.baseUrl ? `${manifest.baseUrl}/records/schedule-e#${scheduleEAnchorId(record.sourceId)}` : null,
+    evidence_url: manifest.baseUrl ? `${manifest.baseUrl}/records/schedule-e${evidenceQuery(manifest.filters)}#${scheduleEAnchorId(record.sourceId)}` : null,
     methodology_url: manifest.baseUrl
       ? `${manifest.baseUrl}/methodology#large_independent_expenditure`
       : "/methodology#large_independent_expenditure",
@@ -121,6 +121,16 @@ function targetPositionLabel(value?: string | null) {
 
 function scheduleEAnchorId(sourceId: string) {
   return `schedule-e-${sourceId.replace(/[^a-zA-Z0-9_-]/g, "-")}`;
+}
+
+function evidenceQuery(filters: Record<string, string>) {
+  const params = new URLSearchParams();
+  for (const key of ["state", "race", "committee", "candidate"]) {
+    const value = filters[key];
+    if (value) params.set(key, value);
+  }
+  const query = params.toString();
+  return query ? `?${query}` : "";
 }
 
 function csvCell(value: string | number | null) {

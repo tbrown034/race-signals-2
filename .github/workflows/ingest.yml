@@ -41,8 +41,8 @@ jobs:
       FEC_MAX_CANDIDATE_PAGES: "2"
       FEC_REQUEST_DELAY_MS: "4000"
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
         with:
           node-version: 24
           cache: npm
@@ -63,8 +63,8 @@ jobs:
       FEC_MAX_CANDIDATE_PAGES: ${{ inputs.max_candidate_pages }}
       FEC_REQUEST_DELAY_MS: "4000"
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
         with:
           node-version: 24
           cache: npm

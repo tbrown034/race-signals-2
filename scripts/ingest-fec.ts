@@ -222,7 +222,7 @@ async function main() {
         state,
       }));
     }
-    const normalizedCandidatesBase = normalizedCandidatesInScope.slice(0, maxCandidates);
+    const normalizedCandidatesBase = selectCandidateScope(normalizedCandidatesInScope, maxCandidates);
     let candidatesWithLegislatorIds = normalizedCandidatesBase;
     try {
       const sync = await applyCongressLegislatorIds(normalizedCandidatesBase);
@@ -529,8 +529,8 @@ function candidateScopeTruncationIssue({
     sourceId: `candidate-scope:${state ?? "national"}:${offices.join(",")}:${cycle}`,
     severity: "warning",
     rule: "candidate_scope_truncated",
-    message: `Race Signals matched ${count} in-scope ${cycle} candidates but FEC_MAX_CANDIDATES limited this ingest to ${maxCandidates}. Treat candidate coverage for this run as partial.`,
-    raw: { count, cycle, maxCandidates, offices, state: state ?? null },
+    message: `Race Signals matched ${count} in-scope ${cycle} candidates but FEC_MAX_CANDIDATES limited this ingest to ${maxCandidates}. The capped queue is balanced across races with incumbents first; treat candidate coverage for this run as partial.`,
+    raw: { count, cycle, maxCandidates, offices, selection: "race_round_robin_incumbents_first", state: state ?? null },
   };
 }
 
@@ -572,6 +572,46 @@ function compareCandidateScope(a: Candidate, b: Candidate) {
     a.name.localeCompare(b.name) ||
     a.fecCandidateId.localeCompare(b.fecCandidateId)
   );
+}
+
+function selectCandidateScope(candidates: Candidate[], maxCandidates?: number) {
+  if (!maxCandidates || candidates.length <= maxCandidates) return candidates;
+  const byRace = new Map<string, Candidate[]>();
+  for (const candidate of candidates) {
+    const raceKey = candidate.raceId ?? `${candidate.state}-${candidate.office}-${candidate.district ?? "statewide"}`;
+    byRace.set(raceKey, [...(byRace.get(raceKey) ?? []), candidate]);
+  }
+  const raceQueues = [...byRace.entries()]
+    .sort(([a], [b]) => a.localeCompare(b))
+    .map(([, raceCandidates]) => raceCandidates.sort(compareCandidatePriority));
+  const selected: Candidate[] = [];
+  for (let round = 0; selected.length < maxCandidates; round += 1) {
+    let addedThisRound = false;
+    for (const raceCandidates of raceQueues) {
+      const candidate = raceCandidates[round];
+      if (!candidate) continue;
+      selected.push(candidate);
+      addedThisRound = true;
+      if (selected.length >= maxCandidates) break;
+    }
+    if (!addedThisRound) break;
+  }
+  return selected.sort(compareCandidateScope);
+}
+
+function compareCandidatePriority(a: Candidate, b: Candidate) {
+  return (
+    incumbentPriority(a.incumbentChallengeStatus) - incumbentPriority(b.incumbentChallengeStatus) ||
+    a.name.localeCompare(b.name) ||
+    a.fecCandidateId.localeCompare(b.fecCandidateId)
+  );
+}
+
+function incumbentPriority(status?: string | null) {
+  if (status === "I") return 0;
+  if (status === "C") return 1;
+  if (status === "O") return 2;
+  return 3;
 }
 
 function sourceRecord(

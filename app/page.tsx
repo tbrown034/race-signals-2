@@ -317,7 +317,15 @@ function StateRaceBoard({ rows, state }: { rows: StateRaceBoardRow[]; state: str
                       </div>
                       <div>
                         <dt className="inline font-mono uppercase tracking-[0.12em] text-neutral-500">Latest </dt>
-                        <dd className="inline">{race.latestSignalDate ? formatDate(race.latestSignalDate) : "No stored signal"}</dd>
+                        <dd className="inline">
+                          {race.latestSignalDate && race.latestSignalDedupeKey ? (
+                            <Link className="underline underline-offset-4" href={`/?race=${race.raceId}#${race.latestSignalDedupeKey}`}>
+                              {formatDate(race.latestSignalDate)}
+                            </Link>
+                          ) : (
+                            "No stored signal"
+                          )}
+                        </dd>
                       </div>
                     </dl>
                   </td>
@@ -335,7 +343,24 @@ function StateRaceBoard({ rows, state }: { rows: StateRaceBoardRow[]; state: str
                     )}
                   </td>
                   <td className="hidden px-4 py-3 text-xs text-neutral-600 md:table-cell">{raceTotalsFreshness(race)}</td>
-                  <td className="hidden px-4 py-3 md:table-cell">{race.latestSignalDate ? formatDate(race.latestSignalDate) : "No stored signal"}</td>
+                  <td className="hidden px-4 py-3 md:table-cell">
+                    {race.latestSignalDate && race.latestSignalDedupeKey ? (
+                      <Link
+                        className="block max-w-[240px] underline underline-offset-4"
+                        href={`/?race=${race.raceId}#${race.latestSignalDedupeKey}`}
+                        title={race.latestSignalHeadline ?? undefined}
+                      >
+                        <span className="block">{formatDate(race.latestSignalDate)}</span>
+                        {race.latestSignalHeadline ? (
+                          <span className="mt-1 block truncate text-xs text-neutral-600">
+                            {race.latestSignalHeadline}
+                          </span>
+                        ) : null}
+                      </Link>
+                    ) : (
+                      "No stored signal"
+                    )}
+                  </td>
                 </tr>
               ))
             ) : (

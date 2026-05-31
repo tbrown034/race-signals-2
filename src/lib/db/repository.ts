@@ -599,6 +599,7 @@ export async function getStateRaceBoard(state: string): Promise<StateRaceBoardRo
       .filter((race) => race.state === normalizedState && race.cycle === CURRENT_CYCLE)
       .map((race) => {
         const raceSignals = demoSignals.filter((signal) => signal.raceId === race.id);
+        const latestRaceSignal = [...raceSignals].sort((a, b) => b.signalDate.localeCompare(a.signalDate))[0];
         const expenditures = demoIndependentExpenditures.filter((expenditure) => expenditure.raceId === race.id);
         return {
           raceId: race.id,
@@ -623,7 +624,9 @@ export async function getStateRaceBoard(state: string): Promise<StateRaceBoardRo
             .sort()
             .at(0) ?? null,
           signalCount: raceSignals.length,
-          latestSignalDate: raceSignals.map((signal) => signal.signalDate).sort().at(-1) ?? null,
+          latestSignalDate: latestRaceSignal?.signalDate ?? null,
+          latestSignalDedupeKey: latestRaceSignal?.dedupeKey ?? null,
+          latestSignalHeadline: latestRaceSignal?.headline ?? null,
           independentExpenditureTotal: expenditures.reduce((sum, expenditure) => sum + expenditure.amount, 0),
         };
       });
@@ -641,6 +644,8 @@ export async function getStateRaceBoard(state: string): Promise<StateRaceBoardRo
     candidate_totals_fetched_at_oldest: string | Date | null;
     signal_count: string;
     latest_signal_date: string | Date | null;
+    latest_signal_dedupe_key: string | null;
+    latest_signal_headline: string | null;
     independent_expenditure_total: string;
   }>(
     `
@@ -689,6 +694,22 @@ export async function getStateRaceBoard(state: string): Promise<StateRaceBoardRo
             and (r.cycle is null or (s.signal_date >= make_date(r.cycle - 1, 1, 1) and s.signal_date <= make_date(r.cycle, 12, 31)))
         ) as latest_signal_date,
         (
+          select s.dedupe_key
+          from signals s
+          where s.race_id = r.id
+            and (r.cycle is null or (s.signal_date >= make_date(r.cycle - 1, 1, 1) and s.signal_date <= make_date(r.cycle, 12, 31)))
+          order by s.signal_date desc, s.created_at desc
+          limit 1
+        ) as latest_signal_dedupe_key,
+        (
+          select s.headline
+          from signals s
+          where s.race_id = r.id
+            and (r.cycle is null or (s.signal_date >= make_date(r.cycle - 1, 1, 1) and s.signal_date <= make_date(r.cycle, 12, 31)))
+          order by s.signal_date desc, s.created_at desc
+          limit 1
+        ) as latest_signal_headline,
+        (
           select coalesce(sum(ie.amount), 0)::text
           from independent_expenditures ie
           where ie.race_id = r.id
@@ -714,6 +735,8 @@ export async function getStateRaceBoard(state: string): Promise<StateRaceBoardRo
     candidateTotalsFetchedAtOldest: row.candidate_totals_fetched_at_oldest ? toIsoString(row.candidate_totals_fetched_at_oldest) : null,
     signalCount: Number(row.signal_count),
     latestSignalDate: row.latest_signal_date ? toDateString(row.latest_signal_date) : null,
+    latestSignalDedupeKey: row.latest_signal_dedupe_key,
+    latestSignalHeadline: row.latest_signal_headline,
     independentExpenditureTotal: Number(row.independent_expenditure_total),
   }));
 }

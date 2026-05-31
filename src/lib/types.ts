@@ -176,6 +176,8 @@ export type StateRaceBoardRow = {
   candidateTotalsFetchedAtOldest?: string | null;
   signalCount: number;
   latestSignalDate?: string | null;
+  latestSignalDedupeKey?: string | null;
+  latestSignalHeadline?: string | null;
   independentExpenditureTotal: number;
 };
 

@@ -202,7 +202,7 @@ export function FeedFilters({
             ) : null}
           </div>
           <label className="min-w-0 text-xs font-medium uppercase tracking-[0.12em] text-neutral-500 sm:hidden">
-            Newly ingested
+            Added to feed
             <select
               className="mt-1 block h-9 w-full min-w-0 border border-neutral-300 bg-white px-2 text-sm normal-case tracking-normal text-neutral-950"
               value={selectedIngestedSince}
@@ -392,7 +392,7 @@ export function FeedFilters({
           </select>
         </label>
           <label className="hidden min-w-0 text-xs font-medium uppercase tracking-[0.12em] text-neutral-500 sm:block xl:min-w-[170px] xl:flex-none">
-          Newly ingested
+          Added to feed
           <select
             className="mt-1 block h-9 w-full min-w-0 border border-neutral-300 bg-white px-2 text-sm normal-case tracking-normal text-neutral-950"
             value={selectedIngestedSince}

@@ -3,7 +3,7 @@ import { FreshMark } from "@/src/components/fresh-mark";
 import { IncumbentBadge } from "@/src/components/incumbent-badge";
 import { PartySquare } from "@/src/components/party-square";
 import { SignalCopyLink } from "@/src/components/signal-copy-link";
-import { formatDate, formatDateTime, formatMoney } from "@/src/lib/format";
+import { formatDate, formatDateTime, formatMoney, formatRelativeTime } from "@/src/lib/format";
 import type { Signal } from "@/src/lib/types";
 
 const typeLabels: Record<string, string> = {
@@ -47,6 +47,9 @@ export function SignalCard({ signal }: { signal: Signal }) {
         <p className="flex items-center gap-1.5 text-neutral-950">
           <FreshMark signalDate={signal.signalDate} status={signal.status} />
           Event {formatDate(signal.signalDate)}
+        </p>
+        <p className="mt-1 text-neutral-600" title={`Ingested ${formatDateTime(signal.dataFreshness)}`}>
+          Added {formatRelativeTime(signal.dataFreshness)}
         </p>
         <Link
           className="mt-1 block uppercase tracking-[0.12em] underline-offset-4 hover:underline"

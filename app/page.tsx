@@ -268,10 +268,11 @@ function FeedTriageStrip({
 }) {
   return (
     <section className="border-b border-neutral-300 px-5 py-3" aria-label="Feed triage">
-      <div className="grid gap-2 lg:grid-cols-3">
-        <TriageItem label="Latest material" signal={signals.latestMaterial} />
+      <div className="grid gap-2 md:grid-cols-2 xl:grid-cols-4">
+        <TriageItem label="Newest added" signal={signals.newestAdded} />
+        <TriageItem label="Largest outside spend" signal={signals.largestIe} empty="No IE alerts in this view" />
+        <TriageItem label="Incumbent named" signal={signals.incumbentNamed} empty="No incumbent-linked signals in this view" />
         <TriageItem label="Needs review" signal={signals.review} empty="No review flags in this view" />
-        <TriageItem label="Largest IE" signal={signals.largestIe} empty="No IE alerts in this view" />
       </div>
     </section>
   );
@@ -311,9 +312,14 @@ function TriageItem({
 }
 
 function feedTriageSignals(signals: Signal[]) {
+  const byDataFreshness = [...signals].sort((a, b) => {
+    const freshnessCompare = b.dataFreshness.localeCompare(a.dataFreshness);
+    return freshnessCompare || b.signalDate.localeCompare(a.signalDate);
+  });
   return {
-    latestMaterial: signals.find((signal) => signal.status === "review" || signal.signalType !== "new_filing" || (signal.amount ?? 0) >= 25000) ?? signals[0],
+    newestAdded: byDataFreshness[0] ?? signals[0],
     review: signals.find((signal) => signal.status === "review"),
+    incumbentNamed: signals.find((signal) => signal.candidateIncumbentChallengeStatus === "I" || signal.candidateIncumbentChallengeStatus === "Incumbent"),
     largestIe: signals
       .filter((signal) => signal.signalType === "large_independent_expenditure" && signal.amount)
       .sort((a, b) => (b.amount ?? 0) - (a.amount ?? 0))[0],

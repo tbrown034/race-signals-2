@@ -126,7 +126,7 @@ export function normalizeIndependentExpenditure(
     amount: record.expenditure_amount ?? 0,
     expenditureDate: record.expenditure_date ?? null,
     purpose: record.expenditure_description ?? null,
-    sourceUrl: record.candidate_id ? fecIndependentExpendituresUrl(record.candidate_id) : null,
+    sourceUrl: record.candidate_id ? fecIndependentExpendituresUrl(record) : null,
     raw: record,
   };
 }

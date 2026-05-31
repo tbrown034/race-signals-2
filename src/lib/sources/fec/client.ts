@@ -258,6 +258,25 @@ export function fecFilingUrl(imageOrFile?: string | number | null) {
   return imageOrFile ? `${FEC_WEB_BASE_URL}/filing/${imageOrFile}/` : `${FEC_WEB_BASE_URL}/filings/`;
 }
 
-export function fecIndependentExpendituresUrl(candidateId: string) {
-  return `${FEC_WEB_BASE_URL}/independent-expenditures/?candidate_id=${candidateId}`;
+export function fecIndependentExpendituresUrl(record: {
+  candidate_id?: string | null;
+  committee_id?: string | null;
+  expenditure_amount?: number | null;
+  expenditure_date?: string | null;
+  sub_id?: string | null;
+}) {
+  const url = new URL(`${FEC_WEB_BASE_URL}/independent-expenditures/`);
+  url.searchParams.set("data_type", "processed");
+  if (record.candidate_id) url.searchParams.set("candidate_id", record.candidate_id);
+  if (record.committee_id) url.searchParams.set("committee_id", record.committee_id);
+  if (record.expenditure_date) {
+    url.searchParams.set("min_date", record.expenditure_date);
+    url.searchParams.set("max_date", record.expenditure_date);
+  }
+  if (record.expenditure_amount !== null && record.expenditure_amount !== undefined) {
+    url.searchParams.set("min_amount", String(record.expenditure_amount));
+    url.searchParams.set("max_amount", String(record.expenditure_amount));
+  }
+  if (record.sub_id) url.searchParams.set("sub_id", record.sub_id);
+  return url.toString();
 }

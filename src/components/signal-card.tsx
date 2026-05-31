@@ -195,7 +195,7 @@ function signalEvidence(signal: Signal) {
       signal.amount ? `amount ${formatMoney(signal.amount)}` : null,
       signal.committeeName ? `spender ${signal.committeeName}` : null,
       purpose ? `purpose ${purpose}` : null,
-      sourceId ? `source ${sourceId}` : null,
+      sourceId ? `Schedule E sub_id ${sourceId}` : null,
     ]
       .filter(Boolean)
       .join(" | ");

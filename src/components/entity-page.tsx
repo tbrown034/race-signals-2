@@ -1,4 +1,5 @@
 import { SignalCard } from "@/src/components/signal-card";
+import { SignalKeyboardNav } from "@/src/components/signal-keyboard-nav";
 import { formatCount, formatDate, formatMoney } from "@/src/lib/format";
 import { displayCandidateName } from "@/src/lib/names";
 import Link from "next/link";
@@ -275,11 +276,13 @@ export function EntityPage({
                 for the full set.
               </p>
             ) : null}
-            {visibleSignals.map((signal, index) => (
-              <div className={index >= mobileVisibleSignals ? "hidden md:block" : undefined} key={signal.dedupeKey}>
-                <SignalCard signal={signal} />
-              </div>
-            ))}
+            <SignalKeyboardNav>
+              {visibleSignals.map((signal, index) => (
+                <div className={index >= mobileVisibleSignals ? "hidden md:block" : undefined} key={signal.dedupeKey}>
+                  <SignalCard signal={signal} />
+                </div>
+              ))}
+            </SignalKeyboardNav>
           </>
         ) : (
           <div className="p-5 text-sm leading-6 text-neutral-600">

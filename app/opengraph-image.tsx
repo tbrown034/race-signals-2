@@ -34,7 +34,7 @@ export default function Image() {
             </div>
           </div>
           <div style={{ color: "#525252", fontSize: "30px", lineHeight: 1.35, maxWidth: "840px" }}>
-            Source-linked campaign-finance alerts for reporters covering 2026 House and Senate races.
+            Source-linked FEC records for reporters covering 2026 House and Senate races.
           </div>
         </div>
         <div style={{ borderTop: "2px solid #d4d4d4", color: "#525252", fontSize: "24px", paddingTop: "24px" }}>

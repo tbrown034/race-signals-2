@@ -1,6 +1,6 @@
 # Race Signals
 
-Race Signals is a serious portfolio MVP for spotting early campaign-finance signals before they become obvious stories.
+Race Signals is a serious portfolio MVP for spotting source-linked FEC records before they are widely reported.
 
 It is built for reporters and editors who need a fast answer to: what changed, who filed, which committees appear in the FEC record, where money is moving and what deserves follow-up.
 

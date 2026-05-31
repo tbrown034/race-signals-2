@@ -18,10 +18,10 @@ export const metadata: Metadata = {
     default: "Race Signals",
     template: "%s | Race Signals",
   },
-  description: "Campaign-finance signals for reporters covering 2026 House and Senate races.",
+  description: "Source-linked FEC records for reporters covering 2026 House and Senate races.",
   openGraph: {
     title: "Race Signals",
-    description: "Source-linked campaign-finance alerts for 2026 House and Senate races.",
+    description: "Source-linked FEC records for 2026 House and Senate races.",
     type: "website",
   },
 };

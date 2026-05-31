@@ -37,7 +37,7 @@ export async function PageShell({ children }: { children: ReactNode }) {
           <div className="min-w-0">
             <BrandMark />
             <p className="mt-1 hidden text-sm text-neutral-600 sm:block">
-              Early campaign-finance alerts for reporters covering 2026 House and Senate races.
+              Source-linked FEC records for reporters covering 2026 House and Senate races.
             </p>
           </div>
           <div className="w-full max-w-full min-w-0 lg:flex lg:w-auto lg:flex-col lg:items-end lg:gap-2">

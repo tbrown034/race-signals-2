@@ -10,8 +10,8 @@ import type { Signal, StateRaceBoardRow } from "@/src/lib/types";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Federal campaign-finance alerts",
-  description: "A chronological feed of source-linked FEC campaign-finance signals.",
+  title: "Source-linked FEC record feed",
+  description: "A chronological feed of source-linked FEC records for 2026 House and Senate races.",
 };
 export const revalidate = 300;
 
@@ -29,7 +29,7 @@ const quickViews = [
   {
     href: "/?type=large_independent_expenditure",
     label: "Outside spending",
-    body: "Independent expenditures, the highest-leverage early alerts.",
+    body: "Schedule E records for reported outside spending.",
   },
   {
     href: "/?status=review",
@@ -100,7 +100,7 @@ export default async function Home({
                   Signal feed
                 </p>
                 <h1 className="mt-1 max-w-full break-words text-xl font-semibold tracking-tight">
-                  Federal campaign-finance alerts
+                  Source-linked FEC record feed
                 </h1>
                 <p className="mt-2 max-w-full break-words text-sm leading-5 whitespace-normal text-neutral-700 sm:hidden">
                   {visibleSignals.length}{hasMoreSignals ? "+" : ""} stored signals. FEC links preserved.

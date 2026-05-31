@@ -4,7 +4,7 @@ import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Methodology",
-  description: "How Race Signals turns FEC records into source-linked campaign-finance alerts.",
+  description: "How Race Signals turns FEC records into source-linked reporting leads.",
 };
 
 const steps = [

@@ -6,7 +6,7 @@ This document is the working memory for agentic tools helping with Race Signals.
 
 Race Signals is a serious portfolio MVP for a journalist-developer. It is not a generic election dashboard.
 
-The product is a feed-first civic data tool that helps reporters spot early campaign-finance signals before they become obvious stories.
+The product is a feed-first civic data tool that helps reporters spot source-linked FEC records before they are widely reported.
 
 The core questions are:
 

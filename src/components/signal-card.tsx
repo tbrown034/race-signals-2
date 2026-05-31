@@ -3,6 +3,8 @@ import { FreshMark } from "@/src/components/fresh-mark";
 import { IncumbentBadge } from "@/src/components/incumbent-badge";
 import { PartySquare } from "@/src/components/party-square";
 import { SignalCopyLink } from "@/src/components/signal-copy-link";
+import { committeeDesignationLabel, committeeTypeLabel } from "@/src/lib/fec-codes";
+import { reportTypeDisplay } from "@/src/lib/fec-report-types";
 import { formatDate, formatDateTime, formatMoney, formatRelativeTime } from "@/src/lib/format";
 import type { Signal } from "@/src/lib/types";
 
@@ -196,12 +198,12 @@ export function SignalCard({ signal }: { signal: Signal }) {
             </span>
           ) : null}
           {signal.committeeId ? (
-            <Link className="underline underline-offset-4" href={`/committees/${signal.committeeId}`}>
+            <Link className="min-w-0 max-w-full break-words underline underline-offset-4 [overflow-wrap:anywhere]" href={`/committees/${signal.committeeId}`}>
               {signal.committeeName ?? signal.committeeId}
             </Link>
           ) : null}
           {signal.raceId ? (
-            <Link className="underline underline-offset-4" href={`/races/${signal.raceId}`}>
+            <Link className="min-w-0 max-w-full break-words underline underline-offset-4 [overflow-wrap:anywhere]" href={`/races/${signal.raceId}`}>
               {signal.raceName ?? signal.raceId}
             </Link>
           ) : (
@@ -284,7 +286,7 @@ function signalEvidence(signal: Signal) {
     const purpose = textMetadata(signal.metadata?.purpose);
     const sourceId = textMetadata(signal.metadata?.sourceId);
     return [
-      support ? `stance ${supportOpposeLabel(support)}` : null,
+      support ? `target position ${supportOpposeLabel(support)}` : null,
       signal.amount !== null && signal.amount !== undefined ? `amount ${formatMoney(signal.amount)}` : null,
       signal.committeeName ? `spender ${signal.committeeName}` : null,
       purpose ? `purpose ${purpose}` : null,
@@ -306,7 +308,7 @@ function signalEvidence(signal: Signal) {
       textMetadata(signal.metadata?.coverageEndDate),
     ].filter(Boolean);
     return [
-      reportType ? `report ${reportType}` : null,
+      reportType ? `report ${reportTypeDisplay(reportType)}` : null,
       versionKind === "likely_refile" ? "likely amendment/refile" : null,
       receipts !== null ? `${receiptBasisLabel(receiptsBasis)} ${formatMoney(receipts)}` : null,
       cash !== null ? `cash ${formatMoney(cash)}` : null,
@@ -331,10 +333,10 @@ function signalEvidence(signal: Signal) {
       textMetadata(signal.metadata?.priorCoverageEndDate),
     ].filter(Boolean);
     return [
-      latestReportType ? `latest report ${latestReportType}` : null,
+      latestReportType ? `latest report ${reportTypeDisplay(latestReportType)}` : null,
       latest !== null ? `latest ${formatMoney(latest)}` : null,
       latestCoverage.length === 2 ? `latest period ${latestCoverage.join(" to ")}` : null,
-      priorReportType ? `prior report ${priorReportType}` : null,
+      priorReportType ? `prior report ${reportTypeDisplay(priorReportType)}` : null,
       prior !== null ? `prior ${formatMoney(prior)}` : null,
       priorCoverage.length === 2 ? `prior period ${priorCoverage.join(" to ")}` : null,
       textMetadata(signal.metadata?.latestSourceId) ? `latest ${textMetadata(signal.metadata?.latestSourceId)}` : null,
@@ -350,8 +352,8 @@ function signalEvidence(signal: Signal) {
     const designation = textMetadata(signal.metadata?.designation);
     return [
       sourceId ? `committee ${sourceId}` : null,
-      committeeType ? `type ${committeeType}` : null,
-      designation ? `designation ${designation}` : null,
+      committeeType ? committeeTypeLabel(committeeType) : null,
+      designation ? committeeDesignationLabel(designation) : null,
     ]
       .filter(Boolean)
       .join(" | ");
@@ -419,8 +421,8 @@ function signalAmountLabel(signal: Signal) {
 }
 
 function supportOpposeLabel(value: string) {
-  if (value === "S") return "supporting";
-  if (value === "O") return "opposing";
+  if (value === "S") return "Supports target";
+  if (value === "O") return "Opposes target";
   return value;
 }
 

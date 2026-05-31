@@ -185,6 +185,10 @@ export default async function SpendingPage({
                                   {" "}
                                   / {sourceRecordLabel(signal.metadata?.sourceId)}
                                 </span>
+                                <span> / </span>
+                                <Link className="font-medium underline underline-offset-4" href={scheduleERecordHref(signal)}>
+                                  Local evidence row
+                                </Link>
                               </>
                             ) : (
                               "Source not stored"
@@ -256,7 +260,11 @@ export default async function SpendingPage({
                           </div>
                             <div>
                               <dt className="inline font-mono uppercase tracking-[0.12em] text-neutral-500">Record </dt>
-                              <dd className="inline font-mono text-neutral-950">{sourceRecordLabel(signal.metadata?.sourceId)}</dd>
+                              <dd className="inline">
+                                <Link className="font-medium underline underline-offset-4" href={scheduleERecordHref(signal)}>
+                                  {sourceRecordLabel(signal.metadata?.sourceId)}
+                                </Link>
+                              </dd>
                             </div>
                           </dl>
                         </td>
@@ -309,6 +317,9 @@ export default async function SpendingPage({
                               <span className="font-mono text-[11px] uppercase tracking-[0.12em] text-neutral-500">
                                 {sourceRecordLabel(signal.metadata?.sourceId)}
                               </span>
+                              <Link className="text-xs font-medium underline underline-offset-4" href={scheduleERecordHref(signal)}>
+                                Local evidence row
+                              </Link>
                             </span>
                           ) : (
                             <span className="text-neutral-600">Source not stored</span>
@@ -426,6 +437,18 @@ function EntityLink({
 function sourceRecordLabel(value: unknown) {
   if (typeof value === "string" && value) return `Record ${value}`;
   return "Record not stored";
+}
+
+function scheduleERecordHref(signal: { candidateId?: string | null; committeeId?: string | null; metadata?: Record<string, unknown>; raceId?: string | null }) {
+  const sourceId = typeof signal.metadata?.sourceId === "string" ? signal.metadata.sourceId : null;
+  const params = new URLSearchParams();
+  if (signal.candidateId) params.set("candidate", signal.candidateId);
+  if (signal.committeeId) params.set("committee", signal.committeeId);
+  if (signal.raceId) params.set("race", signal.raceId);
+  if (sourceId) params.set("sourceId", sourceId);
+  const query = params.toString();
+  const hash = sourceId ? `#schedule-e-${sourceId.replace(/[^a-zA-Z0-9_-]/g, "-")}` : "";
+  return `${query ? `/records/schedule-e?${query}` : "/records/schedule-e"}${hash}`;
 }
 
 function sourcePurpose(value: unknown) {

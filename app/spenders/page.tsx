@@ -23,13 +23,14 @@ export default async function SpendersPage({
     getTopSpenders(100),
   ]);
   const stateOptions = [...new Set(stateOptionSpenders.flatMap((spender) => spender.states))].sort();
+  const stateCounts = stateSpenderCounts(stateOptionSpenders);
   const visibleSpenders = spenders;
   const exportSuffix = selectedState ? `?state=${selectedState}` : "";
 
   return (
     <PageShell>
       <main className="mx-auto max-w-7xl px-5 py-6 sm:px-8">
-        <section className="border border-neutral-300 bg-white">
+        <section className="min-w-0 overflow-hidden border border-neutral-300 bg-white">
           <div className="border-b border-neutral-300 px-5 py-5">
             <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
               <div className="min-w-0">
@@ -39,12 +40,8 @@ export default async function SpendersPage({
                 <h1 className="mt-1 text-xl font-semibold tracking-tight">
                   Top outside spenders
                 </h1>
-                <p className="mt-2 max-w-3xl break-words text-sm leading-5 text-neutral-700">
-                  Committees ranked by all stored current-cycle independent expenditure
-                  totals in the current database slice, including records below the
-                  $25,000 alert threshold. Amounts are sourced from FEC Schedule E
-                  records and should be checked against the linked records view before
-                  publication.
+                <p className="mt-2 max-w-3xl break-words text-sm leading-5 text-neutral-700 [overflow-wrap:anywhere]">
+                  Stored Schedule E spender totals from FEC records.
                 </p>
               </div>
               <div className="flex flex-col gap-1 md:items-end">
@@ -62,8 +59,8 @@ export default async function SpendersPage({
                     Export JSON
                   </a>
                 </div>
-                <p className="text-xs text-neutral-600">
-                  Exports include all matching rows, capped at 10,000, with ingest metadata.
+                <p className="max-w-full break-words text-xs text-neutral-600 [overflow-wrap:anywhere]">
+                  Exports include matching rows, capped at 10,000.
                 </p>
               </div>
             </div>
@@ -71,14 +68,14 @@ export default async function SpendersPage({
           {stateOptions.length ? (
             <nav
               aria-label="Filter spenders by state"
-              className="border-b border-neutral-300 px-5 py-3 font-mono text-[11px] uppercase tracking-[0.12em] text-neutral-600"
+              className="overflow-x-auto border-b border-neutral-300 px-5 py-3 font-mono text-[11px] uppercase tracking-[0.12em] text-neutral-600"
             >
-              <div className="flex flex-wrap gap-x-4 gap-y-2">
+              <div className="flex min-w-max flex-nowrap gap-x-4 whitespace-nowrap">
                 <Link
                   className={stateLinkClass(!selectedState)}
                   href="/spenders"
                 >
-                  All states
+                  All states <span className="text-neutral-500">{stateOptionSpenders.length}</span>
                 </Link>
                 {stateOptions.map((state) => (
                   <Link
@@ -86,7 +83,7 @@ export default async function SpendersPage({
                     href={`/spenders?state=${state}`}
                     key={state}
                   >
-                    {state}
+                    {state} <span className="text-neutral-500">{stateCounts.get(state) ?? 0}</span>
                   </Link>
                 ))}
               </div>
@@ -113,7 +110,7 @@ export default async function SpendersPage({
                     const supportShare = share(spender.supportAmount, spender.totalAmount);
                     const opposeShare = share(spender.opposeAmount, spender.totalAmount);
                     const positionNote = positionConcentrationNote(supportShare, opposeShare);
-                    const raceNote = topRaceShare >= 0.75 ? `Single-race focus (${formatPercent(topRaceShare)})` : null;
+                    const raceNote = topRaceShare >= 0.75 ? `Top-race share ${formatPercent(topRaceShare)}` : null;
 
                     return (
                     <tr key={spender.committeeId ?? spender.fecCommitteeId ?? spender.committeeName}>
@@ -134,7 +131,7 @@ export default async function SpendersPage({
                         <p className="mt-1 font-mono text-sm font-semibold text-neutral-950 md:hidden">
                           {formatMoney(spender.totalAmount)} total IE
                         </p>
-                        <dl className="mt-2 space-y-1 text-xs leading-5 text-neutral-600 md:hidden">
+                        <dl className="mt-2 max-w-full space-y-1 text-xs leading-5 text-neutral-600 [overflow-wrap:anywhere] md:hidden">
                           <div>
                             <dt className="inline font-mono uppercase tracking-[0.12em] text-neutral-500">Total IE </dt>
                             <dd className="inline font-mono font-semibold text-neutral-950">{formatMoney(spender.totalAmount)}</dd>
@@ -182,7 +179,11 @@ export default async function SpendersPage({
                               ) : (
                                 "Unmatched race"
                               )}
-                              {raceNote ? ` / ${raceNote}` : ""}
+                              {raceNote ? (
+                                <span className="mt-1 block font-mono text-[11px] uppercase tracking-[0.12em] text-neutral-700">
+                                  {raceNote}
+                                </span>
+                              ) : null}
                             </dd>
                           </div>
                           <div>
@@ -329,6 +330,16 @@ function positionConcentrationNote(supportShare: number, opposeShare: number) {
 function spenderEvidenceHref(committeeId?: string | null, latestSourceUrl?: string | null) {
   if (committeeId) return `/records/schedule-e?committee=${committeeId}`;
   return latestSourceUrl ?? "/spending?type=large_independent_expenditure";
+}
+
+function stateSpenderCounts(spenders: Awaited<ReturnType<typeof getTopSpenders>>) {
+  const counts = new Map<string, number>();
+  for (const spender of spenders) {
+    for (const state of spender.states) {
+      counts.set(state, (counts.get(state) ?? 0) + 1);
+    }
+  }
+  return counts;
 }
 
 function stateLinkClass(active: boolean) {

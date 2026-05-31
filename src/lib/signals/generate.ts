@@ -21,6 +21,15 @@ type SignalInput = {
   status?: string;
 };
 
+type FilingVersionInfo = {
+  relatedVersions: Array<{
+    receiptDate?: string | null;
+    sourceId: string;
+    sourceUrl?: string | null;
+  }>;
+  versionKind: string;
+};
+
 function candidateById(candidates: Candidate[]) {
   return new Map(candidates.map((candidate) => [candidate.id, candidate]));
 }
@@ -84,14 +93,15 @@ export function generateSignals(input: SignalInput): Signal[] {
     });
   }
 
-  const filingVersionKinds = classifyFilingVersions(input.filings);
+  const filingVersionInfo = classifyFilingVersions(input.filings);
   for (const filing of input.filings) {
     if (!filing.receiptDate || !filing.sourceUrl) continue;
     const committee = filing.committeeId ? committees.get(filing.committeeId) : undefined;
     const race = committee?.raceId ? races.get(committee.raceId) : undefined;
     if (!isCurrentCycleRecord(filing.receiptDate, race, filing.cycle)) continue;
     const candidate = committee?.candidateId ? candidates.get(committee.candidateId) : undefined;
-    const filingCopy = newFilingCopy(filing, committee, filingVersionKinds.get(filing.sourceId) ?? "initial_or_single");
+    const versionInfo = filingVersionInfo.get(filing.sourceId) ?? { versionKind: "initial_or_single", relatedVersions: [] };
+    const filingCopy = newFilingCopy(filing, committee, versionInfo.versionKind);
     signals.push({
       dedupeKey: `fec:new_filing:${filing.sourceId}`,
       signalType: "new_filing",
@@ -116,6 +126,7 @@ export function generateSignals(input: SignalInput): Signal[] {
         totalReceipts: filing.totalReceipts,
         cashOnHand: filing.cashOnHand,
         filingVersionKind: filingCopy.versionKind,
+        relatedFilingVersions: versionInfo.relatedVersions,
         sourceId: filing.sourceId,
         sourceKind: "filing",
       },
@@ -334,10 +345,10 @@ function classifyFilingVersions(filings: Filing[]) {
     group.push(filing);
     byVersionKey.set(key, group);
   }
-  const classifications = new Map<string, string>();
+  const classifications = new Map<string, FilingVersionInfo>();
   for (const group of byVersionKey.values()) {
     if (group.length === 1) {
-      classifications.set(group[0].sourceId, "initial_or_single");
+      classifications.set(group[0].sourceId, { relatedVersions: [], versionKind: "initial_or_single" });
       continue;
     }
     const sorted = group.sort((a, b) => {
@@ -345,7 +356,16 @@ function classifyFilingVersions(filings: Filing[]) {
       return dateCompare || a.sourceId.localeCompare(b.sourceId);
     });
     sorted.forEach((filing, index) => {
-      classifications.set(filing.sourceId, index === 0 ? "initial_version" : "likely_refile");
+      classifications.set(filing.sourceId, {
+        relatedVersions: sorted
+          .filter((other) => other.sourceId !== filing.sourceId)
+          .map((other) => ({
+            receiptDate: other.receiptDate,
+            sourceId: other.sourceId,
+            sourceUrl: other.sourceUrl,
+          })),
+        versionKind: index === 0 ? "initial_version" : "likely_refile",
+      });
     });
   }
   return classifications;

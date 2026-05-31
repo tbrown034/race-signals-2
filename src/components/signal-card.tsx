@@ -35,6 +35,7 @@ export function SignalCard({ signal }: { signal: Signal }) {
   const evidence = signalEvidence(signal);
   const evidenceItems = evidence ? evidence.split(" | ") : [];
   const comparisonSources = filingComparisonSources(signal);
+  const relatedFilingSources = filingVersionSources(signal);
   const verifyLine = verificationLine(signal.signalType);
 
   return (
@@ -98,6 +99,21 @@ export function SignalCard({ signal }: { signal: Signal }) {
                 className="font-medium underline underline-offset-4"
                 href={source.href}
                 key={source.label}
+                rel="noreferrer"
+                target="_blank"
+              >
+                {source.label}
+              </a>
+            ))}
+          </div>
+        ) : null}
+        {relatedFilingSources.length ? (
+          <div className="mt-1 flex flex-wrap gap-2 text-xs">
+            {relatedFilingSources.map((source) => (
+              <a
+                className="font-medium underline underline-offset-4"
+                href={source.href}
+                key={`${source.label}-${source.href}`}
                 rel="noreferrer"
                 target="_blank"
               >
@@ -301,6 +317,26 @@ function filingComparisonSources(signal: Signal) {
     latestSourceUrl ? { label: "Latest filing source", href: latestSourceUrl } : null,
     priorSourceUrl ? { label: "Prior filing source", href: priorSourceUrl } : null,
   ].filter((source): source is { label: string; href: string } => Boolean(source));
+}
+
+function filingVersionSources(signal: Signal) {
+  if (signal.signalType !== "new_filing") return [];
+  const relatedVersions = Array.isArray(signal.metadata?.relatedFilingVersions)
+    ? signal.metadata.relatedFilingVersions
+    : [];
+  return relatedVersions
+    .map((version) => {
+      if (!version || typeof version !== "object") return null;
+      const record = version as Record<string, unknown>;
+      const href = textMetadata(record.sourceUrl);
+      const sourceId = textMetadata(record.sourceId);
+      if (!href) return null;
+      return {
+        href,
+        label: sourceId ? `Related filing ${sourceId}` : "Related filing source",
+      };
+    })
+    .filter((source): source is { label: string; href: string } => Boolean(source));
 }
 
 function numberMetadata(value: unknown) {

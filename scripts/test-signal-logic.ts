@@ -172,6 +172,13 @@ const refileSignal = refileSignals.find((signal) => signal.dedupeKey === "fec:ne
 assert.ok(refileSignal, "likely refile should still generate a source-linked filing signal");
 assert.equal(refileSignal.metadata?.filingVersionKind, "likely_refile");
 assert.match(refileSignal.headline, /another version/, "likely refile headline should avoid fresh-activity framing");
+assert.deepEqual(refileSignal.metadata?.relatedFilingVersions, [
+  {
+    receiptDate: currentFiling.receiptDate,
+    sourceId: currentFiling.sourceId,
+    sourceUrl: currentFiling.sourceUrl,
+  },
+]);
 
 const spikeSignals = generateSignals({
   candidates: [candidate],

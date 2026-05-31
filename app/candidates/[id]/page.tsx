@@ -83,7 +83,7 @@ export default async function CandidatePage({
           ["Cycle receipts", candidateMoney(candidate.totalReceiptsCycle, candidate.totalsUpdatedAt)],
           ["Cash on hand", candidateMoney(candidate.cashOnHandLatest, candidate.totalsUpdatedAt)],
           ["Cash as of", formatDate(candidate.cashOnHandAsOf)],
-          ["FEC API totals timestamp", candidate.totalsUpdatedAt ? formatDateTime(candidate.totalsUpdatedAt) : null],
+          ["FEC totals load date", candidate.totalsUpdatedAt ? formatDateTime(candidate.totalsUpdatedAt) : null],
           ...(candidate.sourceUrl ? ([[
             "Verify current totals",
             <a className="font-medium underline underline-offset-4" href={candidate.sourceUrl} key="fec-totals" rel="noreferrer" target="_blank">
@@ -106,7 +106,8 @@ export default async function CandidatePage({
         <ElectionTimeline
           elections={elections}
           emptyText={`No election timeline available for this candidate. Wikidata and Wikipedia coverage of congressional primaries can be thin - follow the ${candidate.state} secretary of state for authoritative results.`}
-          title="Election timeline"
+          note="Historical election rows from Wikidata or conservative Wikipedia parsing. This is not a live 2026 election calendar."
+          title="Historical election results"
         />
         {raceCohort.length ? (
           <div className="border-b border-neutral-300">

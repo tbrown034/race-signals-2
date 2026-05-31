@@ -19,7 +19,7 @@ const steps = [
   ],
   [
     "Election timeline",
-    "Election dates and results are pulled from Wikidata (CC0) and Wikipedia (CC BY-SA 4.0). Wikidata is the primary source; Wikipedia is used as a fallback when structured data is not yet available. Results trail real-world election calls by 1-3 days for major races and longer for House primaries with limited volunteer coverage. Each row links to its underlying source so reporters can verify. We do not call elections or scrape real-time results. For breaking-night results, use AP, DDHQ, or your state's official tabulator.",
+    "Historical election rows are pulled from Wikidata (CC0) and conservative Wikipedia parsing (CC BY-SA 4.0). Wikidata is the primary source; Wikipedia is used as a fallback when structured data is not yet available. These rows are context for matched candidates, not a 2026 election calendar or live results feed. Results trail real-world election calls by 1-3 days for major races and longer for House primaries with limited volunteer coverage. Each row links to its underlying source so reporters can verify. We do not call elections or scrape real-time results. For breaking-night results, use AP, DDHQ, or your state's official tabulator.",
   ],
 ];
 

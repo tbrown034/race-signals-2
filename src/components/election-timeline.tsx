@@ -9,9 +9,11 @@ export function ElectionTimeline({
   elections,
   showCandidate = false,
   title,
+  note,
 }: {
   emptyText: string;
   elections: Election[];
+  note?: string;
   showCandidate?: boolean;
   title: string;
 }) {
@@ -32,6 +34,7 @@ export function ElectionTimeline({
         <h2 className="text-sm font-semibold uppercase tracking-[0.14em] text-neutral-600">
           {title}
         </h2>
+        {note ? <p className="mt-2 text-sm leading-6 text-neutral-600">{note}</p> : null}
       </div>
       <div className="overflow-x-auto">
         <table className="w-full min-w-0 text-left text-sm md:min-w-[760px]">

@@ -108,8 +108,9 @@ export default async function RacePage({
         <ElectionTimeline
           elections={elections}
           emptyText={`No election timeline available for this race. Wikidata and Wikipedia coverage of congressional primaries can be thin - follow the ${race.state} secretary of state for authoritative results.`}
+          note="Historical results for candidates currently matched to this race. This is not a 2026 election calendar or a real-time results feed."
           showCandidate
-          title="Race timeline"
+          title="Historical election results"
         />
         <div className="border-b border-neutral-300">
           <div className="border-b border-neutral-300 px-5 py-4">
@@ -131,7 +132,7 @@ export default async function RacePage({
                     <th className="hidden px-4 py-3 font-medium md:table-cell" scope="col">FEC record</th>
                     <th className="hidden px-4 py-3 text-right font-medium md:table-cell" scope="col">Receipts</th>
                     <th className="hidden px-4 py-3 text-right font-medium md:table-cell" scope="col">Cash</th>
-                    <th className="hidden px-4 py-3 font-medium md:table-cell" scope="col">FEC API totals timestamp</th>
+                    <th className="hidden px-4 py-3 font-medium md:table-cell" scope="col">FEC totals load date</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-neutral-200">

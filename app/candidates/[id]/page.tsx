@@ -228,25 +228,27 @@ function candidateMobileNotes(
 ) {
   return [
     `${candidateMoney(candidate.totalReceiptsCycle, candidate.totalsFetchedAt)} raised; ${candidateMoney(candidate.cashOnHandLatest, candidate.totalsFetchedAt)} cash${candidate.cashOnHandAsOf ? ` as of ${formatDate(candidate.cashOnHandAsOf)}` : ""}.`,
-    `${formatCount(totalSignals, "signal")}: ${formatCount(signalCounts.filings, "filing")}, ${formatCount(signalCounts.committees, "committee record")}, ${formatCount(signalCounts.outsideSpending, "outside-spending alert")}, ${formatCount(signalCounts.review, "review flag")}.`,
+    totalSignals
+      ? `${formatCount(totalSignals, "signal")}: ${signalCounts.filings} filings, ${signalCounts.committees} committees, ${signalCounts.outsideSpending} IE alerts, ${signalCounts.review} reviews.`
+      : "No filing, committee, IE-alert or review signals yet.",
     candidate.totalReceiptsCycle && candidate.totalReceiptsCycle > 0 && totalSignals === 0
-      ? "FEC totals show activity, but no source-record signal is matched yet."
+      ? "FEC totals show activity; no matched signal yet."
       : null,
     independentExpenditureCount
-      ? `${formatCount(independentExpenditureCount, "Schedule E record")} names this candidate; below-threshold records are context, not alerts.`
-      : "No stored Schedule E records name this candidate in this slice.",
+      ? `${formatCount(independentExpenditureCount, "Schedule E record")} names this candidate; below-threshold records are context.`
+      : "No stored Schedule E records name this candidate.",
   ].filter((note): note is string => Boolean(note));
 }
 
 function MobileCandidateRead({ notes }: { notes: string[] }) {
   return (
-    <div className="border border-neutral-300 bg-neutral-50">
+    <div className="min-w-0 max-w-full border border-neutral-300 bg-neutral-50">
       <p className="border-b border-neutral-300 px-3 py-2 font-mono text-[11px] uppercase tracking-[0.12em] text-neutral-500">
         Reporter read
       </p>
-      <ul className="divide-y divide-neutral-200 text-sm leading-5 text-neutral-700">
+      <ul className="min-w-0 max-w-full divide-y divide-neutral-200 text-sm leading-5 text-neutral-700">
         {notes.map((note) => (
-          <li className="px-3 py-2" key={note}>
+          <li className="min-w-0 max-w-full break-words px-3 py-2 [overflow-wrap:anywhere]" key={note}>
             {note}
           </li>
         ))}

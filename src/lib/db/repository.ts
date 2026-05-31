@@ -275,6 +275,41 @@ function resolveSince(value: string) {
   return value;
 }
 
+function signalSearchClause(values: unknown[], query: string) {
+  values.push(`%${query}%`);
+  const param = values.length;
+  return `(
+    s.headline ilike $${param}
+    or s.why_it_matters ilike $${param}
+    or c.name ilike $${param}
+    or c.fec_candidate_id ilike $${param}
+    or cm.name ilike $${param}
+    or cm.fec_committee_id ilike $${param}
+    or r.name ilike $${param}
+    or s.dedupe_key ilike $${param}
+    or s.source_url ilike $${param}
+    or s.metadata->>'sourceId' ilike $${param}
+    or s.metadata->>'latestSourceId' ilike $${param}
+    or s.metadata->>'priorSourceId' ilike $${param}
+    or s.metadata->>'sourceKind' ilike $${param}
+  )`;
+}
+
+function demoSignalSearchText(signal: Signal) {
+  return [
+    signal.headline,
+    signal.whyItMatters,
+    signal.candidateName ?? "",
+    signal.committeeName ?? "",
+    signal.raceName ?? "",
+    signal.dedupeKey,
+    signal.sourceUrl ?? "",
+    JSON.stringify(signal.metadata ?? {}),
+  ]
+    .join(" ")
+    .toLowerCase();
+}
+
 export async function getSignals(filters: SignalFilters = {}) {
   if (!hasDatabase()) {
     const q = filters.q?.toLowerCase();
@@ -285,14 +320,7 @@ export async function getSignals(filters: SignalFilters = {}) {
       if (filters.type && signal.signalType !== filters.type) return false;
       if (filters.status && signal.status !== filters.status) return false;
       if (filters.since && signal.dataFreshness <= resolveSince(filters.since)) return false;
-      if (
-        q &&
-        !`${signal.headline} ${signal.whyItMatters} ${signal.candidateName ?? ""} ${signal.committeeName ?? ""} ${signal.raceName ?? ""}`
-          .toLowerCase()
-          .includes(q)
-      ) {
-        return false;
-      }
+      if (q && !demoSignalSearchText(signal).includes(q)) return false;
       return true;
     }).slice(0, filters.limit ?? 50);
   }
@@ -324,15 +352,7 @@ export async function getSignals(filters: SignalFilters = {}) {
     where.push(`s.created_at > $${values.length}`);
   }
   if (filters.q) {
-    values.push(`%${filters.q}%`);
-    where.push(`(
-      s.headline ilike $${values.length}
-      or s.why_it_matters ilike $${values.length}
-      or c.name ilike $${values.length}
-      or cm.name ilike $${values.length}
-      or r.name ilike $${values.length}
-      or s.dedupe_key ilike $${values.length}
-    )`);
+    where.push(signalSearchClause(values, filters.q));
   }
   values.push(filters.limit ?? 50);
 
@@ -402,15 +422,7 @@ export async function getSpendingSignals(
     where.push(`s.created_at > $${values.length}`);
   }
   if (scopedFilters.q) {
-    values.push(`%${scopedFilters.q}%`);
-    where.push(`(
-      s.headline ilike $${values.length}
-      or s.why_it_matters ilike $${values.length}
-      or c.name ilike $${values.length}
-      or cm.name ilike $${values.length}
-      or r.name ilike $${values.length}
-      or s.dedupe_key ilike $${values.length}
-    )`);
+    where.push(signalSearchClause(values, scopedFilters.q));
   }
   values.push(scopedFilters.limit);
 

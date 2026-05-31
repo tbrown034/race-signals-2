@@ -383,9 +383,14 @@ export default async function StatusPage() {
               <h2 className="text-sm font-semibold uppercase tracking-[0.14em] text-neutral-600">
                 Candidate signal gaps
               </h2>
-              <p className="mt-1 text-sm text-neutral-600">
-                FEC candidates in this database slice with no generated signal yet. Treat these as coverage caveats, not as proof of inactivity.
-              </p>
+              <div className="mt-1 flex flex-col gap-2 text-sm text-neutral-600 sm:flex-row sm:items-center sm:justify-between">
+                <p>
+                  Top stored FEC candidates with no generated signal yet. Treat these as coverage caveats, not as proof of inactivity.
+                </p>
+                <Link className="shrink-0 font-medium underline underline-offset-4" href="/review#aggregate-only-money">
+                  Open full review queue
+                </Link>
+              </div>
             </div>
             <div className="overflow-x-auto">
               <table className="w-full min-w-0 text-left text-sm md:min-w-[760px]">

@@ -147,7 +147,7 @@ export function FeedFilters({
             placeholder="Candidate, committee, race, source ID"
           />
         </label>
-        <div className="grid grid-cols-1 gap-3 xl:flex xl:flex-wrap">
+        <div className="grid min-w-0 grid-cols-1 gap-3 sm:grid-cols-2 xl:flex xl:flex-wrap">
           <label className="min-w-0 text-xs font-medium uppercase tracking-[0.12em] text-neutral-500 xl:min-w-[96px] xl:flex-none">
           State
           <select
@@ -202,7 +202,7 @@ export function FeedFilters({
             <option value="S">Senate</option>
           </select>
         </label>
-          <label className="col-span-2 min-w-0 text-xs font-medium uppercase tracking-[0.12em] text-neutral-500 xl:min-w-[180px] xl:flex-1">
+          <label className="min-w-0 text-xs font-medium uppercase tracking-[0.12em] text-neutral-500 sm:col-span-2 xl:min-w-[180px] xl:flex-1">
           Race
           <select
             className="mt-1 block h-9 w-full min-w-0 border border-neutral-300 bg-white px-2 text-sm normal-case tracking-normal text-neutral-950"
@@ -221,14 +221,14 @@ export function FeedFilters({
           </select>
         </label>
         {lockedType ? (
-          <div className="col-span-2 min-w-0 text-xs font-medium uppercase tracking-[0.12em] text-neutral-500 xl:min-w-[210px] xl:flex-none">
+          <div className="min-w-0 text-xs font-medium uppercase tracking-[0.12em] text-neutral-500 sm:col-span-2 xl:min-w-[210px] xl:flex-none">
             Type
             <div className="mt-1 flex h-9 items-center border border-neutral-300 bg-neutral-100 px-2 text-sm normal-case tracking-normal text-neutral-700">
               {signalTypes.find(([value]) => value === selectedType)?.[1] ?? "Locked"}
             </div>
           </div>
         ) : (
-          <label className="col-span-2 min-w-0 text-xs font-medium uppercase tracking-[0.12em] text-neutral-500 xl:min-w-[210px] xl:flex-none">
+          <label className="min-w-0 text-xs font-medium uppercase tracking-[0.12em] text-neutral-500 sm:col-span-2 xl:min-w-[210px] xl:flex-none">
             Type
             <select
               className="mt-1 block h-9 w-full min-w-0 border border-neutral-300 bg-white px-2 text-sm normal-case tracking-normal text-neutral-950"
@@ -274,11 +274,11 @@ export function FeedFilters({
             ))}
           </select>
         </label>
-          <button className="self-end border border-neutral-900 bg-neutral-950 px-4 py-2 text-sm font-medium text-white xl:self-end">
+          <button className="w-full self-end border border-neutral-900 bg-neutral-950 px-4 py-2 text-sm font-medium text-white sm:w-auto xl:self-end">
           Search
         </button>
         {hasFilters ? (
-          <Link className="self-end border border-neutral-300 px-4 py-2 text-center text-sm font-medium xl:self-end" href={clearHref ?? "/"}>
+          <Link className="w-full self-end border border-neutral-300 px-4 py-2 text-center text-sm font-medium sm:w-auto xl:self-end" href={clearHref ?? "/"}>
             Clear
           </Link>
         ) : null}

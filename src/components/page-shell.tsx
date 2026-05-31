@@ -39,8 +39,8 @@ export async function PageShell({ children }: { children: ReactNode }) {
               Early campaign-finance alerts for reporters covering 2026 House and Senate races.
             </p>
           </div>
-          <div className="min-w-0 lg:flex lg:flex-col lg:items-end lg:gap-2">
-            <nav className="flex flex-wrap gap-x-4 gap-y-2 text-sm">
+          <div className="w-full max-w-full min-w-0 lg:flex lg:w-auto lg:flex-col lg:items-end lg:gap-2">
+            <nav className="flex max-w-full flex-wrap gap-x-3 gap-y-2 text-sm sm:gap-x-4">
               {nav.map((item) => (
                 <Link
                   className="shrink-0 font-medium text-neutral-700 underline-offset-4 hover:underline"
@@ -52,7 +52,7 @@ export async function PageShell({ children }: { children: ReactNode }) {
               ))}
             </nav>
             <Link
-              className={`mt-1 block font-mono text-[11px] uppercase tracking-[0.12em] underline-offset-4 hover:underline lg:mt-0 ${stale ? "font-semibold text-neutral-950" : "text-neutral-500"}`}
+              className={`mt-1 block max-w-full break-words font-mono text-[11px] uppercase tracking-[0.12em] underline-offset-4 hover:underline lg:mt-0 ${stale ? "font-semibold text-neutral-950" : "text-neutral-500"}`}
               href="/status"
               title={latestFinishedAt ? `Last ingestion finished ${formatDateTime(latestFinishedAt)}` : "No ingestion run recorded"}
             >

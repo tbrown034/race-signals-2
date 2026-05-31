@@ -9,6 +9,21 @@ import { PartySquare } from "@/src/components/party-square";
 import { ReporterRead } from "@/src/components/reporter-read";
 import { getCandidate, getCandidateElections, getCandidatesForRace, getSignalsForEntity } from "@/src/lib/db/repository";
 import { formatDate, formatDateTime, formatMoney } from "@/src/lib/format";
+import type { Metadata } from "next";
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}): Promise<Metadata> {
+  const { id } = await params;
+  const candidate = await getCandidate(id);
+  if (!candidate) return { title: "Candidate not found" };
+  return {
+    title: candidate.name,
+    description: `${candidate.name} campaign-finance signals, FEC totals and race context for ${candidate.raceId ?? "the current Race Signals slice"}.`,
+  };
+}
 
 export default async function CandidatePage({
   params,

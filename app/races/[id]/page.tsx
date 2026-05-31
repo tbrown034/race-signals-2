@@ -16,6 +16,21 @@ import {
   getSignalsForEntity,
 } from "@/src/lib/db/repository";
 import { formatMoney } from "@/src/lib/format";
+import type { Metadata } from "next";
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}): Promise<Metadata> {
+  const { id } = await params;
+  const race = await getRace(id);
+  if (!race) return { title: "Race not found" };
+  return {
+    title: race.name,
+    description: `${race.name} FEC candidate, filing and outside-spending signals for the 2026 cycle.`,
+  };
+}
 
 export default async function RacePage({
   params,

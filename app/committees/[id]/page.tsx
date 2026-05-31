@@ -10,6 +10,21 @@ import {
   getSignalsForEntity,
 } from "@/src/lib/db/repository";
 import { committeeContext, committeeDesignationLabel, committeeTypeLabel } from "@/src/lib/fec-codes";
+import type { Metadata } from "next";
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}): Promise<Metadata> {
+  const { id } = await params;
+  const committee = await getCommittee(id);
+  if (!committee) return { title: "Committee not found" };
+  return {
+    title: committee.name,
+    description: `${committee.name} FEC committee signals, source records and outside-spending context.`,
+  };
+}
 
 export default async function CommitteePage({
   params,

@@ -46,11 +46,13 @@ export default async function Home({
   const state = typeof params.state === "string" ? params.state : undefined;
   const office = typeof params.office === "string" ? params.office : undefined;
   const raceId = typeof params.race === "string" ? params.race : undefined;
+  const committeeId = typeof params.committee === "string" ? params.committee : undefined;
   const type = typeof params.type === "string" ? params.type : undefined;
   const statusFilter = typeof params.status === "string" ? params.status : undefined;
   const since = typeof params.since === "string" ? params.since : undefined;
+  const ingestedSince = typeof params.ingestedSince === "string" ? params.ingestedSince : undefined;
   const exportQuery = new URLSearchParams();
-  for (const key of ["q", "state", "office", "race", "type", "status", "since"]) {
+  for (const key of ["q", "state", "office", "race", "committee", "type", "status", "since", "ingestedSince"]) {
     const value = params[key];
     if (typeof value === "string" && value) exportQuery.set(key, value);
   }
@@ -69,25 +71,30 @@ export default async function Home({
     state ? `state ${state}` : null,
     office ? (office === "S" ? "Senate" : office === "H" ? "House" : `office ${office}`) : null,
     selectedRace ? selectedRace.name : raceId,
+    committeeId ? `committee ${committeeId}` : null,
     type ? type.replaceAll("_", " ") : null,
     statusFilter ? `status ${statusFilter}` : null,
-    since ? sinceLabel(since) : null,
+    since ? `event ${sinceLabel(since)}` : null,
+    ingestedSince ? `ingested ${sinceLabel(ingestedSince)}` : null,
   ].filter(Boolean);
 
   return (
     <PageShell>
       <main className="mx-auto grid max-w-7xl grid-cols-1 gap-6 px-5 py-6 sm:px-8 lg:grid-cols-[1fr_320px]">
-        <section className="min-w-0 border border-neutral-300 bg-white">
+        <section className="w-full max-w-[calc(100vw-2.5rem)] min-w-0 border border-neutral-300 bg-white sm:max-w-none">
           <div className="border-b border-neutral-300 px-5 py-5">
-            <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
-              <div>
+            <div className="flex min-w-0 flex-col gap-3 md:flex-row md:items-end md:justify-between">
+              <div className="min-w-0 max-w-full">
                 <p className="font-mono text-xs uppercase tracking-[0.18em] text-neutral-500">
                   Signal feed
                 </p>
-                <h1 className="mt-1 text-xl font-semibold tracking-tight">
+                <h1 className="mt-1 max-w-full break-words text-xl font-semibold tracking-tight">
                   Federal campaign-finance alerts
                 </h1>
-                <p className="mt-2 text-sm leading-5 text-neutral-700">
+                <p className="mt-2 max-w-full break-words text-sm leading-5 whitespace-normal text-neutral-700 sm:hidden">
+                  {visibleSignals.length}{hasMoreSignals ? "+" : ""} stored signals. FEC links preserved.
+                </p>
+                <p className="mt-2 hidden max-w-full break-words text-sm leading-5 whitespace-normal text-neutral-700 sm:block">
                   Showing {visibleSignals.length}{hasMoreSignals ? "+" : ""} stored signals from the current capped ingest slice. Source-linked FEC records for House and Senate coverage.
                 </p>
                 {activeFilters.length ? (
@@ -119,16 +126,18 @@ export default async function Home({
           </div>
           <CoverageStrip counts={status.counts} latestRun={status.runs[0]} mode={status.mode} />
           <FeedFilters
-            key={[q, state, office, raceId, type, statusFilter, since].join("|")}
+            key={[q, state, office, raceId, committeeId, type, statusFilter, since, ingestedSince].join("|")}
             races={races}
             q={q}
             state={state}
             stateSignalCounts={stateSignalCounts}
             office={office}
             raceId={raceId}
+            committeeId={committeeId}
             type={type}
             status={statusFilter}
             since={since}
+            ingestedSince={ingestedSince}
           />
           {visibleSignals.length ? (
             visibleSignals.map((signal) => <SignalCard signal={signal} key={signal.dedupeKey} />)

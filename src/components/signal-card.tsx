@@ -58,7 +58,7 @@ export function SignalCard({ signal }: { signal: Signal }) {
 
       <div className="min-w-0">
         <div className="flex flex-wrap items-center gap-2">
-          <h2 className="text-base font-semibold leading-snug tracking-tight">
+          <h2 className="min-w-0 break-words text-base font-semibold leading-snug tracking-tight">
             {signal.headline}
           </h2>
           {signal.status === "review" ? (
@@ -173,9 +173,9 @@ export function SignalCard({ signal }: { signal: Signal }) {
             <span>Employer: {contributorEmployerNormalized}</span>
           ) : null}
           {signal.candidateId ? (
-            <span className="inline-flex flex-wrap items-center gap-1.5">
+            <span className="inline-flex min-w-0 flex-wrap items-center gap-1.5">
               <PartySquare party={signal.candidateParty} />
-              <Link className="font-medium underline underline-offset-4" href={`/candidates/${signal.candidateId}`}>
+              <Link className="min-w-0 break-words font-medium underline underline-offset-4" href={`/candidates/${signal.candidateId}`}>
                 {candidateLabel}
               </Link>
               {isIncumbent ? <IncumbentBadge /> : null}

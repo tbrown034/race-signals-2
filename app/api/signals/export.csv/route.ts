@@ -1,5 +1,5 @@
-import { getSignals } from "@/src/lib/db/repository";
-import { EXPORT_LIMIT, rowsToCsv, signalToExportRow } from "@/src/lib/export/signals";
+import { getCoverageSummary, getSignals } from "@/src/lib/db/repository";
+import { EXPORT_LIMIT, type ExportManifest, rowsToCsv, signalToExportRow } from "@/src/lib/export/signals";
 import { signalFiltersFromUrl } from "@/src/lib/signals/filters";
 
 export async function GET(request: Request) {
@@ -10,7 +10,10 @@ export async function GET(request: Request) {
       { status: 400, headers: exportHeaders() },
     );
   }
-  const signals = await getSignals(signalFiltersFromUrl(url, EXPORT_LIMIT + 1));
+  const [signals, manifest] = await Promise.all([
+    getSignals(signalFiltersFromUrl(url, EXPORT_LIMIT + 1)),
+    exportManifest(url),
+  ]);
   const headers = exportHeaders();
 
   if (signals.length > EXPORT_LIMIT) {
@@ -22,7 +25,7 @@ export async function GET(request: Request) {
     );
   }
 
-  const csv = rowsToCsv(signals.map((signal) => signalToExportRow(signal)));
+  const csv = rowsToCsv(signals.map((signal) => signalToExportRow(signal, undefined, manifest)));
   return new Response(csv, {
     headers: {
       ...headers,
@@ -30,6 +33,34 @@ export async function GET(request: Request) {
       "content-disposition": 'attachment; filename="race-signals.csv"',
     },
   });
+}
+
+async function exportManifest(url: URL): Promise<ExportManifest> {
+  const status = await getCoverageSummary();
+  const latestRun = status.runs[0] ?? null;
+  return {
+    exportedAt: new Date().toISOString(),
+    filters: exportFilters(url),
+    latestRun: latestRun
+      ? {
+          id: latestRun.id,
+          scope: latestRun.scope,
+          mode: latestRun.mode ?? null,
+          state: latestRun.state ?? null,
+          status: latestRun.status,
+          finishedAt: latestRun.finishedAt ?? null,
+        }
+      : null,
+  };
+}
+
+function exportFilters(url: URL) {
+  const filters: Record<string, string> = {};
+  for (const key of ["q", "state", "office", "race", "type", "status", "since", "ingestedSince", "committee"]) {
+    const value = url.searchParams.get(key);
+    if (value) filters[key] = value;
+  }
+  return filters;
 }
 
 function exportHeaders() {

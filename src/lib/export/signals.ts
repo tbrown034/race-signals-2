@@ -3,6 +3,14 @@ import type { Signal } from "@/src/lib/types";
 export const EXPORT_LIMIT = 10000;
 
 export type SignalExportRow = {
+  exported_at: string;
+  filters: string;
+  latest_run_id: string | null;
+  latest_run_scope: string | null;
+  latest_run_mode: string | null;
+  latest_run_state: string | null;
+  latest_run_status: string | null;
+  latest_run_finished_at: string | null;
   signal_date: string;
   signal_type: string;
   headline: string;
@@ -27,8 +35,33 @@ export type SignalExportRow = {
   metadata: Record<string, unknown>;
 };
 
-export function signalToExportRow(signal: Signal, baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://race-signals.vercel.app"): SignalExportRow {
+export type ExportManifest = {
+  exportedAt: string;
+  filters: Record<string, string>;
+  latestRun?: {
+    id: string;
+    scope: string;
+    mode?: string | null;
+    state?: string | null;
+    status: string;
+    finishedAt?: string | null;
+  } | null;
+};
+
+export function signalToExportRow(
+  signal: Signal,
+  baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://race-signals.vercel.app",
+  manifest: ExportManifest = { exportedAt: new Date().toISOString(), filters: {}, latestRun: null },
+): SignalExportRow {
   return {
+    exported_at: manifest.exportedAt,
+    filters: JSON.stringify(manifest.filters),
+    latest_run_id: manifest.latestRun?.id ?? null,
+    latest_run_scope: manifest.latestRun?.scope ?? null,
+    latest_run_mode: manifest.latestRun?.mode ?? null,
+    latest_run_state: manifest.latestRun?.state ?? null,
+    latest_run_status: manifest.latestRun?.status ?? null,
+    latest_run_finished_at: manifest.latestRun?.finishedAt ?? null,
     signal_date: signal.signalDate,
     signal_type: signal.signalType,
     headline: signal.headline,
@@ -77,6 +110,14 @@ export function rowsToCsv(rows: SignalExportRow[]) {
     "signal_permalink",
     "data_freshness",
     "dedupe_key",
+    "exported_at",
+    "filters",
+    "latest_run_id",
+    "latest_run_scope",
+    "latest_run_mode",
+    "latest_run_state",
+    "latest_run_status",
+    "latest_run_finished_at",
   ];
 
   return [

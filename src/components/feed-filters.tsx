@@ -36,9 +36,11 @@ export function FeedFilters({
   state,
   office,
   raceId,
+  committeeId,
   type,
   status,
   since,
+  ingestedSince,
   stateSignalCounts = {},
   lockedType,
   clearHref,
@@ -48,9 +50,11 @@ export function FeedFilters({
   state?: string;
   office?: string;
   raceId?: string;
+  committeeId?: string;
   type?: string;
   status?: string;
   since?: string;
+  ingestedSince?: string;
   stateSignalCounts?: Record<string, number>;
   lockedType?: boolean;
   clearHref?: string;
@@ -58,13 +62,14 @@ export function FeedFilters({
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const hasFilters = Boolean(q || state || office || raceId || status || since || (!lockedType && type));
+  const hasFilters = Boolean(q || state || office || raceId || committeeId || status || since || ingestedSince || (!lockedType && type));
   const [selectedState, setSelectedState] = useState(state ?? "");
   const [selectedOffice, setSelectedOffice] = useState(office ?? "");
   const [selectedRaceId, setSelectedRaceId] = useState(raceId ?? "");
   const [selectedType, setSelectedType] = useState(type ?? "");
   const [selectedStatus, setSelectedStatus] = useState(status ?? "");
   const [selectedSince, setSelectedSince] = useState(since ?? "");
+  const [selectedIngestedSince, setSelectedIngestedSince] = useState(ingestedSince ?? "");
   const selectedRace = raceId ? races.find((race) => race.id === raceId) : undefined;
   const raceOptions = selectedState
     ? races.filter((race) => race.state === selectedState && (!selectedOffice || race.office === selectedOffice))
@@ -109,6 +114,9 @@ export function FeedFilters({
     }
     if (name === "since") {
       setSelectedSince(value);
+    }
+    if (name === "ingestedSince") {
+      setSelectedIngestedSince(value);
     }
     router.replace(next.toString() ? `${pathname}?${next.toString()}` : pathname, {
       scroll: false,
@@ -189,6 +197,21 @@ export function FeedFilters({
             </details>
           ) : null}
         </label>
+          <label className="min-w-0 text-xs font-medium uppercase tracking-[0.12em] text-neutral-500 sm:hidden">
+            Newly ingested
+            <select
+              className="mt-1 block h-9 w-full min-w-0 border border-neutral-300 bg-white px-2 text-sm normal-case tracking-normal text-neutral-950"
+              value={selectedIngestedSince}
+              name="ingestedSince-mobile-primary"
+              onChange={(event) => updateFilter("ingestedSince", event.target.value)}
+            >
+              {windows.map(([value, label]) => (
+                <option value={value} key={value}>
+                  {value ? label : "Any ingest date"}
+                </option>
+              ))}
+            </select>
+          </label>
           <details className="min-w-0 border border-neutral-300 p-3 text-xs font-medium uppercase tracking-[0.12em] text-neutral-500 sm:hidden">
             <summary className="cursor-pointer">More filters</summary>
             <div className="mt-3 space-y-3">
@@ -263,7 +286,7 @@ export function FeedFilters({
                 </select>
               </label>
               <label className="block min-w-0">
-                Window
+                Event date
                 <select
                   className="mt-1 block h-9 w-full min-w-0 border border-neutral-300 bg-white px-2 text-sm normal-case tracking-normal text-neutral-950"
                   value={selectedSince}
@@ -350,7 +373,7 @@ export function FeedFilters({
           </select>
         </label>
           <label className="hidden min-w-0 text-xs font-medium uppercase tracking-[0.12em] text-neutral-500 sm:block xl:min-w-[150px] xl:flex-none">
-          Window
+          Event date
           <select
             className="mt-1 block h-9 w-full min-w-0 border border-neutral-300 bg-white px-2 text-sm normal-case tracking-normal text-neutral-950"
             value={selectedSince}
@@ -360,6 +383,21 @@ export function FeedFilters({
             {windows.map(([value, label]) => (
               <option value={value} key={value}>
                 {label}
+              </option>
+            ))}
+          </select>
+        </label>
+          <label className="hidden min-w-0 text-xs font-medium uppercase tracking-[0.12em] text-neutral-500 sm:block xl:min-w-[170px] xl:flex-none">
+          Newly ingested
+          <select
+            className="mt-1 block h-9 w-full min-w-0 border border-neutral-300 bg-white px-2 text-sm normal-case tracking-normal text-neutral-950"
+            value={selectedIngestedSince}
+            name="ingestedSince"
+            onChange={(event) => updateFilter("ingestedSince", event.target.value)}
+          >
+            {windows.map(([value, label]) => (
+              <option value={value} key={value}>
+                {value ? label : "Any ingest date"}
               </option>
             ))}
           </select>

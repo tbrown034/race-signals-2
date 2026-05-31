@@ -30,7 +30,7 @@ export async function PageShell({ children }: { children: ReactNode }) {
         : `Data as of ${formatRelativeTime(latestFinishedAt)}`;
 
   return (
-    <div className="min-h-screen bg-stone-50 text-neutral-950">
+    <div className="min-h-screen overflow-x-hidden bg-stone-50 text-neutral-950">
       <header className="border-b border-neutral-300 bg-white">
         <div className="mx-auto flex max-w-7xl flex-col gap-3 px-5 py-3 sm:px-8 sm:py-4 lg:flex-row lg:items-end lg:justify-between">
           <div className="min-w-0">
@@ -40,7 +40,7 @@ export async function PageShell({ children }: { children: ReactNode }) {
             </p>
           </div>
           <div className="w-full max-w-full min-w-0 lg:flex lg:w-auto lg:flex-col lg:items-end lg:gap-2">
-            <nav className="-mx-5 flex max-w-[calc(100vw-2.5rem)] flex-nowrap gap-x-3 overflow-x-auto px-5 pb-1 text-sm whitespace-nowrap sm:mx-0 sm:max-w-full sm:flex-wrap sm:gap-x-4 sm:px-0 sm:pb-0">
+            <nav className="-mx-5 flex max-w-[calc(100vw-2.5rem)] flex-nowrap gap-x-2 overflow-x-auto px-5 pb-1 text-[13px] whitespace-nowrap sm:mx-0 sm:max-w-full sm:flex-wrap sm:gap-x-4 sm:px-0 sm:pb-0 sm:text-sm">
               {nav.map((item) => (
                 <Link
                   className="shrink-0 font-medium text-neutral-700 underline-offset-4 hover:underline"

@@ -7,6 +7,7 @@ export type SignalFilters = {
   type?: string;
   status?: string;
   since?: string;
+  ingestedSince?: string;
   limit?: number;
 };
 
@@ -35,6 +36,7 @@ export function signalFiltersFromSearchParams(
     type: first(params.type),
     status: first(params.status),
     since: first(params.since),
+    ingestedSince: first(params.ingestedSince),
     limit,
   };
 }
@@ -49,6 +51,7 @@ export function signalFiltersFromUrl(url: URL, limit?: number): SignalFilters {
     type: url.searchParams.get("type") ?? undefined,
     status: url.searchParams.get("status") ?? undefined,
     since: url.searchParams.get("since") ?? undefined,
+    ingestedSince: url.searchParams.get("ingestedSince") ?? undefined,
     limit,
   };
 }

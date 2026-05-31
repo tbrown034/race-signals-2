@@ -10,7 +10,7 @@ export const metadata: Metadata = {
   description: "Race Signals data freshness, ingestion runs and validation issue rollups.",
 };
 
-export const revalidate = 21600;
+export const revalidate = 300;
 
 const countLabels: Record<string, string> = {
   races: "Race shells",
@@ -597,7 +597,9 @@ function PublishabilityPanel({
   const finishedAt = latestRun?.finishedAt ?? latestRun?.startedAt ?? null;
   const isPartial = latestRun?.status === "partial";
   const isError = latestRun?.status === "failed" || latestRun?.status === "error";
-  const headline = isError
+  const headline = !latestRun
+    ? "Not usable yet: no ingest run is recorded."
+    : isError
     ? "Use with caution: latest ingest recorded an error."
     : isPartial
       ? "Use with caution: latest ingest is partial."

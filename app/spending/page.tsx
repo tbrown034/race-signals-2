@@ -26,6 +26,7 @@ export default async function SpendingPage({
   const raceId = typeof params.race === "string" ? params.race : undefined;
   const statusFilter = typeof params.status === "string" ? params.status : undefined;
   const since = typeof params.since === "string" ? params.since : undefined;
+  const ingestedSince = typeof params.ingestedSince === "string" ? params.ingestedSince : undefined;
   const committeeId = typeof params.committee === "string" ? params.committee : undefined;
   const [signals, races, status, stateSignalCounts, committeeFilter] = await Promise.all([
     getSpendingSignals(signalFiltersFromSearchParams(params, 101), sort),
@@ -44,7 +45,7 @@ export default async function SpendingPage({
   return (
     <PageShell>
       <main className="mx-auto max-w-7xl px-5 py-6 sm:px-8">
-        <section className="min-w-0 border border-neutral-300 bg-white">
+        <section className="w-full max-w-[calc(100vw-2.5rem)] min-w-0 border border-neutral-300 bg-white sm:max-w-none">
           <div className="border-b border-neutral-300 px-5 py-5">
             <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
               <div>
@@ -98,13 +99,15 @@ export default async function SpendingPage({
           <CoverageStrip counts={status.counts} latestRun={status.runs[0]} mode={status.mode} />
           <FeedFilters
             clearHref="/spending"
-            key={[q, state, office, raceId, statusFilter, since].join("|")}
+            key={[q, state, office, raceId, statusFilter, since, ingestedSince].join("|")}
             lockedType
             office={office}
             q={q}
             raceId={raceId}
+            committeeId={committeeId}
             races={races}
             since={since}
+            ingestedSince={ingestedSince}
             state={state}
             stateSignalCounts={stateSignalCounts}
             status={statusFilter}
@@ -335,7 +338,7 @@ function spendingSortHref(
   sort: "amount" | "date",
 ) {
   const next = new URLSearchParams();
-  for (const key of ["q", "state", "office", "race", "status", "since", "committee"]) {
+  for (const key of ["q", "state", "office", "race", "status", "since", "ingestedSince", "committee"]) {
     const value = params[key];
     if (typeof value === "string" && value) next.set(key, value);
   }
@@ -346,7 +349,7 @@ function spendingSortHref(
 
 function spendingExportQuery(params: { [key: string]: string | string[] | undefined }) {
   const next = new URLSearchParams();
-  for (const key of ["q", "state", "office", "race", "status", "since", "committee"]) {
+  for (const key of ["q", "state", "office", "race", "status", "since", "ingestedSince", "committee"]) {
     const value = params[key];
     if (typeof value === "string" && value) next.set(key, value);
   }

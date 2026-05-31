@@ -325,6 +325,7 @@ export async function getSignals(filters: SignalFilters = {}) {
       if (filters.type && signal.signalType !== filters.type) return false;
       if (filters.status && signal.status !== filters.status) return false;
       if (filters.since && signal.signalDate <= resolveSince(filters.since)) return false;
+      if (filters.ingestedSince && signal.dataFreshness <= resolveSince(filters.ingestedSince)) return false;
       if (q && !demoSignalSearchText(signal).includes(q)) return false;
       return true;
     }).slice(0, filters.limit ?? 50);
@@ -359,6 +360,10 @@ export async function getSignals(filters: SignalFilters = {}) {
   if (filters.since) {
     values.push(resolveSince(filters.since));
     where.push(`s.signal_date > $${values.length}`);
+  }
+  if (filters.ingestedSince) {
+    values.push(resolveSince(filters.ingestedSince));
+    where.push(`s.data_freshness > $${values.length}`);
   }
   if (filters.q) {
     where.push(signalSearchClause(values, filters.q));
@@ -433,6 +438,10 @@ export async function getSpendingSignals(
   if (scopedFilters.since) {
     values.push(resolveSince(scopedFilters.since));
     where.push(`s.signal_date > $${values.length}`);
+  }
+  if (scopedFilters.ingestedSince) {
+    values.push(resolveSince(scopedFilters.ingestedSince));
+    where.push(`s.data_freshness > $${values.length}`);
   }
   if (scopedFilters.q) {
     where.push(signalSearchClause(values, scopedFilters.q));
@@ -1154,9 +1163,9 @@ export async function getStatus() {
     election_rows: string;
   }>(`
     select
-      count(*)::text as candidates,
-      count(*) filter (where wikidata_id is not null or wikipedia_url is not null)::text as with_identifiers,
-      count(*) filter (where elections_checked_at is not null)::text as checked,
+      count(distinct c.id)::text as candidates,
+      count(distinct c.id) filter (where c.wikidata_id is not null or c.wikipedia_url is not null)::text as with_identifiers,
+      count(distinct c.id) filter (where c.elections_checked_at is not null)::text as checked,
       count(distinct e.candidate_id)::text as with_rows,
       count(e.*)::text as election_rows
     from candidates c
@@ -1265,8 +1274,8 @@ export async function getStatus() {
       windowStart: run.window_start,
       windowEnd: run.window_end,
       state: run.state,
-      startedAt: run.started_at,
-      finishedAt: run.finished_at,
+      startedAt: toIsoString(run.started_at),
+      finishedAt: run.finished_at ? toIsoString(run.finished_at) : null,
       recordsSeen: run.records_seen,
       recordsInserted: run.records_inserted,
       recordsUpdated: run.records_updated,
@@ -1410,8 +1419,8 @@ function mapIngestionRun(run: IngestionRunRow): IngestionRun {
     windowStart: run.window_start,
     windowEnd: run.window_end,
     state: run.state,
-    startedAt: run.started_at,
-    finishedAt: run.finished_at,
+    startedAt: toIsoString(run.started_at),
+    finishedAt: run.finished_at ? toIsoString(run.finished_at) : null,
     recordsSeen: run.records_seen,
     recordsInserted: run.records_inserted,
     recordsUpdated: run.records_updated,

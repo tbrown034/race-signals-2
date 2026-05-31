@@ -10,6 +10,7 @@ export async function GET(request: Request) {
   const records = await getScheduleERecords({
     candidateId: url.searchParams.get("candidate") ?? undefined,
     committeeId: url.searchParams.get("committee") ?? undefined,
+    fecCommitteeId: url.searchParams.get("fecCommittee") ?? undefined,
     raceId: url.searchParams.get("race") ?? undefined,
     sourceId: url.searchParams.get("sourceId") ?? url.searchParams.get("sub_id") ?? undefined,
     state: url.searchParams.get("state")?.toUpperCase() ?? undefined,
@@ -18,7 +19,7 @@ export async function GET(request: Request) {
   const headers = exportHeaders();
   if (records.length > SCHEDULE_E_EXPORT_LIMIT) {
     return Response.json(
-      { error: "Export exceeds 10,000 Schedule E rows. Narrow by state, race, committee or candidate." },
+      { error: "Export exceeds 10,000 Schedule E rows. Narrow by state, race, committee, FEC committee, source ID or candidate." },
       { status: 413, headers },
     );
   }
@@ -44,7 +45,7 @@ async function exportManifest(url: URL): Promise<ScheduleEExportManifest> {
 
 function exportFilters(url: URL) {
   const filters: Record<string, string> = {};
-  for (const key of ["candidate", "committee", "race", "sourceId", "state"]) {
+  for (const key of ["candidate", "committee", "fecCommittee", "race", "sourceId", "state"]) {
     const value = url.searchParams.get(key);
     if (value) filters[key] = key === "state" ? value.toUpperCase() : value;
   }

@@ -213,6 +213,28 @@ assert.equal(
   }, scheduleEManifest).evidence_url,
   "https://race-signals.test/records/schedule-e?state=IN&sourceId=123#schedule-e-123",
 );
+assert.equal(
+  scheduleEToExportRow({
+    sourceId: "123",
+    cycle: 2026,
+    spenderCommitteeId: null,
+    fecCommitteeId: "C00888888",
+    candidateId: "cand-H6IN05000",
+    fecCandidateId: "H6IN05000",
+    raceId: "2026-IN-05-H",
+    supportOpposeIndicator: "O",
+    amount: 125000,
+    expenditureDate: "2026-05-20",
+    purpose: "Digital ads",
+    sourceUrl: "https://www.fec.gov/data/independent-expenditures/?sub_id=123",
+    raw: {},
+    candidateName: "TEST, CANDIDATE",
+    candidateParty: "REP",
+    committeeName: null,
+    raceName: "Indiana 05 Congressional District",
+  }, { ...scheduleEManifest, filters: { state: "IN", fecCommittee: "C00888888" } }).evidence_url,
+  "https://race-signals.test/records/schedule-e?state=IN&fecCommittee=C00888888&sourceId=123#schedule-e-123",
+);
 const negativeNumberCsv = scheduleERowsToCsv([{ ...scheduleERow, amount: -125000 }]);
 assert.ok(negativeNumberCsv.includes("\n2026-05-20,-125000,"), "numeric negative amounts should stay numeric");
 

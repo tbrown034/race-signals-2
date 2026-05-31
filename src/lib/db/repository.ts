@@ -1197,6 +1197,7 @@ export async function getScheduleERecords(
   filters: {
     candidateId?: string;
     committeeId?: string;
+    fecCommitteeId?: string;
     raceId?: string;
     sourceId?: string;
     state?: string;
@@ -1209,6 +1210,7 @@ export async function getScheduleERecords(
       .filter((expenditure) => {
         if (filters.candidateId && expenditure.candidateId !== filters.candidateId) return false;
         if (filters.committeeId && expenditure.spenderCommitteeId !== filters.committeeId) return false;
+        if (filters.fecCommitteeId && expenditure.fecCommitteeId !== filters.fecCommitteeId) return false;
         if (filters.raceId && expenditure.raceId !== filters.raceId) return false;
         if (filters.sourceId && expenditure.sourceId !== filters.sourceId) return false;
         if (filters.state && expenditure.raceId?.split("-")[1] !== filters.state) return false;
@@ -1237,6 +1239,10 @@ export async function getScheduleERecords(
   if (filters.committeeId) {
     values.push(filters.committeeId);
     where.push(`ie.spender_committee_id = $${values.length}`);
+  }
+  if (filters.fecCommitteeId) {
+    values.push(filters.fecCommitteeId);
+    where.push(`ie.fec_committee_id = $${values.length}`);
   }
   if (filters.raceId) {
     values.push(filters.raceId);
@@ -1313,6 +1319,7 @@ export async function getScheduleERecordSummary(
   filters: {
     candidateId?: string;
     committeeId?: string;
+    fecCommitteeId?: string;
     raceId?: string;
     sourceId?: string;
     state?: string;
@@ -1322,6 +1329,7 @@ export async function getScheduleERecordSummary(
     const records = demoIndependentExpenditures.filter((expenditure) => {
       if (filters.candidateId && expenditure.candidateId !== filters.candidateId) return false;
       if (filters.committeeId && expenditure.spenderCommitteeId !== filters.committeeId) return false;
+      if (filters.fecCommitteeId && expenditure.fecCommitteeId !== filters.fecCommitteeId) return false;
       if (filters.raceId && expenditure.raceId !== filters.raceId) return false;
       if (filters.sourceId && expenditure.sourceId !== filters.sourceId) return false;
       if (filters.state && expenditure.raceId?.split("-")[1] !== filters.state) return false;
@@ -1352,6 +1360,10 @@ export async function getScheduleERecordSummary(
   if (filters.committeeId) {
     values.push(filters.committeeId);
     where.push(`ie.spender_committee_id = $${values.length}`);
+  }
+  if (filters.fecCommitteeId) {
+    values.push(filters.fecCommitteeId);
+    where.push(`ie.fec_committee_id = $${values.length}`);
   }
   if (filters.raceId) {
     values.push(filters.raceId);

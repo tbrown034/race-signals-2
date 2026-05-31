@@ -19,12 +19,14 @@ export default async function ScheduleERecordsPage({
   const params = await searchParams;
   const raceId = textParam(params.race);
   const committeeId = textParam(params.committee);
+  const fecCommitteeId = textParam(params.fecCommittee);
   const candidateId = textParam(params.candidate);
   const sourceId = textParam(params.sourceId) ?? textParam(params.sub_id);
   const state = textParam(params.state)?.toUpperCase();
   const filters = {
     candidateId,
     committeeId,
+    fecCommitteeId,
     raceId,
     sourceId,
     state,
@@ -40,6 +42,7 @@ export default async function ScheduleERecordsPage({
     state ? `state ${state}` : null,
     raceId ? `race ${raceId}` : null,
     committeeId ? `spender ${committeeId}` : null,
+    fecCommitteeId ? `FEC spender ${fecCommitteeId}` : null,
     candidateId ? `candidate ${candidateId}` : null,
     sourceId ? `Schedule E source ${sourceId}` : null,
   ].filter(Boolean);
@@ -47,6 +50,7 @@ export default async function ScheduleERecordsPage({
   if (state) exportQuery.set("state", state);
   if (raceId) exportQuery.set("race", raceId);
   if (committeeId) exportQuery.set("committee", committeeId);
+  if (fecCommitteeId) exportQuery.set("fecCommittee", fecCommitteeId);
   if (candidateId) exportQuery.set("candidate", candidateId);
   if (sourceId) exportQuery.set("sourceId", sourceId);
   const exportSuffix = exportQuery.toString();

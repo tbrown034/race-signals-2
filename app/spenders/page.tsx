@@ -111,6 +111,7 @@ export default async function SpendersPage({
                     const opposeShare = share(spender.opposeAmount, spender.totalAmount);
                     const positionNote = positionConcentrationNote(supportShare, opposeShare);
                     const raceNote = topRaceShare >= 0.75 ? `Top-race share ${formatPercent(topRaceShare)}` : null;
+                    const spenderExportHref = spenderScheduleEExportHref(spender);
 
                     return (
                     <tr key={spender.committeeId ?? spender.fecCommitteeId ?? spender.committeeName}>
@@ -259,15 +260,15 @@ export default async function SpendersPage({
                                   Committee evidence page
                                 </Link>
                               ) : null}
-                              {spender.committeeId ? (
+                              {spenderExportHref ? (
                                 <a
                                   className="underline underline-offset-4"
-                                  href={`/api/schedule-e/export.csv?committee=${spender.committeeId}`}
+                                  href={spenderExportHref}
                                 >
                                   Export this spender
                                 </a>
                               ) : (
-                                <span>Spender-scoped export unavailable until committee resolves</span>
+                                <span>Spender-scoped export unavailable because this Schedule E row has no committee ID.</span>
                               )}
                               {spender.latestScheduleESourceUrl ? (
                                 <a
@@ -333,8 +334,15 @@ function positionConcentrationNote(supportShare: number, opposeShare: number) {
 
 function spenderEvidenceHref(spender: Awaited<ReturnType<typeof getTopSpenders>>[number]) {
   if (spender.committeeId) return `/records/schedule-e?committee=${spender.committeeId}`;
+  if (spender.fecCommitteeId) return `/records/schedule-e?fecCommittee=${spender.fecCommitteeId}`;
   if (spender.latestScheduleESourceId) return `/records/schedule-e?sourceId=${spender.latestScheduleESourceId}`;
   return spender.latestScheduleESourceUrl ?? "/spending?type=large_independent_expenditure";
+}
+
+function spenderScheduleEExportHref(spender: Awaited<ReturnType<typeof getTopSpenders>>[number]) {
+  if (spender.committeeId) return `/api/schedule-e/export.csv?committee=${spender.committeeId}`;
+  if (spender.fecCommitteeId) return `/api/schedule-e/export.csv?fecCommittee=${spender.fecCommitteeId}`;
+  return null;
 }
 
 function stateSpenderCounts(spenders: Awaited<ReturnType<typeof getTopSpenders>>) {

@@ -126,7 +126,7 @@ function scheduleEAnchorId(sourceId: string) {
 
 function evidenceQuery(filters: Record<string, string>, sourceId: string) {
   const params = new URLSearchParams();
-  for (const key of ["state", "race", "committee", "candidate"]) {
+  for (const key of ["state", "race", "committee", "fecCommittee", "candidate"]) {
     const value = filters[key];
     if (value) params.set(key, value);
   }

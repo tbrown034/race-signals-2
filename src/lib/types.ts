@@ -153,6 +153,17 @@ export type RaceStats = {
   incumbentCount: number;
 };
 
+export type StateRaceBoardRow = {
+  raceId: string;
+  raceName: string;
+  office: string;
+  district?: string | null;
+  candidateCount: number;
+  signalCount: number;
+  latestSignalDate?: string | null;
+  independentExpenditureTotal: number;
+};
+
 export type StateSignalFreshness = {
   state: string;
   count: number;

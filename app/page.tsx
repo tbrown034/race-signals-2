@@ -3,8 +3,10 @@ import { CoverageStrip } from "@/src/components/coverage-strip";
 import { FeedFilters } from "@/src/components/feed-filters";
 import { PageShell } from "@/src/components/page-shell";
 import { SignalCard } from "@/src/components/signal-card";
-import { getCoverageSummary, getRaces, getSignals, getSignalStateCounts, getSignalStateFreshness } from "@/src/lib/db/repository";
+import { getCoverageSummary, getRaces, getSignals, getSignalStateCounts, getSignalStateFreshness, getStateRaceBoard } from "@/src/lib/db/repository";
+import { formatDate, formatMoney } from "@/src/lib/format";
 import { signalFiltersFromSearchParams, sinceLabel } from "@/src/lib/signals/filters";
+import type { StateRaceBoardRow } from "@/src/lib/types";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -57,12 +59,13 @@ export default async function Home({
     if (typeof value === "string" && value) exportQuery.set(key, value);
   }
   const exportSuffix = exportQuery.toString();
-  const [signals, races, status, stateSignalCounts, stateSignalFreshness] = await Promise.all([
+  const [signals, races, status, stateSignalCounts, stateSignalFreshness, stateRaceBoard] = await Promise.all([
     getSignals(signalFiltersFromSearchParams(params, 51)),
     getRaces(),
     getCoverageSummary(),
     getSignalStateCounts(),
     getSignalStateFreshness(),
+    state ? getStateRaceBoard(state) : Promise.resolve([]),
   ]);
   const visibleSignals = signals.slice(0, 50);
   const hasMoreSignals = signals.length > visibleSignals.length;
@@ -128,6 +131,7 @@ export default async function Home({
             </div>
           </div>
           <CoverageStrip counts={status.counts} latestRun={status.runs[0]} mode={status.mode} />
+          {state ? <StateRaceBoard state={state} rows={stateRaceBoard} /> : null}
           <FeedFilters
             key={[q, state, office, raceId, committeeId, type, statusFilter, since, ingestedSince].join("|")}
             races={races}
@@ -224,5 +228,74 @@ export default async function Home({
         </aside>
       </main>
     </PageShell>
+  );
+}
+
+function StateRaceBoard({ rows, state }: { rows: StateRaceBoardRow[]; state: string }) {
+  return (
+    <section className="border-b border-neutral-300" id="state-race-board">
+      <div className="border-b border-neutral-300 px-5 py-4">
+        <h2 className="text-sm font-semibold uppercase tracking-[0.14em] text-neutral-600">
+          {state} race board
+        </h2>
+        <p className="mt-1 text-sm text-neutral-600">
+          Every 2026 House and Senate race shell for this state, including quiet races with no stored signals.
+        </p>
+      </div>
+      <div className="overflow-x-auto">
+        <table className="w-full min-w-0 text-left text-sm md:min-w-[760px]">
+          <thead className="bg-neutral-100 font-mono text-xs uppercase tracking-[0.12em] text-neutral-500">
+            <tr>
+              <th className="px-4 py-3 font-medium" scope="col">Race</th>
+              <th className="hidden px-4 py-3 text-right font-medium md:table-cell" scope="col">Candidates</th>
+              <th className="hidden px-4 py-3 text-right font-medium md:table-cell" scope="col">Signals</th>
+              <th className="hidden px-4 py-3 text-right font-medium md:table-cell" scope="col">IE total</th>
+              <th className="hidden px-4 py-3 font-medium md:table-cell" scope="col">Latest signal</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-neutral-200">
+            {rows.length ? (
+              rows.map((race) => (
+                <tr key={race.raceId}>
+                  <td className="px-4 py-3">
+                    <Link className="font-medium underline underline-offset-4" href={`/races/${race.raceId}`}>
+                      {race.raceName}
+                    </Link>
+                    <dl className="mt-2 space-y-1 text-xs leading-5 text-neutral-600 md:hidden">
+                      <div>
+                        <dt className="inline font-mono uppercase tracking-[0.12em] text-neutral-500">Candidates </dt>
+                        <dd className="inline">{race.candidateCount}</dd>
+                      </div>
+                      <div>
+                        <dt className="inline font-mono uppercase tracking-[0.12em] text-neutral-500">Signals </dt>
+                        <dd className="inline">{race.signalCount}</dd>
+                      </div>
+                      <div>
+                        <dt className="inline font-mono uppercase tracking-[0.12em] text-neutral-500">IE total </dt>
+                        <dd className="inline font-mono text-neutral-950">{formatMoney(race.independentExpenditureTotal) ?? "$0"}</dd>
+                      </div>
+                      <div>
+                        <dt className="inline font-mono uppercase tracking-[0.12em] text-neutral-500">Latest </dt>
+                        <dd className="inline">{race.latestSignalDate ? formatDate(race.latestSignalDate) : "No stored signal"}</dd>
+                      </div>
+                    </dl>
+                  </td>
+                  <td className="hidden px-4 py-3 text-right font-mono md:table-cell">{race.candidateCount}</td>
+                  <td className="hidden px-4 py-3 text-right font-mono md:table-cell">{race.signalCount}</td>
+                  <td className="hidden px-4 py-3 text-right font-mono md:table-cell">{formatMoney(race.independentExpenditureTotal) ?? "$0"}</td>
+                  <td className="hidden px-4 py-3 md:table-cell">{race.latestSignalDate ? formatDate(race.latestSignalDate) : "No stored signal"}</td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td className="px-4 py-3 text-neutral-600" colSpan={5}>
+                  No configured race shells are available for {state}.
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+    </section>
   );
 }

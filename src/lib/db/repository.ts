@@ -22,6 +22,7 @@ import type {
   RaceStats,
   RecentValidationIssue,
   Signal,
+  StateRaceBoardRow,
   StateSignalFreshness,
   StorageUsage,
   TopSpender,
@@ -503,6 +504,86 @@ export async function getRaces(): Promise<Race[]> {
   return sql<Race>(
     "select id, cycle, state, district, office, name, competitiveness from races order by state, district",
   );
+}
+
+export async function getStateRaceBoard(state: string): Promise<StateRaceBoardRow[]> {
+  const normalizedState = state.toUpperCase();
+  if (!hasDatabase()) {
+    return demoRaces
+      .filter((race) => race.state === normalizedState && race.cycle === CURRENT_CYCLE)
+      .map((race) => {
+        const raceSignals = demoSignals.filter((signal) => signal.raceId === race.id);
+        const expenditures = demoIndependentExpenditures.filter((expenditure) => expenditure.raceId === race.id);
+        return {
+          raceId: race.id,
+          raceName: race.name,
+          office: race.office,
+          district: race.district,
+          candidateCount: demoCandidates.filter((candidate) => candidate.raceId === race.id).length,
+          signalCount: raceSignals.length,
+          latestSignalDate: raceSignals.map((signal) => signal.signalDate).sort().at(-1) ?? null,
+          independentExpenditureTotal: expenditures.reduce((sum, expenditure) => sum + expenditure.amount, 0),
+        };
+      });
+  }
+
+  const rows = await sql<{
+    race_id: string;
+    race_name: string;
+    office: string;
+    district: string | null;
+    candidate_count: string;
+    signal_count: string;
+    latest_signal_date: string | Date | null;
+    independent_expenditure_total: string;
+  }>(
+    `
+      select
+        r.id as race_id,
+        r.name as race_name,
+        r.office,
+        r.district,
+        (
+          select count(*)::text
+          from candidates c
+          where c.race_id = r.id
+        ) as candidate_count,
+        (
+          select count(*)::text
+          from signals s
+          where s.race_id = r.id
+            and (r.cycle is null or (s.signal_date >= make_date(r.cycle - 1, 1, 1) and s.signal_date <= make_date(r.cycle, 12, 31)))
+        ) as signal_count,
+        (
+          select max(s.signal_date)
+          from signals s
+          where s.race_id = r.id
+            and (r.cycle is null or (s.signal_date >= make_date(r.cycle - 1, 1, 1) and s.signal_date <= make_date(r.cycle, 12, 31)))
+        ) as latest_signal_date,
+        (
+          select coalesce(sum(ie.amount), 0)::text
+          from independent_expenditures ie
+          where ie.race_id = r.id
+            and ie.expenditure_date >= make_date(r.cycle - 1, 1, 1)
+            and ie.expenditure_date <= make_date(r.cycle, 12, 31)
+        ) as independent_expenditure_total
+      from races r
+      where r.state = $1
+        and r.cycle = $2
+      order by r.office desc, r.district nulls first
+    `,
+    [normalizedState, CURRENT_CYCLE],
+  );
+  return rows.map((row) => ({
+    raceId: row.race_id,
+    raceName: row.race_name,
+    office: row.office,
+    district: row.district,
+    candidateCount: Number(row.candidate_count),
+    signalCount: Number(row.signal_count),
+    latestSignalDate: row.latest_signal_date ? toDateString(row.latest_signal_date) : null,
+    independentExpenditureTotal: Number(row.independent_expenditure_total),
+  }));
 }
 
 export async function getSignalStateCounts(signalType?: string): Promise<Record<string, number>> {

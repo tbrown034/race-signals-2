@@ -47,7 +47,7 @@ export function EntityPage({
 
   return (
     <main className="mx-auto grid max-w-7xl grid-cols-1 gap-6 px-5 py-6 sm:px-8 lg:grid-cols-[320px_1fr]">
-      <aside className="h-fit min-w-0 border border-neutral-300 bg-white p-5">
+      <aside className="h-fit min-w-0 max-w-full border border-neutral-300 bg-white p-5">
         {asideMedia ? <div className="mb-4">{asideMedia}</div> : null}
         <p className="font-mono text-xs uppercase tracking-[0.18em] text-neutral-500">
           {eyebrow}
@@ -113,7 +113,7 @@ export function EntityPage({
           </div>
         ) : null}
       </aside>
-      <section className="min-w-0 border border-neutral-300 bg-white">
+      <section className="min-w-0 max-w-full border border-neutral-300 bg-white">
         {children}
         {independentExpenditures.length ? (
           <div className="border-b border-neutral-300" id="schedule-e-records">
@@ -281,11 +281,11 @@ export function EntityPage({
 
 function MetaRows({ rows }: { rows: Array<[string, ReactNode | null | undefined]> }) {
   return rows.map(([label, value]) => (
-    <div key={label}>
+    <div className="min-w-0 max-w-full" key={label}>
       <dt className="font-mono text-xs uppercase tracking-[0.12em] text-neutral-500">
         {label}
       </dt>
-      <dd className="mt-1">{value ?? "Not available"}</dd>
+      <dd className="mt-1 min-w-0 max-w-full break-words">{value ?? "Not available"}</dd>
     </div>
   ));
 }

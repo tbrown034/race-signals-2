@@ -159,47 +159,48 @@ export function FeedFilters({
           />
         </label>
         <div className="grid min-w-0 grid-cols-1 gap-3 sm:grid-cols-2 xl:flex xl:flex-wrap">
-          <label className="min-w-0 text-xs font-medium uppercase tracking-[0.12em] text-neutral-500 xl:min-w-[96px] xl:flex-none">
-          State
-          <select
-            className="mt-1 block h-9 w-full min-w-0 border border-neutral-300 bg-white px-2 text-sm normal-case tracking-normal text-neutral-950"
-            value={selectedState}
-            name="state"
-            onChange={(event) => updateFilter("state", event.target.value)}
-          >
-            <option value="">All</option>
-            {selectedUncoveredState ? (
-              <optgroup label="Selected scope state">
-                <option value={selectedUncoveredState.code}>
-                  {selectedUncoveredState.name} ({selectedUncoveredState.code}) - no stored signals
-                </option>
-              </optgroup>
-            ) : null}
-            {coveredStates.length ? (
-              <optgroup label="States with stored signals">
-                {coveredStates.map((item) => (
-                  <option value={item.code} key={item.code}>
-                    {stateOptionLabel(item.name, item.code, stateSignalFreshness[item.code], stateSignalCounts[item.code])}
+          <div className="min-w-0 text-xs font-medium uppercase tracking-[0.12em] text-neutral-500 xl:min-w-[96px] xl:flex-none">
+            <label htmlFor="state-filter">State</label>
+            <select
+              className="mt-1 block h-9 w-full min-w-0 border border-neutral-300 bg-white px-2 text-sm normal-case tracking-normal text-neutral-950"
+              id="state-filter"
+              value={selectedState}
+              name="state"
+              onChange={(event) => updateFilter("state", event.target.value)}
+            >
+              <option value="">All</option>
+              {selectedUncoveredState ? (
+                <optgroup label="Selected scope state">
+                  <option value={selectedUncoveredState.code}>
+                    {selectedUncoveredState.name} ({selectedUncoveredState.code}) - no stored signals
                   </option>
-                ))}
-              </optgroup>
+                </optgroup>
+              ) : null}
+              {coveredStates.length ? (
+                <optgroup label="States with stored signals">
+                  {coveredStates.map((item) => (
+                    <option value={item.code} key={item.code}>
+                      {stateOptionLabel(item.name, item.code, stateSignalFreshness[item.code], stateSignalCounts[item.code])}
+                    </option>
+                  ))}
+                </optgroup>
+              ) : null}
+            </select>
+            {uncoveredStates.length ? (
+              <details className="mt-2 normal-case tracking-normal text-neutral-600">
+                <summary className="cursor-pointer text-xs underline underline-offset-4">
+                  All scope states
+                </summary>
+                <div className="mt-2 grid max-h-44 grid-cols-2 gap-x-3 gap-y-1 overflow-y-auto border border-neutral-200 p-2 text-xs sm:grid-cols-3">
+                  {uncoveredStates.map((item) => (
+                    <Link className="underline underline-offset-4" href={stateHref(item.code)} key={item.code}>
+                      {item.name} ({item.code})
+                    </Link>
+                  ))}
+                </div>
+              </details>
             ) : null}
-          </select>
-          {uncoveredStates.length ? (
-            <details className="mt-2 normal-case tracking-normal text-neutral-600">
-              <summary className="cursor-pointer text-xs underline underline-offset-4">
-                All scope states
-              </summary>
-              <div className="mt-2 grid max-h-44 grid-cols-2 gap-x-3 gap-y-1 overflow-y-auto border border-neutral-200 p-2 text-xs sm:grid-cols-3">
-                {uncoveredStates.map((item) => (
-                  <Link className="underline underline-offset-4" href={stateHref(item.code)} key={item.code}>
-                    {item.name} ({item.code})
-                  </Link>
-                ))}
-              </div>
-            </details>
-          ) : null}
-        </label>
+          </div>
           <label className="min-w-0 text-xs font-medium uppercase tracking-[0.12em] text-neutral-500 sm:hidden">
             Newly ingested
             <select

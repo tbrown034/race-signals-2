@@ -8,6 +8,8 @@ export type SignalFilters = {
   status?: string;
   since?: string;
   ingestedSince?: string;
+  minAmount?: string;
+  position?: string;
   limit?: number;
 };
 
@@ -37,6 +39,8 @@ export function signalFiltersFromSearchParams(
     status: first(params.status),
     since: first(params.since),
     ingestedSince: first(params.ingestedSince),
+    minAmount: first(params.minAmount),
+    position: first(params.position),
     limit,
   };
 }
@@ -52,6 +56,8 @@ export function signalFiltersFromUrl(url: URL, limit?: number): SignalFilters {
     status: url.searchParams.get("status") ?? undefined,
     since: url.searchParams.get("since") ?? undefined,
     ingestedSince: url.searchParams.get("ingestedSince") ?? undefined,
+    minAmount: url.searchParams.get("minAmount") ?? undefined,
+    position: url.searchParams.get("position") ?? undefined,
     limit,
   };
 }

@@ -52,7 +52,7 @@ export default async function Home({
   const since = typeof params.since === "string" ? params.since : undefined;
   const ingestedSince = typeof params.ingestedSince === "string" ? params.ingestedSince : undefined;
   const exportQuery = new URLSearchParams();
-  for (const key of ["q", "state", "office", "race", "committee", "type", "status", "since", "ingestedSince"]) {
+  for (const key of ["q", "state", "office", "race", "committee", "type", "status", "since", "ingestedSince", "minAmount", "position"]) {
     const value = params[key];
     if (typeof value === "string" && value) exportQuery.set(key, value);
   }
@@ -77,6 +77,8 @@ export default async function Home({
     statusFilter ? `status ${statusFilter}` : null,
     since ? `event ${sinceLabel(since)}` : null,
     ingestedSince ? `ingested ${sinceLabel(ingestedSince)}` : null,
+    typeof params.minAmount === "string" ? `$${Number(params.minAmount).toLocaleString("en-US")}+` : null,
+    params.position === "S" ? "support spending" : params.position === "O" ? "opposition spending" : null,
   ].filter(Boolean);
 
   return (

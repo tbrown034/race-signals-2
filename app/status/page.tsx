@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { PageShell } from "@/src/components/page-shell";
-import { getStatus } from "@/src/lib/db/repository";
-import { formatDateTime, formatMoney, isOlderThanHours } from "@/src/lib/format";
+import { getSignalStateFreshness, getStatus } from "@/src/lib/db/repository";
+import { formatDateTime, formatMoney, formatRelativeTime, isOlderThanHours } from "@/src/lib/format";
 import { endpointHealthClass } from "@/src/lib/status-health";
 import type { Metadata } from "next";
 
@@ -20,9 +20,22 @@ const countLabels: Record<string, string> = {
   signals: "Signals",
 };
 
+function stateFreshnessLabel(value?: string | null) {
+  if (!value) return "Unknown";
+  return `${formatRelativeTime(value)} (${formatDateTime(value)})`;
+}
+
 export default async function StatusPage() {
-  const status = await getStatus();
+  const [status, stateFreshness] = await Promise.all([
+    getStatus(),
+    getSignalStateFreshness(),
+  ]);
   const latestRun = status.runs[0];
+  const stateRows = Object.values(stateFreshness).sort((a, b) => (
+    String(b.latestDataFreshness ?? "").localeCompare(String(a.latestDataFreshness ?? "")) ||
+    b.count - a.count ||
+    a.state.localeCompare(b.state)
+  ));
 
   return (
     <PageShell>
@@ -54,6 +67,7 @@ export default async function StatusPage() {
           className="mt-4 flex flex-wrap gap-x-4 gap-y-2 border border-neutral-300 bg-white px-4 py-3 font-mono text-[11px] uppercase tracking-[0.12em] text-neutral-600"
         >
           <a className="underline-offset-4 hover:underline" href="#storage">Storage</a>
+          <a className="underline-offset-4 hover:underline" href="#state-freshness">State freshness</a>
           <a className="underline-offset-4 hover:underline" href="#endpoint-freshness">Endpoint freshness</a>
           {status.candidateSignalGaps.length ? (
             <a className="underline-offset-4 hover:underline" href="#candidate-gaps">Candidate gaps</a>
@@ -72,6 +86,59 @@ export default async function StatusPage() {
               <p className="mt-2 text-2xl font-semibold">{count}</p>
             </div>
           ))}
+        </section>
+
+        <section className="mt-6 border border-neutral-300 bg-white" id="state-freshness">
+          <div className="border-b border-neutral-300 px-5 py-4">
+            <h2 className="text-sm font-semibold uppercase tracking-[0.14em] text-neutral-600">
+              Stored signal freshness by state
+            </h2>
+            <p className="mt-1 text-sm text-neutral-600">
+              This reports the newest stored signal freshness per state. It is not a claim that every state was checked in the latest ingest.
+            </p>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-0 text-left text-sm md:min-w-[560px]">
+              <thead className="bg-neutral-100 font-mono text-xs uppercase tracking-[0.12em] text-neutral-500">
+                <tr>
+                  <th className="px-4 py-3 font-medium" scope="col">State</th>
+                  <th className="hidden px-4 py-3 text-right font-medium md:table-cell" scope="col">Signals</th>
+                  <th className="hidden px-4 py-3 font-medium md:table-cell" scope="col">Newest stored freshness</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-neutral-200">
+                {stateRows.length ? (
+                  stateRows.map((state) => (
+                    <tr key={state.state}>
+                      <td className="px-4 py-3">
+                        <Link className="font-medium underline underline-offset-4" href={`/?state=${state.state}`}>
+                          {state.state}
+                        </Link>
+                        <dl className="mt-2 space-y-1 text-xs leading-5 text-neutral-600 md:hidden">
+                          <div>
+                            <dt className="inline font-mono uppercase tracking-[0.12em] text-neutral-500">Signals </dt>
+                            <dd className="inline">{state.count}</dd>
+                          </div>
+                          <div>
+                            <dt className="inline font-mono uppercase tracking-[0.12em] text-neutral-500">Freshness </dt>
+                            <dd className="inline">{stateFreshnessLabel(state.latestDataFreshness)}</dd>
+                          </div>
+                        </dl>
+                      </td>
+                      <td className="hidden px-4 py-3 text-right font-mono md:table-cell">{state.count}</td>
+                      <td className="hidden px-4 py-3 md:table-cell">{stateFreshnessLabel(state.latestDataFreshness)}</td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td className="px-4 py-3 text-neutral-600" colSpan={3}>
+                      No state-level signal freshness is available yet.
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
         </section>
 
         <section className="mt-6 border border-neutral-300 bg-white p-5" id="storage">

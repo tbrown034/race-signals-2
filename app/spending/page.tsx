@@ -27,6 +27,8 @@ export default async function SpendingPage({
   const statusFilter = typeof params.status === "string" ? params.status : undefined;
   const since = typeof params.since === "string" ? params.since : undefined;
   const ingestedSince = typeof params.ingestedSince === "string" ? params.ingestedSince : undefined;
+  const minAmount = typeof params.minAmount === "string" ? params.minAmount : undefined;
+  const position = typeof params.position === "string" ? params.position : undefined;
   const committeeId = typeof params.committee === "string" ? params.committee : undefined;
   const [signals, races, status, stateSignalCounts, stateSignalFreshness, committeeFilter] = await Promise.all([
     getSpendingSignals(signalFiltersFromSearchParams(params, 101), sort),
@@ -56,7 +58,7 @@ export default async function SpendingPage({
                 <h1 className="mt-1 text-xl font-semibold tracking-tight">
                   Outside spending watch
                 </h1>
-                <p className="mt-2 max-w-3xl text-sm leading-5 text-neutral-700">
+                <p className="mt-2 max-w-3xl break-words text-sm leading-5 text-neutral-700">
                   Independent expenditure signals from FEC Schedule E. Default sort
                   is largest amount first so a reporter can spot the biggest outside
                   moves before scanning the chronology.
@@ -98,6 +100,7 @@ export default async function SpendingPage({
             </div>
           </div>
           <CoverageStrip counts={status.counts} latestRun={status.runs[0]} mode={status.mode} />
+          <SpendingQuickFilters params={params} />
           <FeedFilters
             clearHref="/spending"
             key={[q, state, office, raceId, statusFilter, since, ingestedSince].join("|")}
@@ -118,6 +121,8 @@ export default async function SpendingPage({
           <div className="border-b border-neutral-300 px-5 py-3 font-mono text-[11px] uppercase tracking-[0.12em] text-neutral-500">
             Showing {visibleSignals.length}{hasMoreSignals ? "+" : ""} outside-spending signals
             {committeeId ? ` for ${committeeFilter?.name ?? committeeId}` : ""}
+            {position ? ` / ${supportOpposeLabel(position)}` : ""}
+            {minAmount ? ` / $${Number(minAmount).toLocaleString("en-US")}+` : ""}
             {committeeId ? (
               <>
                 {" / "}
@@ -339,6 +344,61 @@ function sourcePurpose(value: unknown) {
   return "Not specified";
 }
 
+function SpendingQuickFilters({
+  params,
+}: {
+  params: { [key: string]: string | string[] | undefined };
+}) {
+  const selectedPosition = typeof params.position === "string" ? params.position : "";
+  const selectedMinAmount = typeof params.minAmount === "string" ? params.minAmount : "";
+  return (
+    <div className="border-b border-neutral-300 px-5 py-3 text-sm">
+      <div className="grid gap-3 md:grid-cols-2">
+        <div>
+          <p className="font-mono text-[11px] uppercase tracking-[0.12em] text-neutral-500">
+            Position
+          </p>
+          <div className="mt-2 flex flex-wrap gap-2">
+            <Link className={quickFilterClass(!selectedPosition)} href={spendingToggleHref(params, "position", "")}>All</Link>
+            <Link className={quickFilterClass(selectedPosition === "S")} href={spendingToggleHref(params, "position", "S")}>Support</Link>
+            <Link className={quickFilterClass(selectedPosition === "O")} href={spendingToggleHref(params, "position", "O")}>Oppose</Link>
+          </div>
+        </div>
+        <div>
+          <p className="font-mono text-[11px] uppercase tracking-[0.12em] text-neutral-500">
+            Amount floor
+          </p>
+          <div className="mt-2 flex flex-wrap gap-2">
+            <Link className={quickFilterClass(!selectedMinAmount)} href={spendingToggleHref(params, "minAmount", "")}>All</Link>
+            <Link className={quickFilterClass(selectedMinAmount === "25000")} href={spendingToggleHref(params, "minAmount", "25000")}>$25k+</Link>
+            <Link className={quickFilterClass(selectedMinAmount === "100000")} href={spendingToggleHref(params, "minAmount", "100000")}>$100k+</Link>
+            <Link className={quickFilterClass(selectedMinAmount === "250000")} href={spendingToggleHref(params, "minAmount", "250000")}>$250k+</Link>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function quickFilterClass(active: boolean) {
+  return active
+    ? "border border-neutral-950 bg-neutral-950 px-2.5 py-1.5 font-medium text-white"
+    : "border border-neutral-300 px-2.5 py-1.5 font-medium hover:border-neutral-900";
+}
+
+function spendingToggleHref(
+  params: { [key: string]: string | string[] | undefined },
+  key: "minAmount" | "position",
+  value: string,
+) {
+  const next = spendingExportQuery(params);
+  next.delete("type");
+  if (value) next.set(key, value);
+  else next.delete(key);
+  const query = next.toString();
+  return query ? `/spending?${query}` : "/spending";
+}
+
 function signalAnchorId(dedupeKey: string) {
   return `signal-${dedupeKey.replace(/[^a-zA-Z0-9_-]/g, "-")}`;
 }
@@ -348,7 +408,7 @@ function spendingSortHref(
   sort: "amount" | "date",
 ) {
   const next = new URLSearchParams();
-  for (const key of ["q", "state", "office", "race", "status", "since", "ingestedSince", "committee"]) {
+  for (const key of ["q", "state", "office", "race", "status", "since", "ingestedSince", "committee", "minAmount", "position"]) {
     const value = params[key];
     if (typeof value === "string" && value) next.set(key, value);
   }
@@ -359,7 +419,7 @@ function spendingSortHref(
 
 function spendingExportQuery(params: { [key: string]: string | string[] | undefined }) {
   const next = new URLSearchParams();
-  for (const key of ["q", "state", "office", "race", "status", "since", "ingestedSince", "committee"]) {
+  for (const key of ["q", "state", "office", "race", "status", "since", "ingestedSince", "committee", "minAmount", "position"]) {
     const value = params[key];
     if (typeof value === "string" && value) next.set(key, value);
   }

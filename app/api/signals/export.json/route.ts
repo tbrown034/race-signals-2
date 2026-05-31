@@ -54,7 +54,7 @@ async function exportManifest(url: URL): Promise<ExportManifest> {
 
 function exportFilters(url: URL) {
   const filters: Record<string, string> = {};
-  for (const key of ["q", "state", "office", "race", "type", "status", "since", "ingestedSince", "committee"]) {
+  for (const key of ["q", "state", "office", "race", "type", "status", "since", "ingestedSince", "committee", "minAmount", "position"]) {
     const value = url.searchParams.get(key);
     if (value) filters[key] = value;
   }

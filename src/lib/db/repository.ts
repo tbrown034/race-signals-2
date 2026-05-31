@@ -280,6 +280,11 @@ function resolveSince(value: string) {
   return value;
 }
 
+function resolveMinAmount(value: string) {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : 0;
+}
+
 function signalSearchClause(values: unknown[], query: string) {
   values.push(`%${query}%`);
   const param = values.length;
@@ -327,6 +332,8 @@ export async function getSignals(filters: SignalFilters = {}) {
       if (filters.status && signal.status !== filters.status) return false;
       if (filters.since && signal.signalDate <= resolveSince(filters.since)) return false;
       if (filters.ingestedSince && signal.dataFreshness <= resolveSince(filters.ingestedSince)) return false;
+      if (filters.minAmount && (signal.amount ?? 0) < resolveMinAmount(filters.minAmount)) return false;
+      if (filters.position && signal.metadata?.supportOpposeIndicator !== filters.position) return false;
       if (q && !demoSignalSearchText(signal).includes(q)) return false;
       return true;
     }).slice(0, filters.limit ?? 50);
@@ -365,6 +372,14 @@ export async function getSignals(filters: SignalFilters = {}) {
   if (filters.ingestedSince) {
     values.push(resolveSince(filters.ingestedSince));
     where.push(`s.data_freshness > $${values.length}`);
+  }
+  if (filters.minAmount) {
+    values.push(resolveMinAmount(filters.minAmount));
+    where.push(`s.amount >= $${values.length}`);
+  }
+  if (filters.position) {
+    values.push(filters.position);
+    where.push(`s.metadata->>'supportOpposeIndicator' = $${values.length}`);
   }
   if (filters.q) {
     where.push(signalSearchClause(values, filters.q));
@@ -443,6 +458,14 @@ export async function getSpendingSignals(
   if (scopedFilters.ingestedSince) {
     values.push(resolveSince(scopedFilters.ingestedSince));
     where.push(`s.data_freshness > $${values.length}`);
+  }
+  if (scopedFilters.minAmount) {
+    values.push(resolveMinAmount(scopedFilters.minAmount));
+    where.push(`s.amount >= $${values.length}`);
+  }
+  if (scopedFilters.position) {
+    values.push(scopedFilters.position);
+    where.push(`s.metadata->>'supportOpposeIndicator' = $${values.length}`);
   }
   if (scopedFilters.q) {
     where.push(signalSearchClause(values, scopedFilters.q));

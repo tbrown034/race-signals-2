@@ -110,6 +110,7 @@ export default async function StatusPage() {
                   <th className="hidden px-4 py-3 text-right font-medium md:table-cell" scope="col">Schedule E</th>
                   <th className="hidden px-4 py-3 font-medium md:table-cell" scope="col">Newest signal freshness</th>
                   <th className="hidden px-4 py-3 font-medium md:table-cell" scope="col">Latest state ingest</th>
+                  <th className="hidden px-4 py-3 font-medium lg:table-cell" scope="col">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-neutral-200">
@@ -141,6 +142,9 @@ export default async function StatusPage() {
                             <dt className="inline font-mono uppercase tracking-[0.12em] text-neutral-500">Freshness </dt>
                             <dd className="inline">{stateFreshnessLabel(state.latestSignalFreshness)}</dd>
                           </div>
+                          <div className="flex flex-wrap gap-x-3 gap-y-1 pt-1">
+                            <StateActionLinks state={state.state} />
+                          </div>
                         </dl>
                       </td>
                       <td className="hidden px-4 py-3 text-right font-mono md:table-cell">{state.raceCount}</td>
@@ -149,11 +153,16 @@ export default async function StatusPage() {
                       <td className="hidden px-4 py-3 text-right font-mono md:table-cell">{state.independentExpenditureCount}</td>
                       <td className="hidden px-4 py-3 md:table-cell">{stateFreshnessLabel(state.latestSignalFreshness)}</td>
                       <td className="hidden px-4 py-3 md:table-cell">{state.latestIngestFinishedAt ? stateFreshnessLabel(state.latestIngestFinishedAt) : "No state run recorded"}</td>
+                      <td className="hidden px-4 py-3 lg:table-cell">
+                        <div className="flex flex-wrap gap-x-3 gap-y-1 text-xs">
+                          <StateActionLinks state={state.state} />
+                        </div>
+                      </td>
                     </tr>
                   ))
                 ) : (
                   <tr>
-                    <td className="px-4 py-3 text-neutral-600" colSpan={7}>
+                    <td className="px-4 py-3 text-neutral-600" colSpan={8}>
                       No state-level coverage rows are available yet.
                     </td>
                   </tr>
@@ -827,6 +836,17 @@ function PublishabilityPanel({
 
 function retainedValidationIssueLabel(count: number) {
   return `${count} retained validation ${count === 1 ? "issue" : "issues"}`;
+}
+
+function StateActionLinks({ state }: { state: string }) {
+  return (
+    <>
+      <Link className="font-medium underline underline-offset-4" href={`/?state=${state}`}>Feed</Link>
+      <Link className="font-medium underline underline-offset-4" href={`/review?state=${state}`}>Review</Link>
+      <Link className="font-medium underline underline-offset-4" href={`/spending?state=${state}`}>Spending</Link>
+      <Link className="font-medium underline underline-offset-4" href={`/records/schedule-e?state=${state}`}>Evidence</Link>
+    </>
+  );
 }
 
 function runErrorSummary(error: unknown) {

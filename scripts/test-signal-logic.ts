@@ -47,6 +47,7 @@ const currentFiling: Filing = {
   coverageEndDate: "2026-03-31",
   receiptDate: "2026-04-15",
   totalReceipts: 61000,
+  totalReceiptsBasis: "period",
   cashOnHand: 25000,
   sourceUrl: "https://www.fec.gov/data/filing/filing-current/",
   raw: {},
@@ -121,5 +122,28 @@ assert.equal(committeeSignal.metadata?.sourceId, "C00999999");
 assert.equal(committeeSignal.metadata?.sourceKind, "committee");
 assert.equal(committeeSignal.metadata?.committeeType, "H");
 assert.equal(committeeSignal.metadata?.designation, "P");
+
+const mixedBasisSignals = generateSignals({
+  candidates: [candidate],
+  committees: [committee],
+  races: [race],
+  filings: [
+    currentFiling,
+    {
+      ...currentFiling,
+      sourceId: "filing-prior-ytd",
+      receiptDate: "2026-01-31",
+      totalReceipts: 20000,
+      totalReceiptsBasis: "ytd",
+    },
+  ],
+  independentExpenditures: [],
+  dataFreshness: "2026-05-31T12:00:00.000Z",
+});
+assert.equal(
+  mixedBasisSignals.some((signal) => signal.signalType === "committee_activity_spike"),
+  false,
+  "activity spikes must not compare period receipts to YTD or total receipts",
+);
 
 console.log("Signal logic tests passed.");

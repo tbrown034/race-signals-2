@@ -116,11 +116,21 @@ function mapFiling(row: Record<string, unknown>): Filing {
     coverageEndDate: dateText(row.coverage_end_date),
     receiptDate: dateText(row.receipt_date),
     totalReceipts: numberOrNull(row.total_receipts),
+    totalReceiptsBasis: receiptBasis(row.raw),
     totalDisbursements: numberOrNull(row.total_disbursements),
     cashOnHand: numberOrNull(row.cash_on_hand),
     sourceUrl: text(row.source_url),
     raw: row.raw ?? {},
   };
+}
+
+function receiptBasis(raw: unknown): Filing["totalReceiptsBasis"] {
+  if (!raw || typeof raw !== "object") return null;
+  const record = raw as Record<string, unknown>;
+  if (record.total_receipts_period !== null && record.total_receipts_period !== undefined) return "period";
+  if (record.total_receipts !== null && record.total_receipts !== undefined) return "total";
+  if (record.total_receipts_ytd !== null && record.total_receipts_ytd !== undefined) return "ytd";
+  return null;
 }
 
 function mapIndependentExpenditure(row: Record<string, unknown>): IndependentExpenditure {

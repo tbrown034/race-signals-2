@@ -77,6 +77,7 @@ export type Filing = {
   coverageEndDate?: string | null;
   receiptDate?: string | null;
   totalReceipts?: number | null;
+  totalReceiptsBasis?: "period" | "total" | "ytd" | null;
   totalDisbursements?: number | null;
   cashOnHand?: number | null;
   sourceUrl?: string | null;

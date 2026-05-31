@@ -66,6 +66,7 @@ export function normalizeCommittee(
 
 export function normalizeFiling(record: FecReport): Filing {
   const sourceId = String(record.beginning_image_number ?? record.file_number ?? "");
+  const receipts = receiptValue(record);
   return {
     sourceId,
     cycle: record.report_year ?? null,
@@ -75,7 +76,8 @@ export function normalizeFiling(record: FecReport): Filing {
     coverageStartDate: record.coverage_start_date ?? null,
     coverageEndDate: record.coverage_end_date ?? null,
     receiptDate: record.receipt_date ?? null,
-    totalReceipts: numberValue(record.total_receipts_period ?? record.total_receipts ?? record.total_receipts_ytd),
+    totalReceipts: receipts.value,
+    totalReceiptsBasis: receipts.basis,
     totalDisbursements: numberValue(
       record.total_disbursements_period ?? record.total_disbursements ?? record.total_disbursements_ytd,
     ),
@@ -83,6 +85,22 @@ export function normalizeFiling(record: FecReport): Filing {
     sourceUrl: fecFilingUrl(record.beginning_image_number ?? record.file_number),
     raw: record,
   };
+}
+
+function receiptValue(record: FecReport): {
+  value: number | null;
+  basis: Filing["totalReceiptsBasis"];
+} {
+  if (record.total_receipts_period !== null && record.total_receipts_period !== undefined) {
+    return { value: numberValue(record.total_receipts_period), basis: "period" };
+  }
+  if (record.total_receipts !== null && record.total_receipts !== undefined) {
+    return { value: numberValue(record.total_receipts), basis: "total" };
+  }
+  if (record.total_receipts_ytd !== null && record.total_receipts_ytd !== undefined) {
+    return { value: numberValue(record.total_receipts_ytd), basis: "ytd" };
+  }
+  return { value: null, basis: null };
 }
 
 function numberValue(value: number | string | null | undefined) {

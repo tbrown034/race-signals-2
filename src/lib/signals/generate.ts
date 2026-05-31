@@ -180,6 +180,8 @@ export function generateSignals(input: SignalInput): Signal[] {
       !latest?.totalReceipts ||
       !latest.receiptDate ||
       !prior?.totalReceipts ||
+      latest.totalReceiptsBasis !== "period" ||
+      prior.totalReceiptsBasis !== "period" ||
       !isCurrentCycleRecord(latest.receiptDate, race, latest.cycle) ||
       latest.totalReceipts < ACTIVITY_SPIKE_THRESHOLD ||
       latest.totalReceipts < prior.totalReceipts * 2
@@ -208,6 +210,7 @@ export function generateSignals(input: SignalInput): Signal[] {
       metadata: {
         latestTotalReceipts: latest.totalReceipts,
         priorTotalReceipts: prior.totalReceipts,
+        totalReceiptsBasis: latest.totalReceiptsBasis,
         reportType: latest.reportType,
         coverageStartDate: latest.coverageStartDate,
         coverageEndDate: latest.coverageEndDate,

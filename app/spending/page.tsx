@@ -113,29 +113,37 @@ export default async function SpendingPage({
           {visibleSignals.length ? (
             <div className="border-b border-neutral-300">
               <div className="overflow-x-auto">
-                <table className="w-full min-w-[1220px] text-left text-sm">
+                <table className="w-full min-w-0 text-left text-sm md:min-w-[1220px]">
                   <thead className="bg-neutral-100 font-mono text-xs uppercase tracking-[0.12em] text-neutral-500">
                     <tr>
-                      <th className="px-4 py-3 font-medium" scope="col">Date</th>
+                      <th className="hidden px-4 py-3 font-medium md:table-cell" scope="col">Date</th>
                       <th className="px-4 py-3 font-medium" scope="col">Alert</th>
-                      <th className="px-4 py-3 text-right font-medium" scope="col">Amount</th>
-                      <th className="px-4 py-3 font-medium" scope="col">Spender</th>
-                      <th className="px-4 py-3 font-medium" scope="col">Target</th>
-                      <th className="px-4 py-3 font-medium" scope="col">Position</th>
-                      <th className="px-4 py-3 font-medium" scope="col">Purpose</th>
-                      <th className="px-4 py-3 font-medium" scope="col">Race</th>
-                      <th className="px-4 py-3 font-medium" scope="col">Source</th>
+                      <th className="hidden px-4 py-3 text-right font-medium md:table-cell" scope="col">Amount</th>
+                      <th className="hidden px-4 py-3 font-medium md:table-cell" scope="col">Spender</th>
+                      <th className="hidden px-4 py-3 font-medium md:table-cell" scope="col">Target</th>
+                      <th className="hidden px-4 py-3 font-medium md:table-cell" scope="col">Position</th>
+                      <th className="hidden px-4 py-3 font-medium md:table-cell" scope="col">Purpose</th>
+                      <th className="hidden px-4 py-3 font-medium md:table-cell" scope="col">Race</th>
+                      <th className="hidden px-4 py-3 font-medium md:table-cell" scope="col">Source</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-neutral-200">
                     {visibleSignals.map((signal) => (
                       <tr key={`row-${signal.dedupeKey}`}>
-                        <td className="px-4 py-3 font-mono">{formatDate(signal.signalDate)}</td>
-                        <td className="max-w-[320px] px-4 py-3">
+                        <td className="hidden px-4 py-3 font-mono md:table-cell">{formatDate(signal.signalDate)}</td>
+                        <td className="px-4 py-3 md:max-w-[320px]">
                           <Link className="font-medium underline underline-offset-4" href={`/#${signalAnchorId(signal.dedupeKey)}`}>
                             {signal.headline}
                           </Link>
                           <dl className="mt-2 space-y-1 text-xs leading-5 text-neutral-600 md:hidden">
+                            <div>
+                              <dt className="inline font-mono uppercase tracking-[0.12em] text-neutral-500">Date </dt>
+                              <dd className="inline font-mono text-neutral-950">{formatDate(signal.signalDate)}</dd>
+                            </div>
+                            <div>
+                              <dt className="inline font-mono uppercase tracking-[0.12em] text-neutral-500">Amount </dt>
+                              <dd className="inline font-mono font-semibold text-neutral-950">{formatMoney(signal.amount)}</dd>
+                            </div>
                             <div>
                               <dt className="inline font-mono uppercase tracking-[0.12em] text-neutral-500">Spender </dt>
                               <dd className="inline">
@@ -157,6 +165,10 @@ export default async function SpendingPage({
                                   label={signal.candidateName}
                                 />
                               </dd>
+                            </div>
+                            <div>
+                              <dt className="inline font-mono uppercase tracking-[0.12em] text-neutral-500">Position </dt>
+                              <dd className="inline">{supportOpposeLabel(signal.metadata?.supportOpposeIndicator)}</dd>
                             </div>
                             <div>
                               <dt className="inline font-mono uppercase tracking-[0.12em] text-neutral-500">Race </dt>
@@ -184,10 +196,10 @@ export default async function SpendingPage({
                             </div>
                           </dl>
                         </td>
-                        <td className="px-4 py-3 text-right font-mono font-semibold">
+                        <td className="hidden px-4 py-3 text-right font-mono font-semibold md:table-cell">
                           {formatMoney(signal.amount)}
                         </td>
-                        <td className="px-4 py-3">
+                        <td className="hidden px-4 py-3 md:table-cell">
                           <EntityLink
                             fallback="Spender not resolved"
                             hrefBase="/committees"
@@ -195,7 +207,7 @@ export default async function SpendingPage({
                             label={signal.committeeName}
                           />
                         </td>
-                        <td className="px-4 py-3">
+                        <td className="hidden px-4 py-3 md:table-cell">
                           <EntityLink
                             fallback="Candidate not resolved"
                             hrefBase="/candidates"
@@ -203,9 +215,9 @@ export default async function SpendingPage({
                             label={signal.candidateName}
                           />
                         </td>
-                        <td className="px-4 py-3">{supportOpposeLabel(signal.metadata?.supportOpposeIndicator)}</td>
-                        <td className="px-4 py-3 text-neutral-700">{sourcePurpose(signal.metadata?.purpose)}</td>
-                        <td className="px-4 py-3">
+                        <td className="hidden px-4 py-3 md:table-cell">{supportOpposeLabel(signal.metadata?.supportOpposeIndicator)}</td>
+                        <td className="hidden px-4 py-3 text-neutral-700 md:table-cell">{sourcePurpose(signal.metadata?.purpose)}</td>
+                        <td className="hidden px-4 py-3 md:table-cell">
                           {signal.raceId ? (
                             <Link className="font-medium underline underline-offset-4" href={`/races/${signal.raceId}`}>
                               {signal.raceName ?? signal.raceId}
@@ -214,7 +226,7 @@ export default async function SpendingPage({
                             "Unmatched"
                           )}
                         </td>
-                        <td className="px-4 py-3">
+                        <td className="hidden px-4 py-3 md:table-cell">
                           {signal.sourceUrl ? (
                             <span className="inline-flex flex-col gap-1">
                               <a

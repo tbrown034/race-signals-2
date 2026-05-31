@@ -32,17 +32,17 @@ export default async function SpendersPage() {
             </p>
           </div>
           <div className="overflow-x-auto">
-            <table className="w-full min-w-[1040px] text-left text-sm">
+            <table className="w-full min-w-0 text-left text-sm md:min-w-[1040px]">
               <thead className="bg-neutral-100 font-mono text-xs uppercase tracking-[0.12em] text-neutral-500">
                 <tr>
                   <th className="px-4 py-3 font-medium" scope="col">Committee</th>
-                  <th className="px-4 py-3 font-medium" scope="col">Type</th>
-                  <th className="px-4 py-3 font-medium" scope="col">Where</th>
-                  <th className="px-4 py-3 font-medium" scope="col">Last IE</th>
-                  <th className="px-4 py-3 font-medium" scope="col">Position split</th>
-                  <th className="px-4 py-3 text-right font-medium" scope="col">Total IE</th>
-                  <th className="px-4 py-3 text-right font-medium" scope="col">Records</th>
-                  <th className="px-4 py-3 font-medium" scope="col">Source</th>
+                  <th className="hidden px-4 py-3 font-medium md:table-cell" scope="col">Type</th>
+                  <th className="hidden px-4 py-3 font-medium md:table-cell" scope="col">Where</th>
+                  <th className="hidden px-4 py-3 font-medium md:table-cell" scope="col">Last IE</th>
+                  <th className="hidden px-4 py-3 font-medium md:table-cell" scope="col">Position split</th>
+                  <th className="hidden px-4 py-3 text-right font-medium md:table-cell" scope="col">Total IE</th>
+                  <th className="hidden px-4 py-3 text-right font-medium md:table-cell" scope="col">Records</th>
+                  <th className="hidden px-4 py-3 font-medium md:table-cell" scope="col">Source</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-neutral-200">
@@ -64,6 +64,21 @@ export default async function SpendersPage() {
                           {spender.fecCommitteeId ?? "No FEC committee ID"}
                         </p>
                         <dl className="mt-2 space-y-1 text-xs leading-5 text-neutral-600 md:hidden">
+                          <div>
+                            <dt className="inline font-mono uppercase tracking-[0.12em] text-neutral-500">Type </dt>
+                            <dd className="inline">
+                              {committeeTypeLabel(spender.committeeType)}
+                              {spender.designation ? ` / ${committeeDesignationLabel(spender.designation)}` : ""}
+                            </dd>
+                          </div>
+                          <div>
+                            <dt className="inline font-mono uppercase tracking-[0.12em] text-neutral-500">Last IE </dt>
+                            <dd className="inline font-mono text-neutral-950">{formatDate(spender.lastExpenditureDate)}</dd>
+                          </div>
+                          <div>
+                            <dt className="inline font-mono uppercase tracking-[0.12em] text-neutral-500">Split </dt>
+                            <dd className="inline">Support {formatMoney(spender.supportAmount) ?? "$0"} / Oppose {formatMoney(spender.opposeAmount) ?? "$0"}</dd>
+                          </div>
                           <div>
                             <dt className="inline font-mono uppercase tracking-[0.12em] text-neutral-500">Total IE </dt>
                             <dd className="inline font-mono font-semibold text-neutral-950">{formatMoney(spender.totalAmount)}</dd>
@@ -98,13 +113,13 @@ export default async function SpendersPage() {
                           </div>
                         </dl>
                       </td>
-                      <td className="px-4 py-3 text-neutral-700">
+                      <td className="hidden px-4 py-3 text-neutral-700 md:table-cell">
                         <span>{committeeTypeLabel(spender.committeeType)}</span>
                         <span className="block text-xs text-neutral-500">
                           {committeeDesignationLabel(spender.designation)}
                         </span>
                       </td>
-                      <td className="px-4 py-3 text-neutral-700">
+                      <td className="hidden px-4 py-3 text-neutral-700 md:table-cell">
                         {spender.topRaceId ? (
                           <Link className="font-medium underline underline-offset-4" href={`/races/${spender.topRaceId}`}>
                             {spender.topRaceName ?? spender.topRaceId}
@@ -118,18 +133,18 @@ export default async function SpendersPage() {
                           {spender.topRaceAmount ? ` / top race ${formatMoney(spender.topRaceAmount)}` : ""}
                         </p>
                       </td>
-                      <td className="px-4 py-3 font-mono">
+                      <td className="hidden px-4 py-3 font-mono md:table-cell">
                         {formatDate(spender.lastExpenditureDate)}
                       </td>
-                      <td className="px-4 py-3 text-xs leading-5 text-neutral-700">
+                      <td className="hidden px-4 py-3 text-xs leading-5 text-neutral-700 md:table-cell">
                         <span className="block">Support {formatMoney(spender.supportAmount) ?? "$0"}</span>
                         <span className="block">Oppose {formatMoney(spender.opposeAmount) ?? "$0"}</span>
                       </td>
-                      <td className="px-4 py-3 text-right font-mono font-semibold">
+                      <td className="hidden px-4 py-3 text-right font-mono font-semibold md:table-cell">
                         {formatMoney(spender.totalAmount)}
                       </td>
-                      <td className="px-4 py-3 text-right font-mono">{spender.recordCount}</td>
-                      <td className="px-4 py-3">
+                      <td className="hidden px-4 py-3 text-right font-mono md:table-cell">{spender.recordCount}</td>
+                      <td className="hidden px-4 py-3 md:table-cell">
                         <div className="flex flex-col gap-1">
                           {spender.latestScheduleESourceUrl ? (
                             <a

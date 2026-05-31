@@ -123,15 +123,15 @@ export default async function RacePage({
           </div>
           {candidates.length ? (
             <div className="overflow-x-auto">
-              <table className="w-full min-w-[920px] text-left text-sm">
+              <table className="w-full min-w-0 text-left text-sm md:min-w-[920px]">
                 <thead className="bg-neutral-100 font-mono text-xs uppercase tracking-[0.12em] text-neutral-500">
                   <tr>
                     <th className="px-4 py-3 font-medium" scope="col">Candidate</th>
-                    <th className="px-4 py-3 font-medium" scope="col">Party</th>
-                    <th className="px-4 py-3 font-medium" scope="col">FEC record</th>
-                    <th className="px-4 py-3 text-right font-medium" scope="col">Receipts</th>
-                    <th className="px-4 py-3 text-right font-medium" scope="col">Cash</th>
-                    <th className="px-4 py-3 font-medium" scope="col">FEC API totals timestamp</th>
+                    <th className="hidden px-4 py-3 font-medium md:table-cell" scope="col">Party</th>
+                    <th className="hidden px-4 py-3 font-medium md:table-cell" scope="col">FEC record</th>
+                    <th className="hidden px-4 py-3 text-right font-medium md:table-cell" scope="col">Receipts</th>
+                    <th className="hidden px-4 py-3 text-right font-medium md:table-cell" scope="col">Cash</th>
+                    <th className="hidden px-4 py-3 font-medium md:table-cell" scope="col">FEC API totals timestamp</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-neutral-200">
@@ -157,6 +157,15 @@ export default async function RacePage({
                             ) : null}
                             <dl className="mt-2 space-y-1 text-xs leading-5 text-neutral-600 md:hidden">
                               <div>
+                                <dt className="inline font-mono uppercase tracking-[0.12em] text-neutral-500">Party </dt>
+                                <dd className="inline">
+                                  <span className="inline-flex items-center gap-1.5">
+                                    <PartySquare party={candidate.party} />
+                                    {partyLabel(candidate.party)}
+                                  </span>
+                                </dd>
+                              </div>
+                              <div>
                                 <dt className="inline font-mono uppercase tracking-[0.12em] text-neutral-500">Receipts </dt>
                                 <dd className="inline font-mono text-neutral-950">{candidateMoney(candidate.totalReceiptsCycle, candidate.totalsUpdatedAt)}</dd>
                               </div>
@@ -176,17 +185,21 @@ export default async function RacePage({
                                   )}
                                 </dd>
                               </div>
+                              <div>
+                                <dt className="inline font-mono uppercase tracking-[0.12em] text-neutral-500">Totals as of </dt>
+                                <dd className="inline">{candidateTotalsAsOf(candidate.totalsUpdatedAt)}</dd>
+                              </div>
                             </dl>
                           </div>
                         </div>
                       </td>
-                      <td className="px-4 py-3 font-mono text-xs">
+                      <td className="hidden px-4 py-3 font-mono text-xs md:table-cell">
                         <span className="inline-flex items-center gap-2">
                           <PartySquare party={candidate.party} />
                           {partyLabel(candidate.party)}
                         </span>
                       </td>
-                      <td className="px-4 py-3">
+                      <td className="hidden px-4 py-3 md:table-cell">
                         <div className="flex flex-col gap-1">
                           <span className="font-mono text-xs text-neutral-700">{candidate.fecCandidateId}</span>
                           {candidate.sourceUrl ? (
@@ -203,13 +216,13 @@ export default async function RacePage({
                           )}
                         </div>
                       </td>
-                      <td className="px-4 py-3 text-right font-mono">
+                      <td className="hidden px-4 py-3 text-right font-mono md:table-cell">
                         {candidateMoney(candidate.totalReceiptsCycle, candidate.totalsUpdatedAt)}
                       </td>
-                      <td className="px-4 py-3 text-right font-mono">
+                      <td className="hidden px-4 py-3 text-right font-mono md:table-cell">
                         {candidateMoney(candidate.cashOnHandLatest, candidate.totalsUpdatedAt)}
                       </td>
-                      <td className="px-4 py-3 text-xs text-neutral-600">
+                      <td className="hidden px-4 py-3 text-xs text-neutral-600 md:table-cell">
                         {candidateTotalsAsOf(candidate.totalsUpdatedAt)}
                       </td>
                     </tr>

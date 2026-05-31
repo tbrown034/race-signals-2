@@ -119,13 +119,13 @@ export default async function CandidatePage({
               </p>
             </div>
             <div className="overflow-x-auto">
-              <table className="w-full min-w-[680px] text-left text-sm">
+              <table className="w-full min-w-0 text-left text-sm md:min-w-[680px]">
                 <thead className="bg-neutral-100 font-mono text-xs uppercase tracking-[0.12em] text-neutral-500">
                   <tr>
                     <th className="px-4 py-3 font-medium" scope="col">Candidate</th>
-                    <th className="px-4 py-3 font-medium" scope="col">Status</th>
-                    <th className="px-4 py-3 text-right font-medium" scope="col">Receipts</th>
-                    <th className="px-4 py-3 text-right font-medium" scope="col">Cash</th>
+                    <th className="hidden px-4 py-3 font-medium md:table-cell" scope="col">Status</th>
+                    <th className="hidden px-4 py-3 text-right font-medium md:table-cell" scope="col">Receipts</th>
+                    <th className="hidden px-4 py-3 text-right font-medium md:table-cell" scope="col">Cash</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-neutral-200">
@@ -158,13 +158,13 @@ export default async function CandidatePage({
                           </div>
                         </dl>
                       </td>
-                      <td className="px-4 py-3">
+                      <td className="hidden px-4 py-3 md:table-cell">
                         {incumbentStatus(otherCandidate.incumbentChallengeStatus) ?? "Not classified by FEC"}
                       </td>
-                      <td className="px-4 py-3 text-right font-mono">
+                      <td className="hidden px-4 py-3 text-right font-mono md:table-cell">
                         {candidateMoney(otherCandidate.totalReceiptsCycle, otherCandidate.totalsUpdatedAt)}
                       </td>
-                      <td className="px-4 py-3 text-right font-mono">
+                      <td className="hidden px-4 py-3 text-right font-mono md:table-cell">
                         {candidateMoney(otherCandidate.cashOnHandLatest, otherCandidate.totalsUpdatedAt)}
                       </td>
                     </tr>

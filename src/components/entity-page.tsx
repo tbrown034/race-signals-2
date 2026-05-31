@@ -106,22 +106,22 @@ export function EntityPage({
               </h2>
             </div>
             <div className="overflow-x-auto">
-              <table className="w-full min-w-[760px] text-left text-sm">
+              <table className="w-full min-w-0 text-left text-sm md:min-w-[760px]">
                 <thead className="bg-neutral-100 text-xs uppercase tracking-[0.12em] text-neutral-500">
                   <tr>
-                    <th className="px-4 py-3 font-medium" scope="col">Date</th>
+                    <th className="hidden px-4 py-3 font-medium md:table-cell" scope="col">Date</th>
                     <th className="px-4 py-3 font-medium" scope="col">Target</th>
-                    <th className="px-4 py-3 font-medium" scope="col">Position</th>
-                    <th className="px-4 py-3 font-medium" scope="col">Race</th>
-                    <th className="px-4 py-3 font-medium" scope="col">Purpose</th>
-                    <th className="px-4 py-3 font-medium" scope="col">Source</th>
-                    <th className="px-4 py-3 text-right font-medium" scope="col">Amount</th>
+                    <th className="hidden px-4 py-3 font-medium md:table-cell" scope="col">Position</th>
+                    <th className="hidden px-4 py-3 font-medium md:table-cell" scope="col">Race</th>
+                    <th className="hidden px-4 py-3 font-medium md:table-cell" scope="col">Purpose</th>
+                    <th className="hidden px-4 py-3 font-medium md:table-cell" scope="col">Source</th>
+                    <th className="hidden px-4 py-3 text-right font-medium md:table-cell" scope="col">Amount</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-neutral-200">
                   {independentExpenditures.map((expenditure) => (
                     <tr key={expenditure.sourceId}>
-                      <td className="px-4 py-3">{formatDate(expenditure.expenditureDate)}</td>
+                      <td className="hidden px-4 py-3 md:table-cell">{formatDate(expenditure.expenditureDate)}</td>
                       <td className="px-4 py-3">
                         {expenditure.candidateId ? (
                           <Link
@@ -135,12 +135,32 @@ export function EntityPage({
                         )}
                         <dl className="mt-2 space-y-1 text-xs leading-5 text-neutral-600 md:hidden">
                           <div>
+                            <dt className="inline font-mono uppercase tracking-[0.12em] text-neutral-500">Date </dt>
+                            <dd className="inline font-mono text-neutral-950">{formatDate(expenditure.expenditureDate)}</dd>
+                          </div>
+                          <div>
                             <dt className="inline font-mono uppercase tracking-[0.12em] text-neutral-500">Amount </dt>
                             <dd className="inline font-mono font-semibold text-neutral-950">{formatMoney(expenditure.amount)}</dd>
                           </div>
                           <div>
                             <dt className="inline font-mono uppercase tracking-[0.12em] text-neutral-500">Position </dt>
                             <dd className="inline">{supportLabel(expenditure.supportOpposeIndicator)}</dd>
+                          </div>
+                          <div>
+                            <dt className="inline font-mono uppercase tracking-[0.12em] text-neutral-500">Race </dt>
+                            <dd className="inline">
+                              {expenditure.raceId ? (
+                                <Link className="font-medium underline underline-offset-4" href={`/races/${expenditure.raceId}`}>
+                                  {expenditure.raceName ?? expenditure.raceId}
+                                </Link>
+                              ) : (
+                                "Unmatched"
+                              )}
+                            </dd>
+                          </div>
+                          <div>
+                            <dt className="inline font-mono uppercase tracking-[0.12em] text-neutral-500">Purpose </dt>
+                            <dd className="inline">{expenditure.purpose ?? "Not specified"}</dd>
                           </div>
                           <div>
                             <dt className="inline font-mono uppercase tracking-[0.12em] text-neutral-500">Source </dt>
@@ -156,8 +176,8 @@ export function EntityPage({
                           </div>
                         </dl>
                       </td>
-                      <td className="px-4 py-3">{supportLabel(expenditure.supportOpposeIndicator)}</td>
-                      <td className="px-4 py-3">
+                      <td className="hidden px-4 py-3 md:table-cell">{supportLabel(expenditure.supportOpposeIndicator)}</td>
+                      <td className="hidden px-4 py-3 md:table-cell">
                         {expenditure.raceId ? (
                           <Link
                             className="font-medium underline underline-offset-4"
@@ -169,8 +189,8 @@ export function EntityPage({
                           "Unmatched"
                         )}
                       </td>
-                      <td className="px-4 py-3 text-neutral-700">{expenditure.purpose ?? "Not specified"}</td>
-                      <td className="px-4 py-3">
+                      <td className="hidden px-4 py-3 text-neutral-700 md:table-cell">{expenditure.purpose ?? "Not specified"}</td>
+                      <td className="hidden px-4 py-3 md:table-cell">
                         <div className="flex flex-col gap-1">
                           {expenditure.sourceUrl ? (
                             <a
@@ -189,7 +209,7 @@ export function EntityPage({
                           </span>
                         </div>
                       </td>
-                      <td className="px-4 py-3 text-right font-mono">
+                      <td className="hidden px-4 py-3 text-right font-mono md:table-cell">
                         {formatMoney(expenditure.amount)}
                       </td>
                     </tr>

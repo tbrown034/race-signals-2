@@ -1153,6 +1153,9 @@ export async function getCommitteeIndependentExpenditures(
         ...expenditure,
         candidateName: demoCandidates.find((candidate) => candidate.id === expenditure.candidateId)?.name ?? null,
         candidateParty: demoCandidates.find((candidate) => candidate.id === expenditure.candidateId)?.party ?? null,
+        candidateState: demoCandidates.find((candidate) => candidate.id === expenditure.candidateId)?.state ?? null,
+        candidateDistrict: demoCandidates.find((candidate) => candidate.id === expenditure.candidateId)?.district ?? null,
+        candidateIncumbentChallengeStatus: demoCandidates.find((candidate) => candidate.id === expenditure.candidateId)?.incumbentChallengeStatus ?? null,
         committeeName: demoCommittees.find((committee) => committee.id === expenditure.spenderCommitteeId)?.name ?? null,
         raceName: demoRaces.find((race) => race.id === expenditure.raceId)?.name ?? null,
       }));
@@ -1179,6 +1182,9 @@ export async function getCommitteeIndependentExpenditures(
     raw: unknown;
     candidate_name: string | null;
     candidate_party: string | null;
+    candidate_state: string | null;
+    candidate_district: string | null;
+    candidate_incumbent_challenge_status: string | null;
     committee_name: string | null;
     race_name: string | null;
   }>(
@@ -1187,6 +1193,9 @@ export async function getCommitteeIndependentExpenditures(
         ie.*,
         c.name as candidate_name,
         c.party as candidate_party,
+        c.state as candidate_state,
+        c.district as candidate_district,
+        c.incumbent_challenge_status as candidate_incumbent_challenge_status,
         cm.name as committee_name,
         r.name as race_name
       from independent_expenditures ie
@@ -1225,6 +1234,9 @@ export async function getCommitteeIndependentExpenditures(
     raw: row.raw,
     candidateName: row.candidate_name,
     candidateParty: row.candidate_party,
+    candidateState: row.candidate_state,
+    candidateDistrict: row.candidate_district,
+    candidateIncumbentChallengeStatus: row.candidate_incumbent_challenge_status,
     committeeName: row.committee_name,
     raceName: row.race_name,
   }));
@@ -1242,6 +1254,9 @@ export async function getCandidateIndependentExpenditures(
         ...expenditure,
         candidateName: demoCandidates.find((candidate) => candidate.id === expenditure.candidateId)?.name ?? null,
         candidateParty: demoCandidates.find((candidate) => candidate.id === expenditure.candidateId)?.party ?? null,
+        candidateState: demoCandidates.find((candidate) => candidate.id === expenditure.candidateId)?.state ?? null,
+        candidateDistrict: demoCandidates.find((candidate) => candidate.id === expenditure.candidateId)?.district ?? null,
+        candidateIncumbentChallengeStatus: demoCandidates.find((candidate) => candidate.id === expenditure.candidateId)?.incumbentChallengeStatus ?? null,
         committeeName: demoCommittees.find((committee) => committee.id === expenditure.spenderCommitteeId)?.name ?? null,
         raceName: demoRaces.find((race) => race.id === expenditure.raceId)?.name ?? null,
       }));
@@ -1268,6 +1283,9 @@ export async function getCandidateIndependentExpenditures(
     raw: unknown;
     candidate_name: string | null;
     candidate_party: string | null;
+    candidate_state: string | null;
+    candidate_district: string | null;
+    candidate_incumbent_challenge_status: string | null;
     committee_name: string | null;
     race_name: string | null;
   }>(
@@ -1276,6 +1294,9 @@ export async function getCandidateIndependentExpenditures(
         ie.*,
         c.name as candidate_name,
         c.party as candidate_party,
+        c.state as candidate_state,
+        c.district as candidate_district,
+        c.incumbent_challenge_status as candidate_incumbent_challenge_status,
         cm.name as committee_name,
         r.name as race_name
       from independent_expenditures ie
@@ -1314,6 +1335,9 @@ export async function getCandidateIndependentExpenditures(
     raw: row.raw,
     candidateName: row.candidate_name,
     candidateParty: row.candidate_party,
+    candidateState: row.candidate_state,
+    candidateDistrict: row.candidate_district,
+    candidateIncumbentChallengeStatus: row.candidate_incumbent_challenge_status,
     committeeName: row.committee_name,
     raceName: row.race_name,
   }));

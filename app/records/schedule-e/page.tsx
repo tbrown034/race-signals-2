@@ -454,12 +454,29 @@ function targetStatusLabel(value?: string | null) {
 }
 
 function targetLink(record: Awaited<ReturnType<typeof getScheduleERecords>>[number]) {
+  const context = targetContext(record);
   if (!record.candidateId) return displayCandidateName(record.candidateName) ?? record.fecCandidateId ?? "Candidate not resolved";
   return (
-    <Link className="font-medium underline underline-offset-4" href={`/candidates/${record.candidateId}`}>
-      {displayCandidateName(record.candidateName) ?? record.fecCandidateId ?? record.candidateId}
-    </Link>
+    <span>
+      <Link className="font-medium underline underline-offset-4" href={`/candidates/${record.candidateId}`}>
+        {displayCandidateName(record.candidateName) ?? record.fecCandidateId ?? record.candidateId}
+      </Link>
+      {context ? (
+        <span className="ml-1 font-mono text-[11px] uppercase tracking-[0.12em] text-neutral-500">
+          {context}
+        </span>
+      ) : null}
+    </span>
   );
+}
+
+function targetContext(record: Awaited<ReturnType<typeof getScheduleERecords>>[number]) {
+  const district = [record.candidateState, record.candidateDistrict].filter(Boolean).join("-");
+  return [
+    record.candidateParty,
+    district || null,
+    targetStatusLabel(record.candidateIncumbentChallengeStatus),
+  ].filter(Boolean).join(" / ");
 }
 
 function raceLink(record: Awaited<ReturnType<typeof getScheduleERecords>>[number]) {

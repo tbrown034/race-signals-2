@@ -28,6 +28,10 @@ export type ScheduleEExportRow = {
   candidate_id: string | null;
   fec_candidate_id: string | null;
   candidate_party: string | null;
+  candidate_state: string | null;
+  candidate_district: string | null;
+  candidate_incumbent_challenge_status: string | null;
+  candidate_context: string | null;
   race_name: string | null;
   race_id: string | null;
   purpose: string | null;
@@ -68,6 +72,10 @@ export function scheduleEToExportRow(
     candidate_id: record.candidateId ?? null,
     fec_candidate_id: record.fecCandidateId ?? null,
     candidate_party: record.candidateParty ?? null,
+    candidate_state: record.candidateState ?? null,
+    candidate_district: record.candidateDistrict ?? null,
+    candidate_incumbent_challenge_status: record.candidateIncumbentChallengeStatus ?? null,
+    candidate_context: candidateContext(record),
     race_name: record.raceName ?? null,
     race_id: record.raceId ?? null,
     purpose: record.purpose ?? null,
@@ -108,6 +116,10 @@ export function scheduleERowsToCsv(rows: ScheduleEExportRow[]) {
     "candidate_id",
     "fec_candidate_id",
     "candidate_party",
+    "candidate_state",
+    "candidate_district",
+    "candidate_incumbent_challenge_status",
+    "candidate_context",
     "race_name",
     "race_id",
     "purpose",
@@ -130,6 +142,23 @@ export function scheduleERowsToCsv(rows: ScheduleEExportRow[]) {
     columns.join(","),
     ...rows.map((row) => columns.map((column) => csvCell(row[column])).join(",")),
   ].join("\n");
+}
+
+function candidateContext(record: CommitteeIndependentExpenditure) {
+  const district = [record.candidateState, record.candidateDistrict].filter(Boolean).join("-");
+  const parts = [
+    record.candidateParty,
+    district || null,
+    targetStatusLabel(record.candidateIncumbentChallengeStatus),
+  ].filter(Boolean);
+  return parts.length ? parts.join(", ") : null;
+}
+
+function targetStatusLabel(value?: string | null) {
+  if (value === "I") return "incumbent";
+  if (value === "C") return "challenger";
+  if (value === "O") return "open seat";
+  return null;
 }
 
 function targetPositionLabel(value?: string | null) {

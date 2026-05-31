@@ -134,6 +134,9 @@ export type IndependentExpenditure = {
 export type CommitteeIndependentExpenditure = IndependentExpenditure & {
   candidateName?: string | null;
   candidateParty?: string | null;
+  candidateState?: string | null;
+  candidateDistrict?: string | null;
+  candidateIncumbentChallengeStatus?: string | null;
   committeeName?: string | null;
   raceName?: string | null;
 };

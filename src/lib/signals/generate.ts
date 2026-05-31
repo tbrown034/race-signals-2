@@ -267,12 +267,21 @@ export function generateSignals(input: SignalInput): Signal[] {
 function newFilingCopy(filing: Filing, committee?: Committee, versionKind = "initial_or_single") {
   const label = reportTypePhrase(filing.reportType);
   const committeeName = committee?.name ?? "A committee";
+  const isTermination = filing.reportType === "TER";
   if (versionKind === "likely_refile") {
     return {
       headline: `${committeeName} filed another version of ${label}.`,
       whyItMatters:
         "Multiple versions of the same report can reflect amendments or refiles; compare the linked FEC filings before treating totals as new activity.",
       versionKind: "likely_refile",
+    };
+  }
+  if (isTermination) {
+    return {
+      headline: `${committeeName} filed ${label}.`,
+      whyItMatters:
+        "A termination report can signal committee wind-down or administrative cleanup; verify debts, cash and candidate status before treating the campaign as inactive.",
+      versionKind: "initial_or_single",
     };
   }
   return {

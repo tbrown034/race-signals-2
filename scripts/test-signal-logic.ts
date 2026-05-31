@@ -154,6 +154,11 @@ assert.match(
   /filed a termination report/,
   "termination report copy should explain the FEC TER code",
 );
+assert.match(
+  terminationSignal.whyItMatters,
+  /committee wind-down or administrative cleanup/,
+  "termination report why-it-matters copy should not use generic fundraising-report framing",
+);
 
 const committeeSignal = signals.find((signal) => signal.dedupeKey === "fec:new_committee:C00999999");
 assert.ok(committeeSignal, "current-cycle committee should generate a signal");

@@ -138,7 +138,7 @@ CSV and JSON exports are designed for source-checking, not just download volume.
 - Activity-spike signal exports flatten the comparison evidence into first-class columns: latest/prior receipts, receipts ratio, report types, coverage windows, source IDs, source URLs and comparison basis.
 - Schedule E exports include the FEC source URL plus a scoped Race Signals evidence URL back to the Schedule E records page. The FEC URL remains the durable source of record.
 - Spender and race-board exports label totals as stored database-slice totals and include scope notes so downloaded rows do not read as national completeness claims.
-- The Schedule E evidence page and exports can be narrowed by state, race, target-position code, minimum amount, source ID, candidate, internal spender ID or FEC spender ID.
+- The Schedule E evidence page and exports can be narrowed by state, race, target-position code, minimum amount, target party, target incumbent/challenger/open-seat status, source ID, candidate, internal spender ID or FEC spender ID.
 
 ## Known Limitations
 
@@ -239,7 +239,7 @@ npm run repair:schedule-e-links
 
 `npm run audit:signals` checks more than missingness. It also verifies FEC source URL shape by source kind, including Schedule E links with the expected `sub_id`, so source-linked cards do not silently point at the wrong FEC surface.
 
-`npm run audit:pages` starts the built app locally and checks the main reporter routes, including feed, review, Schedule E evidence, spending, spenders, status, docs, methodology and one dynamic candidate/race/committee route.
+`npm run audit:pages` starts the built app locally and checks the main reporter routes, including feed, review, Schedule E evidence, spending, spenders, status, docs, methodology and one dynamic candidate/race/committee route. It also smoke-tests CSV and JSON export endpoints for review signals and Schedule E evidence filters.
 
 ## How To Add A Source Adapter Later
 

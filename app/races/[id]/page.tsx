@@ -98,9 +98,9 @@ export default async function RacePage({
       >
         <nav
           aria-label="Race page sections"
-          className="border-b border-neutral-300 px-5 py-3 font-mono text-[11px] uppercase tracking-[0.12em] text-neutral-600"
+          className="overflow-x-auto border-b border-neutral-300 px-5 py-3 font-mono text-[11px] uppercase tracking-[0.12em] text-neutral-600"
         >
-          <div className="flex flex-wrap gap-x-4 gap-y-2">
+          <div className="flex min-w-max flex-nowrap gap-x-4 whitespace-nowrap">
             <a className="underline-offset-4 hover:underline" href="#reporter-read">Reporter read</a>
             <a className="underline-offset-4 hover:underline" href="#race-stats">Stats</a>
             <a className="underline-offset-4 hover:underline" href="#candidate-cohort">Candidate cohort</a>

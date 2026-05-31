@@ -80,7 +80,7 @@ export default function MethodologyPage() {
 
         <nav
           aria-label="Methodology sections"
-          className="mt-4 flex flex-wrap gap-x-4 gap-y-2 border border-neutral-300 bg-white px-4 py-3 font-mono text-[11px] uppercase tracking-[0.12em] text-neutral-600"
+          className="mt-4 flex flex-nowrap gap-x-4 overflow-x-auto whitespace-nowrap border border-neutral-300 bg-white px-4 py-3 font-mono text-[11px] uppercase tracking-[0.12em] text-neutral-600"
         >
           {[...stepLinks, ...signalLinks, { href: "#confidence", label: "Confidence" }, { href: "#visual-language", label: "Visual language" }].map((item) => (
             <a className="underline-offset-4 hover:underline" href={item.href} key={item.href}>

@@ -64,7 +64,7 @@ export default async function StatusPage() {
 
         <nav
           aria-label="Status page sections"
-          className="mt-4 flex min-w-0 max-w-full flex-wrap gap-x-4 gap-y-2 border border-neutral-300 bg-white px-4 py-3 font-mono text-[11px] uppercase tracking-[0.12em] text-neutral-600"
+          className="mt-4 flex min-w-0 max-w-full flex-nowrap gap-x-4 overflow-x-auto whitespace-nowrap border border-neutral-300 bg-white px-4 py-3 font-mono text-[11px] uppercase tracking-[0.12em] text-neutral-600"
         >
           <a className="underline-offset-4 hover:underline" href="#election-coverage">Election coverage</a>
           <a className="underline-offset-4 hover:underline" href="#storage">Storage</a>

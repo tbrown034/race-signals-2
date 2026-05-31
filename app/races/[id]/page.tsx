@@ -113,6 +113,7 @@ export default async function RacePage({
         </nav>
         <ReporterRead
           id="reporter-read"
+          mobileLimit={3}
           notes={[
             `${candidates.length} FEC candidates matched to this race; ${candidatesWithMoney} currently show cycle receipts in the FEC totals endpoint.`,
             `Known candidate receipts in this slice total ${formatMoney(totalReceipts) ?? "$0"}. Use this as FEC-filed activity, not a race forecast.`,
@@ -383,7 +384,7 @@ function RaceStat({ detail, label, value }: { detail?: string; label: string; va
     <div className="bg-white px-5 py-4">
       <p className="font-mono text-[11px] uppercase tracking-[0.12em] text-neutral-500">{label}</p>
       <p className="mt-1 text-lg font-semibold tabular-nums">{value}</p>
-      {detail ? <p className="mt-1 text-xs leading-5 text-neutral-600">{detail}</p> : null}
+      {detail ? <p className="mt-1 break-words text-xs leading-5 text-neutral-600 [overflow-wrap:anywhere]">{detail}</p> : null}
     </div>
   );
 }

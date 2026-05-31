@@ -25,6 +25,8 @@ export type ScheduleEExportRow = {
   purpose: string | null;
   source_url: string | null;
   source_id: string;
+  methodology_url: string;
+  scope_note: string;
   exported_at: string;
   filters: string;
   latest_run_id: string | null;
@@ -56,6 +58,8 @@ export function scheduleEToExportRow(
     purpose: record.purpose ?? null,
     source_url: record.sourceUrl ?? null,
     source_id: record.sourceId,
+    methodology_url: "/methodology#large_independent_expenditure",
+    scope_note: "Stored, source-linked Schedule E rows in the current Race Signals database slice; not a completeness claim.",
     exported_at: manifest.exportedAt,
     filters: JSON.stringify(manifest.filters),
     latest_run_id: manifest.latestRun?.id ?? null,
@@ -85,6 +89,8 @@ export function scheduleERowsToCsv(rows: ScheduleEExportRow[]) {
     "purpose",
     "source_url",
     "source_id",
+    "methodology_url",
+    "scope_note",
     "exported_at",
     "filters",
     "latest_run_id",
@@ -102,8 +108,8 @@ export function scheduleERowsToCsv(rows: ScheduleEExportRow[]) {
 }
 
 function targetPositionLabel(value?: string | null) {
-  if (value === "S") return "Supports target";
-  if (value === "O") return "Opposes target";
+  if (value === "S") return "FEC code: supports target";
+  if (value === "O") return "FEC code: opposes target";
   return "Not classified by FEC";
 }
 

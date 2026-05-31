@@ -10,6 +10,7 @@ import { ReporterRead } from "@/src/components/reporter-read";
 import { getCandidate, getCandidateElections, getCandidateFilings, getCandidateIndependentExpenditures, getCandidatesForRace, getRace, getSignalsForEntity } from "@/src/lib/db/repository";
 import { reportTypeDisplay } from "@/src/lib/fec-report-types";
 import { formatCount, formatDate, formatDateTime, formatMoney } from "@/src/lib/format";
+import { displayCandidateName } from "@/src/lib/names";
 import type { Metadata } from "next";
 
 export const revalidate = 21600;
@@ -22,9 +23,10 @@ export async function generateMetadata({
   const { id } = await params;
   const candidate = await getCandidate(id);
   if (!candidate) return { title: "Candidate not found" };
+  const name = displayCandidateName(candidate.name) ?? candidate.name;
   return {
-    title: candidate.name,
-    description: `${candidate.name} campaign-finance signals, FEC totals and race context for ${candidate.raceId ?? "the current Race Signals slice"}.`,
+    title: name,
+    description: `${name} campaign-finance signals, FEC totals and race context for ${candidate.raceId ?? "the current Race Signals slice"}.`,
   };
 }
 
@@ -43,6 +45,7 @@ export default async function CandidatePage({
   ]);
 
   if (!candidate) notFound();
+  const candidateDisplayName = displayCandidateName(candidate.name) ?? candidate.name;
   const [raceCohort, race] = candidate.raceId
     ? await Promise.all([getCandidatesForRace(candidate.raceId), getRace(candidate.raceId)])
     : [[], null] as const;
@@ -54,14 +57,17 @@ export default async function CandidatePage({
       <EntityPage
         asideMedia={
           candidate.photoUrl ? (
-            <CandidatePhoto alt={`${candidate.name} congressional portrait`} size="lg" src={candidate.photoUrl} />
+            <CandidatePhoto alt={`${candidateDisplayName} congressional portrait`} size="lg" src={candidate.photoUrl} />
           ) : null
         }
         eyebrow="Candidate"
-        title={candidate.name}
+        title={candidateDisplayName}
         titleAccessory={
           <span className="inline-flex items-center gap-2">
             <PartySquare party={candidate.party} size="md" />
+            <span className="font-mono text-[11px] uppercase tracking-[0.12em] text-neutral-600">
+              {partyLabel(candidate.party)}
+            </span>
             {isIncumbent(candidate.incumbentChallengeStatus) ? <IncumbentBadge /> : null}
           </span>
         }
@@ -170,7 +176,7 @@ export default async function CandidatePage({
                         <span className="inline-flex items-center gap-2">
                           <PartySquare party={otherCandidate.party} />
                           <Link className="font-medium underline underline-offset-4" href={`/candidates/${otherCandidate.id}`}>
-                            {otherCandidate.name}
+                            {displayCandidateName(otherCandidate.name) ?? otherCandidate.name}
                           </Link>
                           {otherCandidate.id === candidate.id ? (
                             <span className="font-mono text-[10px] uppercase tracking-[0.12em] text-neutral-500">
@@ -477,7 +483,7 @@ function candidateMobileNotes(
   independentExpenditureCount: number,
 ) {
   return [
-    `${candidateMoney(candidate.totalReceiptsCycle, candidate.totalsFetchedAt)} raised; ${candidateMoney(candidate.cashOnHandLatest, candidate.totalsFetchedAt)} cash${candidate.cashOnHandAsOf ? ` as of ${formatDate(candidate.cashOnHandAsOf)}` : ""}.`,
+    `FEC totals: ${candidateMoney(candidate.totalReceiptsCycle, candidate.totalsFetchedAt)} raised; ${candidateMoney(candidate.cashOnHandLatest, candidate.totalsFetchedAt)} cash${candidate.cashOnHandAsOf ? ` as of ${formatDate(candidate.cashOnHandAsOf)}` : ""}${candidate.totalsFetchedAt ? `, fetched ${formatDate(candidate.totalsFetchedAt)}` : ""}.`,
     totalSignals
       ? `${formatCount(totalSignals, "signal")}: ${signalCounts.filings} filings, ${signalCounts.committees} committees, ${signalCounts.outsideSpending} IE, ${signalCounts.review} review.`
       : "No matched source-record signals in this stored slice yet.",
@@ -492,13 +498,13 @@ function candidateMobileNotes(
 
 function MobileCandidateRead({ notes }: { notes: string[] }) {
   return (
-    <div className="min-w-0 max-w-[calc(100vw-5rem)] overflow-hidden border border-neutral-300 bg-neutral-50 sm:max-w-full">
+    <div className="min-w-0 max-w-[min(280px,100%)] overflow-hidden border border-neutral-300 bg-neutral-50 sm:max-w-full">
       <p className="border-b border-neutral-300 px-3 py-2 font-mono text-[11px] uppercase tracking-[0.12em] text-neutral-500">
         Reporter read
       </p>
       <ul className="min-w-0 max-w-full divide-y divide-neutral-200 text-sm leading-5 text-neutral-700">
         {notes.map((note) => (
-          <li className="min-w-0 max-w-full break-words px-3 py-2 [overflow-wrap:anywhere]" key={note}>
+          <li className="min-w-0 max-w-full break-words px-3 py-2 [overflow-wrap:anywhere] [word-break:break-word]" key={note}>
             {note}
           </li>
         ))}
@@ -508,8 +514,8 @@ function MobileCandidateRead({ notes }: { notes: string[] }) {
 }
 
 function supportLabel(value?: string | null) {
-  if (value === "S") return "Supports target";
-  if (value === "O") return "Opposes target";
+  if (value === "S") return "FEC code: supports target";
+  if (value === "O") return "FEC code: opposes target";
   return "Not classified by FEC";
 }
 

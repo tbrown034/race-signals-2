@@ -37,6 +37,8 @@ export type SpenderExportRow = {
   oppose_share: number | null;
   support_share: number | null;
   committee_source_url: string | null;
+  methodology_url: string;
+  scope_note: string;
   exported_at: string;
   filters: string;
   latest_run_id: string | null;
@@ -85,6 +87,8 @@ export function spenderToExportRow(
     oppose_share: opposeShare,
     support_share: supportShare,
     committee_source_url: spender.sourceUrl ?? null,
+    methodology_url: manifest.baseUrl ? `${manifest.baseUrl}/methodology#large_independent_expenditure` : "/methodology#large_independent_expenditure",
+    scope_note: "Ranked from stored, source-linked Schedule E rows in the current Race Signals database slice; not a completeness claim.",
     exported_at: manifest.exportedAt,
     filters: JSON.stringify(manifest.filters),
     latest_run_id: manifest.latestRun?.id ?? null,
@@ -125,6 +129,8 @@ export function spenderRowsToCsv(rows: SpenderExportRow[]) {
     "oppose_share",
     "support_share",
     "committee_source_url",
+    "methodology_url",
+    "scope_note",
     "exported_at",
     "filters",
     "latest_run_id",

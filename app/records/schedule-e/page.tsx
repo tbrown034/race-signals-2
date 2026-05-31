@@ -49,7 +49,7 @@ export default async function ScheduleERecordsPage({
   return (
     <PageShell>
       <main className="mx-auto max-w-7xl px-5 py-6 sm:px-8">
-        <section className="border border-neutral-300 bg-white">
+        <section className="w-full max-w-[calc(100vw-2.5rem)] min-w-0 border border-neutral-300 bg-white sm:max-w-none">
           <div className="border-b border-neutral-300 px-5 py-5">
             <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
               <div className="min-w-0 max-w-[calc(100vw-5rem)] sm:max-w-none">
@@ -59,7 +59,7 @@ export default async function ScheduleERecordsPage({
                 <h1 className="mt-1 max-w-full whitespace-normal break-words text-xl font-semibold tracking-tight [overflow-wrap:anywhere]">
                   Schedule E records
                 </h1>
-                <p className="mt-2 max-w-full whitespace-normal break-words text-sm leading-6 text-neutral-700 [overflow-wrap:anywhere] sm:max-w-3xl">
+                <p className="mt-2 max-w-[min(280px,100%)] whitespace-normal break-words text-sm leading-6 text-neutral-700 [overflow-wrap:anywhere] sm:max-w-3xl">
                   Stored Schedule E rows. Includes records below the $25,000 alert threshold, with source links for checking totals before publication.
                 </p>
                 {activeScope.length ? (
@@ -68,23 +68,23 @@ export default async function ScheduleERecordsPage({
                   </p>
                 ) : null}
               </div>
-              <div className="grid max-w-[calc(100vw-5rem)] grid-cols-1 gap-2 text-sm sm:flex sm:max-w-none sm:flex-wrap">
+              <div className="grid w-full max-w-[280px] grid-cols-1 gap-2 text-sm sm:flex sm:max-w-none sm:flex-wrap">
                 <a
-                  className="w-[280px] max-w-full border border-neutral-400 px-3 py-2 font-medium hover:border-neutral-900 sm:w-auto"
+                  className="w-full max-w-full border border-neutral-400 px-3 py-2 font-medium hover:border-neutral-900 sm:w-auto"
                   href={`/api/schedule-e/export.csv${exportSuffix ? `?${exportSuffix}` : ""}`}
                 >
                   Export CSV
                 </a>
                 <a
-                  className="w-[280px] max-w-full border border-neutral-400 px-3 py-2 font-medium hover:border-neutral-900 sm:w-auto"
+                  className="w-full max-w-full border border-neutral-400 px-3 py-2 font-medium hover:border-neutral-900 sm:w-auto"
                   href={`/api/schedule-e/export.json${exportSuffix ? `?${exportSuffix}` : ""}`}
                 >
                   Export JSON
                 </a>
-                <Link className="w-[280px] max-w-full border border-neutral-400 px-3 py-2 font-medium hover:border-neutral-900 sm:w-auto" href="/spending">
+                <Link className="w-full max-w-full border border-neutral-400 px-3 py-2 font-medium hover:border-neutral-900 sm:w-auto" href="/spending">
                   Signals
                 </Link>
-                <Link className="w-[280px] max-w-full border border-neutral-400 px-3 py-2 font-medium hover:border-neutral-900 sm:w-auto" href="/spenders">
+                <Link className="w-full max-w-full border border-neutral-400 px-3 py-2 font-medium hover:border-neutral-900 sm:w-auto" href="/spenders">
                   Top spenders
                 </Link>
               </div>
@@ -93,14 +93,19 @@ export default async function ScheduleERecordsPage({
 
           <div className="grid gap-px border-b border-neutral-300 bg-neutral-300 sm:grid-cols-2 xl:grid-cols-5">
             <RecordStat label="Stored records" value={formatCount(summary.recordCount, "record")} />
-            <RecordStat label="Stored IE" value={formatMoney(summary.totalAmount) ?? "$0"} />
-            <RecordStat label="Supports target" value={formatMoney(summary.supportAmount) ?? "$0"} />
-            <RecordStat label="Opposes target" value={formatMoney(summary.opposeAmount) ?? "$0"} />
+            <RecordStat label="Stored Schedule E IE" value={formatMoney(summary.totalAmount) ?? "$0"} />
+            <RecordStat label="FEC code: supports" value={formatMoney(summary.supportAmount) ?? "$0"} />
+            <RecordStat label="FEC code: opposes" value={formatMoney(summary.opposeAmount) ?? "$0"} />
             <RecordStat label="Not classified" value={formatMoney(summary.uncodedAmount) ?? "$0"} />
           </div>
 
-          <div className="max-w-[calc(100vw-2.5rem)] border-b border-neutral-300 px-5 py-3 text-sm text-neutral-600 sm:max-w-none">
-            Latest {formatCount(records.length, "record")} shown. Summary totals cover the full stored scope; exports return up to 10,000 scoped rows.
+          <div className="border-b border-neutral-300 px-5 py-3 text-sm text-neutral-600">
+            <p className="max-w-[min(280px,100%)] break-words [overflow-wrap:anywhere] sm:max-w-3xl">
+              Latest {formatCount(records.length, "record")} shown. Summary totals cover the full stored scope; exports return up to 10,000 scoped rows.
+            </p>
+            <p className="mt-1 max-w-[min(280px,100%)] break-words [overflow-wrap:anywhere] sm:max-w-3xl">
+              Totals are summed from stored, source-linked Schedule E rows in this database slice, not a completeness claim.
+            </p>
           </div>
 
           {records.length ? (
@@ -225,8 +230,8 @@ function RecordMobileRow({ label, value }: { label: string; value: string }) {
 }
 
 function supportLabel(value?: string | null) {
-  if (value === "S") return "Supports target";
-  if (value === "O") return "Opposes target";
+  if (value === "S") return "FEC code: supports target";
+  if (value === "O") return "FEC code: opposes target";
   return "Not classified by FEC";
 }
 
@@ -250,7 +255,7 @@ function raceLink(record: Awaited<ReturnType<typeof getScheduleERecords>>[number
 
 function sourceLink(record: Awaited<ReturnType<typeof getScheduleERecords>>[number]) {
   return (
-    <>
+    <span className="inline-flex max-w-full flex-wrap items-baseline gap-x-2 gap-y-1">
       {record.sourceUrl ? (
         <a className="font-medium underline underline-offset-4" href={record.sourceUrl} rel="noreferrer" target="_blank">
           FEC Schedule E
@@ -261,6 +266,6 @@ function sourceLink(record: Awaited<ReturnType<typeof getScheduleERecords>>[numb
       <span className="font-mono text-[11px] uppercase tracking-[0.12em] text-neutral-500">
         {record.sourceId}
       </span>
-    </>
+    </span>
   );
 }

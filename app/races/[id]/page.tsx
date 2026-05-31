@@ -16,6 +16,7 @@ import {
   getSignalsForEntity,
 } from "@/src/lib/db/repository";
 import { formatCount, formatDate, formatDateTime, formatMoney } from "@/src/lib/format";
+import { displayCandidateName } from "@/src/lib/names";
 import type { Metadata } from "next";
 
 export const revalidate = 21600;
@@ -72,10 +73,10 @@ export default async function RacePage({
             <span className="inline-flex items-center gap-1.5">
               {candidates.map((candidate) => (
                 <Link
-                  aria-label={`${candidate.name} candidate page`}
+                  aria-label={`${displayCandidateName(candidate.name) ?? candidate.name} candidate page`}
                   href={`/candidates/${candidate.id}`}
                   key={candidate.id}
-                  title={candidate.name}
+                  title={displayCandidateName(candidate.name) ?? candidate.name}
                 >
                   <PartySquare party={candidate.party} />
                 </Link>
@@ -115,8 +116,8 @@ export default async function RacePage({
           notes={[
             `${candidates.length} FEC candidates matched to this race; ${candidatesWithMoney} currently show cycle receipts in the FEC totals endpoint.`,
             `Known candidate receipts in this slice total ${formatMoney(totalReceipts) ?? "$0"}. Use this as FEC-filed activity, not a race forecast.`,
-            `Schedule E independent expenditures currently total ${formatMoney(stats.totalIndependentExpenditures) ?? "$0"} in this race slice.`,
-            `${formatCount(stats.independentExpenditureRecordCount, "stored Schedule E record")} in this race: supports targets ${formatMoney(stats.supportIndependentExpenditures) ?? "$0"}; opposes targets ${formatMoney(stats.opposeIndependentExpenditures) ?? "$0"}.`,
+            `Stored Schedule E source rows in this race slice total ${formatMoney(stats.totalIndependentExpenditures) ?? "$0"}; verify the evidence table before treating this as full-race outside spending.`,
+            `${formatCount(stats.independentExpenditureRecordCount, "stored Schedule E record")} in this race: FEC code supports targets ${formatMoney(stats.supportIndependentExpenditures) ?? "$0"}; FEC code opposes targets ${formatMoney(stats.opposeIndependentExpenditures) ?? "$0"}.`,
             `Latest stored signal: ${latestSignalDate ? formatDate(latestSignalDate) : "none"}; latest stored Schedule E record: ${stats.latestIndependentExpenditureDate ? formatDate(stats.latestIndependentExpenditureDate) : "none"}.`,
             `${formatCount(signals.length, "related signal")}: ${formatCount(signalCounts.filings, "filing")}, ${formatCount(signalCounts.committees, "committee record")}, ${formatCount(signalCounts.outsideSpending, "outside-spending alert")}, ${formatCount(signalCounts.review, "review flag")}.`,
             incumbentCount
@@ -125,14 +126,18 @@ export default async function RacePage({
             ]}
         />
         <div className="grid gap-px border-b border-neutral-300 bg-neutral-300 sm:grid-cols-2 xl:grid-cols-5" id="race-stats">
-          <RaceStat label="Outside spending" value={formatMoney(stats.totalIndependentExpenditures) ?? "$0"} />
+          <RaceStat
+            detail="Source-linked Schedule E rows in this Race Signals slice; verify evidence before publication."
+            label="Stored Schedule E total"
+            value={formatMoney(stats.totalIndependentExpenditures) ?? "$0"}
+          />
           <RaceStat
             detail={raceTotalsDetail(oldestTotalsFetchedAt, latestTotalsFetchedAt)}
             label="Stored FEC candidate totals"
             value={formatMoney(stats.totalRaised) ?? "$0"}
           />
           <RaceStat
-            detail={`Supports targets ${formatMoney(stats.supportIndependentExpenditures) ?? "$0"} / opposes targets ${formatMoney(stats.opposeIndependentExpenditures) ?? "$0"}`}
+            detail={`FEC code supports ${formatMoney(stats.supportIndependentExpenditures) ?? "$0"} / opposes ${formatMoney(stats.opposeIndependentExpenditures) ?? "$0"}`}
             label="IE direction"
             value={formatCount(stats.independentExpenditureRecordCount, "record")}
           />
@@ -170,7 +175,7 @@ export default async function RacePage({
                         <div className="flex items-center gap-3">
                           {candidate.photoUrl ? (
                             <CandidatePhoto
-                              alt={`${candidate.name} congressional portrait`}
+                              alt={`${displayCandidateName(candidate.name) ?? candidate.name} congressional portrait`}
                               size="sm"
                               src={candidate.photoUrl}
                             />
@@ -179,7 +184,7 @@ export default async function RacePage({
                           )}
                           <div className="min-w-0">
                             <Link className="font-medium underline underline-offset-4" href={`/candidates/${candidate.id}`}>
-                              {candidate.name}
+                              {displayCandidateName(candidate.name) ?? candidate.name}
                             </Link>
                             {isIncumbent(candidate.incumbentChallengeStatus) ? (
                               <IncumbentBadge className="ml-2" />

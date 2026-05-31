@@ -61,7 +61,7 @@ export default async function SpendingPage({
                   Outside spending watch
                 </h1>
                 <p className="mt-2 max-w-full break-words text-sm leading-5 text-neutral-700 sm:max-w-3xl">
-                  Largest alerts first. Sort by date for latest records.
+                  Shows $25k+ Schedule E alert signals. Use Schedule E evidence for lower-dollar and uncoded source rows.
                 </p>
               </div>
               <div className="min-w-0 max-w-full flex flex-col gap-2 md:items-end">
@@ -372,8 +372,8 @@ function SpendingEmptyState({
 }
 
 function supportOpposeLabel(value: unknown) {
-  if (value === "S") return "Supports target";
-  if (value === "O") return "Opposes target";
+  if (value === "S") return "FEC code: supports target";
+  if (value === "O") return "FEC code: opposes target";
   return "Not coded by FEC";
 }
 
@@ -440,8 +440,8 @@ function SpendingQuickFilters({
           </p>
           <div className="mt-2 flex flex-wrap gap-2">
             <Link className={quickFilterClass(!selectedPosition)} href={spendingToggleHref(params, "position", "")}>All</Link>
-            <Link className={quickFilterClass(selectedPosition === "S")} href={spendingToggleHref(params, "position", "S")}>Supports target</Link>
-            <Link className={quickFilterClass(selectedPosition === "O")} href={spendingToggleHref(params, "position", "O")}>Opposes target</Link>
+            <Link className={quickFilterClass(selectedPosition === "S")} href={spendingToggleHref(params, "position", "S")}>FEC code: supports</Link>
+            <Link className={quickFilterClass(selectedPosition === "O")} href={spendingToggleHref(params, "position", "O")}>FEC code: opposes</Link>
           </div>
         </div>
         <div>

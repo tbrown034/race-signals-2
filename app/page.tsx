@@ -292,7 +292,7 @@ function TriageItem({
       {signal ? (
         <>
           <Link
-            className="mt-1 block max-w-[270px] truncate text-sm font-medium underline underline-offset-4 sm:max-w-full"
+            className="mt-1 block max-w-[270px] break-words text-sm font-medium leading-5 underline underline-offset-4 [overflow-wrap:anywhere] sm:max-w-full"
             href={`#${signalAnchorId(signal.dedupeKey)}`}
             title={signal.headline}
           >

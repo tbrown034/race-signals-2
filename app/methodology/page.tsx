@@ -130,12 +130,13 @@ export default function MethodologyPage() {
           <h2 className="text-base font-semibold">Confidence and review labels</h2>
           <p className="mt-2 max-w-3xl text-sm leading-6 text-neutral-700">
             Confidence is a data-quality label, not an importance score. High means
-            the source record links cleanly to a candidate, committee, race and FEC
-            source URL. Medium means the record is useful but needs extra context,
-            often because a filing-level comparison needs source review. Low is
-            reserved for records with missing or weakly matched context. Review marks
-            records that cross a flat manual-review threshold or otherwise need
-            verification before publication.
+            the source URL and required source fields are present; entity matching
+            still appears in record details and should be checked when a candidate,
+            committee or race is unresolved. Medium means the record is useful but
+            needs extra context, often because a filing-level comparison needs
+            source review. Low is reserved for records with missing or weakly
+            matched context. Review marks records that cross a flat manual-review
+            threshold or otherwise need verification before publication.
           </p>
         </section>
 

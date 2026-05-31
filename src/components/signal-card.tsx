@@ -6,6 +6,7 @@ import { SignalCopyLink } from "@/src/components/signal-copy-link";
 import { committeeDesignationLabel, committeeTypeLabel } from "@/src/lib/fec-codes";
 import { reportTypeDisplay } from "@/src/lib/fec-report-types";
 import { formatDate, formatDateTime, formatMoney, formatRelativeTime } from "@/src/lib/format";
+import { displayCandidateName } from "@/src/lib/names";
 import type { Signal } from "@/src/lib/types";
 
 const typeLabels: Record<string, string> = {
@@ -247,7 +248,7 @@ function textMetadata(value: unknown) {
 }
 
 function candidateDisplay(signal: Signal) {
-  const name = signal.candidateName ?? signal.candidateId ?? "Candidate not resolved";
+  const name = displayCandidateName(signal.candidateName) ?? signal.candidateId ?? "Candidate not resolved";
   const context = [
     signal.candidateParty,
     [signal.candidateState, signal.candidateDistrict].filter(Boolean).join("-"),
@@ -421,8 +422,8 @@ function signalAmountLabel(signal: Signal) {
 }
 
 function supportOpposeLabel(value: string) {
-  if (value === "S") return "Supports target";
-  if (value === "O") return "Opposes target";
+  if (value === "S") return "FEC code: supports target";
+  if (value === "O") return "FEC code: opposes target";
   return value;
 }
 

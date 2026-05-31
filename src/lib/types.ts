@@ -232,3 +232,12 @@ export type ElectionCoverage = {
   withRows: number;
   electionRows: number;
 };
+
+export type StorageUsage = {
+  databaseSizeBytes: number | null;
+  largestTables: Array<{
+    tableName: string;
+    totalBytes: number;
+    rowEstimate: number | null;
+  }>;
+};

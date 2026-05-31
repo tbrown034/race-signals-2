@@ -194,6 +194,7 @@ npm run lint
 npm run test:logic
 npm run build
 npm run audit:signals
+npm run audit:cost
 ```
 
 ## How To Add A Source Adapter Later

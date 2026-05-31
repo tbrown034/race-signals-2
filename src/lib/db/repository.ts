@@ -20,6 +20,7 @@ import type {
   RaceRating,
   RaceStats,
   Signal,
+  StorageUsage,
   TopSpender,
   Transaction,
   ValidationIssueRollup,
@@ -925,6 +926,10 @@ export async function getStatus() {
         withRows: 0,
         electionRows: 0,
       },
+      storageUsage: {
+        databaseSizeBytes: null,
+        largestTables: [],
+      },
       mode: "demo",
     };
   }
@@ -1003,6 +1008,23 @@ export async function getStatus() {
     left join elections e on e.candidate_id = c.id
   `);
   const electionCoverageRow = electionCoverageRows[0];
+  const storageRows = await sql<{
+    table_name: string;
+    total_bytes: string;
+    row_estimate: string | null;
+  }>(`
+    select
+      relname as table_name,
+      pg_total_relation_size(c.oid)::text as total_bytes,
+      reltuples::bigint::text as row_estimate
+    from pg_class c
+    join pg_namespace n on n.oid = c.relnamespace
+    where n.nspname = 'public'
+      and c.relkind = 'r'
+    order by pg_total_relation_size(c.oid) desc
+    limit 8
+  `);
+  const databaseSizeRows = await sql<{ size: string }>("select pg_database_size(current_database())::text as size");
   try {
     validationIssues = await sql<{
       rule: string;
@@ -1061,6 +1083,14 @@ export async function getStatus() {
       withRows: Number(electionCoverageRow?.with_rows ?? 0),
       electionRows: Number(electionCoverageRow?.election_rows ?? 0),
     } satisfies ElectionCoverage,
+    storageUsage: {
+      databaseSizeBytes: Number(databaseSizeRows[0]?.size ?? 0),
+      largestTables: storageRows.map((row) => ({
+        tableName: row.table_name,
+        totalBytes: Number(row.total_bytes),
+        rowEstimate: row.row_estimate === null ? null : Number(row.row_estimate),
+      })),
+    } satisfies StorageUsage,
     mode: "database",
   };
 }

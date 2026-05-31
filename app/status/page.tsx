@@ -65,6 +65,37 @@ export default async function StatusPage() {
           </dl>
         </section>
 
+        <section className="mt-6 border border-neutral-300 bg-white p-5">
+          <h2 className="text-sm font-semibold uppercase tracking-[0.14em] text-neutral-600">
+            Storage footprint
+          </h2>
+          <p className="mt-2 text-sm leading-6 text-neutral-700">
+            Database size is {formatBytes(status.storageUsage.databaseSizeBytes)}. The target operating model is Neon free-tier compatible; large storage jumps usually mean an ingest scope changed.
+          </p>
+          {status.storageUsage.largestTables.length ? (
+            <div className="mt-4 overflow-x-auto">
+              <table className="w-full min-w-[560px] text-left text-sm">
+                <thead className="bg-neutral-100 font-mono text-xs uppercase tracking-[0.12em] text-neutral-500">
+                  <tr>
+                    <th className="px-4 py-3 font-medium" scope="col">Table</th>
+                    <th className="px-4 py-3 text-right font-medium" scope="col">Size</th>
+                    <th className="px-4 py-3 text-right font-medium" scope="col">Rows est.</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-neutral-200">
+                  {status.storageUsage.largestTables.map((table) => (
+                    <tr key={table.tableName}>
+                      <td className="px-4 py-3 font-mono">{table.tableName}</td>
+                      <td className="px-4 py-3 text-right font-mono">{formatBytes(table.totalBytes)}</td>
+                      <td className="px-4 py-3 text-right font-mono">{table.rowEstimate ?? "Unknown"}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          ) : null}
+        </section>
+
         <section className="mt-6 border border-neutral-300 bg-white">
           <div className="border-b border-neutral-300 px-5 py-4">
             <h2 className="text-sm font-semibold uppercase tracking-[0.14em] text-neutral-600">
@@ -253,4 +284,17 @@ function CoverageStat({ label, value }: { label: string; value: number }) {
       <dd className="mt-1 text-lg font-semibold tabular-nums">{value}</dd>
     </div>
   );
+}
+
+function formatBytes(bytes?: number | null) {
+  if (bytes === null || bytes === undefined) return "unknown";
+  if (bytes < 1024) return `${bytes} B`;
+  const units = ["KB", "MB", "GB"];
+  let value = bytes / 1024;
+  let unit = units[0];
+  for (let index = 1; index < units.length && value >= 1024; index += 1) {
+    value /= 1024;
+    unit = units[index];
+  }
+  return `${value.toFixed(value >= 10 ? 1 : 2)} ${unit}`;
 }

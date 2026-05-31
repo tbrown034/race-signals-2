@@ -28,7 +28,7 @@ export default async function SpendersPage() {
             <p className="mt-2 max-w-3xl text-sm leading-5 text-neutral-700">
               Committees ranked by independent expenditure totals in the current
               database slice. Amounts are sourced from FEC Schedule E records and
-              should be checked against the linked committee source before publication.
+              should be checked against the linked Schedule E record before publication.
             </p>
           </div>
           <div className="overflow-x-auto">
@@ -96,18 +96,33 @@ export default async function SpendersPage() {
                       </td>
                       <td className="px-4 py-3 text-right font-mono">{spender.recordCount}</td>
                       <td className="px-4 py-3">
-                        {spender.sourceUrl ? (
-                          <a
-                            className="font-medium underline underline-offset-4"
-                            href={spender.sourceUrl}
-                            rel="noreferrer"
-                            target="_blank"
-                          >
-                            FEC committee
-                          </a>
-                        ) : (
-                          <span className="text-neutral-600">Source not stored</span>
-                        )}
+                        <div className="flex flex-col gap-1">
+                          {spender.latestScheduleESourceUrl ? (
+                            <a
+                              className="font-medium underline underline-offset-4"
+                              href={spender.latestScheduleESourceUrl}
+                              rel="noreferrer"
+                              target="_blank"
+                            >
+                              FEC Schedule E
+                            </a>
+                          ) : (
+                            <span className="text-neutral-600">Schedule E source not stored</span>
+                          )}
+                          <span className="font-mono text-[11px] uppercase tracking-[0.12em] text-neutral-500">
+                            {spender.latestScheduleESourceId ?? "No Schedule E ID"}
+                          </span>
+                          {spender.sourceUrl ? (
+                            <a
+                              className="text-xs underline underline-offset-4"
+                              href={spender.sourceUrl}
+                              rel="noreferrer"
+                              target="_blank"
+                            >
+                              Committee profile
+                            </a>
+                          ) : null}
+                        </div>
                       </td>
                     </tr>
                   ))

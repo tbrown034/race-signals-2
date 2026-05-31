@@ -137,6 +137,8 @@ export type TopSpender = {
   raceCount: number;
   states: string[];
   lastExpenditureDate?: string | null;
+  latestScheduleESourceId?: string | null;
+  latestScheduleESourceUrl?: string | null;
   topRaceId?: string | null;
   topRaceName?: string | null;
   topRaceAmount?: number | null;

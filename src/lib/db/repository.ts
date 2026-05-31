@@ -689,6 +689,12 @@ export async function getTopSpenders(limit = 100): Promise<TopSpender[]> {
             .filter(Boolean)
             .sort()
             .at(-1) ?? null,
+          latestScheduleESourceId: records
+            .filter((record) => record.expenditureDate)
+            .sort((a, b) => String(b.expenditureDate).localeCompare(String(a.expenditureDate)))[0]?.sourceId ?? null,
+          latestScheduleESourceUrl: records
+            .filter((record) => record.expenditureDate)
+            .sort((a, b) => String(b.expenditureDate).localeCompare(String(a.expenditureDate)))[0]?.sourceUrl ?? null,
           topRaceId: records[0]?.raceId ?? null,
           topRaceName: demoRaces.find((race) => race.id === records[0]?.raceId)?.name ?? null,
           topRaceAmount: records[0]?.amount ?? null,
@@ -713,6 +719,8 @@ export async function getTopSpenders(limit = 100): Promise<TopSpender[]> {
     race_count: string;
     states: string[] | null;
     last_expenditure_date: string | Date | null;
+    latest_schedule_e_source_id: string | null;
+    latest_schedule_e_source_url: string | null;
     top_race_id: string | null;
     top_race_name: string | null;
     top_race_amount: string | null;
@@ -755,6 +763,24 @@ export async function getTopSpenders(limit = 100): Promise<TopSpender[]> {
         select spender_committee_id, race_id, race_name, race_amount
         from spending_by_race
         where rank = 1
+      ),
+      latest_record as (
+        select spender_committee_id, source_id, source_url
+        from (
+          select
+            ie.spender_committee_id,
+            ie.source_id,
+            ie.source_url,
+            row_number() over (
+              partition by ie.spender_committee_id
+              order by ie.expenditure_date desc nulls last, ie.amount desc, ie.source_id
+            ) as rank
+          from independent_expenditures ie
+          left join races r on r.id = ie.race_id
+          where ie.expenditure_date >= make_date(coalesce(r.cycle, $2) - 1, 1, 1)
+            and ie.expenditure_date <= make_date(coalesce(r.cycle, $2), 12, 31)
+        ) ranked_records
+        where rank = 1
       )
       select
         cm.id as committee_id,
@@ -769,6 +795,8 @@ export async function getTopSpenders(limit = 100): Promise<TopSpender[]> {
         s.record_count::text as record_count,
         s.race_count::text as race_count,
         s.last_expenditure_date,
+        latest_record.source_id as latest_schedule_e_source_id,
+        latest_record.source_url as latest_schedule_e_source_url,
         s.states,
         top_race.race_id as top_race_id,
         top_race.race_name as top_race_name,
@@ -776,6 +804,7 @@ export async function getTopSpenders(limit = 100): Promise<TopSpender[]> {
       from spending_by_committee s
       left join committees cm on cm.id = s.spender_committee_id
       left join top_race on top_race.spender_committee_id = s.spender_committee_id
+      left join latest_record on latest_record.spender_committee_id = s.spender_committee_id
       order by s.total_amount desc nulls last
       limit $1
     `,
@@ -796,6 +825,8 @@ export async function getTopSpenders(limit = 100): Promise<TopSpender[]> {
     raceCount: Number(row.race_count),
     states: row.states ?? [],
     lastExpenditureDate: row.last_expenditure_date ? toDateString(row.last_expenditure_date) : null,
+    latestScheduleESourceId: row.latest_schedule_e_source_id,
+    latestScheduleESourceUrl: row.latest_schedule_e_source_url,
     topRaceId: row.top_race_id,
     topRaceName: row.top_race_name,
     topRaceAmount: row.top_race_amount === null ? null : Number(row.top_race_amount),

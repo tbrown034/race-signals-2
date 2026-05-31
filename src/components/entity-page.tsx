@@ -147,18 +147,23 @@ export function EntityPage({
                       </td>
                       <td className="px-4 py-3 text-neutral-700">{expenditure.purpose ?? "Not specified"}</td>
                       <td className="px-4 py-3">
-                        {expenditure.sourceUrl ? (
-                          <a
-                            className="font-medium underline underline-offset-4"
-                            href={expenditure.sourceUrl}
-                            rel="noreferrer"
-                            target="_blank"
-                          >
-                            FEC
-                          </a>
-                        ) : (
-                          "Source not stored"
-                        )}
+                        <div className="flex flex-col gap-1">
+                          {expenditure.sourceUrl ? (
+                            <a
+                              className="font-medium underline underline-offset-4"
+                              href={expenditure.sourceUrl}
+                              rel="noreferrer"
+                              target="_blank"
+                            >
+                              FEC Schedule E
+                            </a>
+                          ) : (
+                            <span className="text-neutral-600">Source not stored</span>
+                          )}
+                          <span className="font-mono text-[11px] uppercase tracking-[0.12em] text-neutral-500">
+                            {expenditure.sourceId}
+                          </span>
+                        </div>
                       </td>
                       <td className="px-4 py-3 text-right font-mono">
                         {formatMoney(expenditure.amount)}

@@ -89,7 +89,7 @@ export function generateSignals(input: SignalInput): Signal[] {
       signalType: "new_filing",
       headline: `${committee?.name ?? "A committee"} filed ${reportLabel(filing.reportType)}.`,
       whyItMatters:
-        "New reports can reveal changed cash positions, spending pace and donor patterns before those shifts are visible in public campaigning.",
+        "New reports can reveal changed cash positions, spending pace and committee activity before those shifts are visible in public campaigning.",
       candidateId: candidate?.id ?? null,
       candidateName: candidate?.name ?? null,
       committeeId: committee?.id ?? filing.committeeId ?? null,

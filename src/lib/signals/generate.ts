@@ -84,14 +84,14 @@ export function generateSignals(input: SignalInput): Signal[] {
     });
   }
 
-  const filingVersionCounts = countLikelyFilingVersions(input.filings);
+  const filingVersionKinds = classifyFilingVersions(input.filings);
   for (const filing of input.filings) {
     if (!filing.receiptDate || !filing.sourceUrl) continue;
     const committee = filing.committeeId ? committees.get(filing.committeeId) : undefined;
     const race = committee?.raceId ? races.get(committee.raceId) : undefined;
     if (!isCurrentCycleRecord(filing.receiptDate, race, filing.cycle)) continue;
     const candidate = committee?.candidateId ? candidates.get(committee.candidateId) : undefined;
-    const filingCopy = newFilingCopy(filing, committee, filingVersionCounts.get(filingVersionKey(filing)) ?? 0);
+    const filingCopy = newFilingCopy(filing, committee, filingVersionKinds.get(filing.sourceId) ?? "initial_or_single");
     signals.push({
       dedupeKey: `fec:new_filing:${filing.sourceId}`,
       signalType: "new_filing",
@@ -255,10 +255,10 @@ function reportLabel(reportType?: string | null) {
   return labels[reportType] ?? `${reportType} report`;
 }
 
-function newFilingCopy(filing: Filing, committee?: Committee, likelyVersionCount = 0) {
+function newFilingCopy(filing: Filing, committee?: Committee, versionKind = "initial_or_single") {
   const label = reportLabel(filing.reportType);
   const committeeName = committee?.name ?? "A committee";
-  if (likelyVersionCount > 1) {
+  if (versionKind === "likely_refile") {
     return {
       headline: `${committeeName} filed another version of ${label}.`,
       whyItMatters:
@@ -326,13 +326,29 @@ function isChallenger(status?: string | null) {
   return status === "C" || status === "Challenger";
 }
 
-function countLikelyFilingVersions(filings: Filing[]) {
-  const counts = new Map<string, number>();
+function classifyFilingVersions(filings: Filing[]) {
+  const byVersionKey = new Map<string, Filing[]>();
   for (const filing of filings) {
     const key = filingVersionKey(filing);
-    counts.set(key, (counts.get(key) ?? 0) + 1);
+    const group = byVersionKey.get(key) ?? [];
+    group.push(filing);
+    byVersionKey.set(key, group);
   }
-  return counts;
+  const classifications = new Map<string, string>();
+  for (const group of byVersionKey.values()) {
+    if (group.length === 1) {
+      classifications.set(group[0].sourceId, "initial_or_single");
+      continue;
+    }
+    const sorted = group.sort((a, b) => {
+      const dateCompare = String(a.receiptDate ?? "").localeCompare(String(b.receiptDate ?? ""));
+      return dateCompare || a.sourceId.localeCompare(b.sourceId);
+    });
+    sorted.forEach((filing, index) => {
+      classifications.set(filing.sourceId, index === 0 ? "initial_version" : "likely_refile");
+    });
+  }
+  return classifications;
 }
 
 function filingVersionKey(filing: Filing) {

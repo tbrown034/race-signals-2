@@ -209,22 +209,8 @@ export default async function Home({
               <dd className="mt-1">Daily ingest is capped; broader national runs are manual.</dd>
             </div>
           </dl>
-          <div className="mt-6 border-t border-neutral-300 pt-5">
-            <p className="font-mono text-xs uppercase tracking-[0.12em] text-neutral-500">
-              Start points
-            </p>
-            <div className="mt-3 space-y-3">
-              {quickViews.map((view) => (
-                <Link
-                  className="block border border-neutral-300 p-3 hover:border-neutral-900"
-                  href={view.href}
-                  key={view.href}
-                >
-                  <span className="block text-sm font-semibold">{view.label}</span>
-                  <span className="mt-1 block text-xs leading-5 text-neutral-600">{view.body}</span>
-                </Link>
-              ))}
-            </div>
+          <div className="mt-6 border-t border-neutral-300 pt-5 text-sm leading-6 text-neutral-700">
+            Use the start-point strip above the filters for common reporting cuts: a state desk, Senate records, outside spending and review items.
           </div>
         </aside>
       </main>

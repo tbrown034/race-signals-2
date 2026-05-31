@@ -106,7 +106,7 @@ export default async function Home({
         </div>
       )}
       <main className="mx-auto grid max-w-7xl grid-cols-1 gap-6 px-5 py-6 sm:px-8 lg:grid-cols-[1fr_320px]">
-        <section className="w-full max-w-[calc(100vw-2.5rem)] min-w-0 border border-neutral-300 bg-white sm:max-w-none">
+        <section className="w-full max-w-[calc(100vw-2.5rem)] min-w-0 scroll-mt-24 border border-neutral-300 bg-white sm:max-w-none" id="signal-feed">
           <div className="border-b border-neutral-300 px-5 py-5">
             <div className="flex min-w-0 flex-col gap-3 md:flex-row md:items-end md:justify-between">
               <div className="min-w-0 max-w-full">

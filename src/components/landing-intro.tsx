@@ -2,34 +2,71 @@ import Link from "next/link";
 
 export function LandingIntro() {
   return (
-    <section
-      aria-labelledby="landing-intro-title"
-      className="border border-neutral-300 bg-white"
-    >
-      <div className="border-b border-neutral-300 px-5 py-5 sm:px-8 sm:py-6">
-        <p className="font-mono text-xs uppercase tracking-[0.18em] text-neutral-500">
-          About Race Signals
+    <section aria-labelledby="landing-intro-title">
+      <div className="border border-neutral-950 bg-neutral-950 px-5 py-8 text-white sm:px-10 sm:py-12">
+        <p className="flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.22em] text-neutral-400">
+          Race Signals
+          <span aria-hidden="true" className="inline-flex items-center gap-0.5">
+            <span className="inline-block h-2 w-2 bg-red-500" />
+            <span className="inline-block h-2 w-2 bg-blue-500" />
+            <span className="inline-block h-2 w-2 bg-emerald-500" />
+          </span>
+          <span className="ml-1 text-neutral-500">·</span>
+          <span className="text-neutral-400">FEC alert desk</span>
         </p>
         <h2
-          className="mt-2 max-w-4xl text-2xl font-semibold leading-tight tracking-tight sm:text-3xl"
+          className="mt-3 max-w-4xl text-3xl font-semibold leading-tight tracking-tight sm:text-4xl"
           id="landing-intro-title"
         >
           A source-linked FEC record feed for 2026 House and Senate races.
         </h2>
-        <p className="mt-3 max-w-3xl text-sm leading-6 text-neutral-700">
+        <p className="mt-4 max-w-3xl text-sm leading-6 text-neutral-300 sm:text-base sm:leading-7">
           Every alert is one FEC record with a plain-English headline, a stable
           source ID, a why-it-matters line and a link back to the original FEC
-          page. Built for working reporters who need to verify a paperwork
-          signal before it becomes a story.
+          page. Built for reporters who need to verify a paperwork signal
+          before it becomes a story.
         </p>
-        <p className="mt-2 max-w-3xl text-sm leading-6 text-neutral-700">
+        <p className="mt-3 max-w-3xl text-xs leading-5 text-neutral-400 sm:text-sm sm:leading-6">
           Not in scope: live election results, donor-by-donor receipts, paid
           race ratings, presidential, state and local races. Follow the FEC
           source link or use AP, DDHQ or your state authority for those.
         </p>
+
+        <div className="mt-7 flex flex-wrap gap-2 text-sm">
+          <Link
+            className="border border-white bg-white px-4 py-2 font-semibold text-neutral-950 hover:bg-neutral-200"
+            href="#signal-feed"
+          >
+            Browse the feed ↓
+          </Link>
+          <Link
+            className="border border-neutral-600 px-4 py-2 font-medium text-white hover:border-white"
+            href="/spending"
+          >
+            Outside spending →
+          </Link>
+          <Link
+            className="border border-neutral-600 px-4 py-2 font-medium text-white hover:border-white"
+            href="/raised"
+          >
+            Top fundraisers →
+          </Link>
+          <Link
+            className="border border-neutral-600 px-4 py-2 font-medium text-white hover:border-white"
+            href="/review"
+          >
+            Review queue →
+          </Link>
+          <Link
+            className="border border-neutral-600 px-4 py-2 font-medium text-white hover:border-white"
+            href="/methodology"
+          >
+            How it works →
+          </Link>
+        </div>
       </div>
 
-      <div className="grid grid-cols-1 divide-neutral-300 border-b border-neutral-300 md:grid-cols-3 md:divide-x">
+      <div className="grid grid-cols-1 divide-neutral-300 border-x border-b border-neutral-300 bg-white md:grid-cols-3 md:divide-x">
         <Step
           number="1"
           eyebrow="Ingest"
@@ -50,24 +87,9 @@ export function LandingIntro() {
         />
       </div>
 
-      <div className="grid grid-cols-1 gap-px bg-neutral-300 md:grid-cols-[1.1fr_1fr]">
+      <div className="grid grid-cols-1 gap-px border-x border-b border-neutral-300 bg-neutral-300 md:grid-cols-[1.1fr_1fr]">
         <SignalAnatomy />
         <ScopeMatrix />
-      </div>
-
-      <div className="border-t border-neutral-300 px-5 py-4 text-sm leading-6 text-neutral-700 sm:px-8">
-        <p>
-          The feed below is the current stored database slice, not a complete
-          national activity total. Empty results do not prove no activity. See{" "}
-          <Link className="font-medium underline underline-offset-4" href="/methodology">
-            methodology
-          </Link>{" "}
-          for the full data, attribution and limits.{" "}
-          <Link className="font-medium underline underline-offset-4" href="/status">
-            Status
-          </Link>{" "}
-          shows what is currently ingested and what is not.
-        </p>
       </div>
     </section>
   );

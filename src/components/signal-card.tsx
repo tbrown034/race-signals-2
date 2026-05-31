@@ -53,7 +53,7 @@ export function SignalCard({ signal }: { signal: Signal }) {
       <div className="min-w-0 max-w-full font-mono text-xs text-neutral-600">
         <p className="flex items-center gap-1.5 text-neutral-950">
           <FreshMark signalDate={signal.signalDate} status={signal.status} />
-          FEC date {formatDate(signal.signalDate)}
+          {signalDateLabel(signal)} {formatDate(signal.signalDate)}
         </p>
         <Link
           className="mt-1 block uppercase tracking-[0.12em] underline-offset-4 hover:underline"
@@ -308,8 +308,15 @@ function fecSourceLabel(signal: Signal) {
 }
 
 function reviewReason(signal: Signal) {
-  if (signal.amount && signal.amount >= 100000) return "large amount";
+  if (signal.amount && signal.amount >= 100000) return "$100k+ source record";
   return "needs human check";
+}
+
+function signalDateLabel(signal: Signal) {
+  if (signal.signalType === "large_independent_expenditure") return "Spent";
+  if (signal.signalType === "new_filing" || signal.signalType === "committee_activity_spike") return "Filed";
+  if (signal.signalType === "new_committee") return "Committee record";
+  return "Event";
 }
 
 function signalEvidence(signal: Signal) {

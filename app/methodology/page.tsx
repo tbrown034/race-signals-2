@@ -37,7 +37,7 @@ const signalTypes = [
   [
     "large_independent_expenditure",
     "Independent expenditure",
-    "A large Schedule E independent-expenditure report can show where outside groups think a race or candidate is worth influencing. The headline names it as Schedule E so it does not read like a contribution or coordinated spend when copied out of context.",
+    "A large Schedule E independent-expenditure report can show where outside groups think a race or candidate is worth influencing. The headline names it as Schedule E so it does not read like a contribution or coordinated spend when copied out of context. Evidence rows preserve payee, dissemination date, expense category and filing PDF links when the FEC provides them.",
   ],
   [
     "committee_activity_spike",

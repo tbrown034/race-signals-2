@@ -122,7 +122,7 @@ Backfill mode generates historical signals from the requested date window. Those
 
 Filing signals are source-linked, but the generator avoids treating obvious duplicate report versions as fresh activity. If two stored filings share the same committee, report type and coverage period, the earliest stored version remains the baseline report and later matching versions are described as likely amendments or refiles, even when amended totals changed.
 
-Independent expenditure signals are generated only from current-cycle Schedule E rows. Headlines explicitly identify them as Schedule E independent expenditures so they do not read like contributions or coordinated spending when exported. Large current-cycle IEs of $100,000 or more are marked `review` even when their event date is older than the freshness window; reviewability is about publication risk, not recency.
+Independent expenditure signals are generated only from current-cycle Schedule E rows. Headlines explicitly identify them as Schedule E independent expenditures so they do not read like contributions or coordinated spending when exported. Large current-cycle IEs of $100,000 or more are marked `review` even when their event date is older than the freshness window; reviewability is about publication risk, not recency. The Schedule E evidence table and exports preserve payee name, dissemination date, category, filing form, file number and PDF URL when the FEC record provides them.
 
 Committee activity spike signals require comparable period-receipts filings and expose both the latest and prior filing source IDs, URLs and coverage periods. If both source links are not available, the spike signal is not generated.
 

@@ -1,6 +1,6 @@
 const FEC_BASE_URL = "https://api.open.fec.gov/v1";
 const FEC_WEB_BASE_URL = "https://www.fec.gov/data";
-const DEFAULT_REQUEST_DELAY_MS = 750;
+const DEFAULT_REQUEST_DELAY_MS = 4000;
 const DEFAULT_MAX_RETRIES = 4;
 
 let lastRequestAt = 0;

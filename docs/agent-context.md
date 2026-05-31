@@ -87,7 +87,7 @@ Ingestion controls:
 
 - `FEC_MAX_CANDIDATE_PAGES` limits national candidate discovery pages.
 - `FEC_MAX_CANDIDATES` limits downstream candidate processing.
-- `FEC_REQUEST_DELAY_MS` paces API calls. Default is 750 ms.
+- `FEC_REQUEST_DELAY_MS` paces API calls. Default is 4000 ms to stay under the normal 1,000-calls/hour FEC limit.
 - `FEC_MAX_RETRIES` controls retry attempts for 429/5xx responses.
 
 National ingestion should be paced and scheduled. Do not put broad FEC ingestion in a route handler.

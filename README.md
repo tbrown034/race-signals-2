@@ -142,7 +142,7 @@ Useful ingestion controls:
 ```bash
 FEC_MAX_CANDIDATE_PAGES=3 npm run ingest
 FEC_MAX_CANDIDATES=25 npm run ingest
-FEC_REQUEST_DELAY_MS=1500 npm run ingest
+FEC_REQUEST_DELAY_MS=4000 npm run ingest
 FEC_MAX_RETRIES=6 npm run ingest
 ```
 
@@ -154,7 +154,7 @@ For a first production smoke test, use:
 FEC_MAX_CANDIDATES=25 FEC_REQUEST_DELAY_MS=1500 npm run ingest
 ```
 
-The FEC API is rate-limited. National ingestion should be treated as a paced background job or scheduled task, not a route handler.
+The default request delay is 4000 ms so uncapped national runs stay under the normal FEC API hourly limit. National ingestion should be treated as a paced background job or scheduled task, not a route handler.
 
 Verification:
 

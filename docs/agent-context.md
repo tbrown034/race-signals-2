@@ -95,6 +95,8 @@ Ingestion controls:
 
 Scheduled ingestion is intentionally cost-capped through GitHub Actions. Current scheduled runs use an Indiana House/Senate slice with candidate/page caps; broader national runs are manual `workflow_dispatch` jobs with explicit caps. Do not put broad FEC ingestion in a route handler.
 
+GitHub Actions scheduled ingest requires repository secrets named `DATABASE_URL` and `FEC_API_KEY`. These are separate from Vercel env vars. CI should keep working without secrets; only the ingest workflow needs them.
+
 Backfilled signals must use the original event date as `signal_date` and `status = historical`. Do not present old backfilled records as fresh changes.
 
 ## National Congressional Scope

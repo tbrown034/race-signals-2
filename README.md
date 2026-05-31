@@ -185,6 +185,13 @@ The default request delay is 4000 ms so uncapped national runs stay under the no
 
 Coverage: 2026 cycle only, national U.S. House + Senate in the data model. Per-candidate totals come from the FEC aggregate totals endpoint. Individual contribution detail is not stored; follow source URLs to FEC for donor-level lookup. The scheduled GitHub Actions ingest is intentionally cost-capped to an Indiana House/Senate slice (`RACE_SIGNALS_STATE=IN`, `FEC_MAX_CANDIDATES=25`, `FEC_MAX_CANDIDATE_PAGES=2`, 45-minute timeout). Broader or national runs are manual `workflow_dispatch` runs with explicit caps. Read traffic is served by Vercel.
 
+GitHub Actions secrets required for scheduled ingest:
+
+- `DATABASE_URL`: Neon-compatible Postgres connection string.
+- `FEC_API_KEY`: FEC API key used by the source adapter.
+
+These are repository secrets, not Vercel environment variables. CI does not need them, but `.github/workflows/ingest.yml` does. If scheduled ingest fails before contacting the FEC, check these secrets first.
+
 Cost guardrails:
 
 - Keep the daily scheduled ingest bounded. A scheduled national run can burn GitHub Actions minutes quickly because FEC requests are deliberately rate-limited.

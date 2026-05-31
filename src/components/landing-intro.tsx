@@ -18,13 +18,15 @@ export function LandingIntro() {
           className="mt-3 max-w-4xl text-3xl font-semibold leading-tight tracking-tight sm:text-4xl"
           id="landing-intro-title"
         >
-          A source-linked FEC record feed for 2026 House and Senate races.
+          A source-linked FEC signal feed for 2026 House and Senate races.
         </h2>
         <p className="mt-4 max-w-3xl text-sm leading-6 text-neutral-300 sm:text-base sm:leading-7">
-          Every alert is one FEC record with a plain-English headline, a stable
-          source ID, a why-it-matters line and a link back to the original FEC
-          page. Built for reporters who need to verify a paperwork signal
-          before it becomes a story.
+          <strong className="font-semibold text-white">A signal is one FEC record that crossed a flat publishing rule</strong>{" "}
+          — large outside spending, a fresh filing, a new candidate committee
+          or a filing-level activity jump. Each signal carries a plain-English
+          headline, a stable source ID, a why-it-matters line and a link back
+          to the original FEC page. Built for reporters who need to verify
+          paperwork before it becomes a story.
         </p>
         <p className="mt-3 max-w-3xl text-xs leading-5 text-neutral-400 sm:text-sm sm:leading-6">
           Not in scope: live election results, donor-by-donor receipts, paid

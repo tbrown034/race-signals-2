@@ -38,7 +38,7 @@ export function CoverageStrip({
         </div>
         <details className="font-mono text-[11px] uppercase tracking-[0.12em] text-neutral-600 sm:hidden">
           <summary className="cursor-pointer">
-            {statusLabel} / {counts.signals ?? 0} signals / {formatRelativeTime(finishedAt)}
+            {statusLabel} / {counts.signals ?? 0} stored signal rows / {formatRelativeTime(finishedAt)}
           </summary>
           <CoverageStats
             counts={counts}
@@ -82,7 +82,7 @@ function CoverageStats({
         <dd className="mt-1 font-semibold text-neutral-950">{latestScope}</dd>
       </div>
       <div>
-        <dt>Stored signals</dt>
+        <dt>Stored signal rows</dt>
         <dd className="mt-1 font-semibold text-neutral-950">{counts.signals ?? 0}</dd>
       </div>
       <div>

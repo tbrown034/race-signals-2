@@ -133,8 +133,8 @@ export default async function RacePage({
             value={formatMoney(stats.totalIndependentExpenditures) ?? "$0"}
           />
           <RaceStat
-            detail={raceTotalsDetail(oldestTotalsFetchedAt, latestTotalsFetchedAt)}
-            label="Stored FEC candidate totals"
+            detail={`Sum of matched FEC candidate totals fetched into this slice; not a ballot or race-wide completeness claim. ${raceTotalsDetail(oldestTotalsFetchedAt, latestTotalsFetchedAt)}`}
+            label="Stored candidate receipts"
             value={formatMoney(stats.totalRaised) ?? "$0"}
           />
           <RaceStat
@@ -142,8 +142,8 @@ export default async function RacePage({
             label="IE direction"
             value={formatCount(stats.independentExpenditureRecordCount, "record")}
           />
-          <RaceStat label="FEC candidate records" value={String(stats.candidateCount)} />
-          <RaceStat label="Incumbents" value={String(stats.incumbentCount)} />
+          <RaceStat label="Matched FEC candidates" value={String(stats.candidateCount)} />
+          <RaceStat label="Matched incumbents" value={String(stats.incumbentCount)} />
         </div>
         <div className="border-b border-neutral-300" id="candidate-cohort">
           <div className="border-b border-neutral-300 px-5 py-4">
@@ -163,8 +163,8 @@ export default async function RacePage({
                     <th className="px-4 py-3 font-medium" scope="col">Candidate</th>
                     <th className="hidden px-4 py-3 font-medium md:table-cell" scope="col">Party</th>
                     <th className="hidden px-4 py-3 font-medium md:table-cell" scope="col">FEC record</th>
-                    <th className="hidden px-4 py-3 text-right font-medium md:table-cell" scope="col">Receipts</th>
-                    <th className="hidden px-4 py-3 text-right font-medium md:table-cell" scope="col">Cash</th>
+                    <th className="hidden px-4 py-3 text-right font-medium md:table-cell" scope="col">Stored receipts</th>
+                    <th className="hidden px-4 py-3 text-right font-medium md:table-cell" scope="col">Stored cash</th>
                     <th className="hidden px-4 py-3 font-medium md:table-cell" scope="col">Source records</th>
                     <th className="hidden px-4 py-3 font-medium md:table-cell" scope="col">Totals freshness</th>
                   </tr>
@@ -201,11 +201,11 @@ export default async function RacePage({
                                 </dd>
                               </div>
                               <div>
-                                <dt className="inline font-mono uppercase tracking-[0.12em] text-neutral-500">Receipts </dt>
+                                <dt className="inline font-mono uppercase tracking-[0.12em] text-neutral-500">Stored receipts </dt>
                                 <dd className="inline font-mono text-neutral-950">{candidateMoney(candidate.totalReceiptsCycle, candidate.totalsFetchedAt)}</dd>
                               </div>
                               <div>
-                                <dt className="inline font-mono uppercase tracking-[0.12em] text-neutral-500">Cash </dt>
+                                <dt className="inline font-mono uppercase tracking-[0.12em] text-neutral-500">Stored cash </dt>
                                 <dd className="inline font-mono text-neutral-950">{candidateMoney(candidate.cashOnHandLatest, candidate.totalsFetchedAt)}</dd>
                               </div>
                               <div>

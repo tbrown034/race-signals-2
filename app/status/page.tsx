@@ -13,11 +13,11 @@ export const metadata: Metadata = {
 export const revalidate = 300;
 
 const countLabels: Record<string, string> = {
-  races: "Race shells",
-  candidates: "Candidates",
-  committees: "Committees",
-  independentExpenditures: "Independent expenditures",
-  signals: "Signals",
+  races: "Stored race shells",
+  candidates: "Stored candidates",
+  committees: "Stored committees",
+  independentExpenditures: "Stored independent expenditures",
+  signals: "Stored signals",
 };
 
 function stateFreshnessLabel(value?: string | null) {
@@ -80,7 +80,7 @@ export default async function StatusPage() {
 
         <section className="mt-6 grid min-w-0 max-w-full gap-3 sm:grid-cols-2 lg:grid-cols-5">
           {Object.entries(status.counts).map(([name, count]) => (
-            <div className="border border-neutral-300 bg-white p-4" key={name}>
+            <div className="border border-neutral-300 bg-white p-4" key={name} title="Rows currently stored in this Race Signals database slice">
               <p className="font-mono text-xs uppercase tracking-[0.12em] text-neutral-500">
                 {countLabels[name] ?? name}
               </p>

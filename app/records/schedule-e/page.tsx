@@ -93,11 +93,11 @@ export default async function ScheduleERecordsPage({
           </div>
 
           <div className="grid gap-px border-b border-neutral-300 bg-neutral-300 sm:grid-cols-2 xl:grid-cols-5">
-            <RecordStat label="Stored records" value={formatCount(summary.recordCount, "record")} />
-            <RecordStat label="Stored Schedule E IE" value={formatMoney(summary.totalAmount) ?? "$0"} />
-            <RecordStat label="FEC code: supports" value={formatMoney(summary.supportAmount) ?? "$0"} />
-            <RecordStat label="FEC code: opposes" value={formatMoney(summary.opposeAmount) ?? "$0"} />
-            <RecordStat label="Not classified" value={formatMoney(summary.uncodedAmount) ?? "$0"} />
+            <RecordStat label="Stored rows" value={formatCount(summary.recordCount, "record")} />
+            <RecordStat label="Stored IE sum" value={formatMoney(summary.totalAmount) ?? "$0"} />
+            <RecordStat label="Stored supports sum" value={formatMoney(summary.supportAmount) ?? "$0"} />
+            <RecordStat label="Stored opposes sum" value={formatMoney(summary.opposeAmount) ?? "$0"} />
+            <RecordStat label="Stored uncoded sum" value={formatMoney(summary.uncodedAmount) ?? "$0"} />
           </div>
 
           <div className="border-b border-neutral-300 px-5 py-3 text-sm text-neutral-600">
@@ -217,6 +217,7 @@ function RecordStat({ label, value }: { label: string; value: string }) {
     <div className="bg-white px-5 py-4">
       <p className="font-mono text-[11px] uppercase tracking-[0.12em] text-neutral-500">{label}</p>
       <p className="mt-1 text-lg font-semibold tabular-nums">{value}</p>
+      <p className="mt-1 text-xs leading-5 text-neutral-600">Current scoped slice</p>
     </div>
   );
 }

@@ -100,8 +100,8 @@ export default async function CandidatePage({
           ],
           ["Status", incumbentStatus(candidate.incumbentChallengeStatus)],
           ["FEC cycle", `Filed with FEC for the ${candidate.electionYear ?? "current"} cycle.`],
-          ["FEC aggregate receipts", candidateMoney(candidate.totalReceiptsCycle, candidate.totalsFetchedAt)],
-          ["FEC aggregate cash", candidateMoney(candidate.cashOnHandLatest, candidate.totalsFetchedAt)],
+          ["Stored FEC receipts", candidateMoney(candidate.totalReceiptsCycle, candidate.totalsFetchedAt)],
+          ["Stored FEC cash", candidateMoney(candidate.cashOnHandLatest, candidate.totalsFetchedAt)],
           ["Cash as of", formatDate(candidate.cashOnHandAsOf)],
           ["Race Signals fetched totals", candidate.totalsFetchedAt ? formatDateTime(candidate.totalsFetchedAt) : "Not recorded"],
           [
@@ -163,8 +163,8 @@ export default async function CandidatePage({
                   <tr>
                     <th className="px-4 py-3 font-medium" scope="col">Candidate</th>
                     <th className="hidden px-4 py-3 font-medium md:table-cell" scope="col">Status</th>
-                    <th className="hidden px-4 py-3 text-right font-medium md:table-cell" scope="col">Receipts</th>
-                    <th className="hidden px-4 py-3 text-right font-medium md:table-cell" scope="col">Cash</th>
+                    <th className="hidden px-4 py-3 text-right font-medium md:table-cell" scope="col">Stored receipts</th>
+                    <th className="hidden px-4 py-3 text-right font-medium md:table-cell" scope="col">Stored cash</th>
                     <th className="hidden px-4 py-3 font-medium md:table-cell" scope="col">Funding mix</th>
                     <th className="hidden px-4 py-3 font-medium md:table-cell" scope="col">Source</th>
                     <th className="hidden px-4 py-3 font-medium md:table-cell" scope="col">Fetched</th>
@@ -191,7 +191,7 @@ export default async function CandidatePage({
                             <dd className="inline">{incumbentStatus(otherCandidate.incumbentChallengeStatus) ?? "Not classified by FEC"}</dd>
                           </div>
                           <div>
-                            <dt className="inline font-mono uppercase tracking-[0.12em] text-neutral-500">Receipts </dt>
+                            <dt className="inline font-mono uppercase tracking-[0.12em] text-neutral-500">Stored receipts </dt>
                             <dd className="inline font-mono text-neutral-950">{candidateMoney(otherCandidate.totalReceiptsCycle, otherCandidate.totalsFetchedAt)}</dd>
                           </div>
                           <div>
@@ -199,7 +199,7 @@ export default async function CandidatePage({
                             <dd className="inline font-mono text-neutral-950">{candidateMoney(otherCandidate.totalDisbursementsCycle, otherCandidate.totalsFetchedAt)}</dd>
                           </div>
                           <div>
-                            <dt className="inline font-mono uppercase tracking-[0.12em] text-neutral-500">Cash </dt>
+                            <dt className="inline font-mono uppercase tracking-[0.12em] text-neutral-500">Stored cash </dt>
                             <dd className="inline font-mono text-neutral-950">{candidateMoney(otherCandidate.cashOnHandLatest, otherCandidate.totalsFetchedAt)}</dd>
                           </div>
                           <div>
@@ -472,7 +472,7 @@ function candidateReporterNotes(
   independentExpenditureCount: number,
 ) {
   return [
-    `Money position: ${candidateMoney(candidate.totalReceiptsCycle, candidate.totalsFetchedAt).toLowerCase()} raised this cycle; ${candidateMoney(candidate.cashOnHandLatest, candidate.totalsFetchedAt).toLowerCase()} cash on hand${candidate.cashOnHandAsOf ? ` as of ${formatDate(candidate.cashOnHandAsOf)}` : ""}.`,
+    `Stored FEC money snapshot: ${candidateMoney(candidate.totalReceiptsCycle, candidate.totalsFetchedAt).toLowerCase()} raised this cycle; ${candidateMoney(candidate.cashOnHandLatest, candidate.totalsFetchedAt).toLowerCase()} cash on hand${candidate.cashOnHandAsOf ? ` as of ${formatDate(candidate.cashOnHandAsOf)}` : ""}.`,
     `${formatCount(totalSignals, "related signal")} in this slice: ${formatCount(signalCounts.filings, "filing")}, ${formatCount(signalCounts.committees, "committee record")}, ${formatCount(signalCounts.outsideSpending, "outside-spending alert")}, ${formatCount(signalCounts.review, "review flag")}.`,
     candidate.totalReceiptsCycle && candidate.totalReceiptsCycle > 0 && totalSignals === 0
       ? "FEC aggregate totals show activity, but Race Signals has not matched a committee, filing or Schedule E record that generates a source-record signal for this candidate yet."

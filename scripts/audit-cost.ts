@@ -11,9 +11,11 @@ async function main() {
 
   const pool = getPool();
   try {
+    const maxDatabaseBytes = Number(process.env.COST_AUDIT_MAX_DB_MB ?? "400") * 1024 * 1024;
     const databaseSize = await pool.query<{ size: string }>(
       "select pg_database_size(current_database())::text as size",
     );
+    const databaseBytes = Number(databaseSize.rows[0]?.size ?? 0);
     const tables = await pool.query<{
       table_name: string;
       total_bytes: string;
@@ -35,7 +37,7 @@ async function main() {
       "transactions",
     ]);
 
-    console.log(`Database size: ${formatBytes(Number(databaseSize.rows[0]?.size ?? 0))}`);
+    console.log(`Database size: ${formatBytes(databaseBytes)} (guard ${formatBytes(maxDatabaseBytes)})`);
     console.table(
       tables.rows.map((row) => ({
         table: row.table_name,
@@ -47,6 +49,12 @@ async function main() {
     if (donorRows > 0) {
       console.error(
         `Cost guard failed: transactions contains ${donorRows} donor-level rows. Run npm run repair:donors or explicitly re-scope donor storage.`,
+      );
+      process.exitCode = 1;
+    }
+    if (databaseBytes > maxDatabaseBytes) {
+      console.error(
+        `Cost guard failed: database is ${formatBytes(databaseBytes)}, above the ${formatBytes(maxDatabaseBytes)} free-tier guard. Narrow ingest scope or prune diagnostic history before continuing.`,
       );
       process.exitCode = 1;
     }

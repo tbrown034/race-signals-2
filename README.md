@@ -202,6 +202,7 @@ Cost guardrails:
 - The ingest script refuses scheduled GitHub Actions runs unless `RACE_SIGNALS_STATE`, `FEC_MAX_CANDIDATES` and `FEC_MAX_CANDIDATE_PAGES` are set.
 - Keep Schedule A itemized receipts out of production ingest for now. The `transactions` table remains available for future work, but donor-level storage is not part of the low-cost MVP and is not surfaced in the UI.
 - Current production storage should stay small because the app stores candidates, committees, filings, Schedule E independent expenditures, signals, ingestion metadata and source IDs rather than every receipt line item.
+- `npm run audit:cost` fails if donor-level `transactions` rows appear or if database size exceeds the free-tier guard (`COST_AUDIT_MAX_DB_MB`, default 400 MB).
 - For the current budget target, use GitHub Actions for bounded ingest, Neon free-tier-compatible Postgres for storage, and Vercel for read-only pages. Avoid adding paid APIs, image storage, or high-frequency cron jobs.
 
 Verification:

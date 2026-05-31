@@ -244,12 +244,33 @@ export async function getRaceRatings(id: string): Promise<RaceRating[]> {
 
 export async function getSignalsForEntity(entity: "candidate" | "committee" | "race", id: string) {
   if (entity === "race") return getSignals({ raceId: id, limit: 30 });
-  const signals = hasDatabase()
-    ? await getSignals({ limit: 100 })
-    : demoSignals;
-  return signals.filter((signal) =>
-    entity === "candidate" ? signal.candidateId === id : signal.committeeId === id,
+  if (!hasDatabase()) {
+    return demoSignals.filter((signal) =>
+      entity === "candidate" ? signal.candidateId === id : signal.committeeId === id,
+    );
+  }
+
+  const column = entity === "candidate" ? "s.candidate_id" : "s.committee_id";
+  const rows = await sql<SignalRow>(
+    `
+      select
+        s.*,
+        c.name as candidate_name,
+        cm.name as committee_name,
+        r.name as race_name,
+        r.state as race_state,
+        r.office as race_office
+      from signals s
+      left join candidates c on c.id = s.candidate_id
+      left join committees cm on cm.id = s.committee_id
+      left join races r on r.id = s.race_id
+      where ${column} = $1
+      order by s.signal_date desc, s.created_at desc
+      limit 100
+    `,
+    [id],
   );
+  return rows.map(mapSignal);
 }
 
 export async function getStatus() {

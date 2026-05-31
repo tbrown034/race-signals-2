@@ -267,9 +267,14 @@ export async function upsertSignals(signals: Signal[]) {
         )
         values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14)
         on conflict (dedupe_key) do update set
+          signal_type = excluded.signal_type,
           headline = excluded.headline,
           why_it_matters = excluded.why_it_matters,
+          candidate_id = excluded.candidate_id,
+          committee_id = excluded.committee_id,
+          race_id = excluded.race_id,
           amount = excluded.amount,
+          signal_date = excluded.signal_date,
           source_url = excluded.source_url,
           confidence = excluded.confidence,
           status = excluded.status,

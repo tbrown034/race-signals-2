@@ -135,6 +135,54 @@ export default async function SpendingPage({
                           <Link className="font-medium underline underline-offset-4" href={`/#${signalAnchorId(signal.dedupeKey)}`}>
                             {signal.headline}
                           </Link>
+                          <dl className="mt-2 space-y-1 text-xs leading-5 text-neutral-600 md:hidden">
+                            <div>
+                              <dt className="inline font-mono uppercase tracking-[0.12em] text-neutral-500">Spender </dt>
+                              <dd className="inline">
+                                <EntityLink
+                                  fallback="Spender not resolved"
+                                  hrefBase="/committees"
+                                  id={signal.committeeId}
+                                  label={signal.committeeName}
+                                />
+                              </dd>
+                            </div>
+                            <div>
+                              <dt className="inline font-mono uppercase tracking-[0.12em] text-neutral-500">Target </dt>
+                              <dd className="inline">
+                                <EntityLink
+                                  fallback="Candidate not resolved"
+                                  hrefBase="/candidates"
+                                  id={signal.candidateId}
+                                  label={signal.candidateName}
+                                />
+                              </dd>
+                            </div>
+                            <div>
+                              <dt className="inline font-mono uppercase tracking-[0.12em] text-neutral-500">Race </dt>
+                              <dd className="inline">
+                                {signal.raceId ? (
+                                  <Link className="font-medium underline underline-offset-4" href={`/races/${signal.raceId}`}>
+                                    {signal.raceName ?? signal.raceId}
+                                  </Link>
+                                ) : (
+                                  "Unmatched"
+                                )}
+                              </dd>
+                            </div>
+                            <div>
+                              <dt className="inline font-mono uppercase tracking-[0.12em] text-neutral-500">Source </dt>
+                              <dd className="inline">
+                                {signal.sourceUrl ? (
+                                  <a className="font-medium underline underline-offset-4" href={signal.sourceUrl} rel="noreferrer" target="_blank">
+                                    FEC Schedule E
+                                  </a>
+                                ) : (
+                                  "Source not stored"
+                                )}
+                              </dd>
+                            </div>
+                          </dl>
                         </td>
                         <td className="px-4 py-3 text-right font-mono font-semibold">
                           {formatMoney(signal.amount)}

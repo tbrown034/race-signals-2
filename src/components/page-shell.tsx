@@ -39,8 +39,8 @@ export async function PageShell({ children }: { children: ReactNode }) {
               Early campaign-finance alerts for reporters covering 2026 House and Senate races.
             </p>
           </div>
-          <div className="min-w-0 overflow-hidden lg:flex lg:flex-col lg:items-end lg:gap-2">
-            <nav className="-mx-5 flex gap-4 overflow-x-auto px-5 pb-1 text-sm sm:mx-0 sm:flex-wrap sm:px-0 sm:pb-0">
+          <div className="min-w-0 lg:flex lg:flex-col lg:items-end lg:gap-2">
+            <nav className="flex flex-wrap gap-x-4 gap-y-2 text-sm">
               {nav.map((item) => (
                 <Link
                   className="shrink-0 font-medium text-neutral-700 underline-offset-4 hover:underline"

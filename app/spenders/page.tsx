@@ -63,6 +63,40 @@ export default async function SpendersPage() {
                         <p className="mt-1 font-mono text-[11px] uppercase tracking-[0.12em] text-neutral-500">
                           {spender.fecCommitteeId ?? "No FEC committee ID"}
                         </p>
+                        <dl className="mt-2 space-y-1 text-xs leading-5 text-neutral-600 md:hidden">
+                          <div>
+                            <dt className="inline font-mono uppercase tracking-[0.12em] text-neutral-500">Total IE </dt>
+                            <dd className="inline font-mono font-semibold text-neutral-950">{formatMoney(spender.totalAmount)}</dd>
+                          </div>
+                          <div>
+                            <dt className="inline font-mono uppercase tracking-[0.12em] text-neutral-500">Records </dt>
+                            <dd className="inline">{spender.recordCount}</dd>
+                          </div>
+                          <div>
+                            <dt className="inline font-mono uppercase tracking-[0.12em] text-neutral-500">Top race </dt>
+                            <dd className="inline">
+                              {spender.topRaceId ? (
+                                <Link className="font-medium underline underline-offset-4" href={`/races/${spender.topRaceId}`}>
+                                  {spender.topRaceName ?? spender.topRaceId}
+                                </Link>
+                              ) : (
+                                "Unmatched race"
+                              )}
+                            </dd>
+                          </div>
+                          <div>
+                            <dt className="inline font-mono uppercase tracking-[0.12em] text-neutral-500">Source </dt>
+                            <dd className="inline">
+                              {spender.latestScheduleESourceUrl ? (
+                                <a className="font-medium underline underline-offset-4" href={spender.latestScheduleESourceUrl} rel="noreferrer" target="_blank">
+                                  FEC Schedule E
+                                </a>
+                              ) : (
+                                "Schedule E source not stored"
+                              )}
+                            </dd>
+                          </div>
+                        </dl>
                       </td>
                       <td className="px-4 py-3 text-neutral-700">
                         <span>{committeeTypeLabel(spender.committeeType)}</span>

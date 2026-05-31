@@ -133,6 +133,28 @@ export function EntityPage({
                         ) : (
                           expenditure.candidateName ?? expenditure.fecCandidateId ?? "Candidate not resolved"
                         )}
+                        <dl className="mt-2 space-y-1 text-xs leading-5 text-neutral-600 md:hidden">
+                          <div>
+                            <dt className="inline font-mono uppercase tracking-[0.12em] text-neutral-500">Amount </dt>
+                            <dd className="inline font-mono font-semibold text-neutral-950">{formatMoney(expenditure.amount)}</dd>
+                          </div>
+                          <div>
+                            <dt className="inline font-mono uppercase tracking-[0.12em] text-neutral-500">Position </dt>
+                            <dd className="inline">{supportLabel(expenditure.supportOpposeIndicator)}</dd>
+                          </div>
+                          <div>
+                            <dt className="inline font-mono uppercase tracking-[0.12em] text-neutral-500">Source </dt>
+                            <dd className="inline">
+                              {expenditure.sourceUrl ? (
+                                <a className="font-medium underline underline-offset-4" href={expenditure.sourceUrl} rel="noreferrer" target="_blank">
+                                  FEC Schedule E
+                                </a>
+                              ) : (
+                                "Source not stored"
+                              )}
+                            </dd>
+                          </div>
+                        </dl>
                       </td>
                       <td className="px-4 py-3">{supportLabel(expenditure.supportOpposeIndicator)}</td>
                       <td className="px-4 py-3">

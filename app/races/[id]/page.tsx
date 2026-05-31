@@ -155,6 +155,28 @@ export default async function RacePage({
                             {isIncumbent(candidate.incumbentChallengeStatus) ? (
                               <IncumbentBadge className="ml-2" />
                             ) : null}
+                            <dl className="mt-2 space-y-1 text-xs leading-5 text-neutral-600 md:hidden">
+                              <div>
+                                <dt className="inline font-mono uppercase tracking-[0.12em] text-neutral-500">Receipts </dt>
+                                <dd className="inline font-mono text-neutral-950">{candidateMoney(candidate.totalReceiptsCycle, candidate.totalsUpdatedAt)}</dd>
+                              </div>
+                              <div>
+                                <dt className="inline font-mono uppercase tracking-[0.12em] text-neutral-500">Cash </dt>
+                                <dd className="inline font-mono text-neutral-950">{candidateMoney(candidate.cashOnHandLatest, candidate.totalsUpdatedAt)}</dd>
+                              </div>
+                              <div>
+                                <dt className="inline font-mono uppercase tracking-[0.12em] text-neutral-500">Source </dt>
+                                <dd className="inline">
+                                  {candidate.sourceUrl ? (
+                                    <a className="font-medium underline underline-offset-4" href={candidate.sourceUrl} rel="noreferrer" target="_blank">
+                                      FEC record
+                                    </a>
+                                  ) : (
+                                    "Source not stored"
+                                  )}
+                                </dd>
+                              </div>
+                            </dl>
                           </div>
                         </div>
                       </td>

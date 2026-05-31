@@ -143,6 +143,20 @@ export default async function CandidatePage({
                             </span>
                           ) : null}
                         </span>
+                        <dl className="mt-2 space-y-1 text-xs leading-5 text-neutral-600 md:hidden">
+                          <div>
+                            <dt className="inline font-mono uppercase tracking-[0.12em] text-neutral-500">Status </dt>
+                            <dd className="inline">{incumbentStatus(otherCandidate.incumbentChallengeStatus) ?? "Not classified by FEC"}</dd>
+                          </div>
+                          <div>
+                            <dt className="inline font-mono uppercase tracking-[0.12em] text-neutral-500">Receipts </dt>
+                            <dd className="inline font-mono text-neutral-950">{candidateMoney(otherCandidate.totalReceiptsCycle, otherCandidate.totalsUpdatedAt)}</dd>
+                          </div>
+                          <div>
+                            <dt className="inline font-mono uppercase tracking-[0.12em] text-neutral-500">Cash </dt>
+                            <dd className="inline font-mono text-neutral-950">{candidateMoney(otherCandidate.cashOnHandLatest, otherCandidate.totalsUpdatedAt)}</dd>
+                          </div>
+                        </dl>
                       </td>
                       <td className="px-4 py-3">
                         {incumbentStatus(otherCandidate.incumbentChallengeStatus) ?? "Not classified by FEC"}

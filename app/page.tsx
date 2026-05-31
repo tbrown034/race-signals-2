@@ -274,13 +274,42 @@ function FeedTriageStrip({
 }: {
   signals: ReturnType<typeof feedTriageSignals>;
 }) {
+  const items = [
+    { label: "Newest added in this view", signal: signals.newestAdded },
+    { label: "Largest outside spend in this view", signal: signals.largestIe, empty: "No IE alerts in this view" },
+    { label: "Incumbent named in this view", signal: signals.incumbentNamed, empty: "No incumbent-linked signals in this view" },
+    { label: "Needs review in this view", signal: signals.review, empty: "No review flags in this view" },
+  ];
+
   return (
     <section className="border-b border-neutral-300 px-5 py-3" aria-label="Feed triage">
-      <div className="grid gap-2 md:grid-cols-2 xl:grid-cols-4">
-        <TriageItem label="Newest added in this view" signal={signals.newestAdded} />
-        <TriageItem label="Largest outside spend in this view" signal={signals.largestIe} empty="No IE alerts in this view" />
-        <TriageItem label="Incumbent named in this view" signal={signals.incumbentNamed} empty="No incumbent-linked signals in this view" />
-        <TriageItem label="Needs review in this view" signal={signals.review} empty="No review flags in this view" />
+      <div className="grid gap-2 sm:hidden">
+        <TriageItem label={items[0].label} signal={items[0].signal} />
+        <details className="border border-neutral-300 px-3 py-2 text-sm text-neutral-700">
+          <summary className="cursor-pointer font-mono text-[11px] uppercase tracking-[0.12em] text-neutral-600">
+            More triage cues
+          </summary>
+          <div className="mt-2 grid gap-2">
+            {items.slice(1).map((item) => (
+              <TriageItem
+                empty={item.empty}
+                key={item.label}
+                label={item.label}
+                signal={item.signal}
+              />
+            ))}
+          </div>
+        </details>
+      </div>
+      <div className="hidden gap-2 sm:grid md:grid-cols-2 xl:grid-cols-4">
+        {items.map((item) => (
+          <TriageItem
+            empty={item.empty}
+            key={item.label}
+            label={item.label}
+            signal={item.signal}
+          />
+        ))}
       </div>
     </section>
   );

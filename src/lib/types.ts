@@ -210,3 +210,10 @@ export type EndpointFreshness = {
   validationIssuesCount: number;
   completedAt: string;
 };
+
+export type ValidationIssueRollup = {
+  rule: string;
+  severity: string;
+  count: number;
+  latestAt: string;
+};

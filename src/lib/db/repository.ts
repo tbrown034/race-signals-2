@@ -21,6 +21,7 @@ import type {
   Signal,
   TopSpender,
   Transaction,
+  ValidationIssueRollup,
 } from "@/src/lib/types";
 
 type SignalRow = {
@@ -845,6 +846,7 @@ export async function getStatus() {
         signals: demoSignals.length,
       },
       endpoints: [],
+      validationIssues: [],
       mode: "demo",
     };
   }
@@ -882,6 +884,12 @@ export async function getStatus() {
     validation_issues_count: number;
     completed_at: string | Date;
   }> = [];
+  let validationIssues: Array<{
+    rule: string;
+    severity: string;
+    count: string;
+    latest_at: string | Date;
+  }> = [];
   try {
     endpoints = await sql<{
       endpoint: string;
@@ -897,6 +905,24 @@ export async function getStatus() {
     `);
   } catch (error) {
     if (!(error instanceof Error) || !error.message.includes("ingestion_endpoint_runs")) {
+      throw error;
+    }
+  }
+  try {
+    validationIssues = await sql<{
+      rule: string;
+      severity: string;
+      count: string;
+      latest_at: string | Date;
+    }>(`
+      select rule, severity, count(*)::text as count, max(created_at) as latest_at
+      from validation_issues
+      group by rule, severity
+      order by max(created_at) desc, count(*) desc
+      limit 12
+    `);
+  } catch (error) {
+    if (!(error instanceof Error) || !error.message.includes("validation_issues")) {
       throw error;
     }
   }
@@ -926,6 +952,12 @@ export async function getStatus() {
       recordsFetched: endpoint.records_fetched,
       validationIssuesCount: endpoint.validation_issues_count,
       completedAt: toIsoString(endpoint.completed_at),
+    })),
+    validationIssues: validationIssues.map<ValidationIssueRollup>((issue) => ({
+      rule: issue.rule,
+      severity: issue.severity,
+      count: Number(issue.count),
+      latestAt: toIsoString(issue.latest_at),
     })),
     mode: "database",
   };

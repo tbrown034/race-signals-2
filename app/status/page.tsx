@@ -135,6 +135,47 @@ export default async function StatusPage() {
             </table>
           </div>
         </section>
+
+        <section className="mt-6 border border-neutral-300 bg-white">
+          <div className="border-b border-neutral-300 px-5 py-4">
+            <h2 className="text-sm font-semibold uppercase tracking-[0.14em] text-neutral-600">
+              Validation issue rollup
+            </h2>
+            <p className="mt-1 text-sm text-neutral-600">
+              Data-quality checks opened by ingest. These are reporting caveats, not fatal errors.
+            </p>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-[680px] text-left text-sm">
+              <thead className="bg-neutral-100 text-xs uppercase tracking-[0.12em] text-neutral-500">
+                <tr>
+                  <th className="px-4 py-3 font-medium" scope="col">Rule</th>
+                  <th className="px-4 py-3 font-medium" scope="col">Severity</th>
+                  <th className="px-4 py-3 text-right font-medium" scope="col">Count</th>
+                  <th className="px-4 py-3 font-medium" scope="col">Latest</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-neutral-200">
+                {status.validationIssues.length ? (
+                  status.validationIssues.map((issue) => (
+                    <tr key={`${issue.rule}-${issue.severity}`}>
+                      <td className="px-4 py-3 font-mono">{issue.rule}</td>
+                      <td className="px-4 py-3">{issue.severity}</td>
+                      <td className="px-4 py-3 text-right font-mono">{issue.count}</td>
+                      <td className="px-4 py-3">{formatDateTime(issue.latestAt)}</td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td className="px-4 py-3 text-neutral-600" colSpan={4}>
+                      No validation issues have been recorded in this database.
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        </section>
       </main>
     </PageShell>
   );

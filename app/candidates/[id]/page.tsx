@@ -332,11 +332,24 @@ function CandidateNoSignalsMessage({
           ? "FEC aggregate totals show cycle receipts, but Race Signals has not matched a committee filing or Schedule E record that generates a signal for this candidate yet."
           : "This is not proof of no activity; it only means the current stored FEC slice has no matched record that meets this product's signal rules."}
       </p>
-      {candidate.sourceUrl ? (
-        <a className="font-medium underline underline-offset-4" href={candidate.sourceUrl} rel="noreferrer" target="_blank">
-          Open the FEC candidate record
-        </a>
-      ) : null}
+      <div className="flex flex-wrap gap-x-4 gap-y-2">
+        {candidate.sourceUrl ? (
+          <a className="font-medium underline underline-offset-4" href={candidate.sourceUrl} rel="noreferrer" target="_blank">
+            Open the FEC candidate record
+          </a>
+        ) : null}
+        <Link className="font-medium underline underline-offset-4" href={`/records/schedule-e?candidate=${candidate.id}`}>
+          Check Schedule E evidence
+        </Link>
+        {candidate.raceId ? (
+          <Link className="font-medium underline underline-offset-4" href={`/races/${candidate.raceId}`}>
+            Open race context
+          </Link>
+        ) : null}
+        <Link className="font-medium underline underline-offset-4" href="/status#candidate-gaps">
+          Check coverage gaps
+        </Link>
+      </div>
     </div>
   );
 }

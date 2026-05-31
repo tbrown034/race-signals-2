@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { raceBoardRowsToCsv, type RaceBoardExportRow } from "@/src/lib/export/race-board";
-import { scheduleERowsToCsv, type ScheduleEExportRow } from "@/src/lib/export/schedule-e";
+import { scheduleERowsToCsv, scheduleEToExportRow, type ScheduleEExportManifest, type ScheduleEExportRow } from "@/src/lib/export/schedule-e";
 import { signalToExportRow, rowsToCsv, type ExportManifest } from "@/src/lib/export/signals";
 import { spenderRowsToCsv, type SpenderExportRow } from "@/src/lib/export/spenders";
 import type { Signal } from "@/src/lib/types";
@@ -14,6 +14,13 @@ const manifest: ExportManifest = {
     status: "success",
     finishedAt: "2026-05-31T12:00:00.000Z",
   },
+};
+
+const scheduleEManifest: ScheduleEExportManifest = {
+  exportedAt: manifest.exportedAt,
+  filters: { state: "IN" },
+  baseUrl: "https://race-signals.test",
+  latestRun: null,
 };
 
 const signal: Signal = {
@@ -184,6 +191,30 @@ assertHeader(scheduleERowsToCsv([scheduleERow]), [
   "scope_note",
 ]);
 assertFormulaNeutralized(scheduleERowsToCsv([scheduleERow]), "'+OUTSIDE");
+assert.equal(
+  scheduleEToExportRow({
+    sourceId: "123",
+    cycle: 2026,
+    spenderCommitteeId: "cmte-C00888888",
+    fecCommitteeId: "C00888888",
+    candidateId: "cand-H6IN05000",
+    fecCandidateId: "H6IN05000",
+    raceId: "2026-IN-05-H",
+    supportOpposeIndicator: "O",
+    amount: -125000,
+    expenditureDate: "2026-05-20",
+    purpose: "+Digital ads",
+    sourceUrl: "https://www.fec.gov/data/independent-expenditures/?sub_id=123",
+    raw: {},
+    candidateName: "TEST, CANDIDATE",
+    candidateParty: "REP",
+    committeeName: "+OUTSIDE GROUP",
+    raceName: "Indiana 05 Congressional District",
+  }, scheduleEManifest).evidence_url,
+  "https://race-signals.test/records/schedule-e?state=IN&sourceId=123#schedule-e-123",
+);
+const negativeNumberCsv = scheduleERowsToCsv([{ ...scheduleERow, amount: -125000 }]);
+assert.ok(negativeNumberCsv.includes("\n2026-05-20,-125000,"), "numeric negative amounts should stay numeric");
 
 assertHeader(spenderRowsToCsv([spenderRow]), [
   "latest_schedule_e_source_url",

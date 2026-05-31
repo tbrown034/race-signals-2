@@ -71,10 +71,12 @@ export function FeedFilters({
     : selectedRace
       ? [selectedRace]
       : [];
-  const stateOptions = [...STATE_SCOPES].sort((a, b) => {
+  const sortedStateOptions = [...STATE_SCOPES].sort((a, b) => {
     const countDiff = (stateSignalCounts[b.code] ?? 0) - (stateSignalCounts[a.code] ?? 0);
     return countDiff || a.code.localeCompare(b.code);
   });
+  const coveredStates = sortedStateOptions.filter((item) => stateSignalCounts[item.code]);
+  const uncoveredStates = sortedStateOptions.filter((item) => !stateSignalCounts[item.code]);
 
   function updateFilter(name: string, value: string) {
     const next = new URLSearchParams(searchParams.toString());
@@ -145,11 +147,22 @@ export function FeedFilters({
             onChange={(event) => updateFilter("state", event.target.value)}
           >
             <option value="">All</option>
-            {stateOptions.map((item) => (
-              <option value={item.code} key={item.code}>
-                {item.code}{stateSignalCounts[item.code] ? ` (${stateSignalCounts[item.code]})` : ""}
-              </option>
-            ))}
+            {coveredStates.length ? (
+              <optgroup label="States with stored signals">
+                {coveredStates.map((item) => (
+                  <option value={item.code} key={item.code}>
+                    {item.name} ({item.code}) - {stateSignalCounts[item.code]}
+                  </option>
+                ))}
+              </optgroup>
+            ) : null}
+            <optgroup label="All scope states">
+              {uncoveredStates.map((item) => (
+                <option value={item.code} key={item.code}>
+                  {item.name} ({item.code})
+                </option>
+              ))}
+            </optgroup>
           </select>
         </label>
         <label className="min-w-[120px] flex-1 text-xs font-medium uppercase tracking-[0.12em] text-neutral-500 sm:flex-none">

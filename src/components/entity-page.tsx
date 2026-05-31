@@ -293,5 +293,5 @@ function MetaRows({ rows }: { rows: Array<[string, ReactNode | null | undefined]
 function supportLabel(value?: string | null) {
   if (value === "S") return "Support";
   if (value === "O") return "Oppose";
-  return "Mention";
+  return "Not classified by FEC";
 }

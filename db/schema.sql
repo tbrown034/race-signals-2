@@ -155,6 +155,12 @@ create table if not exists independent_expenditures (
   support_oppose_indicator text,
   amount numeric not null,
   expenditure_date date,
+  dissemination_date date,
+  payee_name text,
+  category_code_full text,
+  filing_form text,
+  file_number text,
+  pdf_url text,
   purpose text,
   source_url text,
   raw jsonb not null default '{}'::jsonb,
@@ -163,6 +169,12 @@ create table if not exists independent_expenditures (
 );
 
 alter table independent_expenditures add column if not exists cycle integer;
+alter table independent_expenditures add column if not exists dissemination_date date;
+alter table independent_expenditures add column if not exists payee_name text;
+alter table independent_expenditures add column if not exists category_code_full text;
+alter table independent_expenditures add column if not exists filing_form text;
+alter table independent_expenditures add column if not exists file_number text;
+alter table independent_expenditures add column if not exists pdf_url text;
 
 create table if not exists source_records (
   id uuid primary key default gen_random_uuid(),

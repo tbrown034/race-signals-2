@@ -13,11 +13,17 @@ export type ScheduleEExportManifest = {
 export type ScheduleEExportRow = {
   expenditure_date: string | null;
   amount: number;
+  dissemination_date: string | null;
   support_oppose: string | null;
   target_position_label: string;
   spender_committee_name: string | null;
   spender_committee_id: string | null;
   fec_committee_id: string | null;
+  payee_name: string | null;
+  category_code_full: string | null;
+  filing_form: string | null;
+  file_number: string | null;
+  pdf_url: string | null;
   candidate_name: string | null;
   candidate_id: string | null;
   fec_candidate_id: string | null;
@@ -47,11 +53,17 @@ export function scheduleEToExportRow(
   return {
     expenditure_date: record.expenditureDate ?? null,
     amount: record.amount,
+    dissemination_date: record.disseminationDate ?? null,
     support_oppose: record.supportOpposeIndicator ?? null,
     target_position_label: targetPositionLabel(record.supportOpposeIndicator),
     spender_committee_name: record.committeeName ?? null,
     spender_committee_id: record.spenderCommitteeId ?? null,
     fec_committee_id: record.fecCommitteeId ?? null,
+    payee_name: record.payeeName ?? null,
+    category_code_full: record.categoryCodeFull ?? null,
+    filing_form: record.filingForm ?? null,
+    file_number: record.fileNumber ?? null,
+    pdf_url: record.pdfUrl ?? null,
     candidate_name: record.candidateName ?? null,
     candidate_id: record.candidateId ?? null,
     fec_candidate_id: record.fecCandidateId ?? null,
@@ -81,11 +93,17 @@ export function scheduleERowsToCsv(rows: ScheduleEExportRow[]) {
   const columns: Array<keyof ScheduleEExportRow> = [
     "expenditure_date",
     "amount",
+    "dissemination_date",
     "support_oppose",
     "target_position_label",
     "spender_committee_name",
     "spender_committee_id",
     "fec_committee_id",
+    "payee_name",
+    "category_code_full",
+    "filing_form",
+    "file_number",
+    "pdf_url",
     "candidate_name",
     "candidate_id",
     "fec_candidate_id",

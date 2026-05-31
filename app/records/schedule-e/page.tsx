@@ -146,9 +146,19 @@ export default async function ScheduleERecordsPage({
                           record.committeeName ?? record.fecCommitteeId ?? "Spender not resolved"
                         )}
                         <p className="mt-1 text-xs text-neutral-600">{record.purpose ?? "Purpose not specified"}</p>
+                        {record.payeeName || record.disseminationDate || record.categoryCodeFull ? (
+                          <p className="mt-1 text-xs leading-5 text-neutral-600">
+                            {record.payeeName ? `Payee ${record.payeeName}` : "Payee not listed"}
+                            {record.disseminationDate ? ` / disseminated ${formatDate(record.disseminationDate)}` : ""}
+                            {record.categoryCodeFull ? ` / ${record.categoryCodeFull}` : ""}
+                          </p>
+                        ) : null}
                         <dl className="mt-2 space-y-1 text-xs leading-5 text-neutral-600 md:hidden">
                           <RecordMobileRow label="Date" value={formatDate(record.expenditureDate)} />
+                          {record.disseminationDate ? <RecordMobileRow label="Disseminated" value={formatDate(record.disseminationDate)} /> : null}
                           <RecordMobileRow label="Amount" value={formatMoney(record.amount) ?? "$0"} />
+                          {record.payeeName ? <RecordMobileRow label="Payee" value={record.payeeName} /> : null}
+                          {record.categoryCodeFull ? <RecordMobileRow label="Category" value={record.categoryCodeFull} /> : null}
                           <RecordMobileRow label="Target code" value={supportLabel(record.supportOpposeIndicator)} />
                           <div>
                             <dt className="inline font-mono uppercase tracking-[0.12em] text-neutral-500">Target </dt>
@@ -168,7 +178,19 @@ export default async function ScheduleERecordsPage({
                       <td className="hidden px-4 py-3 md:table-cell">{supportLabel(record.supportOpposeIndicator)}</td>
                       <td className="hidden px-4 py-3 md:table-cell">{raceLink(record)}</td>
                       <td className="hidden px-4 py-3 md:table-cell">
-                        <div className="flex flex-col gap-1">{sourceLink(record)}</div>
+                          <div className="flex flex-col gap-1">
+                            {sourceLink(record)}
+                            {record.filingForm || record.fileNumber ? (
+                              <span className="font-mono text-[11px] uppercase tracking-[0.12em] text-neutral-500">
+                                {[record.filingForm, record.fileNumber ? `file ${record.fileNumber}` : null].filter(Boolean).join(" / ")}
+                              </span>
+                            ) : null}
+                            {record.pdfUrl ? (
+                              <a className="text-xs underline underline-offset-4" href={record.pdfUrl} rel="noreferrer" target="_blank">
+                                Filing PDF
+                              </a>
+                            ) : null}
+                          </div>
                       </td>
                       <td className="hidden px-4 py-3 text-right font-mono font-semibold md:table-cell">
                         {formatMoney(record.amount)}

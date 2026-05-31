@@ -120,6 +120,12 @@ export type IndependentExpenditure = {
   supportOpposeIndicator?: string | null;
   amount: number;
   expenditureDate?: string | null;
+  disseminationDate?: string | null;
+  payeeName?: string | null;
+  categoryCodeFull?: string | null;
+  filingForm?: string | null;
+  fileNumber?: string | null;
+  pdfUrl?: string | null;
   purpose?: string | null;
   sourceUrl?: string | null;
   raw: unknown;

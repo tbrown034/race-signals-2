@@ -325,9 +325,10 @@ export async function upsertIndependentExpenditures(expenditures: IndependentExp
         insert into independent_expenditures (
           source_id, cycle, spender_committee_id, fec_committee_id, candidate_id,
           fec_candidate_id, race_id, support_oppose_indicator, amount,
-          expenditure_date, purpose, source_url, raw
+          expenditure_date, dissemination_date, payee_name, category_code_full,
+          filing_form, file_number, pdf_url, purpose, source_url, raw
         )
-        values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13)
+        values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19)
         on conflict (source, source_id) do update set
           cycle = excluded.cycle,
           spender_committee_id = excluded.spender_committee_id,
@@ -338,6 +339,12 @@ export async function upsertIndependentExpenditures(expenditures: IndependentExp
           support_oppose_indicator = excluded.support_oppose_indicator,
           amount = excluded.amount,
           expenditure_date = excluded.expenditure_date,
+          dissemination_date = excluded.dissemination_date,
+          payee_name = excluded.payee_name,
+          category_code_full = excluded.category_code_full,
+          filing_form = excluded.filing_form,
+          file_number = excluded.file_number,
+          pdf_url = excluded.pdf_url,
           purpose = excluded.purpose,
           source_url = excluded.source_url,
           raw = excluded.raw
@@ -353,6 +360,12 @@ export async function upsertIndependentExpenditures(expenditures: IndependentExp
         expenditure.supportOpposeIndicator,
         expenditure.amount,
         expenditure.expenditureDate,
+        expenditure.disseminationDate,
+        expenditure.payeeName,
+        expenditure.categoryCodeFull,
+        expenditure.filingForm,
+        expenditure.fileNumber,
+        expenditure.pdfUrl,
         expenditure.purpose,
         expenditure.sourceUrl,
         JSON.stringify(expenditure.raw),

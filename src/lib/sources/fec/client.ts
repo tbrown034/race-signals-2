@@ -77,6 +77,12 @@ export type FecScheduleE = {
   support_oppose_indicator?: string;
   expenditure_amount?: number;
   expenditure_date?: string;
+  dissemination_date?: string;
+  payee_name?: string;
+  category_code_full?: string;
+  filing_form?: string;
+  file_number?: string | number;
+  pdf_url?: string;
   expenditure_description?: string;
 };
 

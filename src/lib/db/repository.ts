@@ -1066,6 +1066,12 @@ export async function getCommitteeIndependentExpenditures(
     support_oppose_indicator: string | null;
     amount: string;
     expenditure_date: string | Date | null;
+    dissemination_date: string | Date | null;
+    payee_name: string | null;
+    category_code_full: string | null;
+    filing_form: string | null;
+    file_number: string | null;
+    pdf_url: string | null;
     purpose: string | null;
     source_url: string | null;
     raw: unknown;
@@ -1106,6 +1112,12 @@ export async function getCommitteeIndependentExpenditures(
     supportOpposeIndicator: row.support_oppose_indicator,
     amount: Number(row.amount),
     expenditureDate: row.expenditure_date ? toDateString(row.expenditure_date) : null,
+    disseminationDate: row.dissemination_date ? toDateString(row.dissemination_date) : null,
+    payeeName: row.payee_name,
+    categoryCodeFull: row.category_code_full,
+    filingForm: row.filing_form,
+    fileNumber: row.file_number,
+    pdfUrl: row.pdf_url,
     purpose: row.purpose,
     sourceUrl: row.source_url,
     raw: row.raw,
@@ -1143,6 +1155,12 @@ export async function getCandidateIndependentExpenditures(
     support_oppose_indicator: string | null;
     amount: string;
     expenditure_date: string | Date | null;
+    dissemination_date: string | Date | null;
+    payee_name: string | null;
+    category_code_full: string | null;
+    filing_form: string | null;
+    file_number: string | null;
+    pdf_url: string | null;
     purpose: string | null;
     source_url: string | null;
     raw: unknown;
@@ -1183,6 +1201,12 @@ export async function getCandidateIndependentExpenditures(
     supportOpposeIndicator: row.support_oppose_indicator,
     amount: Number(row.amount),
     expenditureDate: row.expenditure_date ? toDateString(row.expenditure_date) : null,
+    disseminationDate: row.dissemination_date ? toDateString(row.dissemination_date) : null,
+    payeeName: row.payee_name,
+    categoryCodeFull: row.category_code_full,
+    filingForm: row.filing_form,
+    fileNumber: row.file_number,
+    pdfUrl: row.pdf_url,
     purpose: row.purpose,
     sourceUrl: row.source_url,
     raw: row.raw,
@@ -1269,6 +1293,12 @@ export async function getScheduleERecords(
     support_oppose_indicator: string | null;
     amount: string;
     expenditure_date: string | Date | null;
+    dissemination_date: string | Date | null;
+    payee_name: string | null;
+    category_code_full: string | null;
+    filing_form: string | null;
+    file_number: string | null;
+    pdf_url: string | null;
     purpose: string | null;
     source_url: string | null;
     raw: unknown;
@@ -1305,6 +1335,12 @@ export async function getScheduleERecords(
     supportOpposeIndicator: row.support_oppose_indicator,
     amount: Number(row.amount),
     expenditureDate: row.expenditure_date ? toDateString(row.expenditure_date) : null,
+    disseminationDate: row.dissemination_date ? toDateString(row.dissemination_date) : null,
+    payeeName: row.payee_name,
+    categoryCodeFull: row.category_code_full,
+    filingForm: row.filing_form,
+    fileNumber: row.file_number,
+    pdfUrl: row.pdf_url,
     purpose: row.purpose,
     sourceUrl: row.source_url,
     raw: row.raw,

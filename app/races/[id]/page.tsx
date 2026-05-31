@@ -125,12 +125,12 @@ export default async function RacePage({
             ]}
         />
         <div className="grid gap-px border-b border-neutral-300 bg-neutral-300 sm:grid-cols-2 xl:grid-cols-5" id="race-stats">
+          <RaceStat label="Outside spending" value={formatMoney(stats.totalIndependentExpenditures) ?? "$0"} />
           <RaceStat
             detail={raceTotalsDetail(oldestTotalsFetchedAt, latestTotalsFetchedAt)}
             label="Stored FEC candidate totals"
             value={formatMoney(stats.totalRaised) ?? "$0"}
           />
-          <RaceStat label="Outside spending" value={formatMoney(stats.totalIndependentExpenditures) ?? "$0"} />
           <RaceStat
             detail={`Supports targets ${formatMoney(stats.supportIndependentExpenditures) ?? "$0"} / opposes targets ${formatMoney(stats.opposeIndependentExpenditures) ?? "$0"}`}
             label="IE direction"

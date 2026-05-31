@@ -26,11 +26,11 @@ const sections = [
   },
   {
     title: "Reporter Verification",
-    body: "Before citing a signal, open the linked FEC source, confirm the candidate, committee, date, amount and race context, then check the status page for ingest freshness. Use the Schedule E records page to reconcile outside-spending totals against stored source rows. Missing signals do not mean no activity; they usually mean the current stored slice has not matched a report, committee record or Schedule E row that crosses the signal rules.",
+    body: "Before citing a signal, open the linked FEC source, confirm the candidate, committee, date, amount and race context, then check the status page for ingest freshness. Use the Review page for records that need editor attention, and use the Schedule E records page to reconcile outside-spending totals against stored source rows. Missing signals do not mean no activity; they usually mean the current stored slice has not matched a report, committee record or Schedule E row that crosses the signal rules.",
   },
   {
     title: "Exports",
-    body: "CSV and JSON exports carry methodology URLs, scope notes and source IDs. Schedule E exports include scoped local evidence links plus the FEC source URL; activity-spike signal exports flatten latest/prior filing receipts, coverage windows, source URLs and comparison basis for spreadsheet review.",
+    body: "CSV and JSON exports carry methodology URLs, scope notes and source IDs. Schedule E exports include scoped local evidence links plus the FEC source URL and preserve visible evidence filters such as state, race, target-position code and minimum amount. Activity-spike signal exports flatten latest/prior filing receipts, coverage windows, source URLs and comparison basis for spreadsheet review.",
   },
   {
     title: "What To Cite",
@@ -42,7 +42,7 @@ const sections = [
   },
   {
     title: "Implementation",
-    body: "The application uses Next 16 App Router, TypeScript, Tailwind and raw SQL against Postgres. Server-rendered read routes stay separate from ingestion logic.",
+    body: "The application uses Next 16 App Router, TypeScript, Tailwind and raw SQL against Postgres. Server-rendered read routes stay separate from ingestion logic. CI runs lint, logic tests, export tests, signal and cost audits, build, and a route smoke audit over the main reporter pages.",
   },
   {
     title: "MVP Discipline",

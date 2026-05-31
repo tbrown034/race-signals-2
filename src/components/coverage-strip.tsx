@@ -38,33 +38,67 @@ export function CoverageStrip({
             </p>
           </details>
         </div>
-        <dl className="grid grid-cols-2 gap-x-5 gap-y-2 font-mono text-[11px] uppercase tracking-[0.12em] text-neutral-600 sm:grid-cols-4">
-          <div>
-            <dt>Status</dt>
-            <dd className="mt-1 font-semibold text-neutral-950">{statusLabel}</dd>
-          </div>
-          <div>
-            <dt>Latest ingest</dt>
-            <dd className="mt-1 font-semibold text-neutral-950">{latestScope}</dd>
-          </div>
-          <div>
-            <dt>Stored signals</dt>
-            <dd className="mt-1 font-semibold text-neutral-950">{counts.signals ?? 0}</dd>
-          </div>
-          <div>
-            <dt>Finished</dt>
-            <dd className="mt-1">
-              <Link
-                className="font-semibold text-neutral-950 underline-offset-4 hover:underline"
-                href="/status"
-                title={finishedAt ? formatDateTime(finishedAt) : "No ingestion run recorded"}
-              >
-                {formatRelativeTime(finishedAt)}
-              </Link>
-            </dd>
-          </div>
-        </dl>
+        <details className="font-mono text-[11px] uppercase tracking-[0.12em] text-neutral-600 sm:hidden">
+          <summary className="cursor-pointer">
+            {statusLabel} / {counts.signals ?? 0} signals / {formatRelativeTime(finishedAt)}
+          </summary>
+          <CoverageStats
+            counts={counts}
+            finishedAt={finishedAt}
+            latestScope={latestScope}
+            statusLabel={statusLabel}
+          />
+        </details>
+        <div className="hidden sm:block">
+          <CoverageStats
+            counts={counts}
+            finishedAt={finishedAt}
+            latestScope={latestScope}
+            statusLabel={statusLabel}
+          />
+        </div>
       </div>
     </div>
+  );
+}
+
+function CoverageStats({
+  counts,
+  finishedAt,
+  latestScope,
+  statusLabel,
+}: {
+  counts: Record<string, number>;
+  finishedAt: string | null;
+  latestScope: string;
+  statusLabel: string;
+}) {
+  return (
+    <dl className="mt-2 grid grid-cols-2 gap-x-5 gap-y-2 sm:mt-0 sm:grid-cols-4">
+      <div>
+        <dt>Status</dt>
+        <dd className="mt-1 font-semibold text-neutral-950">{statusLabel}</dd>
+      </div>
+      <div>
+        <dt>Latest ingest</dt>
+        <dd className="mt-1 font-semibold text-neutral-950">{latestScope}</dd>
+      </div>
+      <div>
+        <dt>Stored signals</dt>
+        <dd className="mt-1 font-semibold text-neutral-950">{counts.signals ?? 0}</dd>
+      </div>
+      <div>
+        <dt>Finished</dt>
+        <dd className="mt-1">
+          <Link
+            className="font-semibold text-neutral-950 underline-offset-4 hover:underline"
+            href="/status"
+            title={finishedAt ? formatDateTime(finishedAt) : "No ingestion run recorded"}
+          >
+            {formatRelativeTime(finishedAt)}
+          </Link>
+        </dd>
+      </div>
+    </dl>
   );
 }

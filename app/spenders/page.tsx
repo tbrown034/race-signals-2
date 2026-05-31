@@ -26,9 +26,11 @@ export default async function SpendersPage() {
               Top outside spenders
             </h1>
             <p className="mt-2 max-w-3xl text-sm leading-5 text-neutral-700">
-              Committees ranked by independent expenditure totals in the current
-              database slice. Amounts are sourced from FEC Schedule E records and
-              should be checked against the linked records view before publication.
+              Committees ranked by all stored current-cycle independent expenditure
+              totals in the current database slice, including records below the
+              $25,000 alert threshold. Amounts are sourced from FEC Schedule E
+              records and should be checked against the linked records view before
+              publication.
             </p>
           </div>
           <div className="overflow-x-auto">

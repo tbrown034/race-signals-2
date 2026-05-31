@@ -233,7 +233,7 @@ export function EntityPage({
             </div>
           </div>
         ) : null}
-        <div className="border-b border-neutral-300 px-5 py-4">
+        <div className="border-b border-neutral-300 px-5 py-4" id="related-signals">
           <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
             <h2 className="text-sm font-semibold uppercase tracking-[0.14em] text-neutral-600">
               Related signals

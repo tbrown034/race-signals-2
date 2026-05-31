@@ -5,21 +5,25 @@ import { formatDate } from "@/src/lib/format";
 import type { Election } from "@/src/lib/types";
 
 export function ElectionTimeline({
+  collapseOnMobile = false,
   emptyText,
   elections,
+  id,
   showCandidate = false,
   title,
   note,
 }: {
+  collapseOnMobile?: boolean;
   emptyText: string;
   elections: Election[];
+  id?: string;
   note?: string;
   showCandidate?: boolean;
   title: string;
 }) {
   if (!elections.length) {
     return (
-      <div className="border-b border-neutral-300 px-5 py-4">
+      <div className="border-b border-neutral-300 px-5 py-4" id={id}>
         <p className="font-mono text-xs uppercase tracking-[0.14em] text-neutral-500">
           {title}
         </p>
@@ -29,15 +33,39 @@ export function ElectionTimeline({
   }
 
   return (
-    <div className="border-b border-neutral-300">
+    <div className="border-b border-neutral-300" id={id}>
       <div className="border-b border-neutral-300 px-5 py-4">
         <h2 className="text-sm font-semibold uppercase tracking-[0.14em] text-neutral-600">
           {title}
         </h2>
         {note ? <p className="mt-2 text-sm leading-6 text-neutral-600">{note}</p> : null}
       </div>
-      <div className="overflow-x-auto">
-        <table className="w-full min-w-0 text-left text-sm md:min-w-[760px]">
+      {collapseOnMobile ? (
+        <details className="border-b border-neutral-300 px-5 py-3 text-sm md:hidden">
+          <summary className="cursor-pointer font-medium underline underline-offset-4">
+            Show {elections.length} historical row{elections.length === 1 ? "" : "s"}
+          </summary>
+          <div className="mt-3">
+            <TimelineTable elections={elections} showCandidate={showCandidate} />
+          </div>
+        </details>
+      ) : null}
+      <div className={`overflow-x-auto ${collapseOnMobile ? "hidden md:block" : ""}`}>
+        <TimelineTable elections={elections} showCandidate={showCandidate} />
+      </div>
+    </div>
+  );
+}
+
+function TimelineTable({
+  elections,
+  showCandidate,
+}: {
+  elections: Election[];
+  showCandidate: boolean;
+}) {
+  return (
+    <table className="w-full min-w-0 text-left text-sm md:min-w-[760px]">
           <thead className="bg-neutral-100 font-mono text-xs uppercase tracking-[0.12em] text-neutral-500">
             <tr>
                 <th className="px-4 py-3 font-medium" scope="col">Date</th>
@@ -127,8 +155,6 @@ export function ElectionTimeline({
             ))}
           </tbody>
         </table>
-      </div>
-    </div>
   );
 }
 

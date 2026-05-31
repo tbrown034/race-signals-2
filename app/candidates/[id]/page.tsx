@@ -95,7 +95,19 @@ export default async function CandidatePage({
           ...profileSourceRows(candidate),
         ]}
       >
+        <nav
+          aria-label="Candidate page sections"
+          className="border-b border-neutral-300 px-5 py-3 font-mono text-[11px] uppercase tracking-[0.12em] text-neutral-600"
+        >
+          <div className="flex flex-wrap gap-x-4 gap-y-2">
+            <a className="underline-offset-4 hover:underline" href="#reporter-read">Reporter read</a>
+            <a className="underline-offset-4 hover:underline" href="#race-context">Race context</a>
+            <a className="underline-offset-4 hover:underline" href="#related-signals">Signals</a>
+            <a className="underline-offset-4 hover:underline" href="#election-history">Election history</a>
+          </div>
+        </nav>
         <ReporterRead
+          id="reporter-read"
           notes={[
             `Money position: ${candidateMoney(candidate.totalReceiptsCycle, candidate.totalsFetchedAt).toLowerCase()} raised this cycle; ${candidateMoney(candidate.cashOnHandLatest, candidate.totalsFetchedAt).toLowerCase()} cash on hand${candidate.cashOnHandAsOf ? ` as of ${formatDate(candidate.cashOnHandAsOf)}` : ""}.`,
             `${formatCount(signals.length, "related signal")} in this slice: ${formatCount(signalCounts.filings, "filing")}, ${formatCount(signalCounts.committees, "committee record")}, ${formatCount(signalCounts.outsideSpending, "outside-spending alert")}, ${formatCount(signalCounts.review, "review flag")}.`,
@@ -106,13 +118,15 @@ export default async function CandidatePage({
           ]}
         />
         <ElectionTimeline
+          collapseOnMobile
           elections={elections}
           emptyText={`No election timeline available for this candidate. ${electionLookupStatus(candidate)} Wikidata and Wikipedia coverage of congressional primaries can be thin - follow the ${candidate.state} secretary of state for authoritative results.`}
+          id="election-history"
           note="Historical election rows from Wikidata or conservative Wikipedia parsing. This is not a live 2026 election calendar."
           title="Historical election results"
         />
         {raceCohort.length ? (
-          <div className="border-b border-neutral-300">
+          <div className="border-b border-neutral-300" id="race-context">
             <div className="border-b border-neutral-300 px-5 py-4">
               <h2 className="text-sm font-semibold uppercase tracking-[0.14em] text-neutral-600">
                 Race context

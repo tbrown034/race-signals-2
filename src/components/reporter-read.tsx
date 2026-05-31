@@ -1,9 +1,9 @@
-export function ReporterRead({ notes, title = "Reporter read" }: { notes: string[]; title?: string }) {
+export function ReporterRead({ id, notes, title = "Reporter read" }: { id?: string; notes: string[]; title?: string }) {
   const visibleNotes = notes.filter(Boolean);
   if (!visibleNotes.length) return null;
 
   return (
-    <div className="border-b border-neutral-300">
+    <div className="border-b border-neutral-300" id={id}>
       <div className="border-b border-neutral-300 px-5 py-4">
         <h2 className="text-sm font-semibold uppercase tracking-[0.14em] text-neutral-600">
           {title}

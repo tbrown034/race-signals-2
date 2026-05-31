@@ -125,7 +125,57 @@ async function main() {
       join candidates c on c.id = s.candidate_id
       where s.signal_type = 'new_committee'
         and c.incumbent_challenge_status in ('I', 'Incumbent')
-        and s.why_it_matters ilike '%first durable paperwork signal%'
+        and (
+          s.why_it_matters not ilike '%not proof%'
+          or s.why_it_matters ilike '%first%launch%'
+          or s.why_it_matters ilike '%early paperwork signal%'
+        )
+      limit 10
+    `));
+
+    checks.push(await countCheck(pool, "Unknown-status committee copy framed as challenger", "warn", `
+      select s.dedupe_key, s.headline, s.why_it_matters, c.name, c.incumbent_challenge_status
+      from signals s
+      left join candidates c on c.id = s.candidate_id
+      where s.signal_type = 'new_committee'
+        and (c.incumbent_challenge_status is null or c.incumbent_challenge_status not in ('I', 'Incumbent', 'C', 'Challenger', 'O', 'Open seat'))
+        and (
+          s.why_it_matters ilike '%challenger%'
+          or s.why_it_matters ilike '%non-incumbent%'
+        )
+      limit 10
+    `));
+
+    checks.push(await countCheck(pool, "Schedule E headline lacks independent-expenditure context", "fail", `
+      select dedupe_key, headline, metadata->>'sourceId' as source_id
+      from signals
+      where signal_type = 'large_independent_expenditure'
+        and headline not ilike '%independent expenditure%'
+        and headline not ilike '%schedule e%'
+      limit 10
+    `));
+
+    checks.push(await countCheck(pool, "Refiles use generic new-report copy", "warn", `
+      select dedupe_key, headline, why_it_matters, metadata->>'sourceId' as source_id
+      from signals
+      where signal_type = 'new_filing'
+        and metadata->>'filingVersionKind' = 'likely_refile'
+        and why_it_matters ilike '%New reports can reveal%'
+      limit 10
+    `));
+
+    checks.push(await countCheck(pool, "Activity spikes missing comparison evidence", "fail", `
+      select dedupe_key, headline, metadata
+      from signals
+      where signal_type = 'committee_activity_spike'
+        and (
+          metadata->>'latestSourceUrl' is null
+          or metadata->>'priorSourceUrl' is null
+          or metadata->>'latestCoverageStartDate' is null
+          or metadata->>'latestCoverageEndDate' is null
+          or metadata->>'priorCoverageStartDate' is null
+          or metadata->>'priorCoverageEndDate' is null
+        )
       limit 10
     `));
 

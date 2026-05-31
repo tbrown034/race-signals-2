@@ -109,12 +109,18 @@ assert.equal(
 const currentIeSignal = signals.find((signal) => signal.dedupeKey === "fec:large_ie:ie-current");
 assert.ok(currentIeSignal, "current-cycle large IE should generate a signal");
 assert.equal(currentIeSignal.status, "review", "current-cycle IE over $100k should be marked review");
+assert.match(
+  currentIeSignal.headline,
+  /Schedule E independent expenditure/,
+  "IE headlines should stand alone as independent-expenditure records",
+);
 
 const filingSignal = signals.find((signal) => signal.dedupeKey === "fec:new_filing:filing-current");
 assert.ok(filingSignal, "current-cycle filing should generate a signal");
 assert.equal(filingSignal.metadata?.reportType, "Q1");
 assert.equal(filingSignal.metadata?.totalReceipts, 61000);
 assert.equal(filingSignal.metadata?.cashOnHand, 25000);
+assert.equal(filingSignal.metadata?.filingVersionKind, "initial_or_single");
 
 const committeeSignal = signals.find((signal) => signal.dedupeKey === "fec:new_committee:C00999999");
 assert.ok(committeeSignal, "current-cycle committee should generate a signal");
@@ -145,5 +151,52 @@ assert.equal(
   false,
   "activity spikes must not compare period receipts to YTD or total receipts",
 );
+
+const refileSignals = generateSignals({
+  candidates: [candidate],
+  committees: [committee],
+  races: [race],
+  filings: [
+    currentFiling,
+    {
+      ...currentFiling,
+      sourceId: "filing-current-amended",
+      receiptDate: "2026-04-20",
+      sourceUrl: "https://www.fec.gov/data/filing/filing-current-amended/",
+    },
+  ],
+  independentExpenditures: [],
+  dataFreshness: "2026-05-31T12:00:00.000Z",
+});
+const refileSignal = refileSignals.find((signal) => signal.dedupeKey === "fec:new_filing:filing-current-amended");
+assert.ok(refileSignal, "likely refile should still generate a source-linked filing signal");
+assert.equal(refileSignal.metadata?.filingVersionKind, "likely_refile");
+assert.match(refileSignal.headline, /another version/, "likely refile headline should avoid fresh-activity framing");
+
+const spikeSignals = generateSignals({
+  candidates: [candidate],
+  committees: [committee],
+  races: [race],
+  filings: [
+    currentFiling,
+    {
+      ...currentFiling,
+      sourceId: "filing-prior-period",
+      receiptDate: "2026-01-31",
+      coverageStartDate: "2025-10-01",
+      coverageEndDate: "2025-12-31",
+      totalReceipts: 20000,
+      totalReceiptsBasis: "period",
+      sourceUrl: "https://www.fec.gov/data/filing/filing-prior-period/",
+    },
+  ],
+  independentExpenditures: [],
+  dataFreshness: "2026-05-31T12:00:00.000Z",
+});
+const spikeSignal = spikeSignals.find((signal) => signal.signalType === "committee_activity_spike");
+assert.ok(spikeSignal, "comparable period filings should generate an activity-spike signal");
+assert.equal(spikeSignal.metadata?.latestSourceUrl, currentFiling.sourceUrl);
+assert.equal(spikeSignal.metadata?.priorSourceUrl, "https://www.fec.gov/data/filing/filing-prior-period/");
+assert.equal(spikeSignal.metadata?.priorCoverageStartDate, "2025-10-01");
 
 console.log("Signal logic tests passed.");

@@ -84,18 +84,19 @@ export function generateSignals(input: SignalInput): Signal[] {
     });
   }
 
+  const filingVersionCounts = countLikelyFilingVersions(input.filings);
   for (const filing of input.filings) {
     if (!filing.receiptDate || !filing.sourceUrl) continue;
     const committee = filing.committeeId ? committees.get(filing.committeeId) : undefined;
     const race = committee?.raceId ? races.get(committee.raceId) : undefined;
     if (!isCurrentCycleRecord(filing.receiptDate, race, filing.cycle)) continue;
     const candidate = committee?.candidateId ? candidates.get(committee.candidateId) : undefined;
+    const filingCopy = newFilingCopy(filing, committee, filingVersionCounts.get(filingVersionKey(filing)) ?? 0);
     signals.push({
       dedupeKey: `fec:new_filing:${filing.sourceId}`,
       signalType: "new_filing",
-      headline: `${committee?.name ?? "A committee"} filed ${reportLabel(filing.reportType)}.`,
-      whyItMatters:
-        "New reports can reveal changed cash positions, spending pace and committee activity before those shifts are visible in public campaigning.",
+      headline: filingCopy.headline,
+      whyItMatters: filingCopy.whyItMatters,
       candidateId: candidate?.id ?? null,
       candidateName: candidate?.name ?? null,
       committeeId: committee?.id ?? filing.committeeId ?? null,
@@ -114,6 +115,7 @@ export function generateSignals(input: SignalInput): Signal[] {
         coverageEndDate: filing.coverageEndDate,
         totalReceipts: filing.totalReceipts,
         cashOnHand: filing.cashOnHand,
+        filingVersionKind: filingCopy.versionKind,
         sourceId: filing.sourceId,
         sourceKind: "filing",
       },
@@ -132,9 +134,9 @@ export function generateSignals(input: SignalInput): Signal[] {
     signals.push({
       dedupeKey: `fec:large_ie:${expenditure.sourceId}`,
       signalType: "large_independent_expenditure",
-      headline: `${committee?.name ?? "An outside spender"} reported $${Math.round(
+      headline: `${committee?.name ?? "An outside spender"} reported a $${Math.round(
         expenditure.amount,
-      ).toLocaleString()} ${supportVerb(expenditure.supportOpposeIndicator)} ${
+      ).toLocaleString()} Schedule E independent expenditure ${supportVerb(expenditure.supportOpposeIndicator)} ${
         candidate?.name ?? "a candidate"
       } in ${displayRace(race)}.`,
       whyItMatters:
@@ -216,6 +218,12 @@ export function generateSignals(input: SignalInput): Signal[] {
         reportType: latest.reportType,
         coverageStartDate: latest.coverageStartDate,
         coverageEndDate: latest.coverageEndDate,
+        latestReportType: latest.reportType,
+        latestCoverageStartDate: latest.coverageStartDate,
+        latestCoverageEndDate: latest.coverageEndDate,
+        priorReportType: prior.reportType,
+        priorCoverageStartDate: prior.coverageStartDate,
+        priorCoverageEndDate: prior.coverageEndDate,
         latestSourceId: latest.sourceId,
         latestSourceUrl: latest.sourceUrl,
         priorSourceId: prior.sourceId,
@@ -247,6 +255,25 @@ function reportLabel(reportType?: string | null) {
   return labels[reportType] ?? `${reportType} report`;
 }
 
+function newFilingCopy(filing: Filing, committee?: Committee, likelyVersionCount = 0) {
+  const label = reportLabel(filing.reportType);
+  const committeeName = committee?.name ?? "A committee";
+  if (likelyVersionCount > 1) {
+    return {
+      headline: `${committeeName} filed another version of ${label}.`,
+      whyItMatters:
+        "Multiple versions of the same report can reflect amendments or refiles; compare the linked FEC filings before treating totals as new activity.",
+      versionKind: "likely_refile",
+    };
+  }
+  return {
+    headline: `${committeeName} filed ${label}.`,
+    whyItMatters:
+      "New reports can reveal changed cash positions, spending pace and committee activity before those shifts are visible in public campaigning.",
+    versionKind: "initial_or_single",
+  };
+}
+
 function newCommitteeCopy(candidate?: Candidate, race?: Race) {
   const raceLabel = displayRace(race);
   const candidateName = candidate?.name ?? "A candidate";
@@ -262,12 +289,19 @@ function newCommitteeCopy(candidate?: Candidate, race?: Race) {
       headline: `Principal campaign committee filed in open-seat ${raceLabel}.`,
       whyItMatters:
         "In an open-seat race, a principal committee can be an early sign of candidate organization, but it still needs source review.",
+      };
+  }
+  if (isChallenger(candidate?.incumbentChallengeStatus)) {
+    return {
+      headline: `${candidateName} filed a principal campaign committee in ${raceLabel}.`,
+      whyItMatters:
+        "For a challenger, a principal committee is often an early paperwork signal that a campaign is organizing.",
     };
   }
   return {
     headline: `${candidateName} filed a principal campaign committee in ${raceLabel}.`,
     whyItMatters:
-      "For a challenger or non-incumbent, a principal committee is often an early paperwork signal that a campaign is organizing.",
+      "This source-linked committee record shows campaign infrastructure, but candidate status and ballot context still need verification.",
   };
 }
 
@@ -286,6 +320,30 @@ function isIncumbent(status?: string | null) {
 
 function isOpenSeat(status?: string | null) {
   return status === "O" || status === "Open seat";
+}
+
+function isChallenger(status?: string | null) {
+  return status === "C" || status === "Challenger";
+}
+
+function countLikelyFilingVersions(filings: Filing[]) {
+  const counts = new Map<string, number>();
+  for (const filing of filings) {
+    const key = filingVersionKey(filing);
+    counts.set(key, (counts.get(key) ?? 0) + 1);
+  }
+  return counts;
+}
+
+function filingVersionKey(filing: Filing) {
+  return [
+    filing.committeeId ?? filing.fecCommitteeId ?? "",
+    filing.reportType ?? "",
+    filing.coverageStartDate ?? "",
+    filing.coverageEndDate ?? "",
+    filing.totalReceipts ?? "",
+    filing.cashOnHand ?? "",
+  ].join("|");
 }
 
 function isCurrentCycleRecord(date: string, race?: Race, cycle?: number | null) {

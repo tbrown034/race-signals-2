@@ -232,6 +232,7 @@ function signalEvidence(signal: Signal) {
     const receipts = numberMetadata(signal.metadata?.totalReceipts);
     const cash = numberMetadata(signal.metadata?.cashOnHand);
     const reportType = textMetadata(signal.metadata?.reportType);
+    const versionKind = textMetadata(signal.metadata?.filingVersionKind);
     const sourceId = textMetadata(signal.metadata?.sourceId);
     const coverage = [
       textMetadata(signal.metadata?.coverageStartDate),
@@ -239,6 +240,7 @@ function signalEvidence(signal: Signal) {
     ].filter(Boolean);
     return [
       reportType ? `report ${reportType}` : null,
+      versionKind === "likely_refile" ? "likely amendment/refile" : null,
       receipts ? `receipts ${formatMoney(receipts)}` : null,
       cash ? `cash ${formatMoney(cash)}` : null,
       coverage.length === 2 ? `period ${coverage.join(" to ")}` : null,
@@ -251,16 +253,23 @@ function signalEvidence(signal: Signal) {
   if (signal.signalType === "committee_activity_spike") {
     const latest = numberMetadata(signal.metadata?.latestTotalReceipts);
     const prior = numberMetadata(signal.metadata?.priorTotalReceipts);
-    const reportType = textMetadata(signal.metadata?.reportType);
-    const coverage = [
-      textMetadata(signal.metadata?.coverageStartDate),
-      textMetadata(signal.metadata?.coverageEndDate),
+    const latestReportType = textMetadata(signal.metadata?.latestReportType) ?? textMetadata(signal.metadata?.reportType);
+    const priorReportType = textMetadata(signal.metadata?.priorReportType);
+    const latestCoverage = [
+      textMetadata(signal.metadata?.latestCoverageStartDate) ?? textMetadata(signal.metadata?.coverageStartDate),
+      textMetadata(signal.metadata?.latestCoverageEndDate) ?? textMetadata(signal.metadata?.coverageEndDate),
+    ].filter(Boolean);
+    const priorCoverage = [
+      textMetadata(signal.metadata?.priorCoverageStartDate),
+      textMetadata(signal.metadata?.priorCoverageEndDate),
     ].filter(Boolean);
     return [
-      reportType ? `report ${reportType}` : null,
+      latestReportType ? `latest report ${latestReportType}` : null,
       latest ? `latest ${formatMoney(latest)}` : null,
+      latestCoverage.length === 2 ? `latest period ${latestCoverage.join(" to ")}` : null,
+      priorReportType ? `prior report ${priorReportType}` : null,
       prior ? `prior ${formatMoney(prior)}` : null,
-      coverage.length === 2 ? `period ${coverage.join(" to ")}` : null,
+      priorCoverage.length === 2 ? `prior period ${priorCoverage.join(" to ")}` : null,
       textMetadata(signal.metadata?.latestSourceId) ? `latest ${textMetadata(signal.metadata?.latestSourceId)}` : null,
       textMetadata(signal.metadata?.priorSourceId) ? `prior ${textMetadata(signal.metadata?.priorSourceId)}` : null,
     ]

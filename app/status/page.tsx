@@ -2,6 +2,7 @@ import Link from "next/link";
 import { PageShell } from "@/src/components/page-shell";
 import { getSignalStateFreshness, getStatus } from "@/src/lib/db/repository";
 import { formatCount, formatDateTime, formatMoney, formatRelativeTime, isOlderThanHours } from "@/src/lib/format";
+import { displayCandidateName } from "@/src/lib/names";
 import { endpointHealthClass } from "@/src/lib/status-health";
 import type { Metadata } from "next";
 
@@ -375,7 +376,7 @@ export default async function StatusPage() {
                     <tr key={candidate.id}>
                       <td className="px-4 py-3">
                         <Link className="font-medium underline underline-offset-4" href={`/candidates/${candidate.id}`}>
-                          {candidate.name}
+                          {displayCandidateName(candidate.name) ?? candidate.name}
                         </Link>
                         <dl className="mt-2 space-y-1 text-xs leading-5 text-neutral-600 md:hidden">
                           <div>

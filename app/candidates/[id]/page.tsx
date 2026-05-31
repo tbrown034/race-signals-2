@@ -151,7 +151,7 @@ export default async function CandidatePage({
               </p>
             </div>
             <div className="overflow-x-auto">
-              <table className="w-full min-w-0 text-left text-sm md:min-w-[680px]">
+              <table className="w-full min-w-0 text-left text-sm md:min-w-[900px]">
                 <thead className="bg-neutral-100 font-mono text-xs uppercase tracking-[0.12em] text-neutral-500">
                   <tr>
                     <th className="px-4 py-3 font-medium" scope="col">Candidate</th>
@@ -159,6 +159,8 @@ export default async function CandidatePage({
                     <th className="hidden px-4 py-3 text-right font-medium md:table-cell" scope="col">Receipts</th>
                     <th className="hidden px-4 py-3 text-right font-medium md:table-cell" scope="col">Cash</th>
                     <th className="hidden px-4 py-3 font-medium md:table-cell" scope="col">Funding mix</th>
+                    <th className="hidden px-4 py-3 font-medium md:table-cell" scope="col">Source</th>
+                    <th className="hidden px-4 py-3 font-medium md:table-cell" scope="col">Fetched</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-neutral-200">
@@ -197,6 +199,22 @@ export default async function CandidatePage({
                             <dt className="inline font-mono uppercase tracking-[0.12em] text-neutral-500">Funding mix </dt>
                             <dd className="inline">{fundingMix(otherCandidate.individualContributionPct, otherCandidate.pacContributionPct)}</dd>
                           </div>
+                          <div>
+                            <dt className="inline font-mono uppercase tracking-[0.12em] text-neutral-500">Source </dt>
+                            <dd className="inline">
+                              {otherCandidate.sourceUrl ? (
+                                <a className="font-medium underline underline-offset-4" href={otherCandidate.sourceUrl} rel="noreferrer" target="_blank">
+                                  FEC record
+                                </a>
+                              ) : (
+                                "Source not stored"
+                              )}
+                            </dd>
+                          </div>
+                          <div>
+                            <dt className="inline font-mono uppercase tracking-[0.12em] text-neutral-500">Fetched </dt>
+                            <dd className="inline">{candidateTotalsFetched(otherCandidate.totalsFetchedAt)}</dd>
+                          </div>
                         </dl>
                       </td>
                       <td className="hidden px-4 py-3 md:table-cell">
@@ -213,6 +231,18 @@ export default async function CandidatePage({
                       </td>
                       <td className="hidden px-4 py-3 text-xs text-neutral-600 md:table-cell">
                         {fundingMix(otherCandidate.individualContributionPct, otherCandidate.pacContributionPct)}
+                      </td>
+                      <td className="hidden px-4 py-3 md:table-cell">
+                        {otherCandidate.sourceUrl ? (
+                          <a className="font-medium underline underline-offset-4" href={otherCandidate.sourceUrl} rel="noreferrer" target="_blank">
+                            FEC record
+                          </a>
+                        ) : (
+                          <span className="text-neutral-600">Source not stored</span>
+                        )}
+                      </td>
+                      <td className="hidden px-4 py-3 text-xs text-neutral-600 md:table-cell">
+                        {candidateTotalsFetched(otherCandidate.totalsFetchedAt)}
                       </td>
                     </tr>
                   ))}
@@ -690,6 +720,10 @@ function profileSourceRows(candidate: NonNullable<Awaited<ReturnType<typeof getC
 
 function candidateMoney(value?: number | null, totalsFetchedAt?: string | null) {
   return formatMoney(value) ?? (totalsFetchedAt ? "Not reported by FEC" : "FEC totals not loaded");
+}
+
+function candidateTotalsFetched(value?: string | null) {
+  return value ? formatDateTime(value) : "FEC totals not loaded";
 }
 
 function electionLookupStatus(candidate: Awaited<ReturnType<typeof getCandidate>>) {

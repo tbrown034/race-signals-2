@@ -94,10 +94,10 @@ export default async function ScheduleERecordsPage({
 
           <div className="grid gap-px border-b border-neutral-300 bg-neutral-300 sm:grid-cols-2 xl:grid-cols-5">
             <RecordStat label="Stored rows" value={formatCount(summary.recordCount, "record")} />
-            <RecordStat label="Stored IE sum" value={formatMoney(summary.totalAmount) ?? "$0"} />
-            <RecordStat label="Stored supports sum" value={formatMoney(summary.supportAmount) ?? "$0"} />
-            <RecordStat label="Stored opposes sum" value={formatMoney(summary.opposeAmount) ?? "$0"} />
-            <RecordStat label="Stored uncoded sum" value={formatMoney(summary.uncodedAmount) ?? "$0"} />
+            <RecordStat label="Stored slice IE sum" value={formatMoney(summary.totalAmount) ?? "$0"} />
+            <RecordStat label="Stored slice supports" value={formatMoney(summary.supportAmount) ?? "$0"} />
+            <RecordStat label="Stored slice opposes" value={formatMoney(summary.opposeAmount) ?? "$0"} />
+            <RecordStat label="Stored slice uncoded" value={formatMoney(summary.uncodedAmount) ?? "$0"} />
           </div>
 
           <div className="border-b border-neutral-300 px-5 py-3 text-sm text-neutral-600">
@@ -125,7 +125,7 @@ export default async function ScheduleERecordsPage({
                 </thead>
                 <tbody className="divide-y divide-neutral-200">
                   {records.map((record) => (
-                    <tr key={record.sourceId}>
+                    <tr id={scheduleEAnchorId(record.sourceId)} key={record.sourceId}>
                       <td className="hidden px-4 py-3 font-mono md:table-cell">
                         {formatDate(record.expenditureDate)}
                       </td>
@@ -258,6 +258,9 @@ function raceLink(record: Awaited<ReturnType<typeof getScheduleERecords>>[number
 function sourceLink(record: Awaited<ReturnType<typeof getScheduleERecords>>[number]) {
   return (
     <span className="inline-flex max-w-full flex-wrap items-baseline gap-x-2 gap-y-1">
+      <a className="font-medium underline underline-offset-4" href={`#${scheduleEAnchorId(record.sourceId)}`}>
+        Local row
+      </a>
       {record.sourceUrl ? (
         <a className="font-medium underline underline-offset-4" href={record.sourceUrl} rel="noreferrer" target="_blank">
           FEC Schedule E
@@ -270,4 +273,8 @@ function sourceLink(record: Awaited<ReturnType<typeof getScheduleERecords>>[numb
       </span>
     </span>
   );
+}
+
+function scheduleEAnchorId(sourceId: string) {
+  return `schedule-e-${sourceId.replace(/[^a-zA-Z0-9_-]/g, "-")}`;
 }

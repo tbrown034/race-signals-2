@@ -198,11 +198,12 @@ export function FeedFilters({
             {activeFilterTokens.map((token) => (
               <Link
                 className="w-full max-w-full min-w-0 break-words border border-neutral-300 bg-white px-2 py-1 text-neutral-700 underline-offset-4 [overflow-wrap:anywhere] hover:border-neutral-900 hover:underline sm:w-auto sm:max-w-[32rem]"
+                aria-label={`Remove filter: ${token.label}`}
                 href={removeFilterHref(token.key)}
                 key={token.key}
                 title={`Remove ${token.label}`}
               >
-                {token.label} x
+                {token.label} / remove
               </Link>
             ))}
           </div>

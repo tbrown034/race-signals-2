@@ -26,6 +26,7 @@ export type ScheduleEExportRow = {
   purpose: string | null;
   source_url: string | null;
   source_id: string;
+  evidence_url: string | null;
   methodology_url: string;
   scope_note: string;
   exported_at: string;
@@ -59,6 +60,7 @@ export function scheduleEToExportRow(
     purpose: record.purpose ?? null,
     source_url: record.sourceUrl ?? null,
     source_id: record.sourceId,
+    evidence_url: manifest.baseUrl ? `${manifest.baseUrl}/records/schedule-e#${scheduleEAnchorId(record.sourceId)}` : null,
     methodology_url: manifest.baseUrl
       ? `${manifest.baseUrl}/methodology#large_independent_expenditure`
       : "/methodology#large_independent_expenditure",
@@ -92,6 +94,7 @@ export function scheduleERowsToCsv(rows: ScheduleEExportRow[]) {
     "purpose",
     "source_url",
     "source_id",
+    "evidence_url",
     "methodology_url",
     "scope_note",
     "exported_at",
@@ -114,6 +117,10 @@ function targetPositionLabel(value?: string | null) {
   if (value === "S") return "FEC code: supports target";
   if (value === "O") return "FEC code: opposes target";
   return "Not classified by FEC";
+}
+
+function scheduleEAnchorId(sourceId: string) {
+  return `schedule-e-${sourceId.replace(/[^a-zA-Z0-9_-]/g, "-")}`;
 }
 
 function csvCell(value: string | number | null) {

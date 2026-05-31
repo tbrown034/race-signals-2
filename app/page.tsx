@@ -274,10 +274,10 @@ function FeedTriageStrip({
   return (
     <section className="border-b border-neutral-300 px-5 py-3" aria-label="Feed triage">
       <div className="grid gap-2 md:grid-cols-2 xl:grid-cols-4">
-        <TriageItem label="Newest added" signal={signals.newestAdded} />
-        <TriageItem label="Largest outside spend" signal={signals.largestIe} empty="No IE alerts in this view" />
-        <TriageItem label="Incumbent named" signal={signals.incumbentNamed} empty="No incumbent-linked signals in this view" />
-        <TriageItem label="Needs review" signal={signals.review} empty="No review flags in this view" />
+        <TriageItem label="Newest added in this view" signal={signals.newestAdded} />
+        <TriageItem label="Largest outside spend in this view" signal={signals.largestIe} empty="No IE alerts in this view" />
+        <TriageItem label="Incumbent named in this view" signal={signals.incumbentNamed} empty="No incumbent-linked signals in this view" />
+        <TriageItem label="Needs review in this view" signal={signals.review} empty="No review flags in this view" />
       </div>
     </section>
   );

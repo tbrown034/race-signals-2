@@ -53,10 +53,10 @@ export function SignalCard({ signal }: { signal: Signal }) {
       <div className="font-mono text-xs text-neutral-600">
         <p className="flex items-center gap-1.5 text-neutral-950">
           <FreshMark signalDate={signal.signalDate} status={signal.status} />
-          Date {formatDate(signal.signalDate)}
+          FEC date {formatDate(signal.signalDate)}
         </p>
         <p className="mt-1 text-neutral-600" title={`Ingested by Race Signals ${formatDateTime(signal.dataFreshness)}`}>
-          Added {formatRelativeTime(signal.dataFreshness)}
+          Added to Race Signals {formatRelativeTime(signal.dataFreshness)}
         </p>
         <Link
           className="mt-1 block uppercase tracking-[0.12em] underline-offset-4 hover:underline"
@@ -147,7 +147,17 @@ export function SignalCard({ signal }: { signal: Signal }) {
         ) : null}
         <p className="mt-1 hidden text-xs leading-5 text-neutral-600 md:block">
           <span className="font-mono uppercase tracking-[0.12em] text-neutral-500">Verify:</span>{" "}
-          {verifyLine}
+          {verifyLine}{" "}
+          {signal.sourceUrl ? (
+            <a
+              className="font-medium underline underline-offset-4"
+              href={signal.sourceUrl}
+              rel="noreferrer"
+              target="_blank"
+            >
+              {fecSourceLabel(signal)}
+            </a>
+          ) : null}
         </p>
         {nextChecks.length ? (
           <div className="mt-2 flex flex-wrap items-center gap-2 text-xs">

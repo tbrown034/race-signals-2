@@ -115,8 +115,22 @@ export default async function SpendingPage({
                             {signal.headline}
                           </Link>
                         </td>
-                        <td className="px-4 py-3">{entityLabel(signal.committeeName, signal.committeeId, "Spender not resolved")}</td>
-                        <td className="px-4 py-3">{entityLabel(signal.candidateName, signal.candidateId, "Candidate not resolved")}</td>
+                        <td className="px-4 py-3">
+                          <EntityLink
+                            fallback="Spender not resolved"
+                            hrefBase="/committees"
+                            id={signal.committeeId}
+                            label={signal.committeeName}
+                          />
+                        </td>
+                        <td className="px-4 py-3">
+                          <EntityLink
+                            fallback="Candidate not resolved"
+                            hrefBase="/candidates"
+                            id={signal.candidateId}
+                            label={signal.candidateName}
+                          />
+                        </td>
                         <td className="px-4 py-3">{supportOpposeLabel(signal.metadata?.supportOpposeIndicator)}</td>
                         <td className="px-4 py-3 text-neutral-700">{sourcePurpose(signal.metadata?.purpose)}</td>
                         <td className="px-4 py-3">
@@ -147,7 +161,7 @@ export default async function SpendingPage({
                               </span>
                             </span>
                           ) : (
-                            "Missing"
+                            <span className="text-neutral-600">Source not stored</span>
                           )}
                         </td>
                       </tr>
@@ -190,8 +204,23 @@ function supportOpposeLabel(value: unknown) {
   return "Not coded by FEC";
 }
 
-function entityLabel(name: string | null | undefined, id: string | null | undefined, fallback: string) {
-  return name ?? id ?? fallback;
+function EntityLink({
+  fallback,
+  hrefBase,
+  id,
+  label,
+}: {
+  fallback: string;
+  hrefBase: "/candidates" | "/committees";
+  id?: string | null;
+  label?: string | null;
+}) {
+  if (!id) return label ?? fallback;
+  return (
+    <Link className="font-medium underline underline-offset-4" href={`${hrefBase}/${id}`}>
+      {label ?? id}
+    </Link>
+  );
 }
 
 function sourceRecordLabel(value: unknown) {

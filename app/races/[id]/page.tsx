@@ -88,7 +88,20 @@ export default async function RacePage({
           ["Competitiveness", race.competitiveness],
         ]}
       >
+        <nav
+          aria-label="Race page sections"
+          className="border-b border-neutral-300 px-5 py-3 font-mono text-[11px] uppercase tracking-[0.12em] text-neutral-600"
+        >
+          <div className="flex flex-wrap gap-x-4 gap-y-2">
+            <a className="underline-offset-4 hover:underline" href="#reporter-read">Reporter read</a>
+            <a className="underline-offset-4 hover:underline" href="#race-stats">Stats</a>
+            <a className="underline-offset-4 hover:underline" href="#candidate-cohort">Candidate cohort</a>
+            <a className="underline-offset-4 hover:underline" href="#related-signals">Signals</a>
+            <a className="underline-offset-4 hover:underline" href="#election-history">Election history</a>
+          </div>
+        </nav>
         <ReporterRead
+          id="reporter-read"
           notes={[
             `${candidates.length} FEC candidates matched to this race; ${candidatesWithMoney} currently show cycle receipts in the FEC totals endpoint.`,
             `Known candidate receipts in this slice total ${formatMoney(totalReceipts) ?? "$0"}. Use this as FEC-filed activity, not a race forecast.`,
@@ -99,20 +112,22 @@ export default async function RacePage({
               : "No incumbent candidate is currently matched in this slice; verify ballot and primary context with election-office sources.",
             ]}
         />
-        <div className="grid gap-px border-b border-neutral-300 bg-neutral-300 sm:grid-cols-4">
+        <div className="grid gap-px border-b border-neutral-300 bg-neutral-300 sm:grid-cols-4" id="race-stats">
           <RaceStat label="Cohort receipts" value={formatMoney(stats.totalRaised) ?? "$0"} />
           <RaceStat label="Outside spending" value={formatMoney(stats.totalIndependentExpenditures) ?? "$0"} />
           <RaceStat label="Candidates filed" value={String(stats.candidateCount)} />
           <RaceStat label="Incumbents" value={String(stats.incumbentCount)} />
         </div>
         <ElectionTimeline
+          collapseOnMobile
           elections={elections}
           emptyText={`No election timeline available for this race. Wikidata and Wikipedia coverage of congressional primaries can be thin - follow the ${race.state} secretary of state for authoritative results.`}
+          id="election-history"
           note="Historical results for candidates currently matched to this race. This is not a 2026 election calendar or a real-time results feed."
           showCandidate
           title="Historical election results"
         />
-        <div className="border-b border-neutral-300">
+        <div className="border-b border-neutral-300" id="candidate-cohort">
           <div className="border-b border-neutral-300 px-5 py-4">
             <h2 className="text-sm font-semibold uppercase tracking-[0.14em] text-neutral-600">
               Candidate cohort

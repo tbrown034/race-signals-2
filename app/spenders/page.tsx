@@ -317,7 +317,7 @@ function positionConcentrationNote(supportShare: number, opposeShare: number) {
 }
 
 function spenderEvidenceHref(committeeId?: string | null, latestSourceUrl?: string | null) {
-  if (committeeId) return `/committees/${committeeId}#schedule-e-records`;
+  if (committeeId) return `/records/schedule-e?committee=${committeeId}`;
   return latestSourceUrl ?? "/spending?type=large_independent_expenditure";
 }
 

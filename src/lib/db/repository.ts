@@ -1100,6 +1100,116 @@ export async function getCandidateIndependentExpenditures(
   }));
 }
 
+export async function getScheduleERecords(
+  filters: {
+    candidateId?: string;
+    committeeId?: string;
+    raceId?: string;
+    state?: string;
+    limit?: number;
+  } = {},
+): Promise<CommitteeIndependentExpenditure[]> {
+  const limit = filters.limit ?? 500;
+  if (!hasDatabase()) {
+    return demoIndependentExpenditures
+      .filter((expenditure) => {
+        if (filters.candidateId && expenditure.candidateId !== filters.candidateId) return false;
+        if (filters.committeeId && expenditure.spenderCommitteeId !== filters.committeeId) return false;
+        if (filters.raceId && expenditure.raceId !== filters.raceId) return false;
+        if (filters.state && expenditure.raceId?.split("-")[1] !== filters.state) return false;
+        return true;
+      })
+      .sort((a, b) => String(b.expenditureDate).localeCompare(String(a.expenditureDate)) || b.amount - a.amount)
+      .slice(0, limit)
+      .map((expenditure) => ({
+        ...expenditure,
+        candidateName: demoCandidates.find((candidate) => candidate.id === expenditure.candidateId)?.name ?? null,
+        candidateParty: demoCandidates.find((candidate) => candidate.id === expenditure.candidateId)?.party ?? null,
+        committeeName: demoCommittees.find((committee) => committee.id === expenditure.spenderCommitteeId)?.name ?? null,
+        raceName: demoRaces.find((race) => race.id === expenditure.raceId)?.name ?? null,
+      }));
+  }
+
+  const values: unknown[] = [CURRENT_CYCLE];
+  const where = [
+    `ie.expenditure_date >= make_date(coalesce(r.cycle, $1) - 1, 1, 1)`,
+    `ie.expenditure_date <= make_date(coalesce(r.cycle, $1), 12, 31)`,
+  ];
+  if (filters.candidateId) {
+    values.push(filters.candidateId);
+    where.push(`ie.candidate_id = $${values.length}`);
+  }
+  if (filters.committeeId) {
+    values.push(filters.committeeId);
+    where.push(`ie.spender_committee_id = $${values.length}`);
+  }
+  if (filters.raceId) {
+    values.push(filters.raceId);
+    where.push(`ie.race_id = $${values.length}`);
+  }
+  if (filters.state) {
+    values.push(filters.state);
+    where.push(`r.state = $${values.length}`);
+  }
+  values.push(limit);
+
+  const rows = await sql<{
+    source_id: string;
+    cycle: number | null;
+    spender_committee_id: string | null;
+    fec_committee_id: string | null;
+    candidate_id: string | null;
+    fec_candidate_id: string | null;
+    race_id: string | null;
+    support_oppose_indicator: string | null;
+    amount: string;
+    expenditure_date: string | Date | null;
+    purpose: string | null;
+    source_url: string | null;
+    raw: unknown;
+    candidate_name: string | null;
+    candidate_party: string | null;
+    committee_name: string | null;
+    race_name: string | null;
+  }>(
+    `
+      select
+        ie.*,
+        c.name as candidate_name,
+        c.party as candidate_party,
+        cm.name as committee_name,
+        r.name as race_name
+      from independent_expenditures ie
+      left join candidates c on c.id = ie.candidate_id
+      left join committees cm on cm.id = ie.spender_committee_id
+      left join races r on r.id = ie.race_id
+      where ${where.join(" and ")}
+      order by ie.expenditure_date desc nulls last, ie.amount desc, ie.source_id
+      limit $${values.length}
+    `,
+    values,
+  );
+  return rows.map((row) => ({
+    sourceId: row.source_id,
+    cycle: row.cycle,
+    spenderCommitteeId: row.spender_committee_id,
+    fecCommitteeId: row.fec_committee_id,
+    candidateId: row.candidate_id,
+    fecCandidateId: row.fec_candidate_id,
+    raceId: row.race_id,
+    supportOpposeIndicator: row.support_oppose_indicator,
+    amount: Number(row.amount),
+    expenditureDate: row.expenditure_date ? toDateString(row.expenditure_date) : null,
+    purpose: row.purpose,
+    sourceUrl: row.source_url,
+    raw: row.raw,
+    candidateName: row.candidate_name,
+    candidateParty: row.candidate_party,
+    committeeName: row.committee_name,
+    raceName: row.race_name,
+  }));
+}
+
 export async function getTopSpenders(limit = 100, state?: string | null): Promise<TopSpender[]> {
   if (!hasDatabase()) {
     return demoCommittees

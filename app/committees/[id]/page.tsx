@@ -94,6 +94,9 @@ export default async function CommitteePage({
             {independentExpenditures.length ? (
               <a className="underline-offset-4 hover:underline" href="#schedule-e-records">Schedule E</a>
             ) : null}
+            {independentExpenditures.length ? (
+              <Link className="underline-offset-4 hover:underline" href={`/records/schedule-e?committee=${committee.id}`}>Full Schedule E evidence</Link>
+            ) : null}
             <a className="underline-offset-4 hover:underline" href="#related-signals">Signals</a>
           </div>
         </nav>

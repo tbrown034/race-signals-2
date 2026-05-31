@@ -103,6 +103,9 @@ export default async function RacePage({
             <a className="underline-offset-4 hover:underline" href="#reporter-read">Reporter read</a>
             <a className="underline-offset-4 hover:underline" href="#race-stats">Stats</a>
             <a className="underline-offset-4 hover:underline" href="#candidate-cohort">Candidate cohort</a>
+            {stats.independentExpenditureRecordCount ? (
+              <Link className="underline-offset-4 hover:underline" href={`/records/schedule-e?race=${race.id}`}>Schedule E evidence</Link>
+            ) : null}
             <a className="underline-offset-4 hover:underline" href="#related-signals">Signals</a>
             <a className="underline-offset-4 hover:underline" href="#election-history">Election history</a>
           </div>

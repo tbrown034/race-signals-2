@@ -320,8 +320,8 @@ function StateRaceBoard({ rows, state }: { rows: StateRaceBoardRow[]; state: str
                         <dt className="inline font-mono uppercase tracking-[0.12em] text-neutral-500">IE total </dt>
                         <dd className="inline font-mono text-neutral-950">
                           {race.independentExpenditureTotal > 0 ? (
-                            <Link className="underline underline-offset-4" href={`/spending?race=${race.raceId}`}>
-                              {formatMoney(race.independentExpenditureTotal) ?? "$0"} signal view
+                            <Link className="underline underline-offset-4" href={`/records/schedule-e?race=${race.raceId}`}>
+                              {formatMoney(race.independentExpenditureTotal) ?? "$0"}
                             </Link>
                           ) : (
                             "$0"
@@ -352,8 +352,8 @@ function StateRaceBoard({ rows, state }: { rows: StateRaceBoardRow[]; state: str
                   <td className="hidden px-4 py-3 text-right font-mono md:table-cell">{race.signalCount}</td>
                   <td className="hidden px-4 py-3 text-right font-mono md:table-cell">
                     {race.independentExpenditureTotal > 0 ? (
-                      <Link className="underline underline-offset-4" href={`/spending?race=${race.raceId}`}>
-                        {formatMoney(race.independentExpenditureTotal) ?? "$0"} signal view
+                      <Link className="underline underline-offset-4" href={`/records/schedule-e?race=${race.raceId}`}>
+                        {formatMoney(race.independentExpenditureTotal) ?? "$0"}
                       </Link>
                     ) : (
                       "$0"

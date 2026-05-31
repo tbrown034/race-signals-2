@@ -156,5 +156,5 @@ function spendingSignalsUrl(spender: TopSpender, baseUrl?: string) {
 
 function committeeEvidenceUrl(spender: TopSpender, baseUrl?: string) {
   if (!baseUrl || !spender.committeeId) return null;
-  return `${baseUrl}/committees/${spender.committeeId}#schedule-e-records`;
+  return `${baseUrl}/records/schedule-e?committee=${spender.committeeId}`;
 }

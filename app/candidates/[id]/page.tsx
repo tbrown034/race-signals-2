@@ -441,9 +441,14 @@ function CandidateOutsideSpendingTable({
   return (
     <div className="border-b border-neutral-300" id="outside-spending-records">
       <div className="border-b border-neutral-300 px-5 py-4">
-        <h2 className="text-sm font-semibold uppercase tracking-[0.14em] text-neutral-600">
-          Outside spending records
-        </h2>
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+          <h2 className="text-sm font-semibold uppercase tracking-[0.14em] text-neutral-600">
+            Outside spending records
+          </h2>
+          <Link className="text-sm font-medium underline underline-offset-4" href={`/records/schedule-e?candidate=${expenditures[0]?.candidateId ?? ""}`}>
+            Open full Schedule E evidence
+          </Link>
+        </div>
         <p className="mt-1 text-sm text-neutral-600">
           Latest current-cycle Schedule E records naming this candidate. Records below the $25,000 alert threshold are context, not signal cards.
         </p>

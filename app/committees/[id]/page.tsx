@@ -12,6 +12,7 @@ import {
 } from "@/src/lib/db/repository";
 import { committeeContext, committeeDesignationLabel, committeeTypeLabel } from "@/src/lib/fec-codes";
 import { formatCount, formatDate, formatMoney } from "@/src/lib/format";
+import { displayCandidateName } from "@/src/lib/names";
 import type { Metadata } from "next";
 
 export const revalidate = 21600;
@@ -52,7 +53,14 @@ export default async function CommitteePage({
       <EntityPage
         eyebrow="Committee"
         title={committee.name}
-        titleAccessory={linkedCandidate ? <PartySquare party={linkedCandidate.party} size="md" /> : null}
+        titleAccessory={linkedCandidate ? (
+          <span className="inline-flex items-center gap-2">
+            <PartySquare party={linkedCandidate.party} size="md" />
+            <span className="font-mono text-[11px] uppercase tracking-[0.12em] text-neutral-600">
+              {partyLabel(linkedCandidate.party)}
+            </span>
+          </span>
+        ) : null}
         sourceUrl={committee.sourceUrl}
         independentExpenditures={independentExpenditures}
         signals={signals}
@@ -87,15 +95,15 @@ export default async function CommitteePage({
       >
         <nav
           aria-label="Committee page sections"
-          className="border-b border-neutral-300 px-5 py-3 font-mono text-[11px] uppercase tracking-[0.12em] text-neutral-600"
+          className="overflow-x-auto border-b border-neutral-300 px-5 py-3 font-mono text-[11px] uppercase tracking-[0.12em] text-neutral-600"
         >
-          <div className="flex flex-wrap gap-x-4 gap-y-2">
+          <div className="flex min-w-max flex-nowrap gap-x-4 whitespace-nowrap">
             <a className="underline-offset-4 hover:underline" href="#reporter-read">Reporter read</a>
             {independentExpenditures.length ? (
               <a className="underline-offset-4 hover:underline" href="#schedule-e-records">Schedule E</a>
             ) : null}
             {independentExpenditures.length ? (
-              <Link className="underline-offset-4 hover:underline" href={`/records/schedule-e?committee=${committee.id}`}>Full Schedule E evidence</Link>
+              <Link className="underline-offset-4 hover:underline" href={`/records/schedule-e?committee=${committee.id}`}>Evidence table</Link>
             ) : null}
             <a className="underline-offset-4 hover:underline" href="#related-signals">Signals</a>
           </div>
@@ -104,13 +112,13 @@ export default async function CommitteePage({
           id="reporter-read"
           notes={[
             linkedCandidate
-              ? `Directly linked to ${linkedCandidate.name}; party context comes from that candidate record.`
+              ? `Directly linked to ${displayCandidateName(linkedCandidate.name) ?? linkedCandidate.name}; party context comes from that candidate record.`
               : "No direct candidate affiliation is stored for this committee, so the page does not assign a party reading.",
             independentExpenditures.length
               ? `Showing ${formatMoney(spendingSummary.total) ?? "$0"} across the latest ${formatCount(independentExpenditures.length, "displayed current-cycle Schedule E independent expenditure record")} attached to this committee.`
               : "No current-cycle Schedule E independent expenditures are attached to this committee in this slice.",
             independentExpenditures.length
-              ? `Displayed position split: support ${formatMoney(spendingSummary.support) ?? "$0"}; oppose ${formatMoney(spendingSummary.oppose) ?? "$0"}; not classified ${formatMoney(spendingSummary.uncoded) ?? "$0"}.`
+              ? `Displayed FEC target-position split: supports ${formatMoney(spendingSummary.support) ?? "$0"}; opposes ${formatMoney(spendingSummary.oppose) ?? "$0"}; not classified ${formatMoney(spendingSummary.uncoded) ?? "$0"}.`
               : null,
             spendingSummary.latestDate
               ? `Latest stored Schedule E date: ${formatDate(spendingSummary.latestDate)}.`
@@ -126,6 +134,13 @@ export default async function CommitteePage({
       </EntityPage>
     </PageShell>
   );
+}
+
+function partyLabel(party?: string | null) {
+  if (party === "REP" || party === "R") return "Republican";
+  if (party === "DEM" || party === "D") return "Democratic";
+  if (!party || party === "NNE") return "Other/unknown";
+  return party;
 }
 
 function summarizeTouchedRaces(

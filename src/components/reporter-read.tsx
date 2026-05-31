@@ -9,9 +9,9 @@ export function ReporterRead({ id, notes, title = "Reporter read" }: { id?: stri
           {title}
         </h2>
       </div>
-      <ul className="divide-y divide-neutral-200 text-sm leading-6 text-neutral-700">
+      <ul className="min-w-0 divide-y divide-neutral-200 text-sm leading-6 text-neutral-700">
         {visibleNotes.map((note) => (
-          <li className="px-5 py-3" key={note}>
+          <li className="max-w-[min(280px,100%)] break-words px-5 py-3 [overflow-wrap:anywhere] sm:max-w-full" key={note}>
             {note}
           </li>
         ))}

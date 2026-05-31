@@ -22,6 +22,7 @@ import type {
   RaceStats,
   RecentValidationIssue,
   Signal,
+  StateSignalFreshness,
   StorageUsage,
   TopSpender,
   Transaction,
@@ -509,6 +510,52 @@ export async function getSignalStateCounts(signalType?: string): Promise<Record<
     values,
   );
   return Object.fromEntries(rows.map((row) => [row.state, Number(row.count)]));
+}
+
+export async function getSignalStateFreshness(signalType?: string): Promise<Record<string, StateSignalFreshness>> {
+  if (!hasDatabase()) {
+    return demoSignals.reduce<Record<string, StateSignalFreshness>>((counts, signal) => {
+      if (signalType && signal.signalType !== signalType) return counts;
+      const state = signal.raceId?.split("-")[1] ?? signal.candidateState;
+      if (!state) return counts;
+      const current = counts[state] ?? { state, count: 0, latestDataFreshness: null };
+      current.count += 1;
+      if (!current.latestDataFreshness || signal.dataFreshness > current.latestDataFreshness) {
+        current.latestDataFreshness = signal.dataFreshness;
+      }
+      counts[state] = current;
+      return counts;
+    }, {});
+  }
+
+  const values: unknown[] = [];
+  const where = ["r.state is not null", currentCycleSignalPredicate];
+  if (signalType) {
+    values.push(signalType);
+    where.push(`s.signal_type = $${values.length}`);
+  }
+  const rows = await sql<{ state: string; count: string; latest_data_freshness: string | Date | null }>(
+    `
+      select
+        r.state,
+        count(*)::text as count,
+        max(s.data_freshness) as latest_data_freshness
+      from signals s
+      join races r on r.id = s.race_id
+      where ${where.join(" and ")}
+      group by r.state
+      order by count(*) desc, r.state asc
+    `,
+    values,
+  );
+  return Object.fromEntries(rows.map((row) => [
+    row.state,
+    {
+      state: row.state,
+      count: Number(row.count),
+      latestDataFreshness: row.latest_data_freshness ? toIsoString(row.latest_data_freshness) : null,
+    },
+  ]));
 }
 
 export async function getSitemapEntities() {

@@ -1,7 +1,8 @@
 "use client";
 
-import type { Race } from "@/src/lib/types";
+import type { Race, StateSignalFreshness } from "@/src/lib/types";
 import { STATE_SCOPES } from "@/src/lib/scope";
+import { formatRelativeTime } from "@/src/lib/format";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import type { FormEvent } from "react";
@@ -42,6 +43,7 @@ export function FeedFilters({
   since,
   ingestedSince,
   stateSignalCounts = {},
+  stateSignalFreshness = {},
   lockedType,
   clearHref,
 }: {
@@ -56,6 +58,7 @@ export function FeedFilters({
   since?: string;
   ingestedSince?: string;
   stateSignalCounts?: Record<string, number>;
+  stateSignalFreshness?: Record<string, StateSignalFreshness>;
   lockedType?: boolean;
   clearHref?: string;
 }) {
@@ -176,7 +179,7 @@ export function FeedFilters({
               <optgroup label="States with stored signals">
                 {coveredStates.map((item) => (
                   <option value={item.code} key={item.code}>
-                    {item.name} ({item.code}) - {stateSignalCounts[item.code]}
+                    {stateOptionLabel(item.name, item.code, stateSignalFreshness[item.code], stateSignalCounts[item.code])}
                   </option>
                 ))}
               </optgroup>
@@ -414,4 +417,17 @@ export function FeedFilters({
       </div>
     </form>
   );
+}
+
+function stateOptionLabel(
+  name: string,
+  code: string,
+  freshness?: StateSignalFreshness,
+  fallbackCount?: number,
+) {
+  const count = freshness?.count ?? fallbackCount ?? 0;
+  const latest = freshness?.latestDataFreshness
+    ? `, refreshed ${formatRelativeTime(freshness.latestDataFreshness)}`
+    : "";
+  return `${name} (${code}) - ${count}${latest}`;
 }

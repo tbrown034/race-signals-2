@@ -2,7 +2,7 @@ import Link from "next/link";
 import { CoverageStrip } from "@/src/components/coverage-strip";
 import { FeedFilters } from "@/src/components/feed-filters";
 import { PageShell } from "@/src/components/page-shell";
-import { getCommittee, getCoverageSummary, getRaces, getSignalStateCounts, getSpendingSignals } from "@/src/lib/db/repository";
+import { getCommittee, getCoverageSummary, getRaces, getSignalStateCounts, getSignalStateFreshness, getSpendingSignals } from "@/src/lib/db/repository";
 import { formatDate, formatMoney } from "@/src/lib/format";
 import { signalFiltersFromSearchParams } from "@/src/lib/signals/filters";
 import type { Metadata } from "next";
@@ -28,11 +28,12 @@ export default async function SpendingPage({
   const since = typeof params.since === "string" ? params.since : undefined;
   const ingestedSince = typeof params.ingestedSince === "string" ? params.ingestedSince : undefined;
   const committeeId = typeof params.committee === "string" ? params.committee : undefined;
-  const [signals, races, status, stateSignalCounts, committeeFilter] = await Promise.all([
+  const [signals, races, status, stateSignalCounts, stateSignalFreshness, committeeFilter] = await Promise.all([
     getSpendingSignals(signalFiltersFromSearchParams(params, 101), sort),
     getRaces(),
     getCoverageSummary(),
     getSignalStateCounts("large_independent_expenditure"),
+    getSignalStateFreshness("large_independent_expenditure"),
     committeeId ? getCommittee(committeeId) : Promise.resolve(null),
   ]);
   const visibleSignals = signals.slice(0, 100);
@@ -110,6 +111,7 @@ export default async function SpendingPage({
             ingestedSince={ingestedSince}
             state={state}
             stateSignalCounts={stateSignalCounts}
+            stateSignalFreshness={stateSignalFreshness}
             status={statusFilter}
             type="large_independent_expenditure"
           />

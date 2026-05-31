@@ -153,6 +153,12 @@ export type RaceStats = {
   incumbentCount: number;
 };
 
+export type StateSignalFreshness = {
+  state: string;
+  count: number;
+  latestDataFreshness?: string | null;
+};
+
 export type Signal = {
   id?: string;
   dedupeKey: string;

@@ -203,10 +203,12 @@ export function generateSignals(input: SignalInput): Signal[] {
     const committee = committees.get(committeeId);
     const race = committee?.raceId ? races.get(committee.raceId) : undefined;
     if (
-      !latest?.totalReceipts ||
+      latest?.totalReceipts === null ||
+      latest?.totalReceipts === undefined ||
       !latest.receiptDate ||
       !latest.sourceUrl ||
-      !prior?.totalReceipts ||
+      prior?.totalReceipts === null ||
+      prior?.totalReceipts === undefined ||
       !prior.sourceUrl ||
       sameReportPeriod(latest, prior) ||
       latestVersionInfo?.versionKind === "likely_refile" ||

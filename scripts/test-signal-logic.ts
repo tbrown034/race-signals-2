@@ -280,4 +280,29 @@ assert.equal(spikeSignal.metadata?.latestSourceUrl, currentFiling.sourceUrl);
 assert.equal(spikeSignal.metadata?.priorSourceUrl, "https://www.fec.gov/data/filing/filing-prior-period/");
 assert.equal(spikeSignal.metadata?.priorCoverageStartDate, "2025-10-01");
 
+const zeroToMaterialSpikeSignals = generateSignals({
+  candidates: [candidate],
+  committees: [committee],
+  races: [race],
+  filings: [
+    currentFiling,
+    {
+      ...currentFiling,
+      sourceId: "filing-prior-zero-period",
+      receiptDate: "2026-01-31",
+      coverageStartDate: "2025-10-01",
+      coverageEndDate: "2025-12-31",
+      totalReceipts: 0,
+      totalReceiptsBasis: "period",
+      sourceUrl: "https://www.fec.gov/data/filing/filing-prior-zero-period/",
+    },
+  ],
+  independentExpenditures: [],
+  dataFreshness: "2026-05-31T12:00:00.000Z",
+});
+const zeroToMaterialSpikeSignal = zeroToMaterialSpikeSignals.find((signal) => signal.signalType === "committee_activity_spike");
+assert.ok(zeroToMaterialSpikeSignal, "a zero-to-material period receipts jump should generate an activity-spike signal");
+assert.equal(zeroToMaterialSpikeSignal.metadata?.priorTotalReceipts, 0);
+assert.equal(zeroToMaterialSpikeSignal.metadata?.priorSourceUrl, "https://www.fec.gov/data/filing/filing-prior-zero-period/");
+
 console.log("Signal logic tests passed.");

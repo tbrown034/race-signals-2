@@ -65,6 +65,7 @@ export function generateSignals(input: SignalInput): Signal[] {
     if (committee.designation !== "P" || !committee.sourceUrl || !committee.firstFileDate) continue;
     const race = committee.raceId ? races.get(committee.raceId) : undefined;
     const candidate = committee.candidateId ? candidates.get(committee.candidateId) : undefined;
+    if (!candidate || !race) continue;
     const signalDate = committee.firstFileDate;
     if (!isCurrentCycleRecord(signalDate, race)) continue;
     const committeeCopy = newCommitteeCopy(candidate, race);
@@ -98,6 +99,7 @@ export function generateSignals(input: SignalInput): Signal[] {
     if (!filing.receiptDate || !filing.sourceUrl) continue;
     const committee = filing.committeeId ? committees.get(filing.committeeId) : undefined;
     const race = committee?.raceId ? races.get(committee.raceId) : undefined;
+    if (!committee || !race) continue;
     if (!isCurrentCycleRecord(filing.receiptDate, race, filing.cycle)) continue;
     const candidate = committee?.candidateId ? candidates.get(committee.candidateId) : undefined;
     const versionInfo = filingVersionInfo.get(filing.sourceId) ?? { versionKind: "initial_or_single", relatedVersions: [] };

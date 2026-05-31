@@ -116,6 +116,16 @@ export function validateFiling(filing: Filing): ValidationIssue[] {
       sourceUrl: filing.sourceUrl,
     });
   }
+  if (!filing.committeeId && !filing.fecCommitteeId) {
+    issues.push({
+      entityType: "filing",
+      sourceId: filing.sourceId,
+      severity: "warning",
+      rule: "missing_committee_id",
+      message: "Filing is missing a committee ID, so it cannot be matched to a committee or race.",
+      sourceUrl: filing.sourceUrl,
+    });
+  }
   return issues.concat(sourceUrlIssue("filing", filing.sourceId, filing.sourceUrl));
 }
 

@@ -32,7 +32,7 @@ The MVP is FEC API only for campaign-finance records. The data model contains 20
 
 Race Signals should feel like a credible newsroom intelligence tool: AP/Reuters/ProPublica alert desk meets campaign-finance notebook.
 
-Use restrained typography, dense readable layouts, neutral colors and minimal decoration. Avoid glossy gradients, generic SaaS dashboard cards, fake election-night visuals, decorative charts and oversized empty spacing. Use color only for meaning such as urgency, party/race context, confidence, status or anomaly level.
+Use restrained typography, dense readable layouts, neutral colors and minimal decoration. Avoid glossy gradients, generic SaaS dashboard cards, fake election-night visuals, decorative charts and oversized empty spacing. Use color only for bounded product meanings such as party context, review status, freshness or operational health. Do not introduce anomaly colors or adaptive scoring.
 
 ## Current Technical Stack
 

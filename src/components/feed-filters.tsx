@@ -77,6 +77,9 @@ export function FeedFilters({
   });
   const coveredStates = sortedStateOptions.filter((item) => stateSignalCounts[item.code]);
   const uncoveredStates = sortedStateOptions.filter((item) => !stateSignalCounts[item.code]);
+  const selectedUncoveredState = selectedState && !stateSignalCounts[selectedState]
+    ? sortedStateOptions.find((item) => item.code === selectedState)
+    : null;
 
   function updateFilter(name: string, value: string) {
     const next = new URLSearchParams(searchParams.toString());
@@ -125,6 +128,13 @@ export function FeedFilters({
     router.replace(next.toString() ? `${pathname}?${next.toString()}` : pathname);
   }
 
+  function stateHref(code: string) {
+    const next = new URLSearchParams(searchParams.toString());
+    next.set("state", code);
+    next.delete("race");
+    return `${pathname}?${next.toString()}`;
+  }
+
   return (
     <form className="border-b border-neutral-300 bg-white p-4" onSubmit={onSubmit}>
       <div className="space-y-3">
@@ -147,6 +157,13 @@ export function FeedFilters({
             onChange={(event) => updateFilter("state", event.target.value)}
           >
             <option value="">All</option>
+            {selectedUncoveredState ? (
+              <optgroup label="Selected scope state">
+                <option value={selectedUncoveredState.code}>
+                  {selectedUncoveredState.name} ({selectedUncoveredState.code}) - no stored signals
+                </option>
+              </optgroup>
+            ) : null}
             {coveredStates.length ? (
               <optgroup label="States with stored signals">
                 {coveredStates.map((item) => (
@@ -156,14 +173,21 @@ export function FeedFilters({
                 ))}
               </optgroup>
             ) : null}
-            <optgroup label="All scope states">
-              {uncoveredStates.map((item) => (
-                <option value={item.code} key={item.code}>
-                  {item.name} ({item.code})
-                </option>
-              ))}
-            </optgroup>
           </select>
+          {uncoveredStates.length ? (
+            <details className="mt-2 normal-case tracking-normal text-neutral-600">
+              <summary className="cursor-pointer text-xs underline underline-offset-4">
+                All scope states
+              </summary>
+              <div className="mt-2 grid max-h-44 grid-cols-2 gap-x-3 gap-y-1 overflow-y-auto border border-neutral-200 p-2 text-xs sm:grid-cols-3">
+                {uncoveredStates.map((item) => (
+                  <Link className="underline underline-offset-4" href={stateHref(item.code)} key={item.code}>
+                    {item.name} ({item.code})
+                  </Link>
+                ))}
+              </div>
+            </details>
+          ) : null}
         </label>
           <label className="min-w-0 text-xs font-medium uppercase tracking-[0.12em] text-neutral-500 xl:min-w-[120px] xl:flex-none">
           Office

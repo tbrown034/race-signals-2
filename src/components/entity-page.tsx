@@ -206,7 +206,7 @@ export function EntityPage({
             </h2>
             {hiddenSignals && allSignalsHref ? (
               <Link className="text-sm font-medium underline underline-offset-4" href={allSignalsHref}>
-                Open all {signals.length} in feed
+                Open matching feed
               </Link>
             ) : null}
           </div>
@@ -215,8 +215,8 @@ export function EntityPage({
           <>
             {hiddenSignals ? (
               <p className="border-b border-neutral-300 px-5 py-3 text-sm text-neutral-600">
-                Showing the latest and review-worthy {visibleSignals.length} of{" "}
-                {formatCount(signals.length, "related signal")}.
+                Showing the latest and review-worthy {visibleSignals.length} from{" "}
+                {formatCount(signals.length, "loaded related signal")}. Open the feed view for broader filtering.
               </p>
             ) : null}
             {visibleSignals.map((signal) => <SignalCard signal={signal} key={signal.dedupeKey} />)}

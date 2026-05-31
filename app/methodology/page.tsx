@@ -86,7 +86,8 @@ export default function MethodologyPage() {
               not use adaptive scoring, percentile baselines or statistical anomaly
               detection in this MVP. Large independent expenditures start at
               $25,000. Filing-level activity spikes require at least $50,000 in
-              latest filing receipts and at least 2x the prior comparable filing.
+              latest filing receipts and at least 2x the prior stored filing with
+              the same period-receipts basis.
               Current-cycle Schedule E independent expenditures of $100,000 or
               more are marked for review.
             </p>

@@ -40,15 +40,15 @@ export default async function CandidatePage({
         signals={signals}
         meta={[
           ["FEC ID", candidate.fecCandidateId],
-          ["Party", candidate.party],
-          ["Office", candidate.office],
+          ["Party", partyLabel(candidate.party)],
+          ["Office", officeLabel(candidate.office)],
           ["Race", candidate.raceId],
           ["Status", incumbentStatus(candidate.incumbentChallengeStatus)],
           ["Filed", `Filed with FEC for the ${candidate.electionYear ?? "current"} cycle.`],
           ["Cycle receipts", formatMoney(candidate.totalReceiptsCycle)],
           ["Cash on hand", formatMoney(candidate.cashOnHandLatest)],
           ["Cash as of", formatDate(candidate.cashOnHandAsOf)],
-          ["Bioguide", candidate.bioguideId],
+          ...(candidate.bioguideId ? ([["Bioguide", candidate.bioguideId]] as Array<[string, string]>) : []),
         ]}
       />
     </PageShell>
@@ -64,4 +64,16 @@ function incumbentStatus(status?: string | null) {
 
 function isIncumbent(status?: string | null) {
   return status === "I" || status === "Incumbent";
+}
+
+function officeLabel(office?: string | null) {
+  if (office === "H") return "U.S. House";
+  if (office === "S") return "U.S. Senate";
+  return office;
+}
+
+function partyLabel(party?: string | null) {
+  if (party === "REP" || party === "R") return "Republican";
+  if (party === "DEM" || party === "D") return "Democratic";
+  return party;
 }

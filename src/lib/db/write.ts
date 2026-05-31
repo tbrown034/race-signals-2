@@ -131,9 +131,9 @@ export async function upsertCommittees(committees: Committee[]) {
       `
         insert into committees (
           id, fec_committee_id, name, committee_type, designation, party,
-          treasurer_name, candidate_id, race_id, discovered_via, source_url
+          treasurer_name, candidate_id, race_id, discovered_via, first_file_date, source_url
         )
-        values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)
+        values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)
         on conflict (fec_committee_id) do update set
           name = excluded.name,
           committee_type = excluded.committee_type,
@@ -143,6 +143,7 @@ export async function upsertCommittees(committees: Committee[]) {
           candidate_id = coalesce(excluded.candidate_id, committees.candidate_id),
           race_id = coalesce(excluded.race_id, committees.race_id),
           discovered_via = excluded.discovered_via,
+          first_file_date = coalesce(excluded.first_file_date, committees.first_file_date),
           source_url = excluded.source_url,
           updated_at = now()
       `,
@@ -157,6 +158,7 @@ export async function upsertCommittees(committees: Committee[]) {
         committee.candidateId,
         committee.raceId,
         committee.discoveredVia,
+        committee.firstFileDate,
         committee.sourceUrl,
       ],
     );

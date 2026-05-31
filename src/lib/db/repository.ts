@@ -232,6 +232,7 @@ export async function getCommittee(id: string): Promise<Committee | null> {
     candidate_id: string | null;
     race_id: string | null;
     discovered_via: string | null;
+    first_file_date: string | Date | null;
     source_url: string | null;
   }>("select * from committees where id = $1", [id]);
   const row = rows[0];
@@ -247,6 +248,7 @@ export async function getCommittee(id: string): Promise<Committee | null> {
     candidateId: row.candidate_id,
     raceId: row.race_id,
     discoveredVia: row.discovered_via,
+    firstFileDate: row.first_file_date ? toDateString(row.first_file_date) : null,
     sourceUrl: row.source_url,
   };
 }

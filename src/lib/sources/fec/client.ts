@@ -35,6 +35,8 @@ export type FecCommittee = {
   party?: string;
   treasurer_name?: string;
   candidate_ids?: string[];
+  first_f1_date?: string;
+  first_file_date?: string;
 };
 
 export type FecReport = {
@@ -47,7 +49,11 @@ export type FecReport = {
   file_number?: number;
   committee_id?: string;
   total_receipts?: number;
+  total_receipts_period?: number | string | null;
+  total_receipts_ytd?: number | string | null;
   total_disbursements?: number;
+  total_disbursements_period?: number | string | null;
+  total_disbursements_ytd?: number | string | null;
   cash_on_hand_end_period?: number;
 };
 

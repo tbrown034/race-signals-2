@@ -46,6 +46,7 @@ export type Committee = {
   candidateId?: string | null;
   raceId?: string | null;
   discoveredVia?: string | null;
+  firstFileDate?: string | null;
   sourceUrl?: string | null;
 };
 

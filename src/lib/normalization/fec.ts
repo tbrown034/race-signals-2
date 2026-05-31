@@ -59,6 +59,7 @@ export function normalizeCommittee(
     candidateId: candidate?.id ?? null,
     raceId: candidate?.raceId ?? null,
     discoveredVia: candidate ? "candidate_committee" : "schedule_e",
+    firstFileDate: record.first_f1_date ?? record.first_file_date ?? null,
     sourceUrl: fecCommitteeUrl(record.committee_id),
   };
 }
@@ -73,12 +74,20 @@ export function normalizeFiling(record: FecReport): Filing {
     coverageStartDate: record.coverage_start_date ?? null,
     coverageEndDate: record.coverage_end_date ?? null,
     receiptDate: record.receipt_date ?? null,
-    totalReceipts: record.total_receipts ?? null,
-    totalDisbursements: record.total_disbursements ?? null,
+    totalReceipts: numberValue(record.total_receipts_period ?? record.total_receipts ?? record.total_receipts_ytd),
+    totalDisbursements: numberValue(
+      record.total_disbursements_period ?? record.total_disbursements ?? record.total_disbursements_ytd,
+    ),
     cashOnHand: record.cash_on_hand_end_period ?? null,
     sourceUrl: fecFilingUrl(record.beginning_image_number ?? record.file_number),
     raw: record,
   };
+}
+
+function numberValue(value: number | string | null | undefined) {
+  if (value === null || value === undefined) return null;
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : null;
 }
 
 export function normalizeIndependentExpenditure(

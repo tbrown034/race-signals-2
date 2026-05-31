@@ -63,12 +63,14 @@ create table if not exists committees (
   candidate_id text references candidates(id),
   race_id text references races(id),
   discovered_via text,
+  first_file_date date,
   source_url text,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
 
 alter table committees add column if not exists discovered_via text;
+alter table committees add column if not exists first_file_date date;
 
 create table if not exists filings (
   id uuid primary key default gen_random_uuid(),

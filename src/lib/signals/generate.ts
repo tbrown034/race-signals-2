@@ -58,7 +58,7 @@ export function generateSignals(input: SignalInput): Signal[] {
     signals.push({
       dedupeKey: `fec:new_committee:${committee.fecCommitteeId}`,
       signalType: "new_committee",
-      headline: `New candidate committee formed in ${displayRace(race)}.`,
+      headline: `Principal campaign committee filed in ${displayRace(race)}.`,
       whyItMatters:
         "A new principal campaign committee is often the first durable paperwork signal that a candidate is moving from exploration to execution.",
       candidateId: candidate?.id ?? null,
@@ -67,7 +67,7 @@ export function generateSignals(input: SignalInput): Signal[] {
       committeeName: committee.name,
       raceId: race?.id ?? null,
       raceName: race?.name ?? null,
-      signalDate: input.dataFreshness.slice(0, 10),
+      signalDate: committee.firstFileDate ?? input.dataFreshness.slice(0, 10),
       sourceUrl: committee.sourceUrl,
       confidence: "high",
       status,
@@ -83,7 +83,7 @@ export function generateSignals(input: SignalInput): Signal[] {
     signals.push({
       dedupeKey: `fec:new_filing:${filing.sourceId}`,
       signalType: "new_filing",
-      headline: `${committee?.name ?? "A committee"} filed ${filing.reportType ?? "a new report"}.`,
+      headline: `${committee?.name ?? "A committee"} filed ${reportLabel(filing.reportType)}.`,
       whyItMatters:
         "New reports can reveal changed cash positions, spending pace and donor patterns before those shifts are visible in public campaigning.",
       candidateId: candidate?.id ?? null,
@@ -189,4 +189,18 @@ export function generateSignals(input: SignalInput): Signal[] {
   }
 
   return signals.sort((a, b) => b.signalDate.localeCompare(a.signalDate));
+}
+
+function reportLabel(reportType?: string | null) {
+  const labels: Record<string, string> = {
+    Q1: "an April quarterly report",
+    Q2: "a July quarterly report",
+    Q3: "an October quarterly report",
+    YE: "a year-end report",
+    "12P": "a pre-primary report",
+    "12G": "a pre-general report",
+    "30G": "a post-general report",
+  };
+  if (!reportType) return "a new report";
+  return labels[reportType] ?? `${reportType} report`;
 }

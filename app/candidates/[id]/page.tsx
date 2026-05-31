@@ -207,6 +207,9 @@ function candidateReporterNotes(
   return [
     `Money position: ${candidateMoney(candidate.totalReceiptsCycle, candidate.totalsFetchedAt).toLowerCase()} raised this cycle; ${candidateMoney(candidate.cashOnHandLatest, candidate.totalsFetchedAt).toLowerCase()} cash on hand${candidate.cashOnHandAsOf ? ` as of ${formatDate(candidate.cashOnHandAsOf)}` : ""}.`,
     `${formatCount(totalSignals, "related signal")} in this slice: ${formatCount(signalCounts.filings, "filing")}, ${formatCount(signalCounts.committees, "committee record")}, ${formatCount(signalCounts.outsideSpending, "outside-spending alert")}, ${formatCount(signalCounts.review, "review flag")}.`,
+    candidate.totalReceiptsCycle && candidate.totalReceiptsCycle > 0 && totalSignals === 0
+      ? "FEC aggregate totals show activity, but Race Signals has not matched a committee, filing or Schedule E record that generates a source-record signal for this candidate yet."
+      : null,
     independentExpenditureCount
       ? `${formatCount(independentExpenditureCount, "stored Schedule E record")} names this candidate; records below the $25,000 alert threshold are shown as context but do not become signals.`
       : "No stored current-cycle Schedule E records name this candidate in the current slice.",
@@ -214,7 +217,7 @@ function candidateReporterNotes(
       ? "Incumbent context: committee records usually reflect cycle operations or continuing campaign infrastructure, not a first-time launch."
       : "Non-incumbent context: a principal committee is useful early evidence of campaign organization, but ballot status still needs election-office verification.",
     "Low-cost mode does not store itemized Schedule A donor receipts; use FEC source links for donor-level lookup.",
-  ];
+  ].filter((note): note is string => Boolean(note));
 }
 
 function candidateMobileNotes(
@@ -226,10 +229,13 @@ function candidateMobileNotes(
   return [
     `${candidateMoney(candidate.totalReceiptsCycle, candidate.totalsFetchedAt)} raised; ${candidateMoney(candidate.cashOnHandLatest, candidate.totalsFetchedAt)} cash${candidate.cashOnHandAsOf ? ` as of ${formatDate(candidate.cashOnHandAsOf)}` : ""}.`,
     `${formatCount(totalSignals, "signal")}: ${formatCount(signalCounts.filings, "filing")}, ${formatCount(signalCounts.committees, "committee record")}, ${formatCount(signalCounts.outsideSpending, "outside-spending alert")}, ${formatCount(signalCounts.review, "review flag")}.`,
+    candidate.totalReceiptsCycle && candidate.totalReceiptsCycle > 0 && totalSignals === 0
+      ? "FEC totals show activity, but no source-record signal is matched yet."
+      : null,
     independentExpenditureCount
       ? `${formatCount(independentExpenditureCount, "Schedule E record")} names this candidate; below-threshold records are context, not alerts.`
       : "No stored Schedule E records name this candidate in this slice.",
-  ];
+  ].filter((note): note is string => Boolean(note));
 }
 
 function MobileCandidateRead({ notes }: { notes: string[] }) {

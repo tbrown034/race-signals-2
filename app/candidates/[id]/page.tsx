@@ -66,6 +66,13 @@ export default async function CandidatePage({
           </span>
         }
         mobileLead={<MobileCandidateRead notes={candidateMobileNotes(candidate, signalCounts, signals.length, independentExpenditures.length)} />}
+        quickActions={
+          <CandidateSourceActions
+            candidateName={candidate.name}
+            raceId={race?.id ?? null}
+            sourceUrl={candidate.sourceUrl}
+          />
+        }
         primaryMetaCount={11}
         sourceUrl={candidate.sourceUrl}
         signals={signals}
@@ -90,7 +97,16 @@ export default async function CandidatePage({
           ["Cash on hand", candidateMoney(candidate.cashOnHandLatest, candidate.totalsFetchedAt)],
           ["Cash as of", formatDate(candidate.cashOnHandAsOf)],
           ["Race Signals fetched totals", candidate.totalsFetchedAt ? formatDateTime(candidate.totalsFetchedAt) : "Not recorded"],
-          ["FEC totals load date", candidate.totalsUpdatedAt ? formatDateTime(candidate.totalsUpdatedAt) : "Not reported by FEC"],
+          [
+            "FEC record last updated",
+            candidate.totalsUpdatedAt ? (
+              <span title="Date reported by FEC, not the Race Signals ingest time.">
+                {formatDateTime(candidate.totalsUpdatedAt)}
+              </span>
+            ) : (
+              "Not reported by FEC"
+            ),
+          ],
           ...(candidate.sourceUrl ? ([[
             "Verify current totals",
             <a className="font-medium underline underline-offset-4" href={candidate.sourceUrl} key="fec-totals" rel="noreferrer" target="_blank">
@@ -248,6 +264,39 @@ function AggregateOnlyNotice({
         </Link>
       </div>
     </section>
+  );
+}
+
+function CandidateSourceActions({
+  candidateName,
+  raceId,
+  sourceUrl,
+}: {
+  candidateName: string;
+  raceId?: string | null;
+  sourceUrl?: string | null;
+}) {
+  return (
+    <nav
+      aria-label="Candidate source actions"
+      className="border border-neutral-300 px-3 py-2 font-mono text-[11px] uppercase tracking-[0.12em] text-neutral-600"
+    >
+      <div className="flex flex-wrap gap-x-4 gap-y-2">
+        {sourceUrl ? (
+          <a className="underline-offset-4 hover:underline" href={sourceUrl} rel="noreferrer" target="_blank">
+            FEC source
+          </a>
+        ) : null}
+        {raceId ? (
+          <Link className="underline-offset-4 hover:underline" href={`/races/${raceId}`}>
+            Race page
+          </Link>
+        ) : null}
+        <Link className="underline-offset-4 hover:underline" href={`/?q=${encodeURIComponent(candidateName)}`}>
+          Matching feed
+        </Link>
+      </div>
+    </nav>
   );
 }
 

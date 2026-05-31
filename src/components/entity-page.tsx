@@ -11,6 +11,7 @@ export function EntityPage({
   title,
   titleAccessory,
   mobileLead,
+  quickActions,
   meta,
   sourceUrl,
   ratings = [],
@@ -25,6 +26,7 @@ export function EntityPage({
   title: string;
   titleAccessory?: ReactNode;
   mobileLead?: ReactNode;
+  quickActions?: ReactNode;
   meta: Array<[string, ReactNode | null | undefined]>;
   sourceUrl?: string | null;
   ratings?: RaceRating[];
@@ -59,6 +61,7 @@ export function EntityPage({
           {titleAccessory}
         </h1>
         {mobileLead ? <div className="mt-4 md:hidden">{mobileLead}</div> : null}
+        {quickActions ? <div className="mt-4">{quickActions}</div> : null}
         <dl className="mt-5 space-y-4 text-sm">
           <MetaRows rows={primaryMeta} />
         </dl>

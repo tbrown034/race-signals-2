@@ -41,8 +41,8 @@ export async function applyCandidateTotalsWithRaw(candidate: Candidate, cycle: n
       totalDisbursementsCycle: numberValue(total.disbursements),
       cashOnHandLatest: numberValue(total.cash_on_hand_end_period),
       cashOnHandAsOf: total.coverage_end_date ?? total.load_date?.slice(0, 10) ?? null,
-      individualContributionPct: pct(individual, receipts),
-      pacContributionPct: pct(pac, receipts),
+      individualContributionPct: contributionPct(individual, receipts),
+      pacContributionPct: contributionPct(pac, receipts),
       totalsUpdatedAt: total.load_date ?? null,
       totalsFetchedAt: new Date().toISOString(),
       sourceUrl: candidate.sourceUrl ?? fecCandidateUrl(candidate.fecCandidateId),
@@ -56,7 +56,7 @@ function numberValue(value: number | string | null | undefined) {
   return Number.isFinite(parsed) ? parsed : null;
 }
 
-function pct(numerator: number | null, denominator: number | null) {
-  if (!numerator || !denominator) return null;
+export function contributionPct(numerator: number | null, denominator: number | null) {
+  if (numerator === null || denominator === null || denominator === 0) return null;
   return Number(((numerator / denominator) * 100).toFixed(2));
 }

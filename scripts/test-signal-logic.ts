@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import { generateSignals } from "@/src/lib/signals/generate";
+import { contributionPct } from "@/src/lib/sources/fec/totals";
 import type { Candidate, Committee, Filing, IndependentExpenditure, Race } from "@/src/lib/types";
 
 const race: Race = {
@@ -94,6 +95,10 @@ const signals = generateSignals({
   independentExpenditures: [currentIe, oldIe],
   dataFreshness: "2026-05-31T12:00:00.000Z",
 });
+
+assert.equal(contributionPct(0, 100000), 0, "true zero funding mix should render as 0%, not missing data");
+assert.equal(contributionPct(null, 100000), null, "missing funding numerator should stay unknown");
+assert.equal(contributionPct(1000, 0), null, "zero receipts denominator cannot produce a funding percentage");
 
 assert.equal(
   signals.some((signal) => signal.dedupeKey === "fec:new_filing:filing-old"),

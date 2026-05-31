@@ -209,10 +209,20 @@ async function main() {
         sourceRecord("fec", "candidates", record.candidate_id, record, `https://www.fec.gov/data/candidate/${record.candidate_id}/`),
       ),
     );
-    const normalizedCandidatesBase = fecCandidates
+    const normalizedCandidatesInScope = fecCandidates
       .map((record) => normalizeCandidate(record, cycle))
       .filter((candidate) => candidate.raceId && raceIds.has(candidate.raceId))
-      .slice(0, maxCandidates);
+      .sort(compareCandidateScope);
+    if (maxCandidates && normalizedCandidatesInScope.length > maxCandidates) {
+      issues.push(candidateScopeTruncationIssue({
+        count: normalizedCandidatesInScope.length,
+        cycle,
+        maxCandidates,
+        offices,
+        state,
+      }));
+    }
+    const normalizedCandidatesBase = normalizedCandidatesInScope.slice(0, maxCandidates);
     let candidatesWithLegislatorIds = normalizedCandidatesBase;
     try {
       const sync = await applyCongressLegislatorIds(normalizedCandidatesBase);
@@ -469,6 +479,39 @@ function paginationIssue(
   };
 }
 
+function candidateScopeTruncationIssue({
+  count,
+  cycle,
+  maxCandidates,
+  offices,
+  state,
+}: {
+  count: number;
+  cycle: number;
+  maxCandidates: number;
+  offices: Array<"H" | "S">;
+  state?: string;
+}): ValidationIssue {
+  return {
+    entityType: "candidate",
+    sourceId: `candidate-scope:${state ?? "national"}:${offices.join(",")}:${cycle}`,
+    severity: "warning",
+    rule: "candidate_scope_truncated",
+    message: `Race Signals matched ${count} in-scope ${cycle} candidates but FEC_MAX_CANDIDATES limited this ingest to ${maxCandidates}. Treat candidate coverage for this run as partial.`,
+    raw: { count, cycle, maxCandidates, offices, state: state ?? null },
+  };
+}
+
+function compareCandidateScope(a: Candidate, b: Candidate) {
+  return (
+    a.state.localeCompare(b.state) ||
+    a.office.localeCompare(b.office) ||
+    String(a.district ?? "").localeCompare(String(b.district ?? "")) ||
+    a.name.localeCompare(b.name) ||
+    a.fecCandidateId.localeCompare(b.fecCandidateId)
+  );
+}
+
 function sourceRecord(
   source: string,
   sourceTable: string,
@@ -497,7 +540,11 @@ function endpointForIssue(entityType: string) {
 function endpointRunStatus(issues: ValidationIssue[], runHadErrors: boolean) {
   if (
     runHadErrors ||
-    issues.some((issue) => issue.rule === "fec_pagination_truncated" || issue.rule === "partial_ingestion_error")
+    issues.some((issue) =>
+      issue.rule === "fec_pagination_truncated" ||
+      issue.rule === "candidate_scope_truncated" ||
+      issue.rule === "partial_ingestion_error",
+    )
   ) {
     return "partial";
   }

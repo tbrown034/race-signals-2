@@ -130,7 +130,7 @@ export default async function Home({
                   </a>
                 </div>
                 <p className="text-xs text-neutral-600">
-                  Exports preserve filters and include FEC source IDs.
+                  Exports include all matching rows, capped at 10,000, with FEC source IDs.
                 </p>
               </div>
             </div>
@@ -234,7 +234,7 @@ function FeedTriageStrip({
   return (
     <section className="border-b border-neutral-300 px-5 py-3" aria-label="Feed triage">
       <div className="grid gap-2 lg:grid-cols-3">
-        <TriageItem label="Newest" signal={signals.latest} />
+        <TriageItem label="Latest material" signal={signals.latestMaterial} />
         <TriageItem label="Needs review" signal={signals.review} empty="No review flags in this view" />
         <TriageItem label="Largest IE" signal={signals.largestIe} empty="No IE alerts in this view" />
       </div>
@@ -277,7 +277,7 @@ function TriageItem({
 
 function feedTriageSignals(signals: Signal[]) {
   return {
-    latest: signals[0],
+    latestMaterial: signals.find((signal) => signal.status === "review" || signal.signalType !== "new_filing" || (signal.amount ?? 0) >= 25000) ?? signals[0],
     review: signals.find((signal) => signal.status === "review"),
     largestIe: signals
       .filter((signal) => signal.signalType === "large_independent_expenditure" && signal.amount)

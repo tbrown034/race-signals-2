@@ -63,7 +63,7 @@ export default async function SpendersPage({
                   </a>
                 </div>
                 <p className="text-xs text-neutral-600">
-                  Exports include current filters and ingest metadata.
+                  Exports include all matching rows, capped at 10,000, with ingest metadata.
                 </p>
               </div>
             </div>

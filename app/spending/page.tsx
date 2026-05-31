@@ -53,19 +53,18 @@ export default async function SpendingPage({
         <section className="w-full max-w-[calc(100vw-2.5rem)] min-w-0 border border-neutral-300 bg-white sm:max-w-none">
           <div className="border-b border-neutral-300 px-5 py-5">
             <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
-              <div>
+              <div className="min-w-0 max-w-full">
                 <p className="font-mono text-xs uppercase tracking-[0.18em] text-neutral-500">
                   Schedule E watch
                 </p>
                 <h1 className="mt-1 text-xl font-semibold tracking-tight">
                   Outside spending watch
                 </h1>
-                <p className="mt-2 max-w-3xl break-words text-sm leading-5 text-neutral-700">
-                  Largest Schedule E alerts first, with FEC source links for verification.
-                  Sort by date when the reporting question is what changed most recently.
+                <p className="mt-2 max-w-full break-words text-sm leading-5 text-neutral-700 sm:max-w-3xl">
+                  Largest alerts first. Sort by date for latest records.
                 </p>
               </div>
-              <div className="flex flex-col gap-2 md:items-end">
+              <div className="min-w-0 max-w-full flex flex-col gap-2 md:items-end">
                 <div className="flex flex-wrap gap-2 text-sm">
                   <Link
                     className={`border px-3 py-2 font-medium ${sort === "amount" ? "border-neutral-950 bg-neutral-950 text-white" : "border-neutral-400 hover:border-neutral-900"}`}
@@ -94,8 +93,8 @@ export default async function SpendingPage({
                     Export JSON
                   </a>
                 </div>
-                <p className="text-xs text-neutral-600">
-                  Exports include only Schedule E signals in this view.
+                <p className="max-w-full break-words text-xs text-neutral-600 md:max-w-xs md:text-right">
+                  All matching rows. Cap 10,000.
                 </p>
               </div>
             </div>
@@ -422,27 +421,64 @@ function SpendingQuickFilters({
             <Link className={quickFilterClass(selectedMinAmount === "250000")} href={spendingToggleHref(params, "minAmount", "250000")}>$250k+</Link>
           </div>
         </div>
-        <div>
-          <p className="font-mono text-[11px] uppercase tracking-[0.12em] text-neutral-500">
-            Target party
-          </p>
-          <div className="mt-2 flex flex-wrap gap-2">
-            <Link className={quickFilterClass(!selectedTargetParty)} href={spendingToggleHref(params, "targetParty", "")}>All</Link>
-            <Link className={quickFilterClass(selectedTargetParty === "REP")} href={spendingToggleHref(params, "targetParty", "REP")}>REP</Link>
-            <Link className={quickFilterClass(selectedTargetParty === "DEM")} href={spendingToggleHref(params, "targetParty", "DEM")}>DEM</Link>
+        <details className="md:hidden">
+          <summary className="cursor-pointer font-mono text-[11px] uppercase tracking-[0.12em] text-neutral-600 md:hidden">
+            More spending filters
+          </summary>
+          <div className="mt-3 grid gap-3">
+            <TargetPartyFilters params={params} selectedTargetParty={selectedTargetParty} />
+            <TargetStatusFilters params={params} selectedTargetStatus={selectedTargetStatus} />
           </div>
-        </div>
-        <div>
-          <p className="font-mono text-[11px] uppercase tracking-[0.12em] text-neutral-500">
-            Target status
-          </p>
-          <div className="mt-2 flex flex-wrap gap-2">
-            <Link className={quickFilterClass(!selectedTargetStatus)} href={spendingToggleHref(params, "targetStatus", "")}>All</Link>
-            <Link className={quickFilterClass(selectedTargetStatus === "I")} href={spendingToggleHref(params, "targetStatus", "I")}>Incumbent</Link>
-            <Link className={quickFilterClass(selectedTargetStatus === "C")} href={spendingToggleHref(params, "targetStatus", "C")}>Challenger</Link>
-            <Link className={quickFilterClass(selectedTargetStatus === "O")} href={spendingToggleHref(params, "targetStatus", "O")}>Open seat</Link>
-          </div>
-        </div>
+        </details>
+        <TargetPartyFilters className="hidden md:block" params={params} selectedTargetParty={selectedTargetParty} />
+        <TargetStatusFilters className="hidden md:block" params={params} selectedTargetStatus={selectedTargetStatus} />
+      </div>
+    </div>
+  );
+}
+
+function TargetPartyFilters({
+  className,
+  params,
+  selectedTargetParty,
+}: {
+  className?: string;
+  params: { [key: string]: string | string[] | undefined };
+  selectedTargetParty: string;
+}) {
+  return (
+    <div className={className}>
+      <p className="font-mono text-[11px] uppercase tracking-[0.12em] text-neutral-500">
+        Target party
+      </p>
+      <div className="mt-2 flex flex-wrap gap-2">
+        <Link className={quickFilterClass(!selectedTargetParty)} href={spendingToggleHref(params, "targetParty", "")}>All</Link>
+        <Link className={quickFilterClass(selectedTargetParty === "REP")} href={spendingToggleHref(params, "targetParty", "REP")}>REP</Link>
+        <Link className={quickFilterClass(selectedTargetParty === "DEM")} href={spendingToggleHref(params, "targetParty", "DEM")}>DEM</Link>
+      </div>
+    </div>
+  );
+}
+
+function TargetStatusFilters({
+  className,
+  params,
+  selectedTargetStatus,
+}: {
+  className?: string;
+  params: { [key: string]: string | string[] | undefined };
+  selectedTargetStatus: string;
+}) {
+  return (
+    <div className={className}>
+      <p className="font-mono text-[11px] uppercase tracking-[0.12em] text-neutral-500">
+        Target status
+      </p>
+      <div className="mt-2 flex flex-wrap gap-2">
+        <Link className={quickFilterClass(!selectedTargetStatus)} href={spendingToggleHref(params, "targetStatus", "")}>All</Link>
+        <Link className={quickFilterClass(selectedTargetStatus === "I")} href={spendingToggleHref(params, "targetStatus", "I")}>Incumbent</Link>
+        <Link className={quickFilterClass(selectedTargetStatus === "C")} href={spendingToggleHref(params, "targetStatus", "C")}>Challenger</Link>
+        <Link className={quickFilterClass(selectedTargetStatus === "O")} href={spendingToggleHref(params, "targetStatus", "O")}>Open seat</Link>
       </div>
     </div>
   );

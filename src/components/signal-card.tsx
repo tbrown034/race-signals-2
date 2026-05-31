@@ -34,6 +34,7 @@ export function SignalCard({ signal }: { signal: Signal }) {
   const anchorId = signalAnchorId(signal);
   const evidence = signalEvidence(signal);
   const evidenceItems = evidence ? evidence.split(" | ") : [];
+  const comparisonSources = filingComparisonSources(signal);
   const verifyLine = verificationLine(signal.signalType);
 
   return (
@@ -90,6 +91,21 @@ export function SignalCard({ signal }: { signal: Signal }) {
           <span className="font-mono uppercase tracking-[0.12em] text-neutral-500">Verify:</span>{" "}
           {verifyLine}
         </p>
+        {comparisonSources.length ? (
+          <div className="mt-1 flex flex-wrap gap-2 text-xs">
+            {comparisonSources.map((source) => (
+              <a
+                className="font-medium underline underline-offset-4"
+                href={source.href}
+                key={source.label}
+                rel="noreferrer"
+                target="_blank"
+              >
+                {source.label}
+              </a>
+            ))}
+          </div>
+        ) : null}
         <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-xs text-neutral-600">
           {signal.status !== "new" && signal.status !== "review" ? (
             <span className="font-mono uppercase tracking-[0.12em] text-neutral-500">
@@ -266,6 +282,16 @@ function signalEvidence(signal: Signal) {
   }
 
   return null;
+}
+
+function filingComparisonSources(signal: Signal) {
+  if (signal.signalType !== "committee_activity_spike") return [];
+  const latestSourceUrl = textMetadata(signal.metadata?.latestSourceUrl);
+  const priorSourceUrl = textMetadata(signal.metadata?.priorSourceUrl);
+  return [
+    latestSourceUrl ? { label: "Latest filing source", href: latestSourceUrl } : null,
+    priorSourceUrl ? { label: "Prior filing source", href: priorSourceUrl } : null,
+  ].filter((source): source is { label: string; href: string } => Boolean(source));
 }
 
 function numberMetadata(value: unknown) {

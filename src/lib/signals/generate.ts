@@ -179,7 +179,9 @@ export function generateSignals(input: SignalInput): Signal[] {
     if (
       !latest?.totalReceipts ||
       !latest.receiptDate ||
+      !latest.sourceUrl ||
       !prior?.totalReceipts ||
+      !prior.sourceUrl ||
       latest.totalReceiptsBasis !== "period" ||
       prior.totalReceiptsBasis !== "period" ||
       !isCurrentCycleRecord(latest.receiptDate, race, latest.cycle) ||
@@ -215,7 +217,9 @@ export function generateSignals(input: SignalInput): Signal[] {
         coverageStartDate: latest.coverageStartDate,
         coverageEndDate: latest.coverageEndDate,
         latestSourceId: latest.sourceId,
+        latestSourceUrl: latest.sourceUrl,
         priorSourceId: prior.sourceId,
+        priorSourceUrl: prior.sourceUrl,
         sourceId: latest.sourceId,
         sourceKind: "filing",
       },

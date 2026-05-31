@@ -92,10 +92,11 @@ export default async function SpendingPage({
           {visibleSignals.length ? (
             <div className="border-b border-neutral-300">
               <div className="overflow-x-auto">
-                <table className="w-full min-w-[920px] text-left text-sm">
+                <table className="w-full min-w-[1120px] text-left text-sm">
                   <thead className="bg-neutral-100 font-mono text-xs uppercase tracking-[0.12em] text-neutral-500">
                     <tr>
                       <th className="px-4 py-3 font-medium" scope="col">Date</th>
+                      <th className="px-4 py-3 font-medium" scope="col">Alert</th>
                       <th className="px-4 py-3 font-medium" scope="col">Spender</th>
                       <th className="px-4 py-3 font-medium" scope="col">Target</th>
                       <th className="px-4 py-3 font-medium" scope="col">Position</th>
@@ -108,6 +109,11 @@ export default async function SpendingPage({
                     {visibleSignals.map((signal) => (
                       <tr key={`row-${signal.dedupeKey}`}>
                         <td className="px-4 py-3 font-mono">{formatDate(signal.signalDate)}</td>
+                        <td className="max-w-[320px] px-4 py-3">
+                          <Link className="font-medium underline underline-offset-4" href={`/#${signalAnchorId(signal.dedupeKey)}`}>
+                            {signal.headline}
+                          </Link>
+                        </td>
                         <td className="px-4 py-3">{signal.committeeName ?? "Unknown spender"}</td>
                         <td className="px-4 py-3">{signal.candidateName ?? "Unknown candidate"}</td>
                         <td className="px-4 py-3">{supportOpposeLabel(signal.metadata?.supportOpposeIndicator)}</td>
@@ -125,14 +131,19 @@ export default async function SpendingPage({
                         </td>
                         <td className="px-4 py-3">
                           {signal.sourceUrl ? (
-                            <a
-                              className="font-medium underline underline-offset-4"
-                              href={signal.sourceUrl}
-                              rel="noreferrer"
-                              target="_blank"
-                            >
-                              FEC
-                            </a>
+                            <span className="inline-flex flex-col gap-1">
+                              <a
+                                className="font-medium underline underline-offset-4"
+                                href={signal.sourceUrl}
+                                rel="noreferrer"
+                                target="_blank"
+                              >
+                                FEC Schedule E
+                              </a>
+                              <span className="font-mono text-[11px] uppercase tracking-[0.12em] text-neutral-500">
+                                {sourceRecordLabel(signal.metadata?.sourceId)}
+                              </span>
+                            </span>
                           ) : (
                             "Missing"
                           )}
@@ -174,7 +185,16 @@ export default async function SpendingPage({
 function supportOpposeLabel(value: unknown) {
   if (value === "S") return "Support";
   if (value === "O") return "Oppose";
-  return "Unknown";
+  return "Not coded by FEC";
+}
+
+function sourceRecordLabel(value: unknown) {
+  if (typeof value === "string" && value) return `Record ${value}`;
+  return "Record not stored";
+}
+
+function signalAnchorId(dedupeKey: string) {
+  return `signal-${dedupeKey.replace(/[^a-zA-Z0-9_-]/g, "-")}`;
 }
 
 function spendingSortHref(

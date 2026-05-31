@@ -33,6 +33,7 @@ export function SignalCard({ signal }: { signal: Signal }) {
   const candidateLabel = candidateDisplay(signal);
   const anchorId = signalAnchorId(signal);
   const evidence = signalEvidence(signal);
+  const evidenceItems = evidence ? evidence.split(" | ") : [];
   const verifyLine = verificationLine(signal.signalType);
 
   return (
@@ -70,10 +71,20 @@ export function SignalCard({ signal }: { signal: Signal }) {
         <p className="mt-1 max-w-3xl text-sm leading-5 text-neutral-700">
           {signal.whyItMatters}
         </p>
-        {evidence ? (
-          <p className="mt-1 font-mono text-[11px] uppercase tracking-[0.12em] text-neutral-500">
-            Record: {evidence}
-          </p>
+        {evidenceItems.length ? (
+          <div className="mt-2 flex flex-wrap gap-1.5">
+            <span className="font-mono text-[11px] uppercase tracking-[0.12em] text-neutral-500">
+              Record
+            </span>
+            {evidenceItems.map((item) => (
+              <span
+                className="border border-neutral-300 px-1.5 py-0.5 text-xs leading-5 text-neutral-700"
+                key={item}
+              >
+                {item}
+              </span>
+            ))}
+          </div>
         ) : null}
         <p className="mt-1 text-xs leading-5 text-neutral-600">
           <span className="font-mono uppercase tracking-[0.12em] text-neutral-500">Verify:</span>{" "}

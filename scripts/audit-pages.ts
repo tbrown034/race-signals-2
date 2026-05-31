@@ -40,7 +40,11 @@ async function main() {
     await assertJsonRoute("/api/signals/export.json?status=review&sort=amount");
     await assertRoute({ path: "/api/schedule-e/export.csv?position=O&minAmount=25000&targetParty=REP", text: "expenditure_date" });
     await assertJsonRoute("/api/schedule-e/export.json?position=O&minAmount=25000&targetParty=REP");
-    console.log(`Page audit passed for ${checks.length} routes and 4 export endpoints.`);
+    await assertRoute({ path: "/api/races/export.csv?state=IN", text: "race_id" });
+    await assertJsonRoute("/api/races/export.json?state=IN");
+    await assertRoute({ path: "/api/spenders/export.csv", text: "committee_name" });
+    await assertJsonRoute("/api/spenders/export.json");
+    console.log(`Page audit passed for ${checks.length} routes and 8 export endpoints.`);
   } finally {
     if (server) {
       server.kill("SIGTERM");

@@ -386,9 +386,9 @@ function StateRaceBoard({ rows, state }: { rows: StateRaceBoardRow[]; state: str
               <th className="px-4 py-3 font-medium" scope="col">Race</th>
               <th className="hidden px-4 py-3 text-right font-medium md:table-cell" scope="col">Candidates</th>
               <th className="hidden px-4 py-3 text-right font-medium md:table-cell" scope="col">Inc.</th>
-              <th className="hidden px-4 py-3 text-right font-medium md:table-cell" scope="col">Raised</th>
+              <th className="hidden px-4 py-3 text-right font-medium md:table-cell" scope="col">FEC receipts</th>
               <th className="hidden px-4 py-3 text-right font-medium md:table-cell" scope="col">Signals</th>
-              <th className="hidden px-4 py-3 text-right font-medium md:table-cell" scope="col">IE total</th>
+              <th className="hidden px-4 py-3 text-right font-medium md:table-cell" scope="col">Stored IE</th>
               <th className="hidden px-4 py-3 font-medium md:table-cell" scope="col">Totals fetched</th>
               <th className="hidden px-4 py-3 font-medium md:table-cell" scope="col">Latest signal</th>
             </tr>
@@ -411,7 +411,7 @@ function StateRaceBoard({ rows, state }: { rows: StateRaceBoardRow[]; state: str
                         <dd className="inline">{race.incumbentCount}</dd>
                       </div>
                       <div>
-                        <dt className="inline font-mono uppercase tracking-[0.12em] text-neutral-500">Raised </dt>
+                        <dt className="inline font-mono uppercase tracking-[0.12em] text-neutral-500">FEC receipts </dt>
                         <dd className="inline font-mono text-neutral-950">{formatMoney(race.candidateReceiptsTotal) ?? "$0"}</dd>
                       </div>
                       <div>
@@ -419,7 +419,7 @@ function StateRaceBoard({ rows, state }: { rows: StateRaceBoardRow[]; state: str
                         <dd className="inline">{race.signalCount}</dd>
                       </div>
                       <div>
-                        <dt className="inline font-mono uppercase tracking-[0.12em] text-neutral-500">IE total </dt>
+                        <dt className="inline font-mono uppercase tracking-[0.12em] text-neutral-500">Stored IE </dt>
                         <dd className="inline font-mono text-neutral-950">
                           {race.independentExpenditureTotal > 0 ? (
                             <Link className="underline underline-offset-4" href={`/records/schedule-e?race=${race.raceId}`}>

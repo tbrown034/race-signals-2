@@ -100,8 +100,8 @@ export default async function CandidatePage({
           ],
           ["Status", incumbentStatus(candidate.incumbentChallengeStatus)],
           ["FEC cycle", `Filed with FEC for the ${candidate.electionYear ?? "current"} cycle.`],
-          ["Cycle receipts", candidateMoney(candidate.totalReceiptsCycle, candidate.totalsFetchedAt)],
-          ["Cash on hand", candidateMoney(candidate.cashOnHandLatest, candidate.totalsFetchedAt)],
+          ["FEC aggregate receipts", candidateMoney(candidate.totalReceiptsCycle, candidate.totalsFetchedAt)],
+          ["FEC aggregate cash", candidateMoney(candidate.cashOnHandLatest, candidate.totalsFetchedAt)],
           ["Cash as of", formatDate(candidate.cashOnHandAsOf)],
           ["Race Signals fetched totals", candidate.totalsFetchedAt ? formatDateTime(candidate.totalsFetchedAt) : "Not recorded"],
           [

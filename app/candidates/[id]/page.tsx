@@ -42,6 +42,7 @@ export default async function CandidatePage({
         }
         sourceUrl={candidate.sourceUrl}
         signals={signals}
+        allSignalsHref={`/?q=${encodeURIComponent(candidate.name)}`}
         meta={[
           ["FEC ID", candidate.fecCandidateId],
           ["Party", partyLabel(candidate.party)],

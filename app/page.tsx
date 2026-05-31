@@ -3,7 +3,7 @@ import { FeedFilters } from "@/src/components/feed-filters";
 import { PageShell } from "@/src/components/page-shell";
 import { SignalCard } from "@/src/components/signal-card";
 import { getRaces, getSignals, getStatus } from "@/src/lib/db/repository";
-import { signalFiltersFromSearchParams } from "@/src/lib/signals/filters";
+import { signalFiltersFromSearchParams, sinceLabel } from "@/src/lib/signals/filters";
 
 const quickViews = [
   {
@@ -40,8 +40,9 @@ export default async function Home({
   const raceId = typeof params.race === "string" ? params.race : undefined;
   const type = typeof params.type === "string" ? params.type : undefined;
   const statusFilter = typeof params.status === "string" ? params.status : undefined;
+  const since = typeof params.since === "string" ? params.since : undefined;
   const exportQuery = new URLSearchParams();
-  for (const key of ["q", "state", "office", "race", "type", "status"]) {
+  for (const key of ["q", "state", "office", "race", "type", "status", "since"]) {
     const value = params[key];
     if (typeof value === "string" && value) exportQuery.set(key, value);
   }
@@ -59,6 +60,7 @@ export default async function Home({
     raceId ?? null,
     type ? type.replaceAll("_", " ") : null,
     statusFilter ? `status ${statusFilter}` : null,
+    since ? sinceLabel(since) : null,
   ].filter(Boolean);
 
   return (
@@ -100,7 +102,7 @@ export default async function Home({
             </div>
           </div>
           <FeedFilters
-            key={[q, state, office, raceId, type, statusFilter].join("|")}
+            key={[q, state, office, raceId, type, statusFilter, since].join("|")}
             races={races}
             q={q}
             state={state}
@@ -108,6 +110,7 @@ export default async function Home({
             raceId={raceId}
             type={type}
             status={statusFilter}
+            since={since}
           />
           {visibleSignals.length ? (
             visibleSignals.map((signal) => <SignalCard signal={signal} key={signal.dedupeKey} />)

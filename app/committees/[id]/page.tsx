@@ -37,6 +37,7 @@ export default async function CommitteePage({
         independentExpenditures={independentExpenditures}
         transactions={transactions}
         signals={signals}
+        allSignalsHref={`/?q=${encodeURIComponent(committee.name)}`}
         meta={[
           ["FEC ID", committee.fecCommitteeId],
           ["Type", committeeTypeLabel(committee.committeeType)],

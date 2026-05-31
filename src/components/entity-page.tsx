@@ -16,6 +16,7 @@ export function EntityPage({
   independentExpenditures = [],
   transactions = [],
   signals,
+  allSignalsHref,
 }: {
   asideMedia?: ReactNode;
   children?: ReactNode;
@@ -28,7 +29,16 @@ export function EntityPage({
   independentExpenditures?: CommitteeIndependentExpenditure[];
   transactions?: Transaction[];
   signals: Signal[];
+  allSignalsHref?: string;
 }) {
+  const prioritySignals = [...signals].sort((a, b) => {
+    if (a.status === "review" && b.status !== "review") return -1;
+    if (b.status === "review" && a.status !== "review") return 1;
+    return b.signalDate.localeCompare(a.signalDate);
+  });
+  const visibleSignals = prioritySignals.slice(0, 25);
+  const hiddenSignals = Math.max(signals.length - visibleSignals.length, 0);
+
   return (
     <main className="mx-auto grid max-w-7xl gap-6 px-5 py-6 sm:px-8 lg:grid-cols-[320px_1fr]">
       <aside className="h-fit border border-neutral-300 bg-white p-5">
@@ -202,12 +212,26 @@ export function EntityPage({
           </div>
         ) : null}
         <div className="border-b border-neutral-300 px-5 py-4">
-          <h2 className="text-sm font-semibold uppercase tracking-[0.14em] text-neutral-600">
-            Related signals
-          </h2>
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+            <h2 className="text-sm font-semibold uppercase tracking-[0.14em] text-neutral-600">
+              Related signals
+            </h2>
+            {hiddenSignals && allSignalsHref ? (
+              <Link className="text-sm font-medium underline underline-offset-4" href={allSignalsHref}>
+                Open all {signals.length} in feed
+              </Link>
+            ) : null}
+          </div>
         </div>
-        {signals.length ? (
-          signals.map((signal) => <SignalCard signal={signal} key={signal.dedupeKey} />)
+        {visibleSignals.length ? (
+          <>
+            {hiddenSignals ? (
+              <p className="border-b border-neutral-300 px-5 py-3 text-sm text-neutral-600">
+                Showing the latest and review-worthy {visibleSignals.length} of {signals.length} related signals.
+              </p>
+            ) : null}
+            {visibleSignals.map((signal) => <SignalCard signal={signal} key={signal.dedupeKey} />)}
+          </>
         ) : (
           <p className="p-5 text-sm text-neutral-600">No related signals in the current slice.</p>
         )}

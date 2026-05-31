@@ -257,6 +257,17 @@ function toIsoString(value: string | Date) {
   return String(value);
 }
 
+function resolveSince(value: string) {
+  const windows: Record<string, number> = {
+    "24h": 24 * 60 * 60 * 1000,
+    "7d": 7 * 24 * 60 * 60 * 1000,
+    "30d": 30 * 24 * 60 * 60 * 1000,
+  };
+  const window = windows[value];
+  if (window) return new Date(Date.now() - window).toISOString();
+  return value;
+}
+
 export async function getSignals(filters: SignalFilters = {}) {
   if (!hasDatabase()) {
     const q = filters.q?.toLowerCase();
@@ -266,6 +277,7 @@ export async function getSignals(filters: SignalFilters = {}) {
       if (filters.office && !signal.raceId?.endsWith(`-${filters.office}`)) return false;
       if (filters.type && signal.signalType !== filters.type) return false;
       if (filters.status && signal.status !== filters.status) return false;
+      if (filters.since && signal.dataFreshness <= resolveSince(filters.since)) return false;
       if (
         q &&
         !`${signal.headline} ${signal.whyItMatters} ${signal.candidateName ?? ""} ${signal.committeeName ?? ""} ${signal.raceName ?? ""}`
@@ -301,7 +313,7 @@ export async function getSignals(filters: SignalFilters = {}) {
     where.push(`s.status = $${values.length}`);
   }
   if (filters.since) {
-    values.push(filters.since);
+    values.push(resolveSince(filters.since));
     where.push(`s.created_at > $${values.length}`);
   }
   if (filters.q) {
@@ -376,7 +388,7 @@ export async function getSpendingSignals(
     where.push(`s.status = $${values.length}`);
   }
   if (scopedFilters.since) {
-    values.push(scopedFilters.since);
+    values.push(resolveSince(scopedFilters.since));
     where.push(`s.created_at > $${values.length}`);
   }
   if (scopedFilters.q) {

@@ -17,6 +17,7 @@ export default async function SpendingPage({
   const office = typeof params.office === "string" ? params.office : undefined;
   const raceId = typeof params.race === "string" ? params.race : undefined;
   const statusFilter = typeof params.status === "string" ? params.status : undefined;
+  const since = typeof params.since === "string" ? params.since : undefined;
   const [signals, races] = await Promise.all([
     getSpendingSignals(signalFiltersFromSearchParams(params, 101), sort),
     getRaces(),
@@ -63,12 +64,13 @@ export default async function SpendingPage({
           </div>
           <FeedFilters
             clearHref="/spending"
-            key={[q, state, office, raceId, statusFilter].join("|")}
+            key={[q, state, office, raceId, statusFilter, since].join("|")}
             lockedType
             office={office}
             q={q}
             raceId={raceId}
             races={races}
+            since={since}
             state={state}
             status={statusFilter}
             type="large_independent_expenditure"
@@ -110,7 +112,7 @@ function spendingSortHref(
   sort: "amount" | "date",
 ) {
   const next = new URLSearchParams();
-  for (const key of ["q", "state", "office", "race", "status"]) {
+  for (const key of ["q", "state", "office", "race", "status", "since"]) {
     const value = params[key];
     if (typeof value === "string" && value) next.set(key, value);
   }

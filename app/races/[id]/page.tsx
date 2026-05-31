@@ -61,6 +61,7 @@ export default async function RacePage({
         }
         ratings={ratings}
         signals={signals}
+        allSignalsHref={`/?race=${encodeURIComponent(race.id)}`}
         meta={[
           ["Race ID", race.id],
           ["Cycle", race.cycle],

@@ -9,6 +9,13 @@ export type SignalFilters = {
   limit?: number;
 };
 
+export function sinceLabel(value?: string) {
+  if (value === "24h") return "last 24 hours";
+  if (value === "7d") return "last 7 days";
+  if (value === "30d") return "last 30 days";
+  return value;
+}
+
 function first(value: string | string[] | undefined) {
   if (Array.isArray(value)) return value[0];
   return value;

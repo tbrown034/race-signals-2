@@ -10,6 +10,7 @@ import { hasDatabase, sql } from "@/src/lib/db/client";
 import type { SignalFilters } from "@/src/lib/signals/filters";
 import type {
   Candidate,
+  CandidateFiling,
   CandidateSignalGap,
   Committee,
   CommitteeIndependentExpenditure,
@@ -83,6 +84,9 @@ type CandidateRow = {
   elections_checked_at: string | Date | null;
   race_id: string | null;
   source_url: string | null;
+  committee_count?: string | null;
+  filing_count?: string | null;
+  signal_count?: string | null;
 };
 
 const CURRENT_CYCLE = 2026;
@@ -147,6 +151,9 @@ function mapCandidateRow(row: CandidateRow): Candidate {
     electionsCheckedAt: row.elections_checked_at ? toIsoString(row.elections_checked_at) : null,
     raceId: row.race_id,
     sourceUrl: row.source_url,
+    committeeCount: row.committee_count === undefined || row.committee_count === null ? undefined : Number(row.committee_count),
+    filingCount: row.filing_count === undefined || row.filing_count === null ? undefined : Number(row.filing_count),
+    signalCount: row.signal_count === undefined || row.signal_count === null ? undefined : Number(row.signal_count),
   };
 }
 
@@ -258,6 +265,66 @@ function mapElectionRow(row: {
     sourceEntityId: row.source_entity_id,
     fetchedAt: toIsoString(row.fetched_at),
   };
+}
+
+export async function getCandidateFilings(candidateId: string): Promise<CandidateFiling[]> {
+  if (!hasDatabase()) return [];
+  const rows = await sql<{
+    source_id: string;
+    cycle: number | null;
+    committee_id: string | null;
+    fec_committee_id: string | null;
+    committee_name: string | null;
+    report_type: string | null;
+    coverage_start_date: string | Date | null;
+    coverage_end_date: string | Date | null;
+    receipt_date: string | Date | null;
+    total_receipts: string | null;
+    total_disbursements: string | null;
+    cash_on_hand: string | null;
+    source_url: string | null;
+    raw: unknown;
+  }>(
+    `
+      select
+        f.source_id,
+        f.cycle,
+        f.committee_id,
+        f.fec_committee_id,
+        c.name as committee_name,
+        f.report_type,
+        f.coverage_start_date,
+        f.coverage_end_date,
+        f.receipt_date,
+        f.total_receipts,
+        f.total_disbursements,
+        f.cash_on_hand,
+        f.source_url,
+        f.raw
+      from filings f
+      join committees c on c.id = f.committee_id
+      where c.candidate_id = $1
+      order by f.receipt_date desc nulls last, f.source_id desc
+    `,
+    [candidateId],
+  );
+  return rows.map((row) => ({
+    sourceId: row.source_id,
+    cycle: row.cycle,
+    committeeId: row.committee_id,
+    fecCommitteeId: row.fec_committee_id,
+    committeeName: row.committee_name,
+    reportType: row.report_type,
+    coverageStartDate: row.coverage_start_date ? toDateString(row.coverage_start_date) : null,
+    coverageEndDate: row.coverage_end_date ? toDateString(row.coverage_end_date) : null,
+    receiptDate: row.receipt_date ? toDateString(row.receipt_date) : null,
+    totalReceipts: row.total_receipts === null ? null : Number(row.total_receipts),
+    totalReceiptsBasis: receiptBasis(row.raw),
+    totalDisbursements: row.total_disbursements === null ? null : Number(row.total_disbursements),
+    cashOnHand: row.cash_on_hand === null ? null : Number(row.cash_on_hand),
+    sourceUrl: row.source_url,
+    raw: row.raw ?? {},
+  }));
 }
 
 function toDateString(value: string | Date) {
@@ -1232,17 +1299,31 @@ export async function getCandidatesForRace(id: string): Promise<Candidate[]> {
   if (!hasDatabase()) {
     return demoCandidates
       .filter((candidate) => candidate.raceId === id)
+      .map((candidate) => ({
+        ...candidate,
+        committeeCount: demoCommittees.filter((committee) => committee.candidateId === candidate.id).length,
+        filingCount: 0,
+        signalCount: demoSignals.filter((signal) => signal.candidateId === candidate.id).length,
+      }))
       .sort(compareCandidateStanding);
   }
   const rows = await sql<CandidateRow>(
     `
-      select *
-      from candidates
-      where race_id = $1
+      select
+        c.*,
+        count(distinct cm.id)::text as committee_count,
+        count(distinct f.source_id)::text as filing_count,
+        count(distinct s.id)::text as signal_count
+      from candidates c
+      left join committees cm on cm.candidate_id = c.id
+      left join filings f on f.committee_id = cm.id
+      left join signals s on s.candidate_id = c.id
+      where c.race_id = $1
+      group by c.id
       order by
-        case when incumbent_challenge_status in ('I', 'Incumbent') then 0 else 1 end,
-        total_receipts_cycle desc nulls last,
-        name
+        case when c.incumbent_challenge_status in ('I', 'Incumbent') then 0 else 1 end,
+        c.total_receipts_cycle desc nulls last,
+        c.name
     `,
     [id],
   );
@@ -1258,12 +1339,14 @@ export async function getRaceStats(id: string): Promise<RaceStats> {
       totalIndependentExpenditures: expenditures.reduce((sum, expenditure) => sum + expenditure.amount, 0),
       candidateCount: candidates.length,
       incumbentCount: candidates.filter((candidate) => isIncumbent(candidate.incumbentChallengeStatus)).length,
+      latestIndependentExpenditureDate: expenditures.map((expenditure) => expenditure.expenditureDate).filter(Boolean).sort().at(-1) ?? null,
     };
   }
 
   const rows = await sql<{
     total_raised: string | null;
     total_independent_expenditures: string | null;
+    latest_independent_expenditure_date: string | Date | null;
     candidate_count: string;
     incumbent_count: string;
   }>(
@@ -1277,7 +1360,9 @@ export async function getRaceStats(id: string): Promise<RaceStats> {
         where race_id = $1
       ),
       spending_stats as (
-        select coalesce(sum(amount), 0)::text as total_independent_expenditures
+        select
+          coalesce(sum(amount), 0)::text as total_independent_expenditures,
+          max(expenditure_date) as latest_independent_expenditure_date
         from independent_expenditures ie
         join races r on r.id = $1
         where ie.race_id = $1
@@ -1287,6 +1372,7 @@ export async function getRaceStats(id: string): Promise<RaceStats> {
       select
         candidate_stats.total_raised,
         spending_stats.total_independent_expenditures,
+        spending_stats.latest_independent_expenditure_date,
         candidate_stats.candidate_count,
         candidate_stats.incumbent_count
       from candidate_stats, spending_stats
@@ -1300,6 +1386,7 @@ export async function getRaceStats(id: string): Promise<RaceStats> {
     totalIndependentExpenditures: Number(row?.total_independent_expenditures ?? 0),
     candidateCount: Number(row?.candidate_count ?? 0),
     incumbentCount: Number(row?.incumbent_count ?? 0),
+    latestIndependentExpenditureDate: row?.latest_independent_expenditure_date ? toDateString(row.latest_independent_expenditure_date) : null,
   };
 }
 
@@ -1702,6 +1789,15 @@ function mapIngestionRun(run: IngestionRunRow): IngestionRun {
     errors: run.errors,
     metadata: run.metadata,
   };
+}
+
+function receiptBasis(raw: unknown): CandidateFiling["totalReceiptsBasis"] {
+  if (!raw || typeof raw !== "object") return null;
+  const record = raw as Record<string, unknown>;
+  if (record.total_receipts_period !== null && record.total_receipts_period !== undefined) return "period";
+  if (record.total_receipts !== null && record.total_receipts !== undefined) return "total";
+  if (record.total_receipts_ytd !== null && record.total_receipts_ytd !== undefined) return "ytd";
+  return null;
 }
 
 async function getTableCounts(tableNames: string[]) {

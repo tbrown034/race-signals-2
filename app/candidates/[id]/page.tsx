@@ -7,7 +7,7 @@ import { IncumbentBadge } from "@/src/components/incumbent-badge";
 import { PageShell } from "@/src/components/page-shell";
 import { PartySquare } from "@/src/components/party-square";
 import { ReporterRead } from "@/src/components/reporter-read";
-import { getCandidate, getCandidateElections, getCandidateIndependentExpenditures, getCandidatesForRace, getRace, getSignalsForEntity } from "@/src/lib/db/repository";
+import { getCandidate, getCandidateElections, getCandidateFilings, getCandidateIndependentExpenditures, getCandidatesForRace, getRace, getSignalsForEntity } from "@/src/lib/db/repository";
 import { formatCount, formatDate, formatDateTime, formatMoney } from "@/src/lib/format";
 import type { Metadata } from "next";
 
@@ -33,11 +33,12 @@ export default async function CandidatePage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const [candidate, signals, elections, independentExpenditures] = await Promise.all([
+  const [candidate, signals, elections, independentExpenditures, filings] = await Promise.all([
     getCandidate(id),
     getSignalsForEntity("candidate", id),
     getCandidateElections(id),
     getCandidateIndependentExpenditures(id),
+    getCandidateFilings(id),
   ]);
 
   if (!candidate) notFound();
@@ -105,6 +106,9 @@ export default async function CandidatePage({
           <div className="flex flex-wrap gap-x-4 gap-y-2">
             <a className="underline-offset-4 hover:underline" href="#reporter-read">Reporter read</a>
             <a className="underline-offset-4 hover:underline" href="#race-context">Race context</a>
+            {filings.length ? (
+              <a className="underline-offset-4 hover:underline" href="#source-filings">Filings</a>
+            ) : null}
             {independentExpenditures.length ? (
               <a className="underline-offset-4 hover:underline" href="#outside-spending-records">Schedule E</a>
             ) : null}
@@ -134,6 +138,7 @@ export default async function CandidatePage({
                     <th className="hidden px-4 py-3 font-medium md:table-cell" scope="col">Status</th>
                     <th className="hidden px-4 py-3 text-right font-medium md:table-cell" scope="col">Receipts</th>
                     <th className="hidden px-4 py-3 text-right font-medium md:table-cell" scope="col">Cash</th>
+                    <th className="hidden px-4 py-3 font-medium md:table-cell" scope="col">Funding mix</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-neutral-200">
@@ -161,8 +166,16 @@ export default async function CandidatePage({
                             <dd className="inline font-mono text-neutral-950">{candidateMoney(otherCandidate.totalReceiptsCycle, otherCandidate.totalsFetchedAt)}</dd>
                           </div>
                           <div>
+                            <dt className="inline font-mono uppercase tracking-[0.12em] text-neutral-500">Spent </dt>
+                            <dd className="inline font-mono text-neutral-950">{candidateMoney(otherCandidate.totalDisbursementsCycle, otherCandidate.totalsFetchedAt)}</dd>
+                          </div>
+                          <div>
                             <dt className="inline font-mono uppercase tracking-[0.12em] text-neutral-500">Cash </dt>
                             <dd className="inline font-mono text-neutral-950">{candidateMoney(otherCandidate.cashOnHandLatest, otherCandidate.totalsFetchedAt)}</dd>
+                          </div>
+                          <div>
+                            <dt className="inline font-mono uppercase tracking-[0.12em] text-neutral-500">Funding mix </dt>
+                            <dd className="inline">{fundingMix(otherCandidate.individualContributionPct, otherCandidate.pacContributionPct)}</dd>
                           </div>
                         </dl>
                       </td>
@@ -173,7 +186,13 @@ export default async function CandidatePage({
                         {candidateMoney(otherCandidate.totalReceiptsCycle, otherCandidate.totalsFetchedAt)}
                       </td>
                       <td className="hidden px-4 py-3 text-right font-mono md:table-cell">
-                        {candidateMoney(otherCandidate.cashOnHandLatest, otherCandidate.totalsFetchedAt)}
+                        <span className="block">{candidateMoney(otherCandidate.cashOnHandLatest, otherCandidate.totalsFetchedAt)}</span>
+                        <span className="block text-[11px] text-neutral-500">
+                          spent {candidateMoney(otherCandidate.totalDisbursementsCycle, otherCandidate.totalsFetchedAt)}
+                        </span>
+                      </td>
+                      <td className="hidden px-4 py-3 text-xs text-neutral-600 md:table-cell">
+                        {fundingMix(otherCandidate.individualContributionPct, otherCandidate.pacContributionPct)}
                       </td>
                     </tr>
                   ))}
@@ -181,6 +200,9 @@ export default async function CandidatePage({
               </table>
             </div>
           </div>
+        ) : null}
+        {filings.length ? (
+          <CandidateFilingsTable filings={filings} />
         ) : null}
         {independentExpenditures.length ? (
           <CandidateOutsideSpendingTable expenditures={independentExpenditures} />
@@ -195,6 +217,102 @@ export default async function CandidatePage({
         />
       </EntityPage>
     </PageShell>
+  );
+}
+
+function CandidateFilingsTable({
+  filings,
+}: {
+  filings: Awaited<ReturnType<typeof getCandidateFilings>>;
+}) {
+  return (
+    <div className="border-b border-neutral-300" id="source-filings">
+      <div className="border-b border-neutral-300 px-5 py-4">
+        <h2 className="text-sm font-semibold uppercase tracking-[0.14em] text-neutral-600">
+          Source filings
+        </h2>
+        <p className="mt-1 text-sm text-neutral-600">
+          FEC committee reports stored for this candidate. Filing signals are generated from these source records, not from aggregate totals alone.
+        </p>
+      </div>
+      <div className="overflow-x-auto">
+        <table className="w-full min-w-0 text-left text-sm md:min-w-[900px]">
+          <thead className="bg-neutral-100 font-mono text-xs uppercase tracking-[0.12em] text-neutral-500">
+            <tr>
+              <th className="px-4 py-3 font-medium" scope="col">Report</th>
+              <th className="hidden px-4 py-3 font-medium md:table-cell" scope="col">Period</th>
+              <th className="hidden px-4 py-3 text-right font-medium md:table-cell" scope="col">Receipts</th>
+              <th className="hidden px-4 py-3 text-right font-medium md:table-cell" scope="col">Disbursements</th>
+              <th className="hidden px-4 py-3 text-right font-medium md:table-cell" scope="col">Cash</th>
+              <th className="hidden px-4 py-3 font-medium md:table-cell" scope="col">Source</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-neutral-200">
+            {filings.map((filing) => (
+              <tr key={filing.sourceId}>
+                <td className="px-4 py-3">
+                  <span className="font-medium">{reportLabel(filing.reportType)}</span>
+                  <p className="mt-1 text-xs text-neutral-600">{filing.committeeName ?? filing.fecCommitteeId ?? "Committee not resolved"}</p>
+                  <dl className="mt-2 space-y-1 text-xs leading-5 text-neutral-600 md:hidden">
+                    <div>
+                      <dt className="inline font-mono uppercase tracking-[0.12em] text-neutral-500">Received </dt>
+                      <dd className="inline font-mono text-neutral-950">{formatDate(filing.receiptDate)}</dd>
+                    </div>
+                    <div>
+                      <dt className="inline font-mono uppercase tracking-[0.12em] text-neutral-500">Period </dt>
+                      <dd className="inline">{filingPeriod(filing.coverageStartDate, filing.coverageEndDate)}</dd>
+                    </div>
+                    <div>
+                      <dt className="inline font-mono uppercase tracking-[0.12em] text-neutral-500">Receipts </dt>
+                      <dd className="inline font-mono text-neutral-950">{formatMoney(filing.totalReceipts) ?? "Not reported"}</dd>
+                    </div>
+                    <div>
+                      <dt className="inline font-mono uppercase tracking-[0.12em] text-neutral-500">Spent </dt>
+                      <dd className="inline font-mono text-neutral-950">{formatMoney(filing.totalDisbursements) ?? "Not reported"}</dd>
+                    </div>
+                    <div>
+                      <dt className="inline font-mono uppercase tracking-[0.12em] text-neutral-500">Source </dt>
+                      <dd className="inline">
+                        {filing.sourceUrl ? (
+                          <a className="font-medium underline underline-offset-4" href={filing.sourceUrl} rel="noreferrer" target="_blank">
+                            FEC filing
+                          </a>
+                        ) : (
+                          "Source not stored"
+                        )}
+                      </dd>
+                    </div>
+                  </dl>
+                </td>
+                <td className="hidden px-4 py-3 text-neutral-700 md:table-cell">
+                  <span className="block">{filingPeriod(filing.coverageStartDate, filing.coverageEndDate)}</span>
+                  <span className="font-mono text-[11px] uppercase tracking-[0.12em] text-neutral-500">
+                    Received {formatDate(filing.receiptDate)}
+                  </span>
+                </td>
+                <td className="hidden px-4 py-3 text-right font-mono md:table-cell">{formatMoney(filing.totalReceipts) ?? "Not reported"}</td>
+                <td className="hidden px-4 py-3 text-right font-mono md:table-cell">{formatMoney(filing.totalDisbursements) ?? "Not reported"}</td>
+                <td className="hidden px-4 py-3 text-right font-mono md:table-cell">{formatMoney(filing.cashOnHand) ?? "Not reported"}</td>
+                <td className="hidden px-4 py-3 md:table-cell">
+                  <div className="flex flex-col gap-1">
+                    {filing.sourceUrl ? (
+                      <a className="font-medium underline underline-offset-4" href={filing.sourceUrl} rel="noreferrer" target="_blank">
+                        FEC filing
+                      </a>
+                    ) : (
+                      <span className="text-neutral-600">Source not stored</span>
+                    )}
+                    <span className="font-mono text-[11px] uppercase tracking-[0.12em] text-neutral-500">
+                      {filing.sourceId}
+                    </span>
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
   );
 }
 
@@ -383,6 +501,46 @@ function partyLabel(party?: string | null) {
   if (party === "DEM" || party === "D") return "Democratic";
   if (!party || party === "NNE") return "Other/unknown";
   return party;
+}
+
+function reportLabel(reportType?: string | null) {
+  const labels: Record<string, string> = {
+    Q1: "April quarterly",
+    Q1S: "April quarterly",
+    Q2: "July quarterly",
+    Q2S: "July quarterly",
+    Q3: "October quarterly",
+    Q3S: "October quarterly",
+    YE: "Year-end",
+    YES: "Year-end",
+    "12P": "Pre-primary",
+    "12G": "Pre-general",
+    "30G": "Post-general",
+  };
+  if (!reportType) return "Report";
+  return labels[reportType] ?? `${reportType} report`;
+}
+
+function filingPeriod(start?: string | null, end?: string | null) {
+  if (!start && !end) return "Period not reported";
+  if (start && end) return `${formatDate(start)} to ${formatDate(end)}`;
+  return formatDate(start ?? end);
+}
+
+function fundingMix(individualPct?: number | null, pacPct?: number | null) {
+  const parts = [
+    individualPct === null || individualPct === undefined ? null : `${formatPct(individualPct)} individual`,
+    pacPct === null || pacPct === undefined ? null : `${formatPct(pacPct)} PAC`,
+  ].filter(Boolean);
+  return parts.length ? parts.join(" / ") : "Not broken out by FEC totals";
+}
+
+function formatPct(value: number) {
+  const normalized = value > 1 ? value / 100 : value;
+  return new Intl.NumberFormat("en-US", {
+    maximumFractionDigits: 1,
+    style: "percent",
+  }).format(normalized);
 }
 
 function profileSourceRows(candidate: NonNullable<Awaited<ReturnType<typeof getCandidate>>>) {

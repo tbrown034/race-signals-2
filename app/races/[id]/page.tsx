@@ -15,7 +15,7 @@ import {
   getRaceStats,
   getSignalsForEntity,
 } from "@/src/lib/db/repository";
-import { formatCount, formatDateTime, formatMoney } from "@/src/lib/format";
+import { formatCount, formatDate, formatDateTime, formatMoney } from "@/src/lib/format";
 import type { Metadata } from "next";
 
 export const revalidate = 21600;
@@ -54,6 +54,7 @@ export default async function RacePage({
   const totalReceipts = candidates.reduce((sum, candidate) => sum + (candidate.totalReceiptsCycle ?? 0), 0);
   const candidatesWithMoney = candidates.filter((candidate) => (candidate.totalReceiptsCycle ?? 0) > 0).length;
   const incumbentCount = candidates.filter((candidate) => isIncumbent(candidate.incumbentChallengeStatus)).length;
+  const latestSignalDate = signals.map((signal) => signal.signalDate).sort().at(-1) ?? null;
 
   return (
     <PageShell>
@@ -106,6 +107,7 @@ export default async function RacePage({
             `${candidates.length} FEC candidates matched to this race; ${candidatesWithMoney} currently show cycle receipts in the FEC totals endpoint.`,
             `Known candidate receipts in this slice total ${formatMoney(totalReceipts) ?? "$0"}. Use this as FEC-filed activity, not a race forecast.`,
             `Schedule E independent expenditures currently total ${formatMoney(stats.totalIndependentExpenditures) ?? "$0"} in this race slice.`,
+            `Latest stored signal: ${latestSignalDate ? formatDate(latestSignalDate) : "none"}; latest stored Schedule E record: ${stats.latestIndependentExpenditureDate ? formatDate(stats.latestIndependentExpenditureDate) : "none"}.`,
             `${formatCount(signals.length, "related signal")}: ${formatCount(signalCounts.filings, "filing")}, ${formatCount(signalCounts.committees, "committee record")}, ${formatCount(signalCounts.outsideSpending, "outside-spending alert")}, ${formatCount(signalCounts.review, "review flag")}.`,
             incumbentCount
               ? `${incumbentCount} incumbent candidate${incumbentCount === 1 ? " is" : "s are"} present; compare committee and filing activity against challenger organization before treating paperwork as a launch signal.`
@@ -138,6 +140,7 @@ export default async function RacePage({
                     <th className="hidden px-4 py-3 font-medium md:table-cell" scope="col">FEC record</th>
                     <th className="hidden px-4 py-3 text-right font-medium md:table-cell" scope="col">Receipts</th>
                     <th className="hidden px-4 py-3 text-right font-medium md:table-cell" scope="col">Cash</th>
+                    <th className="hidden px-4 py-3 font-medium md:table-cell" scope="col">Source records</th>
                     <th className="hidden px-4 py-3 font-medium md:table-cell" scope="col">Totals freshness</th>
                   </tr>
                 </thead>
@@ -181,6 +184,10 @@ export default async function RacePage({
                                 <dd className="inline font-mono text-neutral-950">{candidateMoney(candidate.cashOnHandLatest, candidate.totalsFetchedAt)}</dd>
                               </div>
                               <div>
+                                <dt className="inline font-mono uppercase tracking-[0.12em] text-neutral-500">Spent </dt>
+                                <dd className="inline font-mono text-neutral-950">{candidateMoney(candidate.totalDisbursementsCycle, candidate.totalsFetchedAt)}</dd>
+                              </div>
+                              <div>
                                 <dt className="inline font-mono uppercase tracking-[0.12em] text-neutral-500">Source </dt>
                                 <dd className="inline">
                                   {candidate.sourceUrl ? (
@@ -191,6 +198,10 @@ export default async function RacePage({
                                     "Source not stored"
                                   )}
                                 </dd>
+                              </div>
+                              <div>
+                                <dt className="inline font-mono uppercase tracking-[0.12em] text-neutral-500">Records </dt>
+                                <dd className="inline">{sourceRecordSummary(candidate)}</dd>
                               </div>
                               <div>
                                 <dt className="inline font-mono uppercase tracking-[0.12em] text-neutral-500">Fetched </dt>
@@ -231,7 +242,18 @@ export default async function RacePage({
                         {candidateMoney(candidate.totalReceiptsCycle, candidate.totalsFetchedAt)}
                       </td>
                       <td className="hidden px-4 py-3 text-right font-mono md:table-cell">
-                        {candidateMoney(candidate.cashOnHandLatest, candidate.totalsFetchedAt)}
+                        <span className="block">{candidateMoney(candidate.cashOnHandLatest, candidate.totalsFetchedAt)}</span>
+                        <span className="block text-[11px] text-neutral-500">
+                          spent {candidateMoney(candidate.totalDisbursementsCycle, candidate.totalsFetchedAt)}
+                        </span>
+                      </td>
+                      <td className="hidden px-4 py-3 text-xs leading-5 text-neutral-600 md:table-cell">
+                        <span className="block">{sourceRecordSummary(candidate)}</span>
+                        {isAggregateOnly(candidate) ? (
+                          <span className="mt-1 block font-mono text-[11px] uppercase tracking-[0.12em] text-neutral-700">
+                            Totals only
+                          </span>
+                        ) : null}
                       </td>
                       <td className="hidden px-4 py-3 text-xs text-neutral-600 md:table-cell">
                         <span className="block">Fetched {candidateTotalsFetched(candidate.totalsFetchedAt)}</span>
@@ -275,6 +297,35 @@ function partyLabel(party?: string | null) {
   if (party === "DEM" || party === "D") return "Democratic";
   if (!party || party === "NNE") return "Other/unknown";
   return party;
+}
+
+function sourceRecordSummary(candidate: {
+  committeeCount?: number;
+  filingCount?: number;
+  signalCount?: number;
+  totalReceiptsCycle?: number | null;
+}) {
+  const committeeCount = candidate.committeeCount ?? 0;
+  const filingCount = candidate.filingCount ?? 0;
+  const signalCount = candidate.signalCount ?? 0;
+  if (committeeCount === 0 && filingCount === 0 && signalCount === 0 && (candidate.totalReceiptsCycle ?? 0) > 0) {
+    return "FEC totals only; no matched committee/report signal yet.";
+  }
+  return `${formatCount(committeeCount, "committee")}, ${formatCount(filingCount, "filing")}, ${formatCount(signalCount, "signal")}`;
+}
+
+function isAggregateOnly(candidate: {
+  committeeCount?: number;
+  filingCount?: number;
+  signalCount?: number;
+  totalReceiptsCycle?: number | null;
+}) {
+  return (
+    (candidate.totalReceiptsCycle ?? 0) > 0 &&
+    (candidate.committeeCount ?? 0) === 0 &&
+    (candidate.filingCount ?? 0) === 0 &&
+    (candidate.signalCount ?? 0) === 0
+  );
 }
 
 function candidateMoney(value?: number | null, totalsFetchedAt?: string | null) {

@@ -36,6 +36,9 @@ export type Candidate = {
   electionsCheckedAt?: string | null;
   raceId?: string | null;
   sourceUrl?: string | null;
+  committeeCount?: number;
+  filingCount?: number;
+  signalCount?: number;
 };
 
 export type Election = {
@@ -83,6 +86,10 @@ export type Filing = {
   cashOnHand?: number | null;
   sourceUrl?: string | null;
   raw: unknown;
+};
+
+export type CandidateFiling = Filing & {
+  committeeName?: string | null;
 };
 
 export type Transaction = {
@@ -151,6 +158,7 @@ export type RaceStats = {
   totalIndependentExpenditures: number;
   candidateCount: number;
   incumbentCount: number;
+  latestIndependentExpenditureDate?: string | null;
 };
 
 export type StateRaceBoardRow = {

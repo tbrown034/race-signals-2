@@ -114,8 +114,8 @@ export default async function SpendingPage({
                             {signal.headline}
                           </Link>
                         </td>
-                        <td className="px-4 py-3">{signal.committeeName ?? "Unknown spender"}</td>
-                        <td className="px-4 py-3">{signal.candidateName ?? "Unknown candidate"}</td>
+                        <td className="px-4 py-3">{entityLabel(signal.committeeName, signal.committeeId, "Spender not resolved")}</td>
+                        <td className="px-4 py-3">{entityLabel(signal.candidateName, signal.candidateId, "Candidate not resolved")}</td>
                         <td className="px-4 py-3">{supportOpposeLabel(signal.metadata?.supportOpposeIndicator)}</td>
                         <td className="px-4 py-3">
                           {signal.raceId ? (
@@ -186,6 +186,10 @@ function supportOpposeLabel(value: unknown) {
   if (value === "S") return "Support";
   if (value === "O") return "Oppose";
   return "Not coded by FEC";
+}
+
+function entityLabel(name: string | null | undefined, id: string | null | undefined, fallback: string) {
+  return name ?? id ?? fallback;
 }
 
 function sourceRecordLabel(value: unknown) {

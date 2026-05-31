@@ -58,7 +58,7 @@ export default async function SpendersPage() {
                             {spender.committeeName}
                           </Link>
                         ) : (
-                          <span className="font-medium">{spender.committeeName}</span>
+                          <span className="font-medium">{spender.committeeName ?? spender.fecCommitteeId ?? "Spender not resolved"}</span>
                         )}
                         <p className="mt-1 font-mono text-[11px] uppercase tracking-[0.12em] text-neutral-500">
                           {spender.fecCommitteeId ?? "No FEC committee ID"}
@@ -106,7 +106,7 @@ export default async function SpendersPage() {
                             FEC committee
                           </a>
                         ) : (
-                          <span className="text-neutral-600">Missing source</span>
+                          <span className="text-neutral-600">Source not stored</span>
                         )}
                       </td>
                     </tr>

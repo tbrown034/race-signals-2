@@ -114,9 +114,9 @@ export const demoSignals: Signal[] = [
     id: "demo-signal-001",
     dedupeKey: "demo:committee:C00890501",
     signalType: "new_committee",
-    headline: "New candidate committee formed in IN-05.",
+    headline: "Mara Ellison has a principal campaign committee on file in IN-05.",
     whyItMatters:
-      "A new principal campaign committee is often the first durable paperwork signal that a candidate is moving from exploration to execution.",
+      "For an incumbent, committee activity is usually campaign infrastructure or cycle paperwork, not proof of a first-time launch.",
     candidateId: "cand-H6IN05101",
     candidateName: "Mara Ellison",
     candidateParty: "DEM",
@@ -132,6 +132,12 @@ export const demoSignals: Signal[] = [
     confidence: "high",
     status: "demo",
     dataFreshness: freshness,
+    metadata: {
+      sourceId: "C00890501",
+      sourceKind: "committee",
+      committeeType: "H",
+      designation: "P",
+    },
   },
   {
     id: "demo-signal-002",
@@ -157,6 +163,12 @@ export const demoSignals: Signal[] = [
     confidence: "high",
     status: "demo",
     dataFreshness: freshness,
+    metadata: {
+      supportOpposeIndicator: "O",
+      purpose: "Digital media",
+      sourceId: "demo-ie-001",
+      sourceKind: "schedule_e",
+    },
   },
 ];
 

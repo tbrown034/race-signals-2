@@ -6,9 +6,9 @@ on:
   workflow_dispatch:
     inputs:
       state:
-        description: "Two-letter state code. Clear only for an intentional broader national sample."
+        description: "Optional two-letter state code to narrow this run. Leave empty for a national sample."
         required: false
-        default: "IN"
+        default: ""
       offices:
         description: "FEC offices to ingest: H, S, or H,S."
         required: false
@@ -36,8 +36,7 @@ jobs:
       DATABASE_URL: ${{ secrets.DATABASE_URL }}
       FEC_API_KEY: ${{ secrets.FEC_API_KEY }}
       RACE_SIGNALS_OFFICES: H,S
-      RACE_SIGNALS_STATE: IN
-      FEC_MAX_CANDIDATES: "25"
+      FEC_MAX_CANDIDATES: "40"
       FEC_MAX_CANDIDATE_PAGES: "2"
       FEC_REQUEST_DELAY_MS: "4000"
     steps:

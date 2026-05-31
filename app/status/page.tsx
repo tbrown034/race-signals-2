@@ -229,7 +229,7 @@ export default async function StatusPage() {
                     <th className="hidden px-4 py-3 font-medium md:table-cell" scope="col">Race</th>
                     <th className="hidden px-4 py-3 text-right font-medium md:table-cell" scope="col">Cycle receipts</th>
                     <th className="hidden px-4 py-3 font-medium md:table-cell" scope="col">FEC record</th>
-                    <th className="hidden px-4 py-3 font-medium md:table-cell" scope="col">FEC totals load date</th>
+                    <th className="hidden px-4 py-3 font-medium md:table-cell" scope="col">Totals freshness</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-neutral-200">
@@ -273,8 +273,12 @@ export default async function StatusPage() {
                             </dd>
                           </div>
                           <div>
-                            <dt className="inline font-mono uppercase tracking-[0.12em] text-neutral-500">Totals </dt>
-                            <dd className="inline">{candidate.totalsUpdatedAt ? formatDateTime(candidate.totalsUpdatedAt) : "FEC totals not loaded"}</dd>
+                            <dt className="inline font-mono uppercase tracking-[0.12em] text-neutral-500">Fetched </dt>
+                            <dd className="inline">{candidate.totalsFetchedAt ? formatDateTime(candidate.totalsFetchedAt) : "Not recorded"}</dd>
+                          </div>
+                          <div>
+                            <dt className="inline font-mono uppercase tracking-[0.12em] text-neutral-500">FEC load </dt>
+                            <dd className="inline">{candidate.totalsUpdatedAt ? formatDateTime(candidate.totalsUpdatedAt) : "Not reported by FEC"}</dd>
                           </div>
                         </dl>
                       </td>
@@ -308,7 +312,8 @@ export default async function StatusPage() {
                         </div>
                       </td>
                       <td className="hidden px-4 py-3 text-xs text-neutral-600 md:table-cell">
-                        {candidate.totalsUpdatedAt ? formatDateTime(candidate.totalsUpdatedAt) : "FEC totals not loaded"}
+                        <span className="block">Fetched {candidate.totalsFetchedAt ? formatDateTime(candidate.totalsFetchedAt) : "Not recorded"}</span>
+                        <span className="block">FEC load {candidate.totalsUpdatedAt ? formatDateTime(candidate.totalsUpdatedAt) : "Not reported by FEC"}</span>
                       </td>
                     </tr>
                   ))}

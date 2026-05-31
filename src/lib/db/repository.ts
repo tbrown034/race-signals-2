@@ -1125,6 +1125,7 @@ export async function getStatus() {
     race_name: string | null;
     total_receipts_cycle: string | null;
     totals_updated_at: string | Date | null;
+    totals_fetched_at: string | Date | null;
     source_url: string | null;
   }> = [];
   try {
@@ -1232,6 +1233,7 @@ export async function getStatus() {
     race_name: string | null;
     total_receipts_cycle: string | null;
     totals_updated_at: string | Date | null;
+    totals_fetched_at: string | Date | null;
     source_url: string | null;
   }>(`
     select
@@ -1242,6 +1244,7 @@ export async function getStatus() {
       r.name as race_name,
       c.total_receipts_cycle::text as total_receipts_cycle,
       c.totals_updated_at,
+      c.totals_fetched_at,
       c.source_url
     from candidates c
     left join races r on r.id = c.race_id
@@ -1301,6 +1304,7 @@ export async function getStatus() {
       raceName: candidate.race_name,
       totalReceiptsCycle: candidate.total_receipts_cycle === null ? null : Number(candidate.total_receipts_cycle),
       totalsUpdatedAt: candidate.totals_updated_at ? toIsoString(candidate.totals_updated_at) : null,
+      totalsFetchedAt: candidate.totals_fetched_at ? toIsoString(candidate.totals_fetched_at) : null,
       sourceUrl: candidate.source_url,
     })),
     electionCoverage: {

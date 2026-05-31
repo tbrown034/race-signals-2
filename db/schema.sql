@@ -261,9 +261,12 @@ create index if not exists transactions_committee_date_idx on transactions(commi
 create index if not exists transactions_future_dedupe_idx on transactions(committee_id, contributor_name_normalized, transaction_date, amount);
 create index if not exists independent_expenditures_race_date_idx on independent_expenditures(race_id, expenditure_date desc);
 create index if not exists independent_expenditures_cycle_date_idx on independent_expenditures(cycle, expenditure_date desc);
+create index if not exists independent_expenditures_spender_date_idx on independent_expenditures(spender_committee_id, expenditure_date desc);
 create index if not exists signals_date_idx on signals(signal_date desc, created_at desc);
 create index if not exists signals_type_idx on signals(signal_type);
 create index if not exists signals_race_idx on signals(race_id);
+create index if not exists signals_candidate_date_idx on signals(candidate_id, signal_date desc, created_at desc);
+create index if not exists signals_committee_date_idx on signals(committee_id, signal_date desc, created_at desc);
 create index if not exists signals_status_idx on signals(status);
 create index if not exists race_ratings_race_idx on race_ratings(race_id);
 create index if not exists ingestion_runs_mode_idx on ingestion_runs(mode, started_at desc);

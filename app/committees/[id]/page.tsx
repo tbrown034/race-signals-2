@@ -14,6 +14,8 @@ import { committeeContext, committeeDesignationLabel, committeeTypeLabel } from 
 import { formatCount } from "@/src/lib/format";
 import type { Metadata } from "next";
 
+export const revalidate = 21600;
+
 export async function generateMetadata({
   params,
 }: {

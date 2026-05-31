@@ -4,7 +4,7 @@ import { getSitemapEntities } from "@/src/lib/db/repository";
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://race-signals.vercel.app";
   const entities = await getSitemapEntities();
-  const staticRoutes = ["", "/spending", "/spenders", "/status", "/methodology", "/docs"];
+  const staticRoutes = ["", "/spending", "/spenders", "/methodology", "/docs"];
 
   return [
     ...staticRoutes.map((path) => ({ url: `${baseUrl}${path}` })),

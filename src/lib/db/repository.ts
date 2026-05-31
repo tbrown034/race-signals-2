@@ -319,7 +319,7 @@ export async function getSignals(filters: SignalFilters = {}) {
       if (filters.office && !signal.raceId?.endsWith(`-${filters.office}`)) return false;
       if (filters.type && signal.signalType !== filters.type) return false;
       if (filters.status && signal.status !== filters.status) return false;
-      if (filters.since && signal.dataFreshness <= resolveSince(filters.since)) return false;
+      if (filters.since && signal.signalDate <= resolveSince(filters.since)) return false;
       if (q && !demoSignalSearchText(signal).includes(q)) return false;
       return true;
     }).slice(0, filters.limit ?? 50);
@@ -349,7 +349,7 @@ export async function getSignals(filters: SignalFilters = {}) {
   }
   if (filters.since) {
     values.push(resolveSince(filters.since));
-    where.push(`s.created_at > $${values.length}`);
+    where.push(`s.signal_date > $${values.length}`);
   }
   if (filters.q) {
     where.push(signalSearchClause(values, filters.q));
@@ -507,21 +507,21 @@ export async function getSitemapEntities() {
       from races r
       join signals s on s.race_id = r.id
       order by r.id
-      limit 5000
+      limit 500
     `),
     sql<{ id: string }>(`
       select distinct c.id
       from candidates c
       join signals s on s.candidate_id = c.id
       order by c.id
-      limit 5000
+      limit 500
     `),
     sql<{ id: string }>(`
       select distinct cm.id
       from committees cm
       join signals s on s.committee_id = cm.id
       order by cm.id
-      limit 5000
+      limit 500
     `),
   ]);
   return {

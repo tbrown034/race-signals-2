@@ -4,10 +4,14 @@ import { signalFiltersFromUrl } from "@/src/lib/signals/filters";
 
 export async function GET(request: Request) {
   const url = new URL(request.url);
+  if (isOverlongQuery(url)) {
+    return Response.json(
+      { error: "Search query is too long. Shorten q to 200 characters or fewer before exporting." },
+      { status: 400, headers: exportHeaders() },
+    );
+  }
   const signals = await getSignals(signalFiltersFromUrl(url, EXPORT_LIMIT + 1));
-  const headers = {
-    "x-robots-tag": "noindex, nofollow",
-  };
+  const headers = exportHeaders();
 
   if (signals.length > EXPORT_LIMIT) {
     return Response.json(
@@ -24,4 +28,15 @@ export async function GET(request: Request) {
       "content-disposition": 'attachment; filename="race-signals.json"',
     },
   });
+}
+
+function exportHeaders() {
+  return {
+    "cache-control": "public, s-maxage=3600, stale-while-revalidate=86400",
+    "x-robots-tag": "noindex, nofollow",
+  };
+}
+
+function isOverlongQuery(url: URL) {
+  return (url.searchParams.get("q")?.length ?? 0) > 200;
 }

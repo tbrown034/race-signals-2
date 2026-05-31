@@ -10,6 +10,8 @@ export const metadata: Metadata = {
   description: "Race Signals data freshness, ingestion runs and validation issue rollups.",
 };
 
+export const revalidate = 21600;
+
 const countLabels: Record<string, string> = {
   races: "Race shells",
   candidates: "Candidates",
@@ -416,7 +418,7 @@ function ReporterActionPanel({
         </p>
         <p>{absenceRead}</p>
         <p>
-          Before publication, open the FEC source link and account for {validationIssueLabel(validationIssueCount)}.
+          Before publication, open the FEC source link and account for {retainedValidationIssueLabel(validationIssueCount)}.
         </p>
       </div>
     </section>
@@ -473,8 +475,8 @@ function PublishabilityPanel({
           <dd className="mt-1 font-medium">{formatDateTime(finishedAt)}</dd>
         </div>
         <div>
-          <dt className="font-mono text-[11px] uppercase tracking-[0.12em] text-neutral-500">Open caveats</dt>
-          <dd className="mt-1 font-medium">{validationIssueLabel(validationIssueCount)}</dd>
+          <dt className="font-mono text-[11px] uppercase tracking-[0.12em] text-neutral-500">Retained caveats</dt>
+          <dd className="mt-1 font-medium">{retainedValidationIssueLabel(validationIssueCount)}</dd>
         </div>
       </dl>
       {latestRun?.errors?.length ? (
@@ -488,8 +490,8 @@ function PublishabilityPanel({
   );
 }
 
-function validationIssueLabel(count: number) {
-  return `${count} validation ${count === 1 ? "issue" : "issues"}`;
+function retainedValidationIssueLabel(count: number) {
+  return `${count} retained validation ${count === 1 ? "issue" : "issues"}`;
 }
 
 function runErrorSummary(error: unknown) {

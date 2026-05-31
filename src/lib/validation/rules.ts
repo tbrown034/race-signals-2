@@ -80,7 +80,7 @@ export function validateFiling(filing: Filing): ValidationIssue[] {
       entityType: "filing",
       sourceId: null,
       severity: "error",
-      rule: "duplicate_source_record",
+      rule: "missing_source_id",
       message: "Filing has no stable source ID for deduping.",
       sourceUrl: filing.sourceUrl,
     });

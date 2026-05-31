@@ -84,7 +84,20 @@ export default async function CommitteePage({
           ["Treasurer", committee.treasurerName],
         ]}
       >
+        <nav
+          aria-label="Committee page sections"
+          className="border-b border-neutral-300 px-5 py-3 font-mono text-[11px] uppercase tracking-[0.12em] text-neutral-600"
+        >
+          <div className="flex flex-wrap gap-x-4 gap-y-2">
+            <a className="underline-offset-4 hover:underline" href="#reporter-read">Reporter read</a>
+            {independentExpenditures.length ? (
+              <a className="underline-offset-4 hover:underline" href="#schedule-e-records">Schedule E</a>
+            ) : null}
+            <a className="underline-offset-4 hover:underline" href="#related-signals">Signals</a>
+          </div>
+        </nav>
         <ReporterRead
+          id="reporter-read"
           notes={[
             linkedCandidate
               ? `Directly linked to ${linkedCandidate.name}; party context comes from that candidate record.`

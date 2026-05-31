@@ -65,20 +65,22 @@ async function main() {
       limit 10
     `));
 
-    checks.push(await countCheck(pool, "Signals before race cycle window", "fail", `
+    checks.push(await countCheck(pool, "Signals outside race cycle window", "fail", `
       select s.dedupe_key, s.signal_type, s.signal_date, r.id as race_id, r.cycle
       from signals s
       join races r on r.id = s.race_id
       where s.signal_date < make_date(r.cycle - 1, 1, 1)
+         or s.signal_date > make_date(r.cycle, 12, 31)
       order by s.signal_date asc
       limit 10
     `));
 
-    checks.push(await countCheck(pool, "Schedule E before race cycle window", "fail", `
+    checks.push(await countCheck(pool, "Schedule E outside race cycle window", "fail", `
       select ie.source_id, ie.expenditure_date, ie.race_id, r.cycle, ie.amount
       from independent_expenditures ie
       join races r on r.id = ie.race_id
       where ie.expenditure_date < make_date(r.cycle - 1, 1, 1)
+         or ie.expenditure_date > make_date(r.cycle, 12, 31)
       order by ie.expenditure_date asc
       limit 10
     `));
@@ -106,12 +108,13 @@ async function main() {
       limit 10
     `));
 
-    checks.push(await countCheck(pool, "Filings before race cycle window", "fail", `
+    checks.push(await countCheck(pool, "Filings outside race cycle window", "fail", `
       select f.source_id, f.receipt_date, cm.race_id, r.cycle
       from filings f
       join committees cm on cm.id = f.committee_id
       join races r on r.id = cm.race_id
       where f.receipt_date < make_date(r.cycle - 1, 1, 1)
+         or f.receipt_date > make_date(r.cycle, 12, 31)
       order by f.receipt_date asc
       limit 10
     `));

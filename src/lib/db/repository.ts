@@ -83,6 +83,8 @@ type CandidateRow = {
 };
 
 const CURRENT_CYCLE = 2026;
+const currentCycleSignalPredicate =
+  "(r.cycle is null or (s.signal_date >= make_date(r.cycle - 1, 1, 1) and s.signal_date <= make_date(r.cycle, 12, 31)))";
 
 function mapSignal(row: SignalRow): Signal {
   return {
@@ -326,7 +328,7 @@ export async function getSignals(filters: SignalFilters = {}) {
   }
 
   const values: unknown[] = [];
-  const where: string[] = ["(r.cycle is null or s.signal_date >= make_date(r.cycle - 1, 1, 1))"];
+  const where: string[] = [currentCycleSignalPredicate];
   if (filters.raceId) {
     values.push(filters.raceId);
     where.push(`s.race_id = $${values.length}`);
@@ -399,7 +401,7 @@ export async function getSpendingSignals(
   const values: unknown[] = [];
   const where: string[] = [
     "s.signal_type = 'large_independent_expenditure'",
-    "(r.cycle is null or s.signal_date >= make_date(r.cycle - 1, 1, 1))",
+    currentCycleSignalPredicate,
   ];
   if (scopedFilters.raceId) {
     values.push(scopedFilters.raceId);
@@ -419,7 +421,7 @@ export async function getSpendingSignals(
   }
   if (scopedFilters.since) {
     values.push(resolveSince(scopedFilters.since));
-    where.push(`s.created_at > $${values.length}`);
+    where.push(`s.signal_date > $${values.length}`);
   }
   if (scopedFilters.q) {
     where.push(signalSearchClause(values, scopedFilters.q));
@@ -470,7 +472,7 @@ export async function getSignalStateCounts(signalType?: string): Promise<Record<
   }
 
   const values: unknown[] = [];
-  const where = ["r.state is not null", "(r.cycle is null or s.signal_date >= make_date(r.cycle - 1, 1, 1))"];
+  const where = ["r.state is not null", currentCycleSignalPredicate];
   if (signalType) {
     values.push(signalType);
     where.push(`s.signal_type = $${values.length}`);
@@ -932,7 +934,7 @@ export async function getSignalsForEntity(entity: "candidate" | "committee" | "r
       left join committees cm on cm.id = s.committee_id
       left join races r on r.id = s.race_id
       where ${column} = $1
-        and (r.cycle is null or s.signal_date >= make_date(r.cycle - 1, 1, 1))
+        and ${currentCycleSignalPredicate}
       order by s.signal_date desc, s.created_at desc
       limit 100
     `,

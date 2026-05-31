@@ -255,7 +255,7 @@ export function fecCommitteeUrl(committeeId: string) {
 }
 
 export function fecFilingUrl(imageOrFile?: string | number | null) {
-  return imageOrFile ? `${FEC_WEB_BASE_URL}/filing/${imageOrFile}/` : `${FEC_WEB_BASE_URL}/filings/`;
+  return imageOrFile ? `${FEC_WEB_BASE_URL}/filing/${imageOrFile}/` : null;
 }
 
 export function fecIndependentExpendituresUrl(record: {

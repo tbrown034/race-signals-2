@@ -159,6 +159,8 @@ export type StateRaceBoardRow = {
   office: string;
   district?: string | null;
   candidateCount: number;
+  incumbentCount: number;
+  candidateReceiptsTotal: number;
   signalCount: number;
   latestSignalDate?: string | null;
   independentExpenditureTotal: number;

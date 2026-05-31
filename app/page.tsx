@@ -235,12 +235,30 @@ function StateRaceBoard({ rows, state }: { rows: StateRaceBoardRow[]; state: str
   return (
     <section className="border-b border-neutral-300" id="state-race-board">
       <div className="border-b border-neutral-300 px-5 py-4">
-        <h2 className="text-sm font-semibold uppercase tracking-[0.14em] text-neutral-600">
-          {state} race board
-        </h2>
-        <p className="mt-1 text-sm text-neutral-600">
-          Every 2026 House and Senate race shell for this state, including quiet races with no stored signals.
-        </p>
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <h2 className="text-sm font-semibold uppercase tracking-[0.14em] text-neutral-600">
+              {state} race board
+            </h2>
+            <p className="mt-1 text-sm text-neutral-600">
+              Every 2026 House and Senate race shell for this state, including quiet races with no stored signals.
+            </p>
+          </div>
+          <div className="flex flex-wrap gap-2 text-sm">
+            <a
+              className="border border-neutral-400 px-3 py-2 font-medium hover:border-neutral-900"
+              href={`/api/races/export.csv?state=${state}`}
+            >
+              Export CSV
+            </a>
+            <a
+              className="border border-neutral-400 px-3 py-2 font-medium hover:border-neutral-900"
+              href={`/api/races/export.json?state=${state}`}
+            >
+              Export JSON
+            </a>
+          </div>
+        </div>
       </div>
       <div className="overflow-x-auto">
         <table className="w-full min-w-0 text-left text-sm md:min-w-[760px]">
@@ -248,6 +266,8 @@ function StateRaceBoard({ rows, state }: { rows: StateRaceBoardRow[]; state: str
             <tr>
               <th className="px-4 py-3 font-medium" scope="col">Race</th>
               <th className="hidden px-4 py-3 text-right font-medium md:table-cell" scope="col">Candidates</th>
+              <th className="hidden px-4 py-3 text-right font-medium md:table-cell" scope="col">Inc.</th>
+              <th className="hidden px-4 py-3 text-right font-medium md:table-cell" scope="col">Raised</th>
               <th className="hidden px-4 py-3 text-right font-medium md:table-cell" scope="col">Signals</th>
               <th className="hidden px-4 py-3 text-right font-medium md:table-cell" scope="col">IE total</th>
               <th className="hidden px-4 py-3 font-medium md:table-cell" scope="col">Latest signal</th>
@@ -267,12 +287,28 @@ function StateRaceBoard({ rows, state }: { rows: StateRaceBoardRow[]; state: str
                         <dd className="inline">{race.candidateCount}</dd>
                       </div>
                       <div>
+                        <dt className="inline font-mono uppercase tracking-[0.12em] text-neutral-500">Incumbents </dt>
+                        <dd className="inline">{race.incumbentCount}</dd>
+                      </div>
+                      <div>
+                        <dt className="inline font-mono uppercase tracking-[0.12em] text-neutral-500">Raised </dt>
+                        <dd className="inline font-mono text-neutral-950">{formatMoney(race.candidateReceiptsTotal) ?? "$0"}</dd>
+                      </div>
+                      <div>
                         <dt className="inline font-mono uppercase tracking-[0.12em] text-neutral-500">Signals </dt>
                         <dd className="inline">{race.signalCount}</dd>
                       </div>
                       <div>
                         <dt className="inline font-mono uppercase tracking-[0.12em] text-neutral-500">IE total </dt>
-                        <dd className="inline font-mono text-neutral-950">{formatMoney(race.independentExpenditureTotal) ?? "$0"}</dd>
+                        <dd className="inline font-mono text-neutral-950">
+                          {race.independentExpenditureTotal > 0 ? (
+                            <Link className="underline underline-offset-4" href={`/spending?race=${race.raceId}`}>
+                              {formatMoney(race.independentExpenditureTotal) ?? "$0"}
+                            </Link>
+                          ) : (
+                            "$0"
+                          )}
+                        </dd>
                       </div>
                       <div>
                         <dt className="inline font-mono uppercase tracking-[0.12em] text-neutral-500">Latest </dt>
@@ -281,14 +317,24 @@ function StateRaceBoard({ rows, state }: { rows: StateRaceBoardRow[]; state: str
                     </dl>
                   </td>
                   <td className="hidden px-4 py-3 text-right font-mono md:table-cell">{race.candidateCount}</td>
+                  <td className="hidden px-4 py-3 text-right font-mono md:table-cell">{race.incumbentCount}</td>
+                  <td className="hidden px-4 py-3 text-right font-mono md:table-cell">{formatMoney(race.candidateReceiptsTotal) ?? "$0"}</td>
                   <td className="hidden px-4 py-3 text-right font-mono md:table-cell">{race.signalCount}</td>
-                  <td className="hidden px-4 py-3 text-right font-mono md:table-cell">{formatMoney(race.independentExpenditureTotal) ?? "$0"}</td>
+                  <td className="hidden px-4 py-3 text-right font-mono md:table-cell">
+                    {race.independentExpenditureTotal > 0 ? (
+                      <Link className="underline underline-offset-4" href={`/spending?race=${race.raceId}`}>
+                        {formatMoney(race.independentExpenditureTotal) ?? "$0"}
+                      </Link>
+                    ) : (
+                      "$0"
+                    )}
+                  </td>
                   <td className="hidden px-4 py-3 md:table-cell">{race.latestSignalDate ? formatDate(race.latestSignalDate) : "No stored signal"}</td>
                 </tr>
               ))
             ) : (
               <tr>
-                <td className="px-4 py-3 text-neutral-600" colSpan={5}>
+                <td className="px-4 py-3 text-neutral-600" colSpan={7}>
                   No configured race shells are available for {state}.
                 </td>
               </tr>

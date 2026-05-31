@@ -32,6 +32,7 @@ export type SignalExportRow = {
   signal_permalink: string;
   data_freshness: string;
   dedupe_key: string;
+  metadata_json: string;
   metadata: Record<string, unknown>;
 };
 
@@ -83,6 +84,7 @@ export function signalToExportRow(
     signal_permalink: `${baseUrl}/#${signalAnchorId(signal.dedupeKey)}`,
     data_freshness: signal.dataFreshness,
     dedupe_key: signal.dedupeKey,
+    metadata_json: JSON.stringify(signal.metadata ?? {}),
     metadata: signal.metadata ?? {},
   };
 }
@@ -110,6 +112,7 @@ export function rowsToCsv(rows: SignalExportRow[]) {
     "signal_permalink",
     "data_freshness",
     "dedupe_key",
+    "metadata_json",
     "exported_at",
     "filters",
     "latest_run_id",

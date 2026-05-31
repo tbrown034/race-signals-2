@@ -96,7 +96,7 @@ export function generateSignals(input: SignalInput): Signal[] {
 
   const filingVersionInfo = classifyFilingVersions(input.filings);
   for (const filing of input.filings) {
-    if (!filing.receiptDate || !filing.sourceUrl) continue;
+    if (!filing.sourceId || !filing.receiptDate || !filing.sourceUrl) continue;
     const committee = filing.committeeId ? committees.get(filing.committeeId) : undefined;
     const race = committee?.raceId ? races.get(committee.raceId) : undefined;
     if (!committee || !race) continue;
@@ -137,6 +137,7 @@ export function generateSignals(input: SignalInput): Signal[] {
 
   for (const expenditure of input.independentExpenditures) {
     if (!expenditure.expenditureDate || !expenditure.sourceUrl || expenditure.amount < LARGE_IE_THRESHOLD) continue;
+    if (expenditure.supportOpposeIndicator !== "S" && expenditure.supportOpposeIndicator !== "O") continue;
     const committee = expenditure.spenderCommitteeId
       ? committees.get(expenditure.spenderCommitteeId)
       : undefined;

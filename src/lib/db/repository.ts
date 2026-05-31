@@ -520,6 +520,10 @@ export async function getStateRaceBoard(state: string): Promise<StateRaceBoardRo
           office: race.office,
           district: race.district,
           candidateCount: demoCandidates.filter((candidate) => candidate.raceId === race.id).length,
+          incumbentCount: demoCandidates.filter((candidate) => candidate.raceId === race.id && isIncumbent(candidate.incumbentChallengeStatus)).length,
+          candidateReceiptsTotal: demoCandidates
+            .filter((candidate) => candidate.raceId === race.id)
+            .reduce((sum, candidate) => sum + (candidate.totalReceiptsCycle ?? 0), 0),
           signalCount: raceSignals.length,
           latestSignalDate: raceSignals.map((signal) => signal.signalDate).sort().at(-1) ?? null,
           independentExpenditureTotal: expenditures.reduce((sum, expenditure) => sum + expenditure.amount, 0),
@@ -533,6 +537,8 @@ export async function getStateRaceBoard(state: string): Promise<StateRaceBoardRo
     office: string;
     district: string | null;
     candidate_count: string;
+    incumbent_count: string;
+    candidate_receipts_total: string;
     signal_count: string;
     latest_signal_date: string | Date | null;
     independent_expenditure_total: string;
@@ -548,6 +554,17 @@ export async function getStateRaceBoard(state: string): Promise<StateRaceBoardRo
           from candidates c
           where c.race_id = r.id
         ) as candidate_count,
+        (
+          select count(*)::text
+          from candidates c
+          where c.race_id = r.id
+            and c.incumbent_challenge_status in ('I', 'Incumbent')
+        ) as incumbent_count,
+        (
+          select coalesce(sum(c.total_receipts_cycle), 0)::text
+          from candidates c
+          where c.race_id = r.id
+        ) as candidate_receipts_total,
         (
           select count(*)::text
           from signals s
@@ -580,6 +597,8 @@ export async function getStateRaceBoard(state: string): Promise<StateRaceBoardRo
     office: row.office,
     district: row.district,
     candidateCount: Number(row.candidate_count),
+    incumbentCount: Number(row.incumbent_count),
+    candidateReceiptsTotal: Number(row.candidate_receipts_total),
     signalCount: Number(row.signal_count),
     latestSignalDate: row.latest_signal_date ? toDateString(row.latest_signal_date) : null,
     independentExpenditureTotal: Number(row.independent_expenditure_total),

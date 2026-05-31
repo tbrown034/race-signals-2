@@ -679,6 +679,13 @@ export async function getStateRaceBoard(state: string): Promise<StateRaceBoardRo
           candidateReceiptsTotal: demoCandidates
             .filter((candidate) => candidate.raceId === race.id)
             .reduce((sum, candidate) => sum + (candidate.totalReceiptsCycle ?? 0), 0),
+          candidateFecIds: demoCandidates
+            .filter((candidate) => candidate.raceId === race.id)
+            .map((candidate) => candidate.fecCandidateId),
+          candidateSourceUrls: demoCandidates
+            .filter((candidate) => candidate.raceId === race.id)
+            .map((candidate) => candidate.sourceUrl)
+            .filter((value): value is string => Boolean(value)),
           candidateTotalsFetchedAtLatest: demoCandidates
             .filter((candidate) => candidate.raceId === race.id)
             .map((candidate) => candidate.totalsFetchedAt)
@@ -708,6 +715,8 @@ export async function getStateRaceBoard(state: string): Promise<StateRaceBoardRo
     candidate_count: string;
     incumbent_count: string;
     candidate_receipts_total: string;
+    candidate_fec_ids: string[] | null;
+    candidate_source_urls: string[] | null;
     candidate_totals_fetched_at_latest: string | Date | null;
     candidate_totals_fetched_at_oldest: string | Date | null;
     signal_count: string;
@@ -738,6 +747,16 @@ export async function getStateRaceBoard(state: string): Promise<StateRaceBoardRo
           from candidates c
           where c.race_id = r.id
         ) as candidate_receipts_total,
+        (
+          select array_remove(array_agg(c.fec_candidate_id order by c.total_receipts_cycle desc nulls last, c.name), null)
+          from candidates c
+          where c.race_id = r.id
+        ) as candidate_fec_ids,
+        (
+          select array_remove(array_agg(c.source_url order by c.total_receipts_cycle desc nulls last, c.name), null)
+          from candidates c
+          where c.race_id = r.id
+        ) as candidate_source_urls,
         (
           select max(c.totals_fetched_at)
           from candidates c
@@ -799,6 +818,8 @@ export async function getStateRaceBoard(state: string): Promise<StateRaceBoardRo
     candidateCount: Number(row.candidate_count),
     incumbentCount: Number(row.incumbent_count),
     candidateReceiptsTotal: Number(row.candidate_receipts_total),
+    candidateFecIds: row.candidate_fec_ids ?? [],
+    candidateSourceUrls: row.candidate_source_urls ?? [],
     candidateTotalsFetchedAtLatest: row.candidate_totals_fetched_at_latest ? toIsoString(row.candidate_totals_fetched_at_latest) : null,
     candidateTotalsFetchedAtOldest: row.candidate_totals_fetched_at_oldest ? toIsoString(row.candidate_totals_fetched_at_oldest) : null,
     signalCount: Number(row.signal_count),

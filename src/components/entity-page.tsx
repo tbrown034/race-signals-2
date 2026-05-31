@@ -190,9 +190,15 @@ export function EntityPage({
                             <dt className="inline font-mono uppercase tracking-[0.12em] text-neutral-500">Source </dt>
                             <dd className="inline">
                               {expenditure.sourceUrl ? (
-                                <a className="font-medium underline underline-offset-4" href={expenditure.sourceUrl} rel="noreferrer" target="_blank">
-                                  FEC Schedule E
-                                </a>
+                                <>
+                                  <a className="font-medium underline underline-offset-4" href={expenditure.sourceUrl} rel="noreferrer" target="_blank">
+                                    FEC Schedule E
+                                  </a>
+                                  <span> / </span>
+                                  <Link className="font-medium underline underline-offset-4" href={scheduleERecordHref(expenditure)}>
+                                    Local row
+                                  </Link>
+                                </>
                               ) : (
                                 "Source not stored"
                               )}
@@ -235,6 +241,9 @@ export function EntityPage({
                           <span className="font-mono text-[11px] uppercase tracking-[0.12em] text-neutral-500">
                             {expenditure.sourceId}
                           </span>
+                          <Link className="text-xs font-medium underline underline-offset-4" href={scheduleERecordHref(expenditure)}>
+                            Local evidence row
+                          </Link>
                         </div>
                       </td>
                       <td className="hidden px-4 py-3 text-right font-mono md:table-cell">
@@ -303,6 +312,15 @@ function MetaRows({ rows }: { rows: Array<[string, ReactNode | null | undefined]
       <dd className="mt-1 min-w-0 max-w-full break-words [overflow-wrap:anywhere]">{value ?? "Not available"}</dd>
     </div>
   ));
+}
+
+function scheduleERecordHref(expenditure: CommitteeIndependentExpenditure) {
+  const params = new URLSearchParams();
+  if (expenditure.candidateId) params.set("candidate", expenditure.candidateId);
+  if (expenditure.spenderCommitteeId) params.set("committee", expenditure.spenderCommitteeId);
+  if (expenditure.raceId) params.set("race", expenditure.raceId);
+  params.set("sourceId", expenditure.sourceId);
+  return `/records/schedule-e?${params.toString()}#schedule-e-${expenditure.sourceId.replace(/[^a-zA-Z0-9_-]/g, "-")}`;
 }
 
 function supportLabel(value?: string | null) {

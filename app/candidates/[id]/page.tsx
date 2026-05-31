@@ -629,9 +629,15 @@ function CandidateOutsideSpendingTable({
                       <dt className="inline font-mono uppercase tracking-[0.12em] text-neutral-500">Source </dt>
                       <dd className="inline">
                         {expenditure.sourceUrl ? (
-                          <a className="font-medium underline underline-offset-4" href={expenditure.sourceUrl} rel="noreferrer" target="_blank">
-                            FEC Schedule E
-                          </a>
+                          <>
+                            <a className="font-medium underline underline-offset-4" href={expenditure.sourceUrl} rel="noreferrer" target="_blank">
+                              FEC Schedule E
+                            </a>
+                            <span> / </span>
+                            <Link className="font-medium underline underline-offset-4" href={candidateScheduleERecordHref(candidateId, expenditure)}>
+                              Local row
+                            </Link>
+                          </>
                         ) : (
                           "Source not stored"
                         )}
@@ -653,6 +659,9 @@ function CandidateOutsideSpendingTable({
                     <span className="font-mono text-[11px] uppercase tracking-[0.12em] text-neutral-500">
                       {expenditure.sourceId}
                     </span>
+                    <Link className="text-xs font-medium underline underline-offset-4" href={candidateScheduleERecordHref(candidateId, expenditure)}>
+                      Local evidence row
+                    </Link>
                   </div>
                 </td>
                 <td className="hidden px-4 py-3 text-right font-mono font-semibold md:table-cell">
@@ -665,6 +674,18 @@ function CandidateOutsideSpendingTable({
       </div>
     </div>
   );
+}
+
+function candidateScheduleERecordHref(
+  candidateId: string,
+  expenditure: Awaited<ReturnType<typeof getCandidateIndependentExpenditures>>[number],
+) {
+  const params = new URLSearchParams();
+  params.set("candidate", candidateId);
+  if (expenditure.spenderCommitteeId) params.set("committee", expenditure.spenderCommitteeId);
+  if (expenditure.raceId) params.set("race", expenditure.raceId);
+  params.set("sourceId", expenditure.sourceId);
+  return `/records/schedule-e?${params.toString()}#schedule-e-${expenditure.sourceId.replace(/[^a-zA-Z0-9_-]/g, "-")}`;
 }
 
 function incumbentStatus(status?: string | null) {

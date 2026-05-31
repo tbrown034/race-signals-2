@@ -6,6 +6,7 @@ import { EntityPage } from "@/src/components/entity-page";
 import { IncumbentBadge } from "@/src/components/incumbent-badge";
 import { PageShell } from "@/src/components/page-shell";
 import { PartySquare } from "@/src/components/party-square";
+import { ReporterRead } from "@/src/components/reporter-read";
 import { getCandidatesForRace, getRace, getRaceElections, getRaceRatings, getSignalsForEntity } from "@/src/lib/db/repository";
 import { formatMoney } from "@/src/lib/format";
 
@@ -24,6 +25,10 @@ export default async function RacePage({
   ]);
 
   if (!race) notFound();
+  const signalCounts = countSignals(signals);
+  const totalReceipts = candidates.reduce((sum, candidate) => sum + (candidate.totalReceiptsCycle ?? 0), 0);
+  const candidatesWithMoney = candidates.filter((candidate) => (candidate.totalReceiptsCycle ?? 0) > 0).length;
+  const incumbentCount = candidates.filter((candidate) => isIncumbent(candidate.incumbentChallengeStatus)).length;
 
   return (
     <PageShell>
@@ -57,9 +62,19 @@ export default async function RacePage({
           ["Competitiveness", race.competitiveness],
         ]}
       >
+        <ReporterRead
+          notes={[
+            `${candidates.length} FEC candidates matched to this race; ${candidatesWithMoney} currently show cycle receipts in the FEC totals endpoint.`,
+            `Known candidate receipts in this slice total ${formatMoney(totalReceipts) ?? "$0"}. Use this as FEC-filed activity, not a race forecast.`,
+            `${signals.length} related signals: ${signalCounts.filings} filings, ${signalCounts.committees} committee records, ${signalCounts.outsideSpending} outside-spending alerts, ${signalCounts.review} review flags.`,
+            incumbentCount
+              ? `${incumbentCount} incumbent candidate${incumbentCount === 1 ? " is" : "s are"} present; compare committee and filing activity against challenger organization before treating paperwork as a launch signal.`
+              : "No incumbent candidate is currently matched in this slice; verify ballot and primary context with election-office sources.",
+          ]}
+        />
         <ElectionTimeline
           elections={elections}
-          emptyText={`No election timeline available for this race. Wikidata and Wikipedia coverage of House primaries can be thin - follow the ${race.state} secretary of state for authoritative results.`}
+          emptyText={`No election timeline available for this race. Wikidata and Wikipedia coverage of congressional primaries can be thin - follow the ${race.state} secretary of state for authoritative results.`}
           showCandidate
           title="Race timeline"
         />
@@ -138,4 +153,13 @@ function officeLabel(office?: string | null) {
   if (office === "H") return "U.S. House";
   if (office === "S") return "U.S. Senate";
   return office;
+}
+
+function countSignals(signals: Awaited<ReturnType<typeof getSignalsForEntity>>) {
+  return {
+    filings: signals.filter((signal) => signal.signalType === "new_filing").length,
+    committees: signals.filter((signal) => signal.signalType === "new_committee").length,
+    outsideSpending: signals.filter((signal) => signal.signalType === "large_independent_expenditure").length,
+    review: signals.filter((signal) => signal.status === "review").length,
+  };
 }

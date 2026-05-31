@@ -5,6 +5,7 @@ import { EntityPage } from "@/src/components/entity-page";
 import { IncumbentBadge } from "@/src/components/incumbent-badge";
 import { PageShell } from "@/src/components/page-shell";
 import { PartySquare } from "@/src/components/party-square";
+import { ReporterRead } from "@/src/components/reporter-read";
 import { getCandidate, getCandidateElections, getSignalsForEntity } from "@/src/lib/db/repository";
 import { formatDate, formatDateTime, formatMoney } from "@/src/lib/format";
 
@@ -21,6 +22,7 @@ export default async function CandidatePage({
   ]);
 
   if (!candidate) notFound();
+  const signalCounts = countSignals(signals);
 
   return (
     <PageShell>
@@ -54,9 +56,19 @@ export default async function CandidatePage({
           ...(candidate.bioguideId ? ([["Bioguide", candidate.bioguideId]] as Array<[string, string]>) : []),
         ]}
       >
+        <ReporterRead
+          notes={[
+            `Money position: ${formatMoney(candidate.totalReceiptsCycle) ?? "receipts not available"} raised this cycle; ${formatMoney(candidate.cashOnHandLatest) ?? "cash not available"} cash on hand${candidate.cashOnHandAsOf ? ` as of ${formatDate(candidate.cashOnHandAsOf)}` : ""}.`,
+            `${signals.length} related signals in this slice: ${signalCounts.filings} filings, ${signalCounts.committees} committee records, ${signalCounts.outsideSpending} outside-spending alerts, ${signalCounts.review} review flags.`,
+            isIncumbent(candidate.incumbentChallengeStatus)
+              ? "Incumbent context: committee records usually reflect cycle operations or continuing campaign infrastructure, not a first-time launch."
+              : "Non-incumbent context: a principal committee is useful early evidence of campaign organization, but ballot status still needs election-office verification.",
+            "Low-cost mode does not store itemized Schedule A donor receipts; use FEC source links for donor-level lookup.",
+          ]}
+        />
         <ElectionTimeline
           elections={elections}
-          emptyText={`No election timeline available for this candidate. Wikidata and Wikipedia coverage of House primaries can be thin - follow the ${candidate.state} secretary of state for authoritative results.`}
+          emptyText={`No election timeline available for this candidate. Wikidata and Wikipedia coverage of congressional primaries can be thin - follow the ${candidate.state} secretary of state for authoritative results.`}
           title="Election timeline"
         />
       </EntityPage>
@@ -85,4 +97,13 @@ function partyLabel(party?: string | null) {
   if (party === "REP" || party === "R") return "Republican";
   if (party === "DEM" || party === "D") return "Democratic";
   return party;
+}
+
+function countSignals(signals: Awaited<ReturnType<typeof getSignalsForEntity>>) {
+  return {
+    filings: signals.filter((signal) => signal.signalType === "new_filing").length,
+    committees: signals.filter((signal) => signal.signalType === "new_committee").length,
+    outsideSpending: signals.filter((signal) => signal.signalType === "large_independent_expenditure").length,
+    review: signals.filter((signal) => signal.status === "review").length,
+  };
 }

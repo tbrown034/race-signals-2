@@ -48,6 +48,8 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run ingest
+      - run: SIGNAL_AUDIT_STRICT=1 npm run audit:signals
+      - run: npm run audit:cost
 
   manual-ingest:
     if: github.event_name == 'workflow_dispatch'
@@ -70,3 +72,5 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run ingest
+      - run: SIGNAL_AUDIT_STRICT=1 npm run audit:signals
+      - run: npm run audit:cost

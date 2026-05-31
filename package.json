@@ -9,6 +9,7 @@
     "lint": "eslint",
     "test:logic": "tsx scripts/test-signal-logic.ts",
     "test:exports": "tsx scripts/test-export-contracts.ts",
+    "audit:pages": "tsx scripts/audit-pages.ts",
     "audit:cost": "tsx scripts/audit-cost.ts",
     "audit:signals": "tsx scripts/audit-signals.ts",
     "repair:cycles": "tsx scripts/prune-cross-cycle-records.ts",

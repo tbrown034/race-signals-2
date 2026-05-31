@@ -28,6 +28,7 @@ import type {
   StateRaceBoardRow,
   StateSignalFreshness,
   StorageUsage,
+  TopFundraiser,
   TopSpender,
   Transaction,
   ValidationIssueRollup,
@@ -1653,6 +1654,123 @@ export async function getScheduleERecordSummary(
     totalAmount: Number(row?.total_amount ?? 0),
     uncodedAmount: Number(row?.uncoded_amount ?? 0),
   };
+}
+
+export async function getTopFundraisers(
+  limit = 100,
+  state?: string | null,
+  office?: string | null,
+): Promise<TopFundraiser[]> {
+  if (!hasDatabase()) {
+    return demoCandidates
+      .filter((candidate) => {
+        if (state && candidate.state.toUpperCase() !== state.toUpperCase()) return false;
+        if (office && candidate.office !== office) return false;
+        return (candidate.totalReceiptsCycle ?? 0) > 0;
+      })
+      .sort((a, b) => (b.totalReceiptsCycle ?? 0) - (a.totalReceiptsCycle ?? 0))
+      .slice(0, limit)
+      .map((candidate) => ({
+        candidateId: candidate.id,
+        fecCandidateId: candidate.fecCandidateId,
+        name: candidate.name,
+        party: candidate.party ?? null,
+        office: candidate.office,
+        state: candidate.state,
+        district: candidate.district ?? null,
+        incumbentChallengeStatus: candidate.incumbentChallengeStatus ?? null,
+        raceId: candidate.raceId ?? null,
+        raceName: demoRaces.find((race) => race.id === candidate.raceId)?.name ?? null,
+        totalReceiptsCycle: candidate.totalReceiptsCycle ?? null,
+        totalDisbursementsCycle: candidate.totalDisbursementsCycle ?? null,
+        cashOnHandLatest: candidate.cashOnHandLatest ?? null,
+        cashOnHandAsOf: candidate.cashOnHandAsOf ?? null,
+        individualContributionPct: candidate.individualContributionPct ?? null,
+        pacContributionPct: candidate.pacContributionPct ?? null,
+        totalsUpdatedAt: candidate.totalsUpdatedAt ?? null,
+        sourceUrl: candidate.sourceUrl ?? null,
+      }));
+  }
+
+  const where: string[] = ["c.total_receipts_cycle is not null", "c.total_receipts_cycle > 0"];
+  const values: unknown[] = [];
+  if (state) {
+    values.push(state.toUpperCase());
+    where.push(`c.state = $${values.length}`);
+  }
+  if (office) {
+    values.push(office);
+    where.push(`c.office = $${values.length}`);
+  }
+  values.push(limit);
+  const rows = await sql<{
+    id: string;
+    fec_candidate_id: string;
+    name: string;
+    party: string | null;
+    office: string;
+    state: string;
+    district: string | null;
+    incumbent_challenge_status: string | null;
+    race_id: string | null;
+    race_name: string | null;
+    total_receipts_cycle: string | null;
+    total_disbursements_cycle: string | null;
+    cash_on_hand_latest: string | null;
+    cash_on_hand_as_of: string | Date | null;
+    individual_contribution_pct: string | null;
+    pac_contribution_pct: string | null;
+    totals_updated_at: string | Date | null;
+    source_url: string | null;
+  }>(
+    `
+      select
+        c.id,
+        c.fec_candidate_id,
+        c.name,
+        c.party,
+        c.office,
+        c.state,
+        c.district,
+        c.incumbent_challenge_status,
+        c.race_id,
+        r.name as race_name,
+        c.total_receipts_cycle::text,
+        c.total_disbursements_cycle::text,
+        c.cash_on_hand_latest::text,
+        c.cash_on_hand_as_of,
+        c.individual_contribution_pct::text,
+        c.pac_contribution_pct::text,
+        c.totals_updated_at,
+        c.source_url
+      from candidates c
+      left join races r on r.id = c.race_id
+      where ${where.join(" and ")}
+      order by c.total_receipts_cycle desc nulls last, c.name asc
+      limit $${values.length}
+    `,
+    values,
+  );
+  return rows.map((row) => ({
+    candidateId: row.id,
+    fecCandidateId: row.fec_candidate_id,
+    name: row.name,
+    party: row.party,
+    office: row.office,
+    state: row.state,
+    district: row.district,
+    incumbentChallengeStatus: row.incumbent_challenge_status,
+    raceId: row.race_id,
+    raceName: row.race_name,
+    totalReceiptsCycle: row.total_receipts_cycle === null ? null : Number(row.total_receipts_cycle),
+    totalDisbursementsCycle: row.total_disbursements_cycle === null ? null : Number(row.total_disbursements_cycle),
+    cashOnHandLatest: row.cash_on_hand_latest === null ? null : Number(row.cash_on_hand_latest),
+    cashOnHandAsOf: row.cash_on_hand_as_of ? toIsoString(row.cash_on_hand_as_of).slice(0, 10) : null,
+    individualContributionPct: row.individual_contribution_pct === null ? null : Number(row.individual_contribution_pct),
+    pacContributionPct: row.pac_contribution_pct === null ? null : Number(row.pac_contribution_pct),
+    totalsUpdatedAt: row.totals_updated_at ? toIsoString(row.totals_updated_at) : null,
+    sourceUrl: row.source_url,
+  }));
 }
 
 export async function getTopSpenders(limit = 100, state?: string | null): Promise<TopSpender[]> {

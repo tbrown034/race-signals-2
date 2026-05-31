@@ -141,6 +141,27 @@ export type CommitteeIndependentExpenditure = IndependentExpenditure & {
   raceName?: string | null;
 };
 
+export type TopFundraiser = {
+  candidateId: string;
+  fecCandidateId: string;
+  name: string;
+  party: string | null;
+  office: string;
+  state: string;
+  district: string | null;
+  incumbentChallengeStatus: string | null;
+  raceId: string | null;
+  raceName: string | null;
+  totalReceiptsCycle: number | null;
+  totalDisbursementsCycle: number | null;
+  cashOnHandLatest: number | null;
+  cashOnHandAsOf: string | null;
+  individualContributionPct: number | null;
+  pacContributionPct: number | null;
+  totalsUpdatedAt: string | null;
+  sourceUrl: string | null;
+};
+
 export type TopSpender = {
   committeeId: string | null;
   fecCommitteeId: string | null;

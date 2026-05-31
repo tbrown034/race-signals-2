@@ -9,6 +9,7 @@ const nav = [
   { href: "/spending", label: "Spending" },
   { href: "/records/schedule-e", label: "Records" },
   { href: "/spenders", label: "Spenders" },
+  { href: "/raised", label: "Raised" },
   { href: "/status", label: "Status" },
   { href: "/methodology", label: "Method" },
   { href: "/docs", label: "Docs" },

@@ -24,6 +24,7 @@ async function main() {
       { path: "/spending", text: "Outside spending watch" },
       { path: "/spending", text: "Local evidence row" },
       { path: "/spenders", text: "Top stored outside spenders" },
+      { path: "/raised", text: "Top stored fundraisers" },
       { path: "/records/schedule-e", text: "Schedule E records" },
       { path: "/records/schedule-e?position=O&minAmount=25000", text: "Filtered by" },
       { path: "/status", text: "Publishability read" },
@@ -48,7 +49,9 @@ async function main() {
     await assertJsonRoute("/api/races/export.json?state=IN");
     await assertRoute({ path: "/api/spenders/export.csv", text: "committee_name" });
     await assertJsonRoute("/api/spenders/export.json");
-    console.log(`Page audit passed for ${checks.length} routes and 8 export endpoints.`);
+    await assertRoute({ path: "/api/raised/export.csv", text: "candidate_name" });
+    await assertJsonRoute("/api/raised/export.json");
+    console.log(`Page audit passed for ${checks.length} routes and 10 export endpoints.`);
   } finally {
     if (server) {
       server.kill("SIGTERM");

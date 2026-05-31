@@ -30,6 +30,7 @@ async function exportManifest(url: URL): Promise<SpenderExportManifest> {
   return {
     exportedAt: new Date().toISOString(),
     filters: exportFilters(url),
+    baseUrl: url.origin,
     latestRun: status.runs[0] ?? null,
   };
 }

@@ -5,6 +5,7 @@ export const SPENDER_EXPORT_LIMIT = 10000;
 export type SpenderExportManifest = {
   exportedAt: string;
   filters: Record<string, string>;
+  baseUrl?: string;
   latestRun?: IngestionRun | null;
 };
 
@@ -23,8 +24,11 @@ export type SpenderExportRow = {
   last_expenditure_date: string | null;
   latest_schedule_e_source_id: string | null;
   latest_schedule_e_source_url: string | null;
+  records_table_url: string | null;
+  committee_evidence_url: string | null;
   top_race_id: string | null;
   top_race_name: string | null;
+  top_race_url: string | null;
   top_race_amount: number | null;
   top_race_share: number | null;
   oppose_share: number | null;
@@ -63,8 +67,13 @@ export function spenderToExportRow(
     last_expenditure_date: spender.lastExpenditureDate ?? null,
     latest_schedule_e_source_id: spender.latestScheduleESourceId ?? null,
     latest_schedule_e_source_url: spender.latestScheduleESourceUrl ?? null,
+    records_table_url: recordsTableUrl(spender, manifest.baseUrl),
+    committee_evidence_url: spender.committeeId && manifest.baseUrl
+      ? `${manifest.baseUrl}/committees/${spender.committeeId}#schedule-e-records`
+      : null,
     top_race_id: spender.topRaceId ?? null,
     top_race_name: spender.topRaceName ?? null,
+    top_race_url: spender.topRaceId && manifest.baseUrl ? `${manifest.baseUrl}/races/${spender.topRaceId}` : null,
     top_race_amount: spender.topRaceAmount ?? null,
     top_race_share: topRaceShare,
     oppose_share: opposeShare,
@@ -97,8 +106,11 @@ export function spenderRowsToCsv(rows: SpenderExportRow[]) {
     "last_expenditure_date",
     "latest_schedule_e_source_id",
     "latest_schedule_e_source_url",
+    "records_table_url",
+    "committee_evidence_url",
     "top_race_id",
     "top_race_name",
+    "top_race_url",
     "top_race_amount",
     "top_race_share",
     "oppose_share",
@@ -130,4 +142,11 @@ function csvCell(value: string | number | null) {
 function ratio(numerator: number | null, denominator: number) {
   if (numerator === null || denominator <= 0) return null;
   return Number((numerator / denominator).toFixed(4));
+}
+
+function recordsTableUrl(spender: TopSpender, baseUrl?: string) {
+  if (!baseUrl) return null;
+  if (spender.committeeId) return `${baseUrl}/spending?committee=${spender.committeeId}&sort=date`;
+  if (spender.latestScheduleESourceUrl) return spender.latestScheduleESourceUrl;
+  return null;
 }

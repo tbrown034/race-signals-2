@@ -6,9 +6,9 @@ on:
   workflow_dispatch:
     inputs:
       state:
-        description: "Optional two-letter state code. Leave blank for national manual runs."
+        description: "Two-letter state code. Clear only for an intentional broader national sample."
         required: false
-        default: ""
+        default: "IN"
       offices:
         description: "FEC offices to ingest: H, S, or H,S."
         required: false

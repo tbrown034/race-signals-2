@@ -183,7 +183,7 @@ FEC_MAX_CANDIDATES=25 FEC_REQUEST_DELAY_MS=1500 npm run ingest
 
 The default request delay is 4000 ms so uncapped national runs stay under the normal FEC API hourly limit. National ingestion should be treated as a paced background job, not a route handler.
 
-Coverage: 2026 cycle only, national U.S. House + Senate in the data model. Per-candidate totals come from the FEC aggregate totals endpoint. Individual contribution detail is not stored; follow source URLs to FEC for donor-level lookup. The scheduled GitHub Actions ingest is intentionally cost-capped to an Indiana House/Senate slice (`RACE_SIGNALS_STATE=IN`, `FEC_MAX_CANDIDATES=25`, `FEC_MAX_CANDIDATE_PAGES=2`, 45-minute timeout). Broader or national runs are manual `workflow_dispatch` runs with explicit caps. Read traffic is served by Vercel.
+Coverage: 2026 cycle only, national U.S. House + Senate in the data model. Per-candidate totals come from the FEC aggregate totals endpoint. Individual contribution detail is not stored; follow source URLs to FEC for donor-level lookup. The scheduled GitHub Actions ingest is intentionally cost-capped to an Indiana House/Senate slice (`RACE_SIGNALS_STATE=IN`, `FEC_MAX_CANDIDATES=25`, `FEC_MAX_CANDIDATE_PAGES=2`, 45-minute timeout). Manual `workflow_dispatch` runs default to the same Indiana slice; clearing the state input creates a broader capped national sample and should be treated as deliberately partial, not full national coverage. Read traffic is served by Vercel.
 
 GitHub Actions secrets required for scheduled ingest:
 

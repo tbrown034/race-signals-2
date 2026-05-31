@@ -118,15 +118,6 @@ export default async function RacePage({
           <RaceStat label="Candidates filed" value={String(stats.candidateCount)} />
           <RaceStat label="Incumbents" value={String(stats.incumbentCount)} />
         </div>
-        <ElectionTimeline
-          collapseOnMobile
-          elections={elections}
-          emptyText={`No election timeline available for this race. Wikidata and Wikipedia coverage of congressional primaries can be thin - follow the ${race.state} secretary of state for authoritative results.`}
-          id="election-history"
-          note="Historical results for candidates currently matched to this race. This is not a 2026 election calendar or a real-time results feed."
-          showCandidate
-          title="Historical election results"
-        />
         <div className="border-b border-neutral-300" id="candidate-cohort">
           <div className="border-b border-neutral-300 px-5 py-4">
             <h2 className="text-sm font-semibold uppercase tracking-[0.14em] text-neutral-600">
@@ -255,6 +246,15 @@ export default async function RacePage({
             <p className="p-5 text-sm text-neutral-600">No FEC candidates matched this race yet.</p>
           )}
         </div>
+        <ElectionTimeline
+          collapseOnMobile
+          elections={elections}
+          emptyText={`No election timeline available for this race. Wikidata and Wikipedia coverage of congressional primaries can be thin - follow the ${race.state} secretary of state for authoritative results.`}
+          id="election-history"
+          note="Historical results for candidates currently matched to this race. This is not a 2026 election calendar or a real-time results feed."
+          showCandidate
+          title="Historical election results"
+        />
       </EntityPage>
     </PageShell>
   );

@@ -117,14 +117,6 @@ export default async function CandidatePage({
             "Low-cost mode does not store itemized Schedule A donor receipts; use FEC source links for donor-level lookup.",
           ]}
         />
-        <ElectionTimeline
-          collapseOnMobile
-          elections={elections}
-          emptyText={`No election timeline available for this candidate. ${electionLookupStatus(candidate)} Wikidata and Wikipedia coverage of congressional primaries can be thin - follow the ${candidate.state} secretary of state for authoritative results.`}
-          id="election-history"
-          note="Historical election rows from Wikidata or conservative Wikipedia parsing. This is not a live 2026 election calendar."
-          title="Historical election results"
-        />
         {raceCohort.length ? (
           <div className="border-b border-neutral-300" id="race-context">
             <div className="border-b border-neutral-300 px-5 py-4">
@@ -191,6 +183,14 @@ export default async function CandidatePage({
             </div>
           </div>
         ) : null}
+        <ElectionTimeline
+          collapseOnMobile
+          elections={elections}
+          emptyText={`No election timeline available for this candidate. ${electionLookupStatus(candidate)} Wikidata and Wikipedia coverage of congressional primaries can be thin - follow the ${candidate.state} secretary of state for authoritative results.`}
+          id="election-history"
+          note="Historical election rows from Wikidata or conservative Wikipedia parsing. This is not a live 2026 election calendar."
+          title="Historical election results"
+        />
       </EntityPage>
     </PageShell>
   );

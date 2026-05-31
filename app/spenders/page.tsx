@@ -78,8 +78,12 @@ export default async function SpendersPage() {
                             <dd className="inline font-mono text-neutral-950">{formatDate(spender.lastExpenditureDate)}</dd>
                           </div>
                           <div>
-                            <dt className="inline font-mono uppercase tracking-[0.12em] text-neutral-500">Split </dt>
-                            <dd className="inline">Support {formatMoney(spender.supportAmount) ?? "$0"} / Oppose {formatMoney(spender.opposeAmount) ?? "$0"}</dd>
+                            <dt className="inline font-mono uppercase tracking-[0.12em] text-neutral-500">Support </dt>
+                            <dd className="inline font-mono text-neutral-950">{formatMoney(spender.supportAmount) ?? "$0"}</dd>
+                          </div>
+                          <div>
+                            <dt className="inline font-mono uppercase tracking-[0.12em] text-neutral-500">Oppose </dt>
+                            <dd className="inline font-mono text-neutral-950">{formatMoney(spender.opposeAmount) ?? "$0"}</dd>
                           </div>
                           <div>
                             <dt className="inline font-mono uppercase tracking-[0.12em] text-neutral-500">Total IE </dt>

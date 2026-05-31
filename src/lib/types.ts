@@ -245,6 +245,8 @@ export type CandidateSignalGap = {
   raceId?: string | null;
   raceName?: string | null;
   totalReceiptsCycle?: number | null;
+  totalsUpdatedAt?: string | null;
+  sourceUrl?: string | null;
 };
 
 export type StorageUsage = {

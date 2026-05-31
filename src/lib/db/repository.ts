@@ -1066,6 +1066,8 @@ export async function getStatus() {
     race_id: string | null;
     race_name: string | null;
     total_receipts_cycle: string | null;
+    totals_updated_at: string | Date | null;
+    source_url: string | null;
   }> = [];
   try {
     endpoints = await sql<{
@@ -1143,6 +1145,8 @@ export async function getStatus() {
     race_id: string | null;
     race_name: string | null;
     total_receipts_cycle: string | null;
+    totals_updated_at: string | Date | null;
+    source_url: string | null;
   }>(`
     select
       c.id,
@@ -1150,7 +1154,9 @@ export async function getStatus() {
       c.fec_candidate_id,
       c.race_id,
       r.name as race_name,
-      c.total_receipts_cycle::text as total_receipts_cycle
+      c.total_receipts_cycle::text as total_receipts_cycle,
+      c.totals_updated_at,
+      c.source_url
     from candidates c
     left join races r on r.id = c.race_id
     left join signals s on s.candidate_id = c.id
@@ -1199,6 +1205,8 @@ export async function getStatus() {
       raceId: candidate.race_id,
       raceName: candidate.race_name,
       totalReceiptsCycle: candidate.total_receipts_cycle === null ? null : Number(candidate.total_receipts_cycle),
+      totalsUpdatedAt: candidate.totals_updated_at ? toIsoString(candidate.totals_updated_at) : null,
+      sourceUrl: candidate.source_url,
     })),
     electionCoverage: {
       candidates: Number(electionCoverageRow?.candidates ?? 0),

@@ -182,7 +182,8 @@ export default async function StatusPage() {
                     <th className="px-4 py-3 font-medium" scope="col">Candidate</th>
                     <th className="px-4 py-3 font-medium" scope="col">Race</th>
                     <th className="px-4 py-3 text-right font-medium" scope="col">Cycle receipts</th>
-                    <th className="px-4 py-3 font-medium" scope="col">FEC ID</th>
+                    <th className="px-4 py-3 font-medium" scope="col">FEC record</th>
+                    <th className="px-4 py-3 font-medium" scope="col">Totals loaded</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-neutral-200">
@@ -205,7 +206,26 @@ export default async function StatusPage() {
                       <td className="px-4 py-3 text-right font-mono">
                         {formatMoney(candidate.totalReceiptsCycle) ?? "FEC totals not loaded"}
                       </td>
-                      <td className="px-4 py-3 font-mono">{candidate.fecCandidateId}</td>
+                      <td className="px-4 py-3">
+                        <div className="flex flex-col gap-1">
+                          <span className="font-mono text-xs text-neutral-700">{candidate.fecCandidateId}</span>
+                          {candidate.sourceUrl ? (
+                            <a
+                              className="text-xs font-medium underline underline-offset-4"
+                              href={candidate.sourceUrl}
+                              rel="noreferrer"
+                              target="_blank"
+                            >
+                              Verify at FEC
+                            </a>
+                          ) : (
+                            <span className="text-xs text-neutral-500">Source not stored</span>
+                          )}
+                        </div>
+                      </td>
+                      <td className="px-4 py-3 text-xs text-neutral-600">
+                        {candidate.totalsUpdatedAt ? formatDateTime(candidate.totalsUpdatedAt) : "FEC totals not loaded"}
+                      </td>
                     </tr>
                   ))}
                 </tbody>

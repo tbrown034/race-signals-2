@@ -184,6 +184,7 @@ assertHeader(rowsToCsv([signalToExportRow(signal, "https://race-signals.test", m
   "source_url",
   "source_id",
   "source_kind",
+  "rule_text",
   "signal_permalink",
   "methodology_url",
   "scope_note",

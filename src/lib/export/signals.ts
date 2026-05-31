@@ -1,4 +1,5 @@
 import { csvCell } from "@/src/lib/export/csv";
+import { signalRuleLabel } from "@/src/lib/signals/rules";
 import type { Signal } from "@/src/lib/types";
 
 export const EXPORT_LIMIT = 10000;
@@ -16,6 +17,7 @@ export type SignalExportRow = {
   signal_type: string;
   headline: string;
   why_it_matters: string;
+  rule_text: string;
   candidate_name: string | null;
   candidate_id: string | null;
   candidate_party: string | null;
@@ -92,6 +94,7 @@ export function signalToExportRow(
     signal_type: signal.signalType,
     headline: signal.headline,
     why_it_matters: signal.whyItMatters,
+    rule_text: signalRuleLabel(signal),
     candidate_name: signal.candidateName ?? null,
     candidate_id: signal.candidateId ?? null,
     candidate_party: signal.candidateParty ?? null,
@@ -143,6 +146,7 @@ export function rowsToCsv(rows: SignalExportRow[]) {
     "signal_type",
     "headline",
     "why_it_matters",
+    "rule_text",
     "candidate_name",
     "candidate_id",
     "candidate_party",

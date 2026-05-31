@@ -7,6 +7,7 @@ import { committeeDesignationLabel, committeeTypeLabel } from "@/src/lib/fec-cod
 import { reportTypeDisplay } from "@/src/lib/fec-report-types";
 import { formatDate, formatDateTime, formatMoney } from "@/src/lib/format";
 import { displayCandidateName } from "@/src/lib/names";
+import { signalRuleLabel } from "@/src/lib/signals/rules";
 import type { Signal } from "@/src/lib/types";
 
 const typeLabels: Record<string, string> = {
@@ -79,6 +80,10 @@ export function SignalCard({ signal }: { signal: Signal }) {
         </div>
         <p className="mt-1 max-w-full break-words text-sm leading-5 text-neutral-700 [overflow-wrap:anywhere] sm:max-w-3xl">
           {signal.whyItMatters}
+        </p>
+        <p className="mt-1 max-w-full break-words text-xs leading-5 text-neutral-600 [overflow-wrap:anywhere]">
+          <span className="font-mono uppercase tracking-[0.12em] text-neutral-500">Rule:</span>{" "}
+          {signalRuleLabel(signal).replace(/^Rule: /, "")}
         </p>
         <div className="mt-2 flex flex-wrap items-center gap-1.5 md:hidden">
           <span className="font-mono text-sm font-semibold text-neutral-950">{amount}</span>

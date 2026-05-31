@@ -114,6 +114,31 @@ export type IndependentExpenditure = {
   raw: unknown;
 };
 
+export type CommitteeIndependentExpenditure = IndependentExpenditure & {
+  candidateName?: string | null;
+  candidateParty?: string | null;
+  committeeName?: string | null;
+  raceName?: string | null;
+};
+
+export type TopSpender = {
+  committeeId: string | null;
+  fecCommitteeId: string | null;
+  committeeName: string;
+  committeeType?: string | null;
+  designation?: string | null;
+  sourceUrl?: string | null;
+  totalAmount: number;
+  recordCount: number;
+};
+
+export type RaceStats = {
+  totalRaised: number;
+  totalIndependentExpenditures: number;
+  candidateCount: number;
+  incumbentCount: number;
+};
+
 export type Signal = {
   id?: string;
   dedupeKey: string;

@@ -8,7 +8,20 @@ import {
 } from "@/src/lib/demo/data";
 import { hasDatabase, sql } from "@/src/lib/db/client";
 import type { SignalFilters } from "@/src/lib/signals/filters";
-import type { Candidate, Committee, Election, EndpointFreshness, IngestionRun, Race, RaceRating, Signal, Transaction } from "@/src/lib/types";
+import type {
+  Candidate,
+  Committee,
+  CommitteeIndependentExpenditure,
+  Election,
+  EndpointFreshness,
+  IngestionRun,
+  Race,
+  RaceRating,
+  RaceStats,
+  Signal,
+  TopSpender,
+  Transaction,
+} from "@/src/lib/types";
 
 type SignalRow = {
   id: string;
@@ -253,7 +266,12 @@ export async function getSignals(filters: SignalFilters = {}) {
       if (filters.office && !signal.raceId?.endsWith(`-${filters.office}`)) return false;
       if (filters.type && signal.signalType !== filters.type) return false;
       if (filters.status && signal.status !== filters.status) return false;
-      if (q && !`${signal.headline} ${signal.whyItMatters}`.toLowerCase().includes(q)) {
+      if (
+        q &&
+        !`${signal.headline} ${signal.whyItMatters} ${signal.candidateName ?? ""} ${signal.committeeName ?? ""} ${signal.raceName ?? ""}`
+          .toLowerCase()
+          .includes(q)
+      ) {
         return false;
       }
       return true;
@@ -288,7 +306,14 @@ export async function getSignals(filters: SignalFilters = {}) {
   }
   if (filters.q) {
     values.push(`%${filters.q}%`);
-    where.push(`(s.headline ilike $${values.length} or s.why_it_matters ilike $${values.length})`);
+    where.push(`(
+      s.headline ilike $${values.length}
+      or s.why_it_matters ilike $${values.length}
+      or c.name ilike $${values.length}
+      or cm.name ilike $${values.length}
+      or r.name ilike $${values.length}
+      or s.dedupe_key ilike $${values.length}
+    )`);
   }
   values.push(filters.limit ?? 50);
 
@@ -311,6 +336,81 @@ export async function getSignals(filters: SignalFilters = {}) {
       left join races r on r.id = s.race_id
       ${where.length ? `where ${where.join(" and ")}` : ""}
       order by s.signal_date desc, s.created_at desc
+      limit $${values.length}
+    `,
+    values,
+  );
+  return rows.map(mapSignal);
+}
+
+export async function getSpendingSignals(
+  filters: Omit<SignalFilters, "type"> = {},
+  sort: "amount" | "date" = "amount",
+) {
+  const scopedFilters = { ...filters, type: "large_independent_expenditure", limit: filters.limit ?? 100 };
+  if (!hasDatabase()) {
+    const signals = await getSignals(scopedFilters);
+    return [...signals].sort((a, b) =>
+      sort === "date"
+        ? b.signalDate.localeCompare(a.signalDate)
+        : (b.amount ?? 0) - (a.amount ?? 0) || b.signalDate.localeCompare(a.signalDate),
+    );
+  }
+
+  const values: unknown[] = [];
+  const where: string[] = ["s.signal_type = 'large_independent_expenditure'"];
+  if (scopedFilters.raceId) {
+    values.push(scopedFilters.raceId);
+    where.push(`s.race_id = $${values.length}`);
+  }
+  if (scopedFilters.state) {
+    values.push(scopedFilters.state);
+    where.push(`r.state = $${values.length}`);
+  }
+  if (scopedFilters.office) {
+    values.push(scopedFilters.office);
+    where.push(`r.office = $${values.length}`);
+  }
+  if (scopedFilters.status) {
+    values.push(scopedFilters.status);
+    where.push(`s.status = $${values.length}`);
+  }
+  if (scopedFilters.since) {
+    values.push(scopedFilters.since);
+    where.push(`s.created_at > $${values.length}`);
+  }
+  if (scopedFilters.q) {
+    values.push(`%${scopedFilters.q}%`);
+    where.push(`(
+      s.headline ilike $${values.length}
+      or s.why_it_matters ilike $${values.length}
+      or c.name ilike $${values.length}
+      or cm.name ilike $${values.length}
+      or r.name ilike $${values.length}
+      or s.dedupe_key ilike $${values.length}
+    )`);
+  }
+  values.push(scopedFilters.limit);
+
+  const rows = await sql<SignalRow>(
+    `
+      select
+        s.*,
+        c.name as candidate_name,
+        c.party as candidate_party,
+        c.state as candidate_state,
+        c.district as candidate_district,
+        c.incumbent_challenge_status as candidate_incumbent_challenge_status,
+        cm.name as committee_name,
+        r.name as race_name,
+        r.state as race_state,
+        r.office as race_office
+      from signals s
+      left join candidates c on c.id = s.candidate_id
+      left join committees cm on cm.id = s.committee_id
+      left join races r on r.id = s.race_id
+      where ${where.join(" and ")}
+      order by ${sort === "date" ? "s.signal_date desc, s.created_at desc" : "s.amount desc nulls last, s.signal_date desc"}
       limit $${values.length}
     `,
     values,
@@ -412,6 +512,141 @@ export async function getCommitteeTransactions(id: string, limit = 10): Promise<
   }));
 }
 
+export async function getCommitteeIndependentExpenditures(
+  id: string,
+  limit = 25,
+): Promise<CommitteeIndependentExpenditure[]> {
+  if (!hasDatabase()) {
+    return demoIndependentExpenditures
+      .filter((expenditure) => expenditure.spenderCommitteeId === id)
+      .slice(0, limit)
+      .map((expenditure) => ({
+        ...expenditure,
+        candidateName: demoCandidates.find((candidate) => candidate.id === expenditure.candidateId)?.name ?? null,
+        candidateParty: demoCandidates.find((candidate) => candidate.id === expenditure.candidateId)?.party ?? null,
+        committeeName: demoCommittees.find((committee) => committee.id === expenditure.spenderCommitteeId)?.name ?? null,
+        raceName: demoRaces.find((race) => race.id === expenditure.raceId)?.name ?? null,
+      }));
+  }
+  const rows = await sql<{
+    source_id: string;
+    spender_committee_id: string | null;
+    fec_committee_id: string | null;
+    candidate_id: string | null;
+    fec_candidate_id: string | null;
+    race_id: string | null;
+    support_oppose_indicator: string | null;
+    amount: string;
+    expenditure_date: string | Date | null;
+    purpose: string | null;
+    source_url: string | null;
+    raw: unknown;
+    candidate_name: string | null;
+    candidate_party: string | null;
+    committee_name: string | null;
+    race_name: string | null;
+  }>(
+    `
+      select
+        ie.*,
+        c.name as candidate_name,
+        c.party as candidate_party,
+        cm.name as committee_name,
+        r.name as race_name
+      from independent_expenditures ie
+      left join candidates c on c.id = ie.candidate_id
+      left join committees cm on cm.id = ie.spender_committee_id
+      left join races r on r.id = ie.race_id
+      where ie.spender_committee_id = $1
+      order by ie.expenditure_date desc nulls last, ie.amount desc
+      limit $2
+    `,
+    [id, limit],
+  );
+  return rows.map((row) => ({
+    sourceId: row.source_id,
+    spenderCommitteeId: row.spender_committee_id,
+    fecCommitteeId: row.fec_committee_id,
+    candidateId: row.candidate_id,
+    fecCandidateId: row.fec_candidate_id,
+    raceId: row.race_id,
+    supportOpposeIndicator: row.support_oppose_indicator,
+    amount: Number(row.amount),
+    expenditureDate: row.expenditure_date ? toDateString(row.expenditure_date) : null,
+    purpose: row.purpose,
+    sourceUrl: row.source_url,
+    raw: row.raw,
+    candidateName: row.candidate_name,
+    candidateParty: row.candidate_party,
+    committeeName: row.committee_name,
+    raceName: row.race_name,
+  }));
+}
+
+export async function getTopSpenders(limit = 100): Promise<TopSpender[]> {
+  if (!hasDatabase()) {
+    return demoCommittees
+      .map((committee) => {
+        const records = demoIndependentExpenditures.filter(
+          (expenditure) => expenditure.spenderCommitteeId === committee.id,
+        );
+        return {
+          committeeId: committee.id,
+          fecCommitteeId: committee.fecCommitteeId,
+          committeeName: committee.name,
+          committeeType: committee.committeeType,
+          designation: committee.designation,
+          sourceUrl: committee.sourceUrl,
+          totalAmount: records.reduce((sum, record) => sum + record.amount, 0),
+          recordCount: records.length,
+        };
+      })
+      .filter((spender) => spender.recordCount > 0)
+      .sort((a, b) => b.totalAmount - a.totalAmount)
+      .slice(0, limit);
+  }
+
+  const rows = await sql<{
+    committee_id: string | null;
+    fec_committee_id: string | null;
+    committee_name: string | null;
+    committee_type: string | null;
+    designation: string | null;
+    source_url: string | null;
+    total_amount: string;
+    record_count: string;
+  }>(
+    `
+      select
+        cm.id as committee_id,
+        coalesce(cm.fec_committee_id, ie.fec_committee_id) as fec_committee_id,
+        coalesce(cm.name, ie.fec_committee_id, 'Unknown spender') as committee_name,
+        cm.committee_type,
+        cm.designation,
+        cm.source_url,
+        sum(ie.amount)::text as total_amount,
+        count(*)::text as record_count
+      from independent_expenditures ie
+      left join committees cm on cm.id = ie.spender_committee_id
+      group by cm.id, cm.fec_committee_id, ie.fec_committee_id, cm.name, cm.committee_type, cm.designation, cm.source_url
+      order by sum(ie.amount) desc nulls last
+      limit $1
+    `,
+    [limit],
+  );
+
+  return rows.map((row) => ({
+    committeeId: row.committee_id,
+    fecCommitteeId: row.fec_committee_id,
+    committeeName: row.committee_name ?? "Unknown spender",
+    committeeType: row.committee_type,
+    designation: row.designation,
+    sourceUrl: row.source_url,
+    totalAmount: Number(row.total_amount),
+    recordCount: Number(row.record_count),
+  }));
+}
+
 export async function getRace(id: string): Promise<Race | null> {
   if (!hasDatabase()) return demoRaces.find((race) => race.id === id) ?? null;
   const rows = await sql<Race>(
@@ -503,6 +738,57 @@ export async function getCandidatesForRace(id: string): Promise<Candidate[]> {
     [id],
   );
   return rows.map(mapCandidateRow);
+}
+
+export async function getRaceStats(id: string): Promise<RaceStats> {
+  if (!hasDatabase()) {
+    const candidates = demoCandidates.filter((candidate) => candidate.raceId === id);
+    const expenditures = demoIndependentExpenditures.filter((expenditure) => expenditure.raceId === id);
+    return {
+      totalRaised: candidates.reduce((sum, candidate) => sum + (candidate.totalReceiptsCycle ?? 0), 0),
+      totalIndependentExpenditures: expenditures.reduce((sum, expenditure) => sum + expenditure.amount, 0),
+      candidateCount: candidates.length,
+      incumbentCount: candidates.filter((candidate) => isIncumbent(candidate.incumbentChallengeStatus)).length,
+    };
+  }
+
+  const rows = await sql<{
+    total_raised: string | null;
+    total_independent_expenditures: string | null;
+    candidate_count: string;
+    incumbent_count: string;
+  }>(
+    `
+      with candidate_stats as (
+        select
+          coalesce(sum(total_receipts_cycle), 0)::text as total_raised,
+          count(*)::text as candidate_count,
+          count(*) filter (where incumbent_challenge_status in ('I', 'Incumbent'))::text as incumbent_count
+        from candidates
+        where race_id = $1
+      ),
+      spending_stats as (
+        select coalesce(sum(amount), 0)::text as total_independent_expenditures
+        from independent_expenditures
+        where race_id = $1
+      )
+      select
+        candidate_stats.total_raised,
+        spending_stats.total_independent_expenditures,
+        candidate_stats.candidate_count,
+        candidate_stats.incumbent_count
+      from candidate_stats, spending_stats
+    `,
+    [id],
+  );
+
+  const row = rows[0];
+  return {
+    totalRaised: Number(row?.total_raised ?? 0),
+    totalIndependentExpenditures: Number(row?.total_independent_expenditures ?? 0),
+    candidateCount: Number(row?.candidate_count ?? 0),
+    incumbentCount: Number(row?.incumbent_count ?? 0),
+  };
 }
 
 function compareCandidateStanding(a: Candidate, b: Candidate) {

@@ -6,6 +6,8 @@ import { formatDateTime, formatRelativeTime, isOlderThanHours } from "@/src/lib/
 
 const nav = [
   { href: "/", label: "Feed" },
+  { href: "/spending", label: "Spending" },
+  { href: "/spenders", label: "Spenders" },
   { href: "/status", label: "Status" },
   { href: "/methodology", label: "Methodology" },
   { href: "/docs", label: "Docs" },

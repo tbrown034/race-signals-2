@@ -31,6 +31,8 @@ export function FeedFilters({
   raceId,
   type,
   status,
+  lockedType,
+  clearHref,
 }: {
   races: Race[];
   q?: string;
@@ -39,6 +41,8 @@ export function FeedFilters({
   raceId?: string;
   type?: string;
   status?: string;
+  lockedType?: boolean;
+  clearHref?: string;
 }) {
   const router = useRouter();
   const pathname = usePathname();
@@ -159,21 +163,30 @@ export function FeedFilters({
             ))}
           </select>
         </label>
-        <label className="text-xs font-medium uppercase tracking-[0.12em] text-neutral-500">
-          Type
-          <select
-            className="mt-1 block h-9 w-full border border-neutral-300 bg-white px-2 text-sm normal-case tracking-normal text-neutral-950"
-            value={selectedType}
-            name="type"
-            onChange={(event) => updateFilter("type", event.target.value)}
-          >
-            {signalTypes.map(([value, label]) => (
-              <option value={value} key={value}>
-                {label}
-              </option>
-            ))}
-          </select>
-        </label>
+        {lockedType ? (
+          <div className="text-xs font-medium uppercase tracking-[0.12em] text-neutral-500">
+            Type
+            <div className="mt-1 flex h-9 items-center border border-neutral-300 bg-neutral-100 px-2 text-sm normal-case tracking-normal text-neutral-700">
+              {signalTypes.find(([value]) => value === selectedType)?.[1] ?? "Locked"}
+            </div>
+          </div>
+        ) : (
+          <label className="text-xs font-medium uppercase tracking-[0.12em] text-neutral-500">
+            Type
+            <select
+              className="mt-1 block h-9 w-full border border-neutral-300 bg-white px-2 text-sm normal-case tracking-normal text-neutral-950"
+              value={selectedType}
+              name="type"
+              onChange={(event) => updateFilter("type", event.target.value)}
+            >
+              {signalTypes.map(([value, label]) => (
+                <option value={value} key={value}>
+                  {label}
+                </option>
+              ))}
+            </select>
+          </label>
+        )}
         <label className="text-xs font-medium uppercase tracking-[0.12em] text-neutral-500">
           Status
           <select
@@ -193,7 +206,7 @@ export function FeedFilters({
           Search
         </button>
         {hasFilters ? (
-          <Link className="self-end border border-neutral-300 px-4 py-2 text-center text-sm font-medium" href="/">
+          <Link className="self-end border border-neutral-300 px-4 py-2 text-center text-sm font-medium" href={clearHref ?? "/"}>
             Clear
           </Link>
         ) : null}

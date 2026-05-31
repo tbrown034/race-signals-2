@@ -155,7 +155,7 @@ FEC_MAX_RETRIES=6 npm run ingest
 RACE_SIGNALS_OFFICES=H,S npm run ingest
 ```
 
-Without those caps, candidate discovery attempts the full 2026 House/Senate candidate search and then fetches related committee/report/receipt/expenditure records.
+Without those caps, candidate discovery attempts the full 2026 House/Senate candidate search and then fetches related committee/report/receipt/expenditure records. Do that manually only when you are intentionally spending the time; do not schedule uncapped national ingest until the pipeline is optimized for it.
 
 For a first production smoke test, use:
 
@@ -163,9 +163,17 @@ For a first production smoke test, use:
 FEC_MAX_CANDIDATES=25 FEC_REQUEST_DELAY_MS=1500 npm run ingest
 ```
 
-The default request delay is 4000 ms so uncapped national runs stay under the normal FEC API hourly limit. National ingestion should be treated as a paced background job or scheduled task, not a route handler.
+The default request delay is 4000 ms so uncapped national runs stay under the normal FEC API hourly limit. National ingestion should be treated as a paced background job, not a route handler.
 
-Coverage: 2026 cycle only, national U.S. House + Senate. Per-candidate totals come from the FEC aggregate totals endpoint. Individual contribution detail is not stored; follow source URLs to FEC for donor-level lookup. Daily ingest runs on GitHub Actions. Read traffic is served by Vercel.
+Coverage: 2026 cycle only, national U.S. House + Senate in the data model. Per-candidate totals come from the FEC aggregate totals endpoint. Individual contribution detail is not stored; follow source URLs to FEC for donor-level lookup. The scheduled GitHub Actions ingest is intentionally cost-capped to an Indiana House/Senate slice (`RACE_SIGNALS_STATE=IN`, `FEC_MAX_CANDIDATES=25`, `FEC_MAX_CANDIDATE_PAGES=2`, 45-minute timeout). Broader or national runs are manual `workflow_dispatch` runs with explicit caps. Read traffic is served by Vercel.
+
+Cost guardrails:
+
+- Keep the daily scheduled ingest bounded. A scheduled national run can burn GitHub Actions minutes quickly because FEC requests are deliberately rate-limited.
+- The ingest script refuses scheduled GitHub Actions runs unless `RACE_SIGNALS_STATE`, `FEC_MAX_CANDIDATES` and `FEC_MAX_CANDIDATE_PAGES` are set.
+- Keep Schedule A itemized receipts out of production ingest for now. The `transactions` table remains available for future work, but donor-level storage is not part of the low-cost MVP.
+- Current production storage should stay small because the app stores candidates, committees, filings, Schedule E independent expenditures, signals, ingestion metadata and source IDs rather than every receipt line item.
+- For the current budget target, use GitHub Actions for bounded ingest, Neon free-tier-compatible Postgres for storage, and Vercel for read-only pages. Avoid adding paid APIs, image storage, or high-frequency cron jobs.
 
 Verification:
 

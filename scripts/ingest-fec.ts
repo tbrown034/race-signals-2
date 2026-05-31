@@ -91,6 +91,25 @@ function officesFromEnv() {
   return offices as Array<"H" | "S">;
 }
 
+function enforceScheduledCostGuard({
+  maxCandidates,
+  maxCandidatePages,
+  state,
+}: {
+  maxCandidates?: number;
+  maxCandidatePages?: number;
+  state?: string;
+}) {
+  if (process.env.GITHUB_ACTIONS !== "true" || process.env.GITHUB_EVENT_NAME !== "schedule") {
+    return;
+  }
+  if (!state || !maxCandidates || !maxCandidatePages) {
+    throw new Error(
+      "Scheduled GitHub Actions ingest must set RACE_SIGNALS_STATE, FEC_MAX_CANDIDATES and FEC_MAX_CANDIDATE_PAGES. Use workflow_dispatch for broader runs.",
+    );
+  }
+}
+
 async function main() {
   if (!process.env.DATABASE_URL) {
     throw new Error("DATABASE_URL is required to ingest FEC data.");
@@ -106,6 +125,7 @@ async function main() {
   const mode = ingestionMode();
   const offices = officesFromEnv();
   const state = envValue("RACE_SIGNALS_STATE")?.toUpperCase();
+  enforceScheduledCostGuard({ maxCandidates, maxCandidatePages, state });
   const dateWindow: DateWindow = {
     startDate: dateFromEnv("BACKFILL_START_DATE"),
     endDate: dateFromEnv("BACKFILL_END_DATE"),

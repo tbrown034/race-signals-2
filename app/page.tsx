@@ -96,8 +96,9 @@ export default async function Home({
           </p>
           <h2 className="mt-2 text-lg font-semibold">2026 U.S. congressional scope</h2>
           <p className="mt-2 text-sm leading-6 text-neutral-700">
-            FEC-only MVP coverage. Demo mode appears automatically when no database
-            is configured; real ingestion uses `FEC_API_KEY` and Postgres.
+            FEC-only MVP coverage. The database can represent every 2026 House and Senate
+            race, but the scheduled low-cost ingest is intentionally capped to a small daily
+            slice. Demo mode appears automatically when no database is configured.
           </p>
           <dl className="mt-5 space-y-3 text-sm">
             <div>
@@ -116,7 +117,13 @@ export default async function Home({
               <dt className="font-mono text-xs uppercase tracking-[0.12em] text-neutral-500">
                 Races
               </dt>
-              <dd className="mt-1">{races.length} configured House and Senate races</dd>
+              <dd className="mt-1">{races.length} race shells available for filtering</dd>
+            </div>
+            <div>
+              <dt className="font-mono text-xs uppercase tracking-[0.12em] text-neutral-500">
+                Cost guard
+              </dt>
+              <dd className="mt-1">Daily ingest is capped; broader national runs are manual.</dd>
             </div>
           </dl>
         </aside>

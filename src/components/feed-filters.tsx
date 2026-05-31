@@ -36,6 +36,12 @@ export function FeedFilters({
   status?: string;
 }) {
   const hasFilters = Boolean(q || state || office || raceId || type || status);
+  const selectedRace = raceId ? races.find((race) => race.id === raceId) : undefined;
+  const raceOptions = state
+    ? races.filter((race) => race.state === state && (!office || race.office === office))
+    : selectedRace
+      ? [selectedRace]
+      : [];
 
   return (
     <form className="border-b border-neutral-300 bg-white p-4">
@@ -83,10 +89,10 @@ export function FeedFilters({
             defaultValue={raceId ?? ""}
             name="race"
           >
-            <option value="">All races</option>
-            {races
-              .filter((race) => (!state || race.state === state) && (!office || race.office === office))
-              .map((race) => (
+            <option value="">
+              {state ? "All races" : "Select state first"}
+            </option>
+            {raceOptions.map((race) => (
               <option value={race.id} key={race.id}>
                 {race.office === "S" ? `${race.state} Senate` : `${race.state}-${race.district}`}
               </option>

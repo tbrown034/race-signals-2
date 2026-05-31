@@ -8,5 +8,6 @@ export function endpointHealthClass(endpoint: { completedAt: string; status: str
   if (status === "error" || status === "failed") return "bg-red-700";
   if (isStale) return "bg-amber-700";
   if (status === "success") return "bg-emerald-700";
+  if (status === "partial") return "bg-amber-700";
   return "border border-neutral-500";
 }

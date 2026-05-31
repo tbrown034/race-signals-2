@@ -4,15 +4,61 @@ on:
   schedule:
     - cron: "0 9 * * *"
   workflow_dispatch:
+    inputs:
+      state:
+        description: "Optional two-letter state code. Leave blank for national manual runs."
+        required: false
+        default: ""
+      offices:
+        description: "FEC offices to ingest: H, S, or H,S."
+        required: false
+        default: "H,S"
+      max_candidates:
+        description: "Manual candidate cap. Keep bounded unless intentionally doing a long run."
+        required: false
+        default: "100"
+      max_candidate_pages:
+        description: "Manual candidate search page cap."
+        required: false
+        default: "5"
+
+concurrency:
+  group: fec-ingest
+  cancel-in-progress: false
 
 jobs:
-  ingest:
+  scheduled-ingest:
+    if: github.event_name == 'schedule'
     runs-on: ubuntu-latest
-    timeout-minutes: 360
+    timeout-minutes: 45
     env:
       DATABASE_URL: ${{ secrets.DATABASE_URL }}
       FEC_API_KEY: ${{ secrets.FEC_API_KEY }}
       RACE_SIGNALS_OFFICES: H,S
+      RACE_SIGNALS_STATE: IN
+      FEC_MAX_CANDIDATES: "25"
+      FEC_MAX_CANDIDATE_PAGES: "2"
+      FEC_REQUEST_DELAY_MS: "4000"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - run: npm run ingest
+
+  manual-ingest:
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    env:
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      FEC_API_KEY: ${{ secrets.FEC_API_KEY }}
+      RACE_SIGNALS_OFFICES: ${{ inputs.offices }}
+      RACE_SIGNALS_STATE: ${{ inputs.state }}
+      FEC_MAX_CANDIDATES: ${{ inputs.max_candidates }}
+      FEC_MAX_CANDIDATE_PAGES: ${{ inputs.max_candidate_pages }}
       FEC_REQUEST_DELAY_MS: "4000"
     steps:
       - uses: actions/checkout@v4

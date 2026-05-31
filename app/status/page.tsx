@@ -43,7 +43,7 @@ export default async function StatusPage() {
               {/* Status uses the same square shape with operational meanings, bounded to this page. */}
               <span className="inline-flex flex-wrap items-center gap-x-4 gap-y-2 font-mono text-[11px] uppercase tracking-[0.12em] text-neutral-600">
                 <LegendSquare className="bg-emerald-700" label="Healthy" />
-                <LegendSquare className="bg-amber-700" label="Stale" />
+                <LegendSquare className="bg-amber-700" label="Stale/partial" />
                 <LegendSquare className="bg-red-700" label="Error" />
                 <LegendSquare className="border border-neutral-500" label="No runs" />
               </span>

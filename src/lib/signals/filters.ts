@@ -1,4 +1,5 @@
 export type SignalFilters = {
+  committeeId?: string;
   q?: string;
   raceId?: string;
   state?: string;
@@ -27,6 +28,7 @@ export function signalFiltersFromSearchParams(
 ): SignalFilters {
   return {
     q: first(params.q),
+    committeeId: first(params.committee),
     state: first(params.state),
     office: first(params.office),
     raceId: first(params.race),
@@ -40,6 +42,7 @@ export function signalFiltersFromSearchParams(
 export function signalFiltersFromUrl(url: URL, limit?: number): SignalFilters {
   return {
     q: url.searchParams.get("q") ?? undefined,
+    committeeId: url.searchParams.get("committee") ?? undefined,
     state: url.searchParams.get("state") ?? undefined,
     office: url.searchParams.get("office") ?? undefined,
     raceId: url.searchParams.get("race") ?? undefined,

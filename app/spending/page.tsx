@@ -25,6 +25,7 @@ export default async function SpendingPage({
   const raceId = typeof params.race === "string" ? params.race : undefined;
   const statusFilter = typeof params.status === "string" ? params.status : undefined;
   const since = typeof params.since === "string" ? params.since : undefined;
+  const committeeId = typeof params.committee === "string" ? params.committee : undefined;
   const [signals, races, status, stateSignalCounts] = await Promise.all([
     getSpendingSignals(signalFiltersFromSearchParams(params, 101), sort),
     getRaces(),
@@ -109,6 +110,7 @@ export default async function SpendingPage({
           />
           <div className="border-b border-neutral-300 px-5 py-3 font-mono text-[11px] uppercase tracking-[0.12em] text-neutral-500">
             Showing {visibleSignals.length}{hasMoreSignals ? "+" : ""} outside-spending signals
+            {committeeId ? ` for committee ${committeeId}` : ""}
           </div>
           {visibleSignals.length ? (
             <div className="border-b border-neutral-300">
@@ -323,7 +325,7 @@ function spendingSortHref(
   sort: "amount" | "date",
 ) {
   const next = new URLSearchParams();
-  for (const key of ["q", "state", "office", "race", "status", "since"]) {
+  for (const key of ["q", "state", "office", "race", "status", "since", "committee"]) {
     const value = params[key];
     if (typeof value === "string" && value) next.set(key, value);
   }
@@ -334,7 +336,7 @@ function spendingSortHref(
 
 function spendingExportQuery(params: { [key: string]: string | string[] | undefined }) {
   const next = new URLSearchParams();
-  for (const key of ["q", "state", "office", "race", "status", "since"]) {
+  for (const key of ["q", "state", "office", "race", "status", "since", "committee"]) {
     const value = params[key];
     if (typeof value === "string" && value) next.set(key, value);
   }

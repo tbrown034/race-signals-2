@@ -28,7 +28,7 @@ export default async function SpendersPage() {
             <p className="mt-2 max-w-3xl text-sm leading-5 text-neutral-700">
               Committees ranked by independent expenditure totals in the current
               database slice. Amounts are sourced from FEC Schedule E records and
-              should be checked against the linked Schedule E record before publication.
+              should be checked against the linked records view before publication.
             </p>
           </div>
           <div className="overflow-x-auto">
@@ -85,7 +85,11 @@ export default async function SpendersPage() {
                           </div>
                           <div>
                             <dt className="inline font-mono uppercase tracking-[0.12em] text-neutral-500">Records </dt>
-                            <dd className="inline">{spender.recordCount}</dd>
+                            <dd className="inline">
+                              <Link className="font-medium underline underline-offset-4" href={spenderRecordsHref(spender.committeeId)}>
+                                {spender.recordCount} Schedule E record{spender.recordCount === 1 ? "" : "s"}
+                              </Link>
+                            </dd>
                           </div>
                           <div>
                             <dt className="inline font-mono uppercase tracking-[0.12em] text-neutral-500">Top race </dt>
@@ -102,13 +106,9 @@ export default async function SpendersPage() {
                           <div>
                             <dt className="inline font-mono uppercase tracking-[0.12em] text-neutral-500">Source </dt>
                             <dd className="inline">
-                              {spender.latestScheduleESourceUrl ? (
-                                <a className="font-medium underline underline-offset-4" href={spender.latestScheduleESourceUrl} rel="noreferrer" target="_blank">
-                                  FEC Schedule E
-                                </a>
-                              ) : (
-                                "Schedule E source not stored"
-                              )}
+                              <Link className="font-medium underline underline-offset-4" href={spenderRecordsHref(spender.committeeId)}>
+                                Open contributing records
+                              </Link>
                             </dd>
                           </div>
                         </dl>
@@ -143,17 +143,24 @@ export default async function SpendersPage() {
                       <td className="hidden px-4 py-3 text-right font-mono font-semibold md:table-cell">
                         {formatMoney(spender.totalAmount)}
                       </td>
-                      <td className="hidden px-4 py-3 text-right font-mono md:table-cell">{spender.recordCount}</td>
+                      <td className="hidden px-4 py-3 text-right font-mono md:table-cell">
+                        <Link className="font-medium underline underline-offset-4" href={spenderRecordsHref(spender.committeeId)}>
+                          {spender.recordCount}
+                        </Link>
+                      </td>
                       <td className="hidden px-4 py-3 md:table-cell">
                         <div className="flex flex-col gap-1">
+                          <Link className="font-medium underline underline-offset-4" href={spenderRecordsHref(spender.committeeId)}>
+                            Open contributing records
+                          </Link>
                           {spender.latestScheduleESourceUrl ? (
                             <a
-                              className="font-medium underline underline-offset-4"
+                              className="text-xs underline underline-offset-4"
                               href={spender.latestScheduleESourceUrl}
                               rel="noreferrer"
                               target="_blank"
                             >
-                              FEC Schedule E
+                              Latest FEC source only
                             </a>
                           ) : (
                             <span className="text-neutral-600">Schedule E source not stored</span>
@@ -189,4 +196,10 @@ export default async function SpendersPage() {
       </main>
     </PageShell>
   );
+}
+
+function spenderRecordsHref(committeeId?: string | null) {
+  const params = new URLSearchParams({ type: "large_independent_expenditure" });
+  if (committeeId) params.set("committee", committeeId);
+  return `/spending?${params.toString()}`;
 }

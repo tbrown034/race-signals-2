@@ -317,6 +317,7 @@ export async function getSignals(filters: SignalFilters = {}) {
     const q = filters.q?.toLowerCase();
     return demoSignals.filter((signal) => {
       if (filters.raceId && signal.raceId !== filters.raceId) return false;
+      if (filters.committeeId && signal.committeeId !== filters.committeeId) return false;
       if (filters.state && !signal.raceId?.includes(`-${filters.state}-`)) return false;
       if (filters.office && !signal.raceId?.endsWith(`-${filters.office}`)) return false;
       if (filters.type && signal.signalType !== filters.type) return false;
@@ -332,6 +333,10 @@ export async function getSignals(filters: SignalFilters = {}) {
   if (filters.raceId) {
     values.push(filters.raceId);
     where.push(`s.race_id = $${values.length}`);
+  }
+  if (filters.committeeId) {
+    values.push(filters.committeeId);
+    where.push(`s.committee_id = $${values.length}`);
   }
   if (filters.state) {
     values.push(filters.state);
@@ -406,6 +411,10 @@ export async function getSpendingSignals(
   if (scopedFilters.raceId) {
     values.push(scopedFilters.raceId);
     where.push(`s.race_id = $${values.length}`);
+  }
+  if (scopedFilters.committeeId) {
+    values.push(scopedFilters.committeeId);
+    where.push(`s.committee_id = $${values.length}`);
   }
   if (scopedFilters.state) {
     values.push(scopedFilters.state);

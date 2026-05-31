@@ -5,10 +5,8 @@ import type {
   IndependentExpenditure,
   Race,
   Signal,
-  Transaction,
 } from "@/src/lib/types";
 
-const LARGE_CONTRIBUTION_THRESHOLD = 10000;
 const LARGE_IE_THRESHOLD = 25000;
 const ACTIVITY_SPIKE_THRESHOLD = 50000;
 
@@ -17,7 +15,6 @@ type SignalInput = {
   committees: Committee[];
   races: Race[];
   filings: Filing[];
-  transactions: Transaction[];
   independentExpenditures: IndependentExpenditure[];
   dataFreshness: string;
   status?: string;
@@ -104,40 +101,6 @@ export function generateSignals(input: SignalInput): Signal[] {
     });
   }
 
-  for (const transaction of input.transactions) {
-    if (!transaction.transactionDate || transaction.amount < LARGE_CONTRIBUTION_THRESHOLD) continue;
-    const committee = transaction.committeeId ? committees.get(transaction.committeeId) : undefined;
-    const race = committee?.raceId ? races.get(committee.raceId) : undefined;
-    const candidate = committee?.candidateId ? candidates.get(committee.candidateId) : undefined;
-    signals.push({
-      dedupeKey: `fec:large_contribution:${transaction.sourceId}`,
-      signalType: "large_contribution",
-      headline: `${committee?.name ?? "A committee"} received a $${Math.round(
-        transaction.amount,
-      ).toLocaleString()} contribution.`,
-      whyItMatters:
-        "Large receipts can reveal which campaigns are attracting early institutional support and deserve a closer look at donor networks.",
-      candidateId: candidate?.id ?? null,
-      candidateName: candidate?.name ?? null,
-      committeeId: committee?.id ?? transaction.committeeId ?? null,
-      committeeName: committee?.name ?? null,
-      raceId: race?.id ?? null,
-      raceName: race?.name ?? null,
-      amount: transaction.amount,
-      signalDate: transaction.transactionDate,
-      sourceUrl: transaction.sourceUrl,
-      confidence: transaction.amount >= 100000 ? "low" : "medium",
-      status: transaction.amount >= 100000 ? "review" : status,
-      dataFreshness: input.dataFreshness,
-      metadata: {
-        contributorName: transaction.contributorName,
-        contributorNameNormalized: transaction.contributorNameNormalized,
-        contributorEmployer: transaction.contributorEmployer,
-        contributorEmployerNormalized: transaction.contributorEmployerNormalized,
-      },
-    });
-  }
-
   for (const expenditure of input.independentExpenditures) {
     if (!expenditure.expenditureDate || expenditure.amount < LARGE_IE_THRESHOLD) continue;
     const committee = expenditure.spenderCommitteeId
@@ -171,44 +134,57 @@ export function generateSignals(input: SignalInput): Signal[] {
     });
   }
 
-  const totalsByCommittee = new Map<string, { amount: number; latest: string; count: number }>();
-  for (const transaction of input.transactions) {
-    if (!transaction.committeeId || !transaction.transactionDate) continue;
-    const current = totalsByCommittee.get(transaction.committeeId) ?? {
-      amount: 0,
-      latest: transaction.transactionDate,
-      count: 0,
-    };
-    current.amount += transaction.amount;
-    current.count += 1;
-    if (transaction.transactionDate > current.latest) current.latest = transaction.transactionDate;
-    totalsByCommittee.set(transaction.committeeId, current);
+  const filingsByCommittee = new Map<string, Filing[]>();
+  for (const filing of input.filings) {
+    if (!filing.committeeId || !filing.receiptDate) continue;
+    const committeeFilings = filingsByCommittee.get(filing.committeeId) ?? [];
+    committeeFilings.push(filing);
+    filingsByCommittee.set(filing.committeeId, committeeFilings);
   }
 
-  for (const [committeeId, total] of totalsByCommittee) {
-    if (total.amount < ACTIVITY_SPIKE_THRESHOLD || total.count < 2) continue;
+  for (const [committeeId, committeeFilings] of filingsByCommittee) {
+    const sorted = committeeFilings.sort((a, b) =>
+      String(b.receiptDate).localeCompare(String(a.receiptDate)),
+    );
+    const latest = sorted[0];
+    const prior = sorted[1];
+    if (
+      !latest?.totalReceipts ||
+      !latest.receiptDate ||
+      !prior?.totalReceipts ||
+      latest.totalReceipts < ACTIVITY_SPIKE_THRESHOLD ||
+      latest.totalReceipts < prior.totalReceipts * 2
+    ) {
+      continue;
+    }
     const committee = committees.get(committeeId);
     const race = committee?.raceId ? races.get(committee.raceId) : undefined;
     const candidate = committee?.candidateId ? candidates.get(committee.candidateId) : undefined;
     signals.push({
-      dedupeKey: `fec:activity_spike:${committeeId}:${total.latest}`,
+      dedupeKey: `fec:activity_spike:${latest.sourceId}`,
       signalType: "committee_activity_spike",
-      headline: `${committee?.name ?? "A committee"} showed a receipt spike in ${displayRace(race)}.`,
+      headline: `${committee?.name ?? "A committee"} reported a filing-level receipts spike in ${displayRace(race)}.`,
       whyItMatters:
-        "A cluster of large receipts can signal fundraising momentum or a coordinated push that merits source-level review.",
+        "A sharp increase in report-level receipts can signal fundraising momentum worth source-level review.",
       candidateId: candidate?.id ?? null,
       candidateName: candidate?.name ?? null,
       committeeId,
       committeeName: committee?.name ?? null,
       raceId: race?.id ?? null,
       raceName: race?.name ?? null,
-      amount: total.amount,
-      signalDate: total.latest,
-      sourceUrl: committee?.sourceUrl,
+      amount: latest.totalReceipts,
+      signalDate: latest.receiptDate,
+      sourceUrl: latest.sourceUrl,
       confidence: "medium",
       status,
       dataFreshness: input.dataFreshness,
-      metadata: { transactionCount: total.count },
+      metadata: {
+        latestTotalReceipts: latest.totalReceipts,
+        priorTotalReceipts: prior.totalReceipts,
+        reportType: latest.reportType,
+        coverageStartDate: latest.coverageStartDate,
+        coverageEndDate: latest.coverageEndDate,
+      },
     });
   }
 

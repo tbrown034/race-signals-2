@@ -333,6 +333,35 @@ export async function insertValidationIssues(issues: ValidationIssue[]) {
   }
 }
 
+export async function insertEndpointRuns(
+  runId: string,
+  endpoints: Array<{
+    endpoint: string;
+    status: "success" | "partial" | "failed";
+    recordsFetched: number;
+    validationIssuesCount: number;
+  }>,
+) {
+  const pool = getPool();
+  for (const endpoint of endpoints) {
+    await pool.query(
+      `
+        insert into ingestion_endpoint_runs (
+          ingestion_run_id, endpoint, status, records_fetched, validation_issues_count
+        )
+        values ($1, $2, $3, $4, $5)
+      `,
+      [
+        runId,
+        endpoint.endpoint,
+        endpoint.status,
+        endpoint.recordsFetched,
+        endpoint.validationIssuesCount,
+      ],
+    );
+  }
+}
+
 export type IngestionRunInput = {
   scope: string;
   mode: "watch" | "backfill" | "repair";

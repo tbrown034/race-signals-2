@@ -199,6 +199,17 @@ create table if not exists validation_issues (
   created_at timestamptz not null default now()
 );
 
+create table if not exists ingestion_endpoint_runs (
+  id uuid primary key default gen_random_uuid(),
+  ingestion_run_id uuid references ingestion_runs(id),
+  source text not null default 'fec',
+  endpoint text not null,
+  status text not null,
+  records_fetched integer not null default 0,
+  validation_issues_count integer not null default 0,
+  completed_at timestamptz not null default now()
+);
+
 create index if not exists candidates_race_idx on candidates(race_id);
 create index if not exists committees_candidate_idx on committees(candidate_id);
 create index if not exists committees_race_idx on committees(race_id);
@@ -213,3 +224,4 @@ create index if not exists signals_status_idx on signals(status);
 create index if not exists race_ratings_race_idx on race_ratings(race_id);
 create index if not exists saved_filters_cadence_idx on saved_filters(cadence, last_sent_at);
 create index if not exists ingestion_runs_mode_idx on ingestion_runs(mode, started_at desc);
+create index if not exists ingestion_endpoint_runs_latest_idx on ingestion_endpoint_runs(endpoint, completed_at desc);

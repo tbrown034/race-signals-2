@@ -32,6 +32,44 @@ export default async function StatusPage() {
         </section>
 
         <section className="mt-6 overflow-hidden border border-neutral-300 bg-white">
+          <div className="border-b border-neutral-300 px-5 py-4">
+            <h2 className="text-sm font-semibold uppercase tracking-[0.14em] text-neutral-600">
+              Endpoint freshness
+            </h2>
+          </div>
+          <table className="w-full text-left text-sm">
+            <thead className="bg-neutral-100 text-xs uppercase tracking-[0.12em] text-neutral-500">
+              <tr>
+                <th className="px-4 py-3 font-medium">Endpoint</th>
+                <th className="px-4 py-3 font-medium">Last successful run</th>
+                <th className="px-4 py-3 font-medium">Records fetched</th>
+                <th className="px-4 py-3 font-medium">Validation issues</th>
+                <th className="px-4 py-3 font-medium">Status</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-neutral-200">
+              {status.endpoints.length ? (
+                status.endpoints.map((endpoint) => (
+                  <tr key={endpoint.endpoint}>
+                    <td className="px-4 py-3 font-mono">{endpoint.endpoint}</td>
+                    <td className="px-4 py-3">{formatDateTime(endpoint.completedAt)}</td>
+                    <td className="px-4 py-3">{endpoint.recordsFetched}</td>
+                    <td className="px-4 py-3">{endpoint.validationIssuesCount}</td>
+                    <td className="px-4 py-3">{endpoint.status}</td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td className="px-4 py-3 text-neutral-600" colSpan={5}>
+                    No endpoint-level freshness has been recorded yet.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </section>
+
+        <section className="mt-6 overflow-hidden border border-neutral-300 bg-white">
           <table className="w-full text-left text-sm">
             <thead className="bg-neutral-100 text-xs uppercase tracking-[0.12em] text-neutral-500">
               <tr>

@@ -95,7 +95,6 @@ Initial signal types:
 
 - New candidate committee
 - New filing
-- Large contribution
 - Large independent expenditure
 - Committee activity spike
 

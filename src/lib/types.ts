@@ -154,3 +154,11 @@ export type IngestionRun = {
   errors: unknown[];
   metadata: Record<string, unknown>;
 };
+
+export type EndpointFreshness = {
+  endpoint: string;
+  status: string;
+  recordsFetched: number;
+  validationIssuesCount: number;
+  completedAt: string;
+};

@@ -76,7 +76,6 @@ Useful first-slice endpoints:
 - Candidate search: `/v1/candidates/search/`
 - Candidate committees: `/v1/candidate/{candidate_id}/committees/`
 - Committee reports: `/v1/committee/{committee_id}/reports/`
-- Itemized receipts: `/v1/schedules/schedule_a/`
 - Independent expenditures: `/v1/schedules/schedule_e/`
 
 Official docs note that FEC API data is updated nightly. API calls are limited to 100 results per page. A normal key allows 1,000 calls per hour.
@@ -171,7 +170,6 @@ Initial signal types:
 
 - `new_committee`
 - `new_filing`
-- `large_contribution`
 - `large_independent_expenditure`
 - `outside_spending_increase`
 - `committee_activity_spike`

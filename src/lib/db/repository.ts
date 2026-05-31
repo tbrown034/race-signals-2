@@ -8,7 +8,7 @@ import {
 } from "@/src/lib/demo/data";
 import { hasDatabase, sql } from "@/src/lib/db/client";
 import type { SignalFilters } from "@/src/lib/signals/filters";
-import type { Candidate, Committee, IngestionRun, Race, RaceRating, Signal, Transaction } from "@/src/lib/types";
+import type { Candidate, Committee, EndpointFreshness, IngestionRun, Race, RaceRating, Signal, Transaction } from "@/src/lib/types";
 
 type SignalRow = {
   id: string;
@@ -333,6 +333,7 @@ export async function getStatus() {
         independentExpenditures: demoIndependentExpenditures.length,
         signals: demoSignals.length,
       },
+      endpoints: [],
       mode: "demo",
     };
   }
@@ -363,6 +364,32 @@ export async function getStatus() {
     union all select 'signals', count(*)::text from signals
   `);
 
+  let endpoints: Array<{
+    endpoint: string;
+    status: string;
+    records_fetched: number;
+    validation_issues_count: number;
+    completed_at: string | Date;
+  }> = [];
+  try {
+    endpoints = await sql<{
+      endpoint: string;
+      status: string;
+      records_fetched: number;
+      validation_issues_count: number;
+      completed_at: string | Date;
+    }>(`
+      select distinct on (endpoint)
+        endpoint, status, records_fetched, validation_issues_count, completed_at
+      from ingestion_endpoint_runs
+      order by endpoint, completed_at desc
+    `);
+  } catch (error) {
+    if (!(error instanceof Error) || !error.message.includes("ingestion_endpoint_runs")) {
+      throw error;
+    }
+  }
+
   return {
     runs: runs.map<IngestionRun>((run) => ({
       id: run.id,
@@ -382,6 +409,13 @@ export async function getStatus() {
       metadata: run.metadata,
     })),
     counts: Object.fromEntries(counts.map((row) => [row.name, Number(row.count)])),
+    endpoints: endpoints.map<EndpointFreshness>((endpoint) => ({
+      endpoint: endpoint.endpoint,
+      status: endpoint.status,
+      recordsFetched: endpoint.records_fetched,
+      validationIssuesCount: endpoint.validation_issues_count,
+      completedAt: toIsoString(endpoint.completed_at),
+    })),
     mode: "database",
   };
 }

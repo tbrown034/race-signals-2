@@ -3,6 +3,7 @@ import { migrate } from "@/src/lib/db/schema";
 import {
   createIngestionRun,
   finishIngestionRun,
+  insertEndpointRuns,
   insertValidationIssues,
   upsertCandidates,
   upsertCommittees,
@@ -11,14 +12,12 @@ import {
   upsertRaceRatings,
   upsertRaces,
   upsertSignals,
-  upsertTransactions,
 } from "@/src/lib/db/write";
 import {
   normalizeCandidate,
   normalizeCommittee,
   normalizeFiling,
   normalizeIndependentExpenditure,
-  normalizeTransaction,
 } from "@/src/lib/normalization/fec";
 import { generateSignals } from "@/src/lib/signals/generate";
 import {
@@ -26,7 +25,6 @@ import {
   fetchCandidatesForOffice,
   fetchCommittee,
   fetchIndependentExpendituresForCandidate,
-  fetchReceiptsForCommittee,
   fetchReportsForCommittee,
   type DateWindow,
 } from "@/src/lib/sources/fec/client";
@@ -37,14 +35,12 @@ import {
   validateCommittee,
   validateFiling,
   validateIndependentExpenditure,
-  validateTransaction,
 } from "@/src/lib/validation/rules";
 import type {
   Candidate,
   Committee,
   Filing,
   IndependentExpenditure,
-  Transaction,
   ValidationIssue,
 } from "@/src/lib/types";
 
@@ -134,12 +130,17 @@ async function main() {
     },
   });
   const errors: unknown[] = [];
+  const endpointCounts = {
+    candidates: 0,
+    committees: 0,
+    reports: 0,
+    schedule_e: 0,
+  };
 
   try {
     const candidates: Candidate[] = [];
     const committees: Committee[] = [];
     const filings: Filing[] = [];
-    const transactions: Transaction[] = [];
     const independentExpenditures: IndependentExpenditure[] = [];
     const issues: ValidationIssue[] = [];
 
@@ -153,6 +154,7 @@ async function main() {
         offices.map((office) => fetchCandidatesForOffice(office, cycle, maxCandidatePages, state)),
       )
     ).flat();
+    endpointCounts.candidates += fecCandidates.length;
     const normalizedCandidates = fecCandidates
       .map((record) => normalizeCandidate(record, cycle))
       .filter((candidate) => candidate.raceId && raceIds.has(candidate.raceId))
@@ -165,6 +167,7 @@ async function main() {
     for (const candidate of normalizedCandidates) {
       try {
         const fecCommittees = await fetchCommitteesForCandidate(candidate.fecCandidateId);
+        endpointCounts.committees += fecCommittees.length;
         const normalizedCommittees = fecCommittees.map((record) =>
           normalizeCommittee(record, candidate),
         );
@@ -177,6 +180,7 @@ async function main() {
           cycle,
           dateWindow,
         );
+        endpointCounts.schedule_e += fecIes.length;
         const normalizedIes = fecIes.map((record) =>
           normalizeIndependentExpenditure(record, candidate.raceId),
         );
@@ -194,6 +198,7 @@ async function main() {
         for (const committeeId of orphanSpenderIds) {
           const spender = await fetchCommittee(committeeId);
           if (!spender) continue;
+          endpointCounts.committees += 1;
           const normalizedSpender = normalizeCommittee(spender);
           committees.push(normalizedSpender);
           knownCommitteeIds.add(normalizedSpender.fecCommitteeId);
@@ -206,19 +211,10 @@ async function main() {
             cycle,
             dateWindow,
           );
-          const fecReceipts = await fetchReceiptsForCommittee(
-            committee.fecCommitteeId,
-            cycle,
-            dateWindow,
-          );
+          endpointCounts.reports += fecReports.length;
           const normalizedFilings = fecReports.map(normalizeFiling);
-          const normalizedTransactions = fecReceipts.map(normalizeTransaction);
           filings.push(...normalizedFilings);
-          transactions.push(...normalizedTransactions);
           normalizedFilings.forEach((filing) => issues.push(...validateFiling(filing)));
-          normalizedTransactions.forEach((transaction) =>
-            issues.push(...validateTransaction(transaction)),
-          );
         }
       } catch (error) {
         const message = error instanceof Error ? error.message : String(error);
@@ -240,7 +236,6 @@ async function main() {
       committees,
       races: raceScope,
       filings,
-      transactions,
       independentExpenditures,
       dataFreshness,
       status: mode === "backfill" ? "historical" : "new",
@@ -251,16 +246,24 @@ async function main() {
     await upsertCandidates(candidates);
     await upsertCommittees(committees);
     await upsertFilings(filings);
-    await upsertTransactions(transactions);
     await upsertIndependentExpenditures(independentExpenditures);
     await upsertSignals(signals);
     await insertValidationIssues(issues);
+    await insertEndpointRuns(
+      runId,
+      Object.entries(endpointCounts).map(([endpoint, recordsFetched]) => ({
+        endpoint,
+        status: errors.length ? "partial" : "success",
+        recordsFetched,
+        validationIssuesCount: issues.filter((issue) => endpointForIssue(issue.entityType) === endpoint)
+          .length,
+      })),
+    );
 
     const recordsSeen =
       candidates.length +
       committees.length +
       filings.length +
-      transactions.length +
       independentExpenditures.length +
       signals.length;
     await finishIngestionRun(runId, errors.length ? "partial" : "success", recordsSeen, errors);
@@ -273,6 +276,14 @@ async function main() {
     await finishIngestionRun(runId, "failed", 0, errors);
     throw error;
   }
+}
+
+function endpointForIssue(entityType: string) {
+  if (entityType === "candidate") return "candidates";
+  if (entityType === "committee") return "committees";
+  if (entityType === "filing") return "reports";
+  if (entityType === "independent_expenditure") return "schedule_e";
+  return "unknown";
 }
 
 main().catch((error) => {

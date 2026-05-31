@@ -1,15 +1,12 @@
 import { raceIdFor } from "@/src/lib/scope";
-import { normalizeDonorName, normalizeEmployer } from "@/src/lib/normalization/entities";
 import {
   fecCandidateUrl,
   fecCommitteeUrl,
   fecFilingUrl,
   fecIndependentExpendituresUrl,
-  fecReceiptsUrl,
   type FecCandidate,
   type FecCommittee,
   type FecReport,
-  type FecScheduleA,
   type FecScheduleE,
 } from "@/src/lib/sources/fec/client";
 import type {
@@ -17,7 +14,6 @@ import type {
   Committee,
   Filing,
   IndependentExpenditure,
-  Transaction,
 } from "@/src/lib/types";
 
 export function normalizeCandidate(record: FecCandidate, cycle: number): Candidate {
@@ -70,27 +66,6 @@ export function normalizeFiling(record: FecReport): Filing {
     totalDisbursements: record.total_disbursements ?? null,
     cashOnHand: record.cash_on_hand_end_period ?? null,
     sourceUrl: fecFilingUrl(record.beginning_image_number ?? record.file_number),
-    raw: record,
-  };
-}
-
-export function normalizeTransaction(record: FecScheduleA): Transaction {
-  const contributorName = record.contributor_name ?? null;
-  const contributorEmployer = record.contributor_employer ?? null;
-  return {
-    sourceId: String(record.sub_id ?? ""),
-    committeeId: record.committee_id ? `cmte-${record.committee_id}` : null,
-    fecCommitteeId: record.committee_id ?? null,
-    contributorName,
-    contributorNameNormalized: contributorName ? normalizeDonorName(contributorName) : null,
-    contributorEmployer,
-    contributorEmployerNormalized: contributorEmployer ? normalizeEmployer(contributorEmployer) : null,
-    contributorOccupation: record.contributor_occupation ?? null,
-    amount: record.contribution_receipt_amount ?? 0,
-    transactionDate: record.contribution_receipt_date ?? null,
-    transactionType: record.receipt_type ?? null,
-    memoText: record.memo_text ?? null,
-    sourceUrl: record.committee_id ? fecReceiptsUrl(record.committee_id) : null,
     raw: record,
   };
 }

@@ -6,7 +6,6 @@ const signalTypes = [
   ["", "All signal types"],
   ["new_committee", "New committee"],
   ["new_filing", "New filing"],
-  ["large_contribution", "Large receipt"],
   ["large_independent_expenditure", "Independent expenditure"],
   ["committee_activity_spike", "Activity spike"],
 ];

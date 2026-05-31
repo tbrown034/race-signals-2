@@ -50,18 +50,6 @@ export type FecReport = {
   cash_on_hand_end_period?: number;
 };
 
-export type FecScheduleA = {
-  sub_id?: string;
-  committee_id?: string;
-  contributor_name?: string;
-  contributor_employer?: string;
-  contributor_occupation?: string;
-  contribution_receipt_amount?: number;
-  contribution_receipt_date?: string;
-  receipt_type?: string;
-  memo_text?: string;
-};
-
 export type FecScheduleE = {
   sub_id?: string;
   committee_id?: string;
@@ -234,23 +222,6 @@ export async function fetchReportsForCommittee(
   );
 }
 
-export async function fetchReceiptsForCommittee(
-  committeeId: string,
-  cycle: number,
-  window?: DateWindow,
-) {
-  return firstPages<FecScheduleA>(
-    "/schedules/schedule_a/",
-    {
-      committee_id: committeeId,
-      two_year_transaction_period: cycle,
-      sort: "-contribution_receipt_date",
-      ...dateWindowParams(window),
-    },
-    2,
-  );
-}
-
 export async function fetchIndependentExpendituresForCandidate(
   candidateId: string,
   cycle: number,
@@ -278,10 +249,6 @@ export function fecCommitteeUrl(committeeId: string) {
 
 export function fecFilingUrl(imageOrFile?: string | number | null) {
   return imageOrFile ? `${FEC_WEB_BASE_URL}/filing/${imageOrFile}/` : `${FEC_WEB_BASE_URL}/filings/`;
-}
-
-export function fecReceiptsUrl(committeeId: string) {
-  return `${FEC_WEB_BASE_URL}/receipts/?committee_id=${committeeId}`;
 }
 
 export function fecIndependentExpendituresUrl(candidateId: string) {

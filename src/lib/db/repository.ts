@@ -1300,6 +1300,100 @@ export async function getStatus() {
   };
 }
 
+export async function getCoverageSummary() {
+  if (!hasDatabase()) {
+    return {
+      runs: demoIngestionRuns.slice(0, 1),
+      counts: {
+        races: demoRaces.length,
+        candidates: demoCandidates.length,
+        committees: demoCommittees.length,
+        independentExpenditures: demoIndependentExpenditures.length,
+        signals: demoSignals.length,
+      },
+      endpoints: [] as EndpointFreshness[],
+      mode: "demo",
+    };
+  }
+
+  const [runs, counts, endpoints] = await Promise.all([
+    sql<IngestionRunRow>("select * from ingestion_runs order by started_at desc limit 1"),
+    sql<{ name: string; count: string }>(`
+      select 'races' as name, count(*)::text from races
+      union all select 'candidates', count(*)::text from candidates
+      union all select 'committees', count(*)::text from committees
+      union all select 'independentExpenditures', count(*)::text from independent_expenditures
+      union all select 'signals', count(*)::text from signals
+    `),
+    sql<{
+      endpoint: string;
+      status: string;
+      records_fetched: number;
+      validation_issues_count: number;
+      completed_at: string | Date;
+    }>(`
+      select distinct on (endpoint)
+        endpoint, status, records_fetched, validation_issues_count, completed_at
+      from ingestion_endpoint_runs
+      order by endpoint, completed_at desc
+    `).catch((error) => {
+      if (error instanceof Error && error.message.includes("ingestion_endpoint_runs")) return [];
+      throw error;
+    }),
+  ]);
+
+  return {
+    runs: runs.map(mapIngestionRun),
+    counts: Object.fromEntries(counts.map((row) => [row.name, Number(row.count)])),
+    endpoints: endpoints.map<EndpointFreshness>((endpoint) => ({
+      endpoint: endpoint.endpoint,
+      status: endpoint.status,
+      recordsFetched: endpoint.records_fetched,
+      validationIssuesCount: endpoint.validation_issues_count,
+      completedAt: toIsoString(endpoint.completed_at),
+    })),
+    mode: "database",
+  };
+}
+
+type IngestionRunRow = {
+  id: string;
+  source: string;
+  scope: string;
+  status: string;
+  mode: string;
+  window_start: string | null;
+  window_end: string | null;
+  state: string | null;
+  started_at: string;
+  finished_at: string | null;
+  records_seen: number;
+  records_inserted: number;
+  records_updated: number;
+  errors: unknown[];
+  metadata: Record<string, unknown>;
+};
+
+function mapIngestionRun(run: IngestionRunRow): IngestionRun {
+  return {
+    id: run.id,
+    source: run.source,
+    scope: run.scope,
+    mode: run.mode,
+    status: run.status,
+    windowStart: run.window_start,
+    windowEnd: run.window_end,
+    state: run.state,
+    startedAt: run.started_at,
+    finishedAt: run.finished_at,
+    recordsSeen: run.records_seen,
+    recordsInserted: run.records_inserted,
+    recordsUpdated: run.records_updated,
+    errors: run.errors,
+    metadata: run.metadata,
+  };
+}
+
 async function getTableCounts(tableNames: string[]) {
   const counts = new Map<string, number>();
 

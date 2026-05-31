@@ -3,7 +3,7 @@ import { CoverageStrip } from "@/src/components/coverage-strip";
 import { FeedFilters } from "@/src/components/feed-filters";
 import { PageShell } from "@/src/components/page-shell";
 import { SignalCard } from "@/src/components/signal-card";
-import { getRaces, getSignals, getSignalStateCounts, getStatus } from "@/src/lib/db/repository";
+import { getCoverageSummary, getRaces, getSignals, getSignalStateCounts } from "@/src/lib/db/repository";
 import { signalFiltersFromSearchParams, sinceLabel } from "@/src/lib/signals/filters";
 import type { Metadata } from "next";
 
@@ -57,7 +57,7 @@ export default async function Home({
   const [signals, races, status, stateSignalCounts] = await Promise.all([
     getSignals(signalFiltersFromSearchParams(params, 51)),
     getRaces(),
-    getStatus(),
+    getCoverageSummary(),
     getSignalStateCounts(),
   ]);
   const visibleSignals = signals.slice(0, 50);

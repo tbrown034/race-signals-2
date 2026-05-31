@@ -2,7 +2,7 @@ import Link from "next/link";
 import { CoverageStrip } from "@/src/components/coverage-strip";
 import { FeedFilters } from "@/src/components/feed-filters";
 import { PageShell } from "@/src/components/page-shell";
-import { getRaces, getSignalStateCounts, getSpendingSignals, getStatus } from "@/src/lib/db/repository";
+import { getCoverageSummary, getRaces, getSignalStateCounts, getSpendingSignals } from "@/src/lib/db/repository";
 import { formatDate, formatMoney } from "@/src/lib/format";
 import { signalFiltersFromSearchParams } from "@/src/lib/signals/filters";
 import type { Metadata } from "next";
@@ -28,7 +28,7 @@ export default async function SpendingPage({
   const [signals, races, status, stateSignalCounts] = await Promise.all([
     getSpendingSignals(signalFiltersFromSearchParams(params, 101), sort),
     getRaces(),
-    getStatus(),
+    getCoverageSummary(),
     getSignalStateCounts("large_independent_expenditure"),
   ]);
   const visibleSignals = signals.slice(0, 100);

@@ -1,7 +1,7 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { BrandMark } from "@/src/components/brand-mark";
-import { getStatus } from "@/src/lib/db/repository";
+import { getCoverageSummary } from "@/src/lib/db/repository";
 import { formatDateTime, formatRelativeTime, isOlderThanHours } from "@/src/lib/format";
 
 const nav = [
@@ -14,7 +14,7 @@ const nav = [
 ];
 
 export async function PageShell({ children }: { children: ReactNode }) {
-  const status = await getStatus();
+  const status = await getCoverageSummary();
   const latestRun = status.runs[0];
   const latestFinishedAt = latestRun?.finishedAt ?? latestRun?.startedAt ?? null;
   const stale = isOlderThanHours(latestFinishedAt, 36);

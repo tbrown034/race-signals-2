@@ -11,6 +11,7 @@ export const metadata: Metadata = {
   title: "Outside spending watch",
   description: "Independent expenditure alerts from FEC Schedule E records.",
 };
+export const revalidate = 300;
 
 export default async function SpendingPage({
   searchParams,

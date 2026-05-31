@@ -11,6 +11,7 @@ export const metadata: Metadata = {
   title: "Federal campaign-finance alerts",
   description: "A chronological feed of source-linked FEC campaign-finance signals.",
 };
+export const revalidate = 300;
 
 const quickViews = [
   {

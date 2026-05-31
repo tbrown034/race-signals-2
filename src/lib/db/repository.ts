@@ -23,6 +23,7 @@ import type {
   RaceStats,
   RecentValidationIssue,
   Signal,
+  SourceRecordArchiveSummary,
   StateRaceBoardRow,
   StateSignalFreshness,
   StorageUsage,
@@ -1477,6 +1478,7 @@ export async function getStatus() {
       sourceRecordArchive: {
         count: 0,
         latestFetchedAt: null,
+        tables: [],
       },
       mode: "demo",
     };
@@ -1602,6 +1604,23 @@ export async function getStatus() {
     from source_records
   `);
   const sourceRecordArchiveRow = sourceRecordArchiveRows[0];
+  const sourceRecordArchiveTableRows = await sql<{
+    source: string;
+    source_table: string;
+    count: string;
+    distinct_source_ids: string;
+    latest_fetched_at: string | Date | null;
+  }>(`
+    select
+      source,
+      source_table,
+      count(*)::text as count,
+      count(distinct source_id)::text as distinct_source_ids,
+      max(fetched_at) as latest_fetched_at
+    from source_records
+    group by source, source_table
+    order by max(fetched_at) desc, count(*) desc, source_table
+  `);
   try {
     validationIssues = await sql<{
       rule: string;
@@ -1756,7 +1775,14 @@ export async function getStatus() {
     sourceRecordArchive: {
       count: Number(sourceRecordArchiveRow?.count ?? 0),
       latestFetchedAt: sourceRecordArchiveRow?.latest_fetched_at ? toIsoString(sourceRecordArchiveRow.latest_fetched_at) : null,
-    },
+      tables: sourceRecordArchiveTableRows.map((row) => ({
+        source: row.source,
+        sourceTable: row.source_table,
+        count: Number(row.count),
+        distinctSourceIds: Number(row.distinct_source_ids),
+        latestFetchedAt: row.latest_fetched_at ? toIsoString(row.latest_fetched_at) : null,
+      })),
+    } satisfies SourceRecordArchiveSummary,
     mode: "database",
   };
 }

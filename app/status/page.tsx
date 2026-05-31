@@ -169,6 +169,58 @@ export default async function StatusPage() {
             Database size is {formatBytes(status.storageUsage.databaseSizeBytes)}. The target operating model is Neon free-tier compatible; large storage jumps usually mean an ingest scope changed.
             {" "}Raw source archive: {formatCount(status.sourceRecordArchive.count, "record")} with latest hash refresh {status.sourceRecordArchive.latestFetchedAt ? formatRelativeTime(status.sourceRecordArchive.latestFetchedAt) : "not yet recorded"}.
           </p>
+          {status.sourceRecordArchive.tables.length ? (
+            <div className="mt-4 overflow-x-auto">
+              <table className="w-full min-w-0 text-left text-sm md:min-w-[680px]">
+                <caption className="border-b border-neutral-300 px-4 py-3 text-left text-sm text-neutral-600">
+                  Raw FEC payloads are archived by source type so reporters can see which records back the normalized tables.
+                </caption>
+                <thead className="bg-neutral-100 font-mono text-xs uppercase tracking-[0.12em] text-neutral-500">
+                  <tr>
+                    <th className="px-4 py-3 font-medium" scope="col">Archived source</th>
+                    <th className="hidden px-4 py-3 text-right font-medium md:table-cell" scope="col">Records</th>
+                    <th className="hidden px-4 py-3 text-right font-medium md:table-cell" scope="col">Unique IDs</th>
+                    <th className="hidden px-4 py-3 font-medium md:table-cell" scope="col">Latest refresh</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-neutral-200">
+                  {status.sourceRecordArchive.tables.map((sourceTable) => (
+                    <tr key={`${sourceTable.source}-${sourceTable.sourceTable}`}>
+                      <td className="px-4 py-3">
+                        <span className="block font-medium">{sourceRecordTableLabel(sourceTable.sourceTable)}</span>
+                        <span className="mt-1 block font-mono text-xs uppercase tracking-[0.12em] text-neutral-500">
+                          {sourceTable.source} / {sourceTable.sourceTable}
+                        </span>
+                        <dl className="mt-2 space-y-1 text-xs leading-5 text-neutral-600 md:hidden">
+                          <div>
+                            <dt className="inline font-mono uppercase tracking-[0.12em] text-neutral-500">Records </dt>
+                            <dd className="inline">{sourceTable.count}</dd>
+                          </div>
+                          <div>
+                            <dt className="inline font-mono uppercase tracking-[0.12em] text-neutral-500">Unique IDs </dt>
+                            <dd className="inline">{sourceTable.distinctSourceIds}</dd>
+                          </div>
+                          <div>
+                            <dt className="inline font-mono uppercase tracking-[0.12em] text-neutral-500">Latest </dt>
+                            <dd className="inline">{sourceTable.latestFetchedAt ? formatDateTime(sourceTable.latestFetchedAt) : "Not recorded"}</dd>
+                          </div>
+                        </dl>
+                      </td>
+                      <td className="hidden px-4 py-3 text-right font-mono md:table-cell">{sourceTable.count}</td>
+                      <td className="hidden px-4 py-3 text-right font-mono md:table-cell">{sourceTable.distinctSourceIds}</td>
+                      <td className="hidden px-4 py-3 md:table-cell">
+                        {sourceTable.latestFetchedAt ? formatDateTime(sourceTable.latestFetchedAt) : "Not recorded"}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          ) : (
+            <p className="mt-4 border border-neutral-200 bg-neutral-50 px-4 py-3 text-sm text-neutral-600">
+              No raw source records are archived in this environment. Demo mode does not store FEC payloads.
+            </p>
+          )}
           {status.storageUsage.largestTables.length ? (
             <div className="mt-4 overflow-x-auto">
               <table className="w-full min-w-0 text-left text-sm md:min-w-[560px]">
@@ -809,6 +861,17 @@ function validationRuleLabel(rule: string) {
 function endpointLabel(endpoint: string) {
   if (endpoint === "schedule_a") return "schedule_a (disabled)";
   return endpoint;
+}
+
+function sourceRecordTableLabel(sourceTable: string) {
+  const labels: Record<string, string> = {
+    candidate_totals: "Candidate totals endpoint",
+    candidates: "Candidate search endpoint",
+    committees: "Committee endpoint",
+    filings: "Filings and reports endpoint",
+    schedule_e: "Schedule E independent expenditures",
+  };
+  return labels[sourceTable] ?? sourceTable.replaceAll("_", " ");
 }
 
 function CoverageStat({ label, value }: { label: string; value: number }) {

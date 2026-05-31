@@ -312,3 +312,15 @@ export type StorageUsage = {
     rowCount: number | null;
   }>;
 };
+
+export type SourceRecordArchiveSummary = {
+  count: number;
+  latestFetchedAt?: string | null;
+  tables: Array<{
+    source: string;
+    sourceTable: string;
+    count: number;
+    distinctSourceIds: number;
+    latestFetchedAt?: string | null;
+  }>;
+};

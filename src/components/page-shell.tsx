@@ -1,18 +1,9 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { BrandMark } from "@/src/components/brand-mark";
+import { NavLinks } from "@/src/components/nav-links";
 import { getCoverageSummary } from "@/src/lib/db/repository";
 import { formatDateTime, formatRelativeTime, isOlderThanHours } from "@/src/lib/format";
-
-const nav = [
-  { href: "/", label: "Feed" },
-  { href: "/spending", label: "Spending" },
-  { href: "/records/schedule-e", label: "Records" },
-  { href: "/spenders", label: "Spenders" },
-  { href: "/status", label: "Status" },
-  { href: "/methodology", label: "Method" },
-  { href: "/docs", label: "Docs" },
-];
 
 export async function PageShell({ children }: { children: ReactNode }) {
   const status = await getCoverageSummary();
@@ -41,17 +32,7 @@ export async function PageShell({ children }: { children: ReactNode }) {
             </p>
           </div>
           <div className="w-full max-w-full min-w-0 lg:flex lg:w-auto lg:flex-col lg:items-end lg:gap-2">
-            <nav className="-mx-5 flex max-w-[calc(100vw-1rem)] flex-nowrap gap-x-2 overflow-x-auto px-5 pb-1 text-[12px] whitespace-nowrap sm:mx-0 sm:max-w-full sm:flex-wrap sm:gap-x-4 sm:px-0 sm:pb-0 sm:text-sm">
-              {nav.map((item) => (
-                <Link
-                  className="shrink-0 font-medium text-neutral-700 underline-offset-4 hover:underline"
-                  href={item.href}
-                  key={item.href}
-                >
-                  {item.label}
-                </Link>
-              ))}
-            </nav>
+            <NavLinks />
             <Link
               className={`mt-1 block max-w-full font-mono text-[10px] uppercase tracking-[0.12em] underline-offset-4 hover:underline sm:text-[11px] lg:mt-0 ${stale ? "font-semibold text-neutral-950" : "text-neutral-500"}`}
               href="/status"

@@ -1565,6 +1565,7 @@ export async function getStatus() {
     total_receipts_cycle: string | null;
     committee_count: string;
     filing_count: string;
+    independent_expenditure_count: string;
     totals_updated_at: string | Date | null;
     totals_fetched_at: string | Date | null;
     source_url: string | null;
@@ -1700,6 +1701,7 @@ export async function getStatus() {
     total_receipts_cycle: string | null;
     committee_count: string;
     filing_count: string;
+    independent_expenditure_count: string;
     totals_updated_at: string | Date | null;
     totals_fetched_at: string | Date | null;
     source_url: string | null;
@@ -1713,6 +1715,7 @@ export async function getStatus() {
       c.total_receipts_cycle::text as total_receipts_cycle,
       count(distinct cm.id)::text as committee_count,
       count(distinct f.source_id)::text as filing_count,
+      count(distinct ie.source_id)::text as independent_expenditure_count,
       c.totals_updated_at,
       c.totals_fetched_at,
       c.source_url
@@ -1720,6 +1723,7 @@ export async function getStatus() {
     left join races r on r.id = c.race_id
     left join committees cm on cm.candidate_id = c.id
     left join filings f on f.committee_id = cm.id
+    left join independent_expenditures ie on ie.candidate_id = c.id
     left join signals s on s.candidate_id = c.id
     group by c.id, r.name
     having count(s.id) = 0
@@ -1777,6 +1781,7 @@ export async function getStatus() {
       totalReceiptsCycle: candidate.total_receipts_cycle === null ? null : Number(candidate.total_receipts_cycle),
       committeeCount: Number(candidate.committee_count),
       filingCount: Number(candidate.filing_count),
+      independentExpenditureCount: Number(candidate.independent_expenditure_count),
       totalsUpdatedAt: candidate.totals_updated_at ? toIsoString(candidate.totals_updated_at) : null,
       totalsFetchedAt: candidate.totals_fetched_at ? toIsoString(candidate.totals_fetched_at) : null,
       sourceUrl: candidate.source_url,

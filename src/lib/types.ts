@@ -301,6 +301,7 @@ export type CandidateSignalGap = {
   totalReceiptsCycle?: number | null;
   committeeCount?: number;
   filingCount?: number;
+  independentExpenditureCount?: number;
   totalsUpdatedAt?: string | null;
   totalsFetchedAt?: string | null;
   sourceUrl?: string | null;

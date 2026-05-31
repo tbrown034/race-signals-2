@@ -58,7 +58,7 @@ export function FeedFilters({
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const hasFilters = Boolean(q || state || office || raceId || type || status || since);
+  const hasFilters = Boolean(q || state || office || raceId || status || since || (!lockedType && type));
   const [selectedState, setSelectedState] = useState(state ?? "");
   const [selectedOffice, setSelectedOffice] = useState(office ?? "");
   const [selectedRaceId, setSelectedRaceId] = useState(raceId ?? "");

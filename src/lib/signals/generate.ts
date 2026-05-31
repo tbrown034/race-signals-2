@@ -53,10 +53,10 @@ export function generateSignals(input: SignalInput): Signal[] {
   const status = input.status ?? "new";
 
   for (const committee of input.committees) {
-    if (committee.designation !== "P" || !committee.sourceUrl) continue;
+    if (committee.designation !== "P" || !committee.sourceUrl || !committee.firstFileDate) continue;
     const race = committee.raceId ? races.get(committee.raceId) : undefined;
     const candidate = committee.candidateId ? candidates.get(committee.candidateId) : undefined;
-    const signalDate = committee.firstFileDate ?? input.dataFreshness.slice(0, 10);
+    const signalDate = committee.firstFileDate;
     if (!isCurrentCycleRecord(signalDate, race)) continue;
     const committeeCopy = newCommitteeCopy(candidate, race);
     signals.push({

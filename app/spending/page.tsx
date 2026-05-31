@@ -118,12 +118,12 @@ export default async function SpendingPage({
                     <tr>
                       <th className="px-4 py-3 font-medium" scope="col">Date</th>
                       <th className="px-4 py-3 font-medium" scope="col">Alert</th>
+                      <th className="px-4 py-3 text-right font-medium" scope="col">Amount</th>
                       <th className="px-4 py-3 font-medium" scope="col">Spender</th>
                       <th className="px-4 py-3 font-medium" scope="col">Target</th>
                       <th className="px-4 py-3 font-medium" scope="col">Position</th>
                       <th className="px-4 py-3 font-medium" scope="col">Purpose</th>
                       <th className="px-4 py-3 font-medium" scope="col">Race</th>
-                      <th className="px-4 py-3 text-right font-medium" scope="col">Amount</th>
                       <th className="px-4 py-3 font-medium" scope="col">Source</th>
                     </tr>
                   </thead>
@@ -135,6 +135,9 @@ export default async function SpendingPage({
                           <Link className="font-medium underline underline-offset-4" href={`/#${signalAnchorId(signal.dedupeKey)}`}>
                             {signal.headline}
                           </Link>
+                        </td>
+                        <td className="px-4 py-3 text-right font-mono font-semibold">
+                          {formatMoney(signal.amount)}
                         </td>
                         <td className="px-4 py-3">
                           <EntityLink
@@ -162,9 +165,6 @@ export default async function SpendingPage({
                           ) : (
                             "Unmatched"
                           )}
-                        </td>
-                        <td className="px-4 py-3 text-right font-mono font-semibold">
-                          {formatMoney(signal.amount)}
                         </td>
                         <td className="px-4 py-3">
                           {signal.sourceUrl ? (

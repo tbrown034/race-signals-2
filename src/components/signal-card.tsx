@@ -135,7 +135,7 @@ export function SignalCard({ signal }: { signal: Signal }) {
             rel="noreferrer"
             target="_blank"
           >
-            FEC source
+            {fecSourceLabel(signal)}
           </a>
         ) : (
           <span>Source not publishable</span>
@@ -167,6 +167,17 @@ function isIncumbentStatus(status?: string | null) {
 
 function signalAnchorId(signal: Signal) {
   return `signal-${signal.dedupeKey.replace(/[^a-zA-Z0-9_-]/g, "-")}`;
+}
+
+function fecSourceLabel(signal: Signal) {
+  const sourceKind = textMetadata(signal.metadata?.sourceKind);
+  if (sourceKind === "committee") return "FEC committee";
+  if (sourceKind === "filing") return "FEC filing";
+  if (sourceKind === "schedule_e") return "FEC Schedule E";
+  if (signal.signalType === "new_committee") return "FEC committee";
+  if (signal.signalType === "new_filing" || signal.signalType === "committee_activity_spike") return "FEC filing";
+  if (signal.signalType === "large_independent_expenditure") return "FEC Schedule E";
+  return "FEC source";
 }
 
 function reviewReason(signal: Signal) {

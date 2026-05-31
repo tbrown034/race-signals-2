@@ -291,10 +291,32 @@ export async function insertValidationIssues(issues: ValidationIssue[]) {
   }
 }
 
-export async function createIngestionRun(scope: string) {
+export type IngestionRunInput = {
+  scope: string;
+  mode: "watch" | "backfill" | "repair";
+  windowStart?: string | null;
+  windowEnd?: string | null;
+  state?: string | null;
+  metadata?: Record<string, unknown>;
+};
+
+export async function createIngestionRun(input: IngestionRunInput) {
   const rows = await getPool().query<{ id: string }>(
-    "insert into ingestion_runs (source, scope, status) values ('fec', $1, 'running') returning id",
-    [scope],
+    `
+      insert into ingestion_runs (
+        source, scope, mode, status, window_start, window_end, state, metadata
+      )
+      values ('fec', $1, $2, 'running', $3, $4, $5, $6)
+      returning id
+    `,
+    [
+      input.scope,
+      input.mode,
+      input.windowStart,
+      input.windowEnd,
+      input.state,
+      JSON.stringify(input.metadata ?? {}),
+    ],
   );
   return rows.rows[0].id;
 }

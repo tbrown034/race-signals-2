@@ -117,7 +117,11 @@ export type IngestionRun = {
   id: string;
   source: string;
   scope: string;
+  mode?: string;
   status: string;
+  windowStart?: string | null;
+  windowEnd?: string | null;
+  state?: string | null;
   startedAt: string;
   finishedAt?: string | null;
   recordsSeen: number;

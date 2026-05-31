@@ -36,8 +36,10 @@ export default async function StatusPage() {
             <thead className="bg-neutral-100 text-xs uppercase tracking-[0.12em] text-neutral-500">
               <tr>
                 <th className="px-4 py-3 font-medium">Source</th>
+                <th className="px-4 py-3 font-medium">Mode</th>
                 <th className="px-4 py-3 font-medium">Scope</th>
                 <th className="px-4 py-3 font-medium">Status</th>
+                <th className="px-4 py-3 font-medium">Window</th>
                 <th className="px-4 py-3 font-medium">Finished</th>
                 <th className="px-4 py-3 font-medium">Records</th>
               </tr>
@@ -46,8 +48,14 @@ export default async function StatusPage() {
               {status.runs.map((run) => (
                 <tr key={run.id}>
                   <td className="px-4 py-3">{run.source}</td>
+                  <td className="px-4 py-3">{run.mode ?? "watch"}</td>
                   <td className="px-4 py-3">{run.scope}</td>
                   <td className="px-4 py-3">{run.status}</td>
+                  <td className="px-4 py-3">
+                    {run.windowStart && run.windowEnd
+                      ? `${run.windowStart} to ${run.windowEnd}`
+                      : "Current"}
+                  </td>
                   <td className="px-4 py-3">{formatDateTime(run.finishedAt ?? run.startedAt)}</td>
                   <td className="px-4 py-3">{run.recordsSeen}</td>
                 </tr>

@@ -20,6 +20,7 @@ type SignalInput = {
   transactions: Transaction[];
   independentExpenditures: IndependentExpenditure[];
   dataFreshness: string;
+  status?: string;
 };
 
 function candidateById(candidates: Candidate[]) {
@@ -50,6 +51,7 @@ export function generateSignals(input: SignalInput): Signal[] {
   const committees = committeeById(input.committees);
   const races = raceById(input.races);
   const signals: Signal[] = [];
+  const status = input.status ?? "new";
 
   for (const committee of input.committees) {
     if (committee.designation !== "P") continue;
@@ -70,7 +72,7 @@ export function generateSignals(input: SignalInput): Signal[] {
       signalDate: input.dataFreshness.slice(0, 10),
       sourceUrl: committee.sourceUrl,
       confidence: "high",
-      status: "new",
+      status,
       dataFreshness: input.dataFreshness,
     });
   }
@@ -96,7 +98,7 @@ export function generateSignals(input: SignalInput): Signal[] {
       signalDate: filing.receiptDate,
       sourceUrl: filing.sourceUrl,
       confidence: "high",
-      status: "new",
+      status,
       dataFreshness: input.dataFreshness,
     });
   }
@@ -124,7 +126,7 @@ export function generateSignals(input: SignalInput): Signal[] {
       signalDate: transaction.transactionDate,
       sourceUrl: transaction.sourceUrl,
       confidence: transaction.amount >= 100000 ? "low" : "medium",
-      status: transaction.amount >= 100000 ? "review" : "new",
+      status: transaction.amount >= 100000 ? "review" : status,
       dataFreshness: input.dataFreshness,
       metadata: { contributorName: transaction.contributorName },
     });
@@ -157,7 +159,7 @@ export function generateSignals(input: SignalInput): Signal[] {
       signalDate: expenditure.expenditureDate,
       sourceUrl: expenditure.sourceUrl,
       confidence: expenditure.amount >= 100000 ? "medium" : "high",
-      status: expenditure.amount >= 100000 ? "review" : "new",
+      status: expenditure.amount >= 100000 ? "review" : status,
       dataFreshness: input.dataFreshness,
       metadata: { supportOpposeIndicator: expenditure.supportOpposeIndicator },
     });
@@ -198,7 +200,7 @@ export function generateSignals(input: SignalInput): Signal[] {
       signalDate: total.latest,
       sourceUrl: committee?.sourceUrl,
       confidence: "medium",
-      status: "new",
+      status,
       dataFreshness: input.dataFreshness,
       metadata: { transactionCount: total.count },
     });

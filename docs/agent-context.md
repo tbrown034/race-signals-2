@@ -85,12 +85,17 @@ The local `.env.local` includes `FEC_API_KEY`. Keep demo fallback mode available
 
 Ingestion controls:
 
+- `INGESTION_MODE` can be `watch`, `backfill`, or `repair`.
+- `BACKFILL_START_DATE` and `BACKFILL_END_DATE` are required for backfill mode.
+- `RACE_SIGNALS_STATE` limits a run to one state.
 - `FEC_MAX_CANDIDATE_PAGES` limits national candidate discovery pages.
 - `FEC_MAX_CANDIDATES` limits downstream candidate processing.
 - `FEC_REQUEST_DELAY_MS` paces API calls. Default is 4000 ms to stay under the normal 1,000-calls/hour FEC limit.
 - `FEC_MAX_RETRIES` controls retry attempts for 429/5xx responses.
 
 National ingestion should be paced and scheduled. Do not put broad FEC ingestion in a route handler.
+
+Backfilled signals must use the original event date as `signal_date` and `status = historical`. Do not present old backfilled records as fresh changes.
 
 ## National House Scope
 

@@ -100,6 +100,8 @@ Initial signal types:
 
 Each signal includes a type, headline, why-it-matters explanation, related candidate/committee/race, amount when relevant, signal date, FEC source URL, confidence/status and data freshness timestamp.
 
+Backfill mode generates historical signals from the requested date window. Those signals preserve the original event date in `signal_date` and use `status = historical` so old records do not look like fresh alerts.
+
 ## Known Limitations
 
 - Coverage is national for 2026 U.S. House races, but not for Senate, presidential, state or local races.
@@ -135,6 +137,12 @@ Then run:
 
 ```bash
 npm run ingest
+```
+
+Backfill a bounded historical window:
+
+```bash
+INGESTION_MODE=backfill BACKFILL_START_DATE=2025-01-01 BACKFILL_END_DATE=2025-03-31 RACE_SIGNALS_STATE=IN npm run ingest
 ```
 
 Useful ingestion controls:

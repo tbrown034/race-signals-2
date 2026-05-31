@@ -13,8 +13,9 @@ export default async function Home({
   const state = typeof params.state === "string" ? params.state : undefined;
   const raceId = typeof params.race === "string" ? params.race : undefined;
   const type = typeof params.type === "string" ? params.type : undefined;
+  const statusFilter = typeof params.status === "string" ? params.status : undefined;
   const [signals, races, status] = await Promise.all([
-    getSignals({ q, state, raceId, type, limit: 50 }),
+    getSignals({ q, state, raceId, type, status: statusFilter, limit: 50 }),
     getRaces(),
     getStatus(),
   ]);
@@ -36,7 +37,14 @@ export default async function Home({
               decide whether to follow up.
             </p>
           </div>
-          <FeedFilters races={races} q={q} state={state} raceId={raceId} type={type} />
+          <FeedFilters
+            races={races}
+            q={q}
+            state={state}
+            raceId={raceId}
+            type={type}
+            status={statusFilter}
+          />
           {signals.length ? (
             signals.map((signal) => <SignalCard signal={signal} key={signal.dedupeKey} />)
           ) : (

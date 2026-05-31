@@ -26,6 +26,7 @@ import {
   fetchIndependentExpendituresForCandidate,
   fetchReceiptsForCommittee,
   fetchReportsForCommittee,
+  type DateWindow,
 } from "@/src/lib/sources/fec/client";
 import { DEFAULT_CYCLE, TARGET_RACES } from "@/src/lib/scope";
 import {
@@ -53,6 +54,28 @@ function numberFromEnv(name: string) {
   return Number.isFinite(parsed) && parsed > 0 ? parsed : undefined;
 }
 
+function envValue(name: string) {
+  const value = process.env[name];
+  return value && value.trim() ? value.trim() : undefined;
+}
+
+function dateFromEnv(name: string) {
+  const value = envValue(name);
+  if (!value) return undefined;
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+    throw new Error(`${name} must use YYYY-MM-DD format.`);
+  }
+  return value;
+}
+
+function ingestionMode() {
+  const mode = envValue("INGESTION_MODE") ?? "watch";
+  if (!["watch", "backfill", "repair"].includes(mode)) {
+    throw new Error("INGESTION_MODE must be watch, backfill, or repair.");
+  }
+  return mode as "watch" | "backfill" | "repair";
+}
+
 async function main() {
   if (!process.env.DATABASE_URL) {
     throw new Error("DATABASE_URL is required to ingest FEC data.");
@@ -65,8 +88,36 @@ async function main() {
   const cycle = numberFromEnv("RACE_SIGNALS_CYCLE") ?? DEFAULT_CYCLE;
   const maxCandidatePages = numberFromEnv("FEC_MAX_CANDIDATE_PAGES");
   const maxCandidates = numberFromEnv("FEC_MAX_CANDIDATES");
-  const runScope = `${cycle} national House candidate scope`;
-  const runId = await createIngestionRun(runScope);
+  const mode = ingestionMode();
+  const state = envValue("RACE_SIGNALS_STATE")?.toUpperCase();
+  const dateWindow: DateWindow = {
+    startDate: dateFromEnv("BACKFILL_START_DATE"),
+    endDate: dateFromEnv("BACKFILL_END_DATE"),
+  };
+  if (mode === "backfill" && (!dateWindow.startDate || !dateWindow.endDate)) {
+    throw new Error("Backfill mode requires BACKFILL_START_DATE and BACKFILL_END_DATE.");
+  }
+  if (
+    dateWindow.startDate &&
+    dateWindow.endDate &&
+    dateWindow.startDate > dateWindow.endDate
+  ) {
+    throw new Error("BACKFILL_START_DATE must be before or equal to BACKFILL_END_DATE.");
+  }
+
+  const runScope = `${cycle} ${state ? `${state} ` : "national "}House ${mode}`;
+  const runId = await createIngestionRun({
+    scope: runScope,
+    mode,
+    windowStart: dateWindow.startDate,
+    windowEnd: dateWindow.endDate,
+    state,
+    metadata: {
+      maxCandidatePages,
+      maxCandidates,
+      requestDelayMs: process.env.FEC_REQUEST_DELAY_MS,
+    },
+  });
   const errors: unknown[] = [];
 
   try {
@@ -77,9 +128,11 @@ async function main() {
     const independentExpenditures: IndependentExpenditure[] = [];
     const issues: ValidationIssue[] = [];
 
-    const raceScope = TARGET_RACES.filter((race) => race.cycle === cycle);
+    const raceScope = TARGET_RACES.filter(
+      (race) => race.cycle === cycle && (!state || race.state === state),
+    );
     const raceIds = new Set(raceScope.map((race) => race.id));
-    const fecCandidates = await fetchHouseCandidates(cycle, maxCandidatePages);
+    const fecCandidates = await fetchHouseCandidates(cycle, maxCandidatePages, state);
     const normalizedCandidates = fecCandidates
       .map((record) => normalizeCandidate(record, cycle))
       .filter((candidate) => candidate.raceId && raceIds.has(candidate.raceId))
@@ -100,6 +153,7 @@ async function main() {
         const fecIes = await fetchIndependentExpendituresForCandidate(
           candidate.fecCandidateId,
           cycle,
+          dateWindow,
         );
         const normalizedIes = fecIes.map((record) =>
           normalizeIndependentExpenditure(record, candidate.raceId),
@@ -108,8 +162,16 @@ async function main() {
         normalizedIes.forEach((ie) => issues.push(...validateIndependentExpenditure(ie)));
 
         for (const committee of normalizedCommittees) {
-          const fecReports = await fetchReportsForCommittee(committee.fecCommitteeId, cycle);
-          const fecReceipts = await fetchReceiptsForCommittee(committee.fecCommitteeId, cycle);
+          const fecReports = await fetchReportsForCommittee(
+            committee.fecCommitteeId,
+            cycle,
+            dateWindow,
+          );
+          const fecReceipts = await fetchReceiptsForCommittee(
+            committee.fecCommitteeId,
+            cycle,
+            dateWindow,
+          );
           const normalizedFilings = fecReports.map(normalizeFiling);
           const normalizedTransactions = fecReceipts.map(normalizeTransaction);
           filings.push(...normalizedFilings);
@@ -142,6 +204,7 @@ async function main() {
       transactions,
       independentExpenditures,
       dataFreshness,
+      status: mode === "backfill" ? "historical" : "new",
     });
 
     await upsertRaces(raceScope);

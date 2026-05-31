@@ -60,6 +60,7 @@ export async function getSignals(filters: {
   raceId?: string;
   state?: string;
   type?: string;
+  status?: string;
   limit?: number;
 } = {}) {
   if (!hasDatabase()) {
@@ -68,6 +69,7 @@ export async function getSignals(filters: {
       if (filters.raceId && signal.raceId !== filters.raceId) return false;
       if (filters.state && !signal.raceId?.includes(`-${filters.state}-`)) return false;
       if (filters.type && signal.signalType !== filters.type) return false;
+      if (filters.status && signal.status !== filters.status) return false;
       if (q && !`${signal.headline} ${signal.whyItMatters}`.toLowerCase().includes(q)) {
         return false;
       }
@@ -88,6 +90,10 @@ export async function getSignals(filters: {
   if (filters.type) {
     values.push(filters.type);
     where.push(`s.signal_type = $${values.length}`);
+  }
+  if (filters.status) {
+    values.push(filters.status);
+    where.push(`s.status = $${values.length}`);
   }
   if (filters.q) {
     values.push(`%${filters.q}%`);
@@ -223,6 +229,10 @@ export async function getStatus() {
     source: string;
     scope: string;
     status: string;
+    mode: string;
+    window_start: string | null;
+    window_end: string | null;
+    state: string | null;
     started_at: string;
     finished_at: string | null;
     records_seen: number;
@@ -245,7 +255,11 @@ export async function getStatus() {
       id: run.id,
       source: run.source,
       scope: run.scope,
+      mode: run.mode,
       status: run.status,
+      windowStart: run.window_start,
+      windowEnd: run.window_end,
+      state: run.state,
       startedAt: run.started_at,
       finishedAt: run.finished_at,
       recordsSeen: run.records_seen,

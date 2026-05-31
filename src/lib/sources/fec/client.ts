@@ -146,12 +146,29 @@ async function firstPages<T>(
   return records;
 }
 
-export async function fetchHouseCandidates(cycle: number, maxPages?: number) {
+export type DateWindow = {
+  startDate?: string;
+  endDate?: string;
+};
+
+function dateWindowParams(window?: DateWindow) {
+  return {
+    min_date: window?.startDate,
+    max_date: window?.endDate,
+  };
+}
+
+export async function fetchHouseCandidates(
+  cycle: number,
+  maxPages?: number,
+  state?: string,
+) {
   return firstPages<FecCandidate>(
     "/candidates/search/",
     {
       office: "H",
       election_year: cycle,
+      state,
       sort: "name",
     },
     maxPages,
@@ -182,36 +199,52 @@ export async function fetchCommitteesForCandidate(candidateId: string) {
   );
 }
 
-export async function fetchReportsForCommittee(committeeId: string, cycle: number) {
+export async function fetchReportsForCommittee(
+  committeeId: string,
+  cycle: number,
+  window?: DateWindow,
+) {
   return firstPages<FecReport>(
     `/committee/${committeeId}/reports/`,
     {
       report_year: cycle,
       sort: "-receipt_date",
+      min_receipt_date: window?.startDate,
+      max_receipt_date: window?.endDate,
     },
     2,
   );
 }
 
-export async function fetchReceiptsForCommittee(committeeId: string, cycle: number) {
+export async function fetchReceiptsForCommittee(
+  committeeId: string,
+  cycle: number,
+  window?: DateWindow,
+) {
   return firstPages<FecScheduleA>(
     "/schedules/schedule_a/",
     {
       committee_id: committeeId,
       two_year_transaction_period: cycle,
       sort: "-contribution_receipt_date",
+      ...dateWindowParams(window),
     },
     2,
   );
 }
 
-export async function fetchIndependentExpendituresForCandidate(candidateId: string, cycle: number) {
+export async function fetchIndependentExpendituresForCandidate(
+  candidateId: string,
+  cycle: number,
+  window?: DateWindow,
+) {
   return firstPages<FecScheduleE>(
     "/schedules/schedule_e/",
     {
       candidate_id: candidateId,
       two_year_transaction_period: cycle,
       sort: "-expenditure_date",
+      ...dateWindowParams(window),
     },
     2,
   );

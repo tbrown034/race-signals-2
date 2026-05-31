@@ -149,6 +149,11 @@ create table if not exists ingestion_runs (
   metadata jsonb not null default '{}'::jsonb
 );
 
+alter table ingestion_runs add column if not exists mode text not null default 'watch';
+alter table ingestion_runs add column if not exists window_start date;
+alter table ingestion_runs add column if not exists window_end date;
+alter table ingestion_runs add column if not exists state text;
+
 create table if not exists validation_issues (
   id uuid primary key default gen_random_uuid(),
   source text not null,
@@ -171,3 +176,5 @@ create index if not exists independent_expenditures_race_date_idx on independent
 create index if not exists signals_date_idx on signals(signal_date desc, created_at desc);
 create index if not exists signals_type_idx on signals(signal_type);
 create index if not exists signals_race_idx on signals(race_id);
+create index if not exists signals_status_idx on signals(status);
+create index if not exists ingestion_runs_mode_idx on ingestion_runs(mode, started_at desc);

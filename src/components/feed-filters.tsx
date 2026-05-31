@@ -10,21 +10,31 @@ const signalTypes = [
   ["committee_activity_spike", "Activity spike"],
 ];
 
+const statuses = [
+  ["", "All statuses"],
+  ["new", "New"],
+  ["historical", "Historical"],
+  ["review", "Review"],
+  ["demo", "Demo"],
+];
+
 export function FeedFilters({
   races,
   q,
   state,
   raceId,
   type,
+  status,
 }: {
   races: Race[];
   q?: string;
   state?: string;
   raceId?: string;
   type?: string;
+  status?: string;
 }) {
   return (
-    <form className="grid gap-3 border-b border-neutral-300 bg-white p-4 md:grid-cols-[1fr_140px_220px_240px_auto]">
+    <form className="grid gap-3 border-b border-neutral-300 bg-white p-4 md:grid-cols-[1fr_120px_180px_220px_160px_auto]">
       <input
         className="h-10 border border-neutral-300 bg-white px-3 text-sm outline-none focus:border-neutral-700"
         defaultValue={q}
@@ -59,6 +69,17 @@ export function FeedFilters({
       </select>
       <select className="h-10 border border-neutral-300 bg-white px-3 text-sm" defaultValue={type ?? ""} name="type">
         {signalTypes.map(([value, label]) => (
+          <option value={value} key={value}>
+            {label}
+          </option>
+        ))}
+      </select>
+      <select
+        className="h-10 border border-neutral-300 bg-white px-3 text-sm"
+        defaultValue={status ?? ""}
+        name="status"
+      >
+        {statuses.map(([value, label]) => (
           <option value={value} key={value}>
             {label}
           </option>

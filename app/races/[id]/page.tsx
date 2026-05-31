@@ -7,7 +7,14 @@ import { IncumbentBadge } from "@/src/components/incumbent-badge";
 import { PageShell } from "@/src/components/page-shell";
 import { PartySquare } from "@/src/components/party-square";
 import { ReporterRead } from "@/src/components/reporter-read";
-import { getCandidatesForRace, getRace, getRaceElections, getRaceRatings, getSignalsForEntity } from "@/src/lib/db/repository";
+import {
+  getCandidatesForRace,
+  getRace,
+  getRaceElections,
+  getRaceRatings,
+  getRaceStats,
+  getSignalsForEntity,
+} from "@/src/lib/db/repository";
 import { formatMoney } from "@/src/lib/format";
 
 export default async function RacePage({
@@ -16,12 +23,13 @@ export default async function RacePage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const [race, signals, ratings, candidates, elections] = await Promise.all([
+  const [race, signals, ratings, candidates, elections, stats] = await Promise.all([
     getRace(id),
     getSignalsForEntity("race", id),
     getRaceRatings(id),
     getCandidatesForRace(id),
     getRaceElections(id),
+    getRaceStats(id),
   ]);
 
   if (!race) notFound();
@@ -66,12 +74,19 @@ export default async function RacePage({
           notes={[
             `${candidates.length} FEC candidates matched to this race; ${candidatesWithMoney} currently show cycle receipts in the FEC totals endpoint.`,
             `Known candidate receipts in this slice total ${formatMoney(totalReceipts) ?? "$0"}. Use this as FEC-filed activity, not a race forecast.`,
+            `Schedule E independent expenditures currently total ${formatMoney(stats.totalIndependentExpenditures) ?? "$0"} in this race slice.`,
             `${signals.length} related signals: ${signalCounts.filings} filings, ${signalCounts.committees} committee records, ${signalCounts.outsideSpending} outside-spending alerts, ${signalCounts.review} review flags.`,
             incumbentCount
               ? `${incumbentCount} incumbent candidate${incumbentCount === 1 ? " is" : "s are"} present; compare committee and filing activity against challenger organization before treating paperwork as a launch signal.`
               : "No incumbent candidate is currently matched in this slice; verify ballot and primary context with election-office sources.",
-          ]}
+            ]}
         />
+        <div className="grid gap-px border-b border-neutral-300 bg-neutral-300 sm:grid-cols-4">
+          <RaceStat label="Cohort receipts" value={formatMoney(stats.totalRaised) ?? "$0"} />
+          <RaceStat label="Outside spending" value={formatMoney(stats.totalIndependentExpenditures) ?? "$0"} />
+          <RaceStat label="Candidates filed" value={String(stats.candidateCount)} />
+          <RaceStat label="Incumbents" value={String(stats.incumbentCount)} />
+        </div>
         <ElectionTimeline
           elections={elections}
           emptyText={`No election timeline available for this race. Wikidata and Wikipedia coverage of congressional primaries can be thin - follow the ${race.state} secretary of state for authoritative results.`}
@@ -89,10 +104,10 @@ export default async function RacePage({
               <table className="w-full text-left text-sm">
                 <thead className="bg-neutral-100 font-mono text-xs uppercase tracking-[0.12em] text-neutral-500">
                   <tr>
-                    <th className="px-4 py-3 font-medium">Candidate</th>
-                    <th className="px-4 py-3 font-medium">Party</th>
-                    <th className="px-4 py-3 text-right font-medium">Receipts</th>
-                    <th className="px-4 py-3 text-right font-medium">Cash</th>
+                    <th className="px-4 py-3 font-medium" scope="col">Candidate</th>
+                    <th className="px-4 py-3 font-medium" scope="col">Party</th>
+                    <th className="px-4 py-3 text-right font-medium" scope="col">Receipts</th>
+                    <th className="px-4 py-3 text-right font-medium" scope="col">Cash</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-neutral-200">
@@ -162,4 +177,13 @@ function countSignals(signals: Awaited<ReturnType<typeof getSignalsForEntity>>) 
     outsideSpending: signals.filter((signal) => signal.signalType === "large_independent_expenditure").length,
     review: signals.filter((signal) => signal.status === "review").length,
   };
+}
+
+function RaceStat({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="bg-white px-5 py-4">
+      <p className="font-mono text-[11px] uppercase tracking-[0.12em] text-neutral-500">{label}</p>
+      <p className="mt-1 text-lg font-semibold tabular-nums">{value}</p>
+    </div>
+  );
 }

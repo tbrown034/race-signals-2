@@ -1,7 +1,8 @@
 import { SignalCard } from "@/src/components/signal-card";
 import { formatDate, formatMoney } from "@/src/lib/format";
+import Link from "next/link";
 import type { ReactNode } from "react";
-import type { RaceRating, Signal, Transaction } from "@/src/lib/types";
+import type { CommitteeIndependentExpenditure, RaceRating, Signal, Transaction } from "@/src/lib/types";
 
 export function EntityPage({
   asideMedia,
@@ -12,6 +13,7 @@ export function EntityPage({
   meta,
   sourceUrl,
   ratings = [],
+  independentExpenditures = [],
   transactions = [],
   signals,
 }: {
@@ -23,6 +25,7 @@ export function EntityPage({
   meta: Array<[string, string | number | null | undefined]>;
   sourceUrl?: string | null;
   ratings?: RaceRating[];
+  independentExpenditures?: CommitteeIndependentExpenditure[];
   transactions?: Transaction[];
   signals: Signal[];
 }) {
@@ -85,6 +88,67 @@ export function EntityPage({
       </aside>
       <section className="border border-neutral-300 bg-white">
         {children}
+        {independentExpenditures.length ? (
+          <div className="border-b border-neutral-300">
+            <div className="border-b border-neutral-300 px-5 py-4">
+              <h2 className="text-sm font-semibold uppercase tracking-[0.14em] text-neutral-600">
+                Recent independent expenditures
+              </h2>
+            </div>
+            <div className="overflow-x-auto">
+              <table className="w-full min-w-[760px] text-left text-sm">
+                <thead className="bg-neutral-100 text-xs uppercase tracking-[0.12em] text-neutral-500">
+                  <tr>
+                    <th className="px-4 py-3 font-medium" scope="col">Date</th>
+                    <th className="px-4 py-3 font-medium" scope="col">Target</th>
+                    <th className="px-4 py-3 font-medium" scope="col">Position</th>
+                    <th className="px-4 py-3 font-medium" scope="col">Purpose</th>
+                    <th className="px-4 py-3 font-medium" scope="col">Source</th>
+                    <th className="px-4 py-3 text-right font-medium" scope="col">Amount</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-neutral-200">
+                  {independentExpenditures.map((expenditure) => (
+                    <tr key={expenditure.sourceId}>
+                      <td className="px-4 py-3">{formatDate(expenditure.expenditureDate)}</td>
+                      <td className="px-4 py-3">
+                        {expenditure.candidateId ? (
+                          <Link
+                            className="font-medium underline underline-offset-4"
+                            href={`/candidates/${expenditure.candidateId}`}
+                          >
+                            {expenditure.candidateName ?? expenditure.fecCandidateId ?? "Unknown candidate"}
+                          </Link>
+                        ) : (
+                          expenditure.candidateName ?? expenditure.fecCandidateId ?? "Unknown candidate"
+                        )}
+                      </td>
+                      <td className="px-4 py-3">{supportLabel(expenditure.supportOpposeIndicator)}</td>
+                      <td className="px-4 py-3 text-neutral-700">{expenditure.purpose ?? "Not specified"}</td>
+                      <td className="px-4 py-3">
+                        {expenditure.sourceUrl ? (
+                          <a
+                            className="font-medium underline underline-offset-4"
+                            href={expenditure.sourceUrl}
+                            rel="noreferrer"
+                            target="_blank"
+                          >
+                            FEC
+                          </a>
+                        ) : (
+                          "Missing"
+                        )}
+                      </td>
+                      <td className="px-4 py-3 text-right font-mono">
+                        {formatMoney(expenditure.amount)}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        ) : null}
         {transactions.length ? (
           <div className="border-b border-neutral-300">
             <div className="border-b border-neutral-300 px-5 py-4">
@@ -150,4 +214,10 @@ export function EntityPage({
       </section>
     </main>
   );
+}
+
+function supportLabel(value?: string | null) {
+  if (value === "S") return "Support";
+  if (value === "O") return "Oppose";
+  return "Mention";
 }

@@ -2,7 +2,13 @@ import { notFound } from "next/navigation";
 import { EntityPage } from "@/src/components/entity-page";
 import { PageShell } from "@/src/components/page-shell";
 import { PartySquare } from "@/src/components/party-square";
-import { getCandidate, getCommittee, getCommitteeTransactions, getSignalsForEntity } from "@/src/lib/db/repository";
+import {
+  getCandidate,
+  getCommittee,
+  getCommitteeIndependentExpenditures,
+  getCommitteeTransactions,
+  getSignalsForEntity,
+} from "@/src/lib/db/repository";
 import { committeeContext, committeeDesignationLabel, committeeTypeLabel } from "@/src/lib/fec-codes";
 
 export default async function CommitteePage({
@@ -11,10 +17,11 @@ export default async function CommitteePage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const [committee, signals, transactions] = await Promise.all([
+  const [committee, signals, transactions, independentExpenditures] = await Promise.all([
     getCommittee(id),
     getSignalsForEntity("committee", id),
     getCommitteeTransactions(id),
+    getCommitteeIndependentExpenditures(id),
   ]);
 
   if (!committee) notFound();
@@ -27,6 +34,7 @@ export default async function CommitteePage({
         title={committee.name}
         titleAccessory={linkedCandidate ? <PartySquare party={linkedCandidate.party} size="md" /> : null}
         sourceUrl={committee.sourceUrl}
+        independentExpenditures={independentExpenditures}
         transactions={transactions}
         signals={signals}
         meta={[

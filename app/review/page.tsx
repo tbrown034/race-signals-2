@@ -234,6 +234,55 @@ export default async function ReviewPage({
                 No retained validation caveats are recorded.
               </p>
             )}
+            {status.recentValidationIssues.length ? (
+              <div className="mt-5 border border-neutral-300">
+                <div className="border-b border-neutral-300 px-3 py-2">
+                  <h3 className="font-mono text-[11px] uppercase tracking-[0.12em] text-neutral-600">
+                    Latest caveat examples
+                  </h3>
+                  <p className="mt-1 text-xs leading-5 text-neutral-600">
+                    Specific retained examples for publication checks; rollups above show broader pipeline volume.
+                  </p>
+                </div>
+                <div className="overflow-x-auto">
+                  <table className="w-full min-w-0 text-left text-xs md:min-w-[760px]">
+                    <thead className="bg-neutral-100 font-mono uppercase tracking-[0.12em] text-neutral-500">
+                      <tr>
+                        <th className="px-3 py-2 font-medium" scope="col">Rule</th>
+                        <th className="hidden px-3 py-2 font-medium md:table-cell" scope="col">Source ID</th>
+                        <th className="px-3 py-2 font-medium" scope="col">Message</th>
+                        <th className="hidden px-3 py-2 font-medium md:table-cell" scope="col">Source</th>
+                        <th className="hidden px-3 py-2 font-medium lg:table-cell" scope="col">Recorded</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-neutral-200">
+                      {status.recentValidationIssues.map((issue) => (
+                        <tr key={`${issue.rule}-${issue.sourceId ?? "no-source"}-${issue.createdAt}`}>
+                          <td className="px-3 py-2 font-medium">{issue.rule.replaceAll("_", " ")}</td>
+                          <td className="hidden px-3 py-2 font-mono md:table-cell">{issue.sourceId ?? "No source ID"}</td>
+                          <td className="px-3 py-2">
+                            <p className="max-w-full break-words leading-5 [overflow-wrap:anywhere]">{issue.message}</p>
+                            <p className="mt-1 font-mono uppercase tracking-[0.12em] text-neutral-500 md:hidden">
+                              {issue.sourceId ?? "No source ID"}
+                            </p>
+                          </td>
+                          <td className="hidden px-3 py-2 md:table-cell">
+                            {issue.sourceUrl ? (
+                              <a className="font-medium underline underline-offset-4" href={issue.sourceUrl} rel="noreferrer" target="_blank">
+                                Open source
+                              </a>
+                            ) : (
+                              "No source URL"
+                            )}
+                          </td>
+                          <td className="hidden px-3 py-2 font-mono text-neutral-600 lg:table-cell">{formatDateTime(issue.createdAt)}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            ) : null}
           </section>
         </section>
       </main>

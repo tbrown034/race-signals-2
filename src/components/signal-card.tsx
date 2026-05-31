@@ -25,7 +25,7 @@ const typeStripes: Record<string, string> = {
 };
 
 export function SignalCard({ signal }: { signal: Signal }) {
-  const amount = formatMoney(signal.amount);
+  const amount = signalAmountLabel(signal);
   const contributorName = textMetadata(signal.metadata?.contributorName);
   const contributorNameNormalized = textMetadata(signal.metadata?.contributorNameNormalized);
   const contributorEmployerNormalized = textMetadata(signal.metadata?.contributorEmployerNormalized);
@@ -198,7 +198,7 @@ export function SignalCard({ signal }: { signal: Signal }) {
 
       <div className="flex flex-wrap items-start gap-2 text-xs md:flex-col md:items-end">
         <span className="font-mono text-sm font-semibold text-neutral-950">
-          {amount ?? "Non-monetary"}
+          {amount}
         </span>
         <Link
           className="border border-neutral-400 px-2 py-1 font-mono uppercase tracking-[0.12em] text-neutral-600 underline-offset-4 hover:underline"
@@ -271,7 +271,7 @@ function signalEvidence(signal: Signal) {
     const sourceId = textMetadata(signal.metadata?.sourceId);
     return [
       support ? `stance ${supportOpposeLabel(support)}` : null,
-      signal.amount ? `amount ${formatMoney(signal.amount)}` : null,
+      signal.amount !== null && signal.amount !== undefined ? `amount ${formatMoney(signal.amount)}` : null,
       signal.committeeName ? `spender ${signal.committeeName}` : null,
       purpose ? `purpose ${purpose}` : null,
       sourceId ? `Schedule E sub_id ${sourceId}` : null,
@@ -293,8 +293,8 @@ function signalEvidence(signal: Signal) {
     return [
       reportType ? `report ${reportType}` : null,
       versionKind === "likely_refile" ? "likely amendment/refile" : null,
-      receipts ? `receipts ${formatMoney(receipts)}` : null,
-      cash ? `cash ${formatMoney(cash)}` : null,
+      receipts !== null ? `receipts ${formatMoney(receipts)}` : null,
+      cash !== null ? `cash ${formatMoney(cash)}` : null,
       coverage.length === 2 ? `period ${coverage.join(" to ")}` : null,
       sourceId ? `filing ${sourceId}` : null,
     ]
@@ -317,10 +317,10 @@ function signalEvidence(signal: Signal) {
     ].filter(Boolean);
     return [
       latestReportType ? `latest report ${latestReportType}` : null,
-      latest ? `latest ${formatMoney(latest)}` : null,
+      latest !== null ? `latest ${formatMoney(latest)}` : null,
       latestCoverage.length === 2 ? `latest period ${latestCoverage.join(" to ")}` : null,
       priorReportType ? `prior report ${priorReportType}` : null,
-      prior ? `prior ${formatMoney(prior)}` : null,
+      prior !== null ? `prior ${formatMoney(prior)}` : null,
       priorCoverage.length === 2 ? `prior period ${priorCoverage.join(" to ")}` : null,
       textMetadata(signal.metadata?.latestSourceId) ? `latest ${textMetadata(signal.metadata?.latestSourceId)}` : null,
       textMetadata(signal.metadata?.priorSourceId) ? `prior ${textMetadata(signal.metadata?.priorSourceId)}` : null,
@@ -382,6 +382,16 @@ function numberMetadata(value: unknown) {
     return Number.isFinite(parsed) ? parsed : null;
   }
   return null;
+}
+
+function signalAmountLabel(signal: Signal) {
+  const amount = formatMoney(signal.amount);
+  if (amount) return amount;
+  if (signal.signalType === "new_committee") return "Non-monetary";
+  if (signal.signalType === "new_filing" || signal.signalType === "committee_activity_spike") {
+    return "Receipts not reported";
+  }
+  return "Amount not stored";
 }
 
 function supportOpposeLabel(value: string) {

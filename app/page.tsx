@@ -560,7 +560,7 @@ function StateRaceBoard({ rows, state }: { rows: StateRaceBoardRow[]; state: str
             ) : (
               <tr>
                 <td className="px-4 py-3 text-neutral-600" colSpan={8}>
-                  No configured race shells are available for {state}.
+                  <StateRaceBoardEmptyState state={state} />
                 </td>
               </tr>
             )}
@@ -568,6 +568,28 @@ function StateRaceBoard({ rows, state }: { rows: StateRaceBoardRow[]; state: str
         </table>
       </div>
     </section>
+  );
+}
+
+function StateRaceBoardEmptyState({ state }: { state: string }) {
+  return (
+    <div className="max-w-3xl text-sm leading-6">
+      <p className="font-semibold text-neutral-950">No configured race shells are available for {state}.</p>
+      <p className="mt-1">
+        That usually means this state is outside the current configured race shell list, not that there is no FEC activity.
+      </p>
+      <div className="mt-3 flex flex-wrap gap-x-4 gap-y-2">
+        <Link className="font-medium underline underline-offset-4" href={`/?state=${state}`}>
+          Show {state} feed
+        </Link>
+        <Link className="font-medium underline underline-offset-4" href={`/records/schedule-e?state=${state}`}>
+          Check {state} Schedule E evidence
+        </Link>
+        <Link className="font-medium underline underline-offset-4" href="/status#state-freshness">
+          Check coverage board
+        </Link>
+      </div>
+    </div>
   );
 }
 

@@ -92,7 +92,7 @@ export default async function SpendingPage({
           {visibleSignals.length ? (
             <div className="border-b border-neutral-300">
               <div className="overflow-x-auto">
-                <table className="w-full min-w-[1120px] text-left text-sm">
+                <table className="w-full min-w-[1220px] text-left text-sm">
                   <thead className="bg-neutral-100 font-mono text-xs uppercase tracking-[0.12em] text-neutral-500">
                     <tr>
                       <th className="px-4 py-3 font-medium" scope="col">Date</th>
@@ -100,6 +100,7 @@ export default async function SpendingPage({
                       <th className="px-4 py-3 font-medium" scope="col">Spender</th>
                       <th className="px-4 py-3 font-medium" scope="col">Target</th>
                       <th className="px-4 py-3 font-medium" scope="col">Position</th>
+                      <th className="px-4 py-3 font-medium" scope="col">Purpose</th>
                       <th className="px-4 py-3 font-medium" scope="col">Race</th>
                       <th className="px-4 py-3 text-right font-medium" scope="col">Amount</th>
                       <th className="px-4 py-3 font-medium" scope="col">Source</th>
@@ -117,6 +118,7 @@ export default async function SpendingPage({
                         <td className="px-4 py-3">{entityLabel(signal.committeeName, signal.committeeId, "Spender not resolved")}</td>
                         <td className="px-4 py-3">{entityLabel(signal.candidateName, signal.candidateId, "Candidate not resolved")}</td>
                         <td className="px-4 py-3">{supportOpposeLabel(signal.metadata?.supportOpposeIndicator)}</td>
+                        <td className="px-4 py-3 text-neutral-700">{sourcePurpose(signal.metadata?.purpose)}</td>
                         <td className="px-4 py-3">
                           {signal.raceId ? (
                             <Link className="font-medium underline underline-offset-4" href={`/races/${signal.raceId}`}>
@@ -195,6 +197,11 @@ function entityLabel(name: string | null | undefined, id: string | null | undefi
 function sourceRecordLabel(value: unknown) {
   if (typeof value === "string" && value) return `Record ${value}`;
   return "Record not stored";
+}
+
+function sourcePurpose(value: unknown) {
+  if (typeof value === "string" && value) return value;
+  return "Not specified";
 }
 
 function signalAnchorId(dedupeKey: string) {

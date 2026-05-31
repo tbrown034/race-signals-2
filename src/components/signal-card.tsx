@@ -65,10 +65,6 @@ export function SignalCard({ signal }: { signal: Signal }) {
             >
               Review: {reviewReason(signal)}
             </span>
-          ) : signal.status !== "new" ? (
-            <span className="border border-neutral-400 px-1.5 py-0.5 font-mono text-[10px] uppercase tracking-[0.12em] text-neutral-700">
-              {signal.status}
-            </span>
           ) : null}
         </div>
         <p className="mt-1 max-w-3xl text-sm leading-5 text-neutral-700">
@@ -84,6 +80,11 @@ export function SignalCard({ signal }: { signal: Signal }) {
           {verifyLine}
         </p>
         <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-xs text-neutral-600">
+          {signal.status !== "new" && signal.status !== "review" ? (
+            <span className="font-mono uppercase tracking-[0.12em] text-neutral-500">
+              Status: {signal.status}
+            </span>
+          ) : null}
           {contributorNameNormalized ? (
             <span title={contributorName ?? contributorNameNormalized}>
               Donor: {contributorNameNormalized}

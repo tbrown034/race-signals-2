@@ -78,8 +78,8 @@ export default async function CandidatePage({
           ],
           ["Status", incumbentStatus(candidate.incumbentChallengeStatus)],
           ["FEC cycle", `Filed with FEC for the ${candidate.electionYear ?? "current"} cycle.`],
-          ["Cycle receipts", formatMoney(candidate.totalReceiptsCycle)],
-          ["Cash on hand", formatMoney(candidate.cashOnHandLatest)],
+          ["Cycle receipts", candidateMoney(candidate.totalReceiptsCycle, candidate.totalsUpdatedAt)],
+          ["Cash on hand", candidateMoney(candidate.cashOnHandLatest, candidate.totalsUpdatedAt)],
           ["Cash as of", formatDate(candidate.cashOnHandAsOf)],
           ["FEC totals load date", candidate.totalsUpdatedAt ? formatDateTime(candidate.totalsUpdatedAt) : null],
           ...(candidate.bioguideId ? ([["Bioguide", candidate.bioguideId]] as Array<[string, string]>) : []),
@@ -87,7 +87,7 @@ export default async function CandidatePage({
       >
         <ReporterRead
           notes={[
-            `Money position: ${formatMoney(candidate.totalReceiptsCycle) ?? "receipts not available"} raised this cycle; ${formatMoney(candidate.cashOnHandLatest) ?? "cash not available"} cash on hand${candidate.cashOnHandAsOf ? ` as of ${formatDate(candidate.cashOnHandAsOf)}` : ""}.`,
+            `Money position: ${candidateMoney(candidate.totalReceiptsCycle, candidate.totalsUpdatedAt).toLowerCase()} raised this cycle; ${candidateMoney(candidate.cashOnHandLatest, candidate.totalsUpdatedAt).toLowerCase()} cash on hand${candidate.cashOnHandAsOf ? ` as of ${formatDate(candidate.cashOnHandAsOf)}` : ""}.`,
             `${signals.length} related signals in this slice: ${signalCounts.filings} filings, ${signalCounts.committees} committee records, ${signalCounts.outsideSpending} outside-spending alerts, ${signalCounts.review} review flags.`,
             isIncumbent(candidate.incumbentChallengeStatus)
               ? "Incumbent context: committee records usually reflect cycle operations or continuing campaign infrastructure, not a first-time launch."
@@ -140,10 +140,10 @@ export default async function CandidatePage({
                         {incumbentStatus(otherCandidate.incumbentChallengeStatus) ?? "Not classified by FEC"}
                       </td>
                       <td className="px-4 py-3 text-right font-mono">
-                        {formatMoney(otherCandidate.totalReceiptsCycle) ?? "Not reported"}
+                        {candidateMoney(otherCandidate.totalReceiptsCycle, otherCandidate.totalsUpdatedAt)}
                       </td>
                       <td className="px-4 py-3 text-right font-mono">
-                        {formatMoney(otherCandidate.cashOnHandLatest) ?? "Not reported"}
+                        {candidateMoney(otherCandidate.cashOnHandLatest, otherCandidate.totalsUpdatedAt)}
                       </td>
                     </tr>
                   ))}
@@ -179,6 +179,10 @@ function partyLabel(party?: string | null) {
   if (party === "DEM" || party === "D") return "Democratic";
   if (!party || party === "NNE") return "Other/unknown";
   return party;
+}
+
+function candidateMoney(value?: number | null, totalsUpdatedAt?: string | null) {
+  return formatMoney(value) ?? (totalsUpdatedAt ? "Not reported by FEC" : "FEC totals not loaded");
 }
 
 function countSignals(signals: Awaited<ReturnType<typeof getSignalsForEntity>>) {

@@ -157,10 +157,10 @@ export default async function RacePage({
                         </span>
                       </td>
                       <td className="px-4 py-3 text-right font-mono">
-                        {formatMoney(candidate.totalReceiptsCycle) ?? "Not reported"}
+                        {candidateMoney(candidate.totalReceiptsCycle, candidate.totalsUpdatedAt)}
                       </td>
                       <td className="px-4 py-3 text-right font-mono">
-                        {formatMoney(candidate.cashOnHandLatest) ?? "Not reported"}
+                        {candidateMoney(candidate.cashOnHandLatest, candidate.totalsUpdatedAt)}
                       </td>
                     </tr>
                   ))}
@@ -191,6 +191,10 @@ function partyLabel(party?: string | null) {
   if (party === "DEM" || party === "D") return "Democratic";
   if (!party || party === "NNE") return "Other/unknown";
   return party;
+}
+
+function candidateMoney(value?: number | null, totalsUpdatedAt?: string | null) {
+  return formatMoney(value) ?? (totalsUpdatedAt ? "Not reported by FEC" : "FEC totals not loaded");
 }
 
 function countSignals(signals: Awaited<ReturnType<typeof getSignalsForEntity>>) {

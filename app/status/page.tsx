@@ -127,7 +127,7 @@ export default async function StatusPage() {
               <thead className="bg-neutral-100 text-xs uppercase tracking-[0.12em] text-neutral-500">
                 <tr>
                   <th className="px-4 py-3 font-medium" scope="col">Endpoint</th>
-                  <th className="px-4 py-3 font-medium" scope="col">Last successful run</th>
+                  <th className="px-4 py-3 font-medium" scope="col">Latest run</th>
                   <th className="px-4 py-3 font-medium" scope="col">Records fetched</th>
                   <th className="px-4 py-3 font-medium" scope="col">Validation issues</th>
                   <th className="px-4 py-3 font-medium" scope="col">Status</th>

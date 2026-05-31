@@ -87,7 +87,7 @@ export default async function Home({
                   Federal campaign-finance alerts
                 </h1>
                 <p className="mt-2 text-sm leading-5 text-neutral-700">
-                  Showing {visibleSignals.length}{hasMoreSignals ? "+" : ""} signals. Source-linked FEC records for House and Senate coverage.
+                  Showing {visibleSignals.length}{hasMoreSignals ? "+" : ""} stored signals from the current capped ingest slice. Source-linked FEC records for House and Senate coverage.
                 </p>
                 {activeFilters.length ? (
                   <p className="mt-1 font-mono text-[11px] uppercase tracking-[0.12em] text-neutral-500">

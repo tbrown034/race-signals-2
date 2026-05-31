@@ -46,7 +46,7 @@ export function SignalCard({ signal }: { signal: Signal }) {
       <div className="font-mono text-xs text-neutral-600">
         <p className="flex items-center gap-1.5 text-neutral-950">
           <FreshMark signalDate={signal.signalDate} status={signal.status} />
-          Event date {formatDate(signal.signalDate)}
+          Date {formatDate(signal.signalDate)}
         </p>
         <p className="mt-1 text-neutral-600" title={`Ingested by Race Signals ${formatDateTime(signal.dataFreshness)}`}>
           Added {formatRelativeTime(signal.dataFreshness)}

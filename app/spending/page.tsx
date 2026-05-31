@@ -61,9 +61,8 @@ export default async function SpendingPage({
                   Outside spending watch
                 </h1>
                 <p className="mt-2 max-w-3xl break-words text-sm leading-5 text-neutral-700">
-                  Independent expenditure signals from FEC Schedule E. Default sort
-                  is largest amount first so a reporter can spot the biggest outside
-                  moves before scanning the chronology.
+                  Largest Schedule E alerts first, with FEC source links for verification.
+                  Sort by date when the reporting question is what changed most recently.
                 </p>
               </div>
               <div className="flex flex-col gap-2 md:items-end">

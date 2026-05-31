@@ -25,16 +25,14 @@ export function CoverageStrip({
             Coverage check
           </p>
           <p className="mt-1 hidden leading-5 text-neutral-700 sm:block">
-            Current readout reflects stored records from capped ingest runs, not a real-time national tabulator.
-            The latest ingest may be only one state or slice; absence of a signal is not confirmation that no FEC activity exists.
+            This is a stored FEC slice, not a live national count. No alert does not mean no activity.
           </p>
           <details className="mt-1 text-neutral-700 sm:hidden">
             <summary className="cursor-pointer text-xs font-medium underline underline-offset-4">
               What this coverage means
             </summary>
             <p className="mt-2 leading-5">
-              Stored records come from capped ingest runs, not a real-time national tabulator.
-              Absence of a signal is not confirmation that no FEC activity exists.
+              This is a stored FEC slice, not a live national count. No alert does not mean no activity.
             </p>
           </details>
         </div>

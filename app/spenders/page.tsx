@@ -131,7 +131,14 @@ export default async function SpendersPage({
                         <p className="mt-1 font-mono text-[11px] uppercase tracking-[0.12em] text-neutral-500">
                           {spender.fecCommitteeId ?? "No FEC committee ID"}
                         </p>
+                        <p className="mt-1 font-mono text-sm font-semibold text-neutral-950 md:hidden">
+                          {formatMoney(spender.totalAmount)} total IE
+                        </p>
                         <dl className="mt-2 space-y-1 text-xs leading-5 text-neutral-600 md:hidden">
+                          <div>
+                            <dt className="inline font-mono uppercase tracking-[0.12em] text-neutral-500">Total IE </dt>
+                            <dd className="inline font-mono font-semibold text-neutral-950">{formatMoney(spender.totalAmount)}</dd>
+                          </div>
                           <div>
                             <dt className="inline font-mono uppercase tracking-[0.12em] text-neutral-500">Type </dt>
                             <dd className="inline">
@@ -157,10 +164,6 @@ export default async function SpendersPage({
                               <dd className="inline">{positionNote}</dd>
                             </div>
                           ) : null}
-                          <div>
-                            <dt className="inline font-mono uppercase tracking-[0.12em] text-neutral-500">Total IE </dt>
-                            <dd className="inline font-mono font-semibold text-neutral-950">{formatMoney(spender.totalAmount)}</dd>
-                          </div>
                           <div>
                             <dt className="inline font-mono uppercase tracking-[0.12em] text-neutral-500">Records </dt>
                             <dd className="inline">

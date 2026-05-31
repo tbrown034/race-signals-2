@@ -100,7 +100,7 @@ export default async function ScheduleERecordsPage({
           </div>
 
           <div className="border-b border-neutral-300 px-5 py-3 text-sm text-neutral-600">
-            The table displays the latest {formatCount(records.length, "record")} to keep this read route cheap. Summary totals cover the full stored scope; use CSV or JSON export for up to 10,000 scoped rows.
+            The table displays the latest {formatCount(records.length, "record")} for fast page load. Summary totals cover the full stored scope; use CSV or JSON export for up to 10,000 scoped rows.
           </div>
 
           {records.length ? (

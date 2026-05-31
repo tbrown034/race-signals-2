@@ -18,12 +18,12 @@ export const revalidate = 300;
 const quickViews = [
   {
     href: "/?state=IN",
-    label: "Indiana local desk",
+    label: "Indiana desk",
     body: "State-level congressional slice for a local politics reporter.",
   },
   {
     href: "/?office=S",
-    label: "Senate filter",
+    label: "Senate",
     body: "Shows Senate records present in the current stored slice.",
   },
   {
@@ -105,7 +105,7 @@ export default async function Home({
                   {visibleSignals.length}{hasMoreSignals ? "+" : ""} stored signals. FEC links preserved.
                 </p>
                 <p className="mt-2 hidden max-w-full break-words text-sm leading-5 whitespace-normal text-neutral-700 sm:block">
-                  Showing {visibleSignals.length}{hasMoreSignals ? "+" : ""} stored signals from the current capped ingest slice. Source-linked FEC records for House and Senate coverage.
+                  Latest {visibleSignals.length}{hasMoreSignals ? "+" : ""} stored alerts. Each item links to its FEC source; coverage depends on the latest ingest scope.
                 </p>
                 {activeFilters.length ? (
                   <p className="mt-1 font-mono text-[11px] uppercase tracking-[0.12em] text-neutral-500">
@@ -226,10 +226,10 @@ export default async function Home({
 
 function StartPointStrip() {
   return (
-    <section className="border-b border-neutral-300 px-5 py-3" aria-label="Start points">
+    <section className="border-b border-neutral-300 px-5 py-3" aria-label="Common cuts">
       <div className="flex flex-col gap-2 xl:flex-row xl:items-center">
         <p className="shrink-0 font-mono text-[11px] uppercase tracking-[0.12em] text-neutral-500">
-          Start points
+          Common cuts
         </p>
         <div className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1 xl:flex-wrap xl:overflow-visible xl:pb-0">
           {quickViews.map((view) => (

@@ -83,6 +83,15 @@ Official docs note that FEC API data is updated nightly. API calls are limited t
 
 The local `.env.local` includes `FEC_API_KEY`. Keep demo fallback mode available for reviewers without credentials.
 
+Ingestion controls:
+
+- `FEC_MAX_CANDIDATE_PAGES` limits national candidate discovery pages.
+- `FEC_MAX_CANDIDATES` limits downstream candidate processing.
+- `FEC_REQUEST_DELAY_MS` paces API calls. Default is 750 ms.
+- `FEC_MAX_RETRIES` controls retry attempts for 429/5xx responses.
+
+National ingestion should be paced and scheduled. Do not put broad FEC ingestion in a route handler.
+
 ## National House Scope
 
 Default scope lives in `src/lib/scope.ts`.

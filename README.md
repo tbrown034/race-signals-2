@@ -142,9 +142,19 @@ Useful ingestion controls:
 ```bash
 FEC_MAX_CANDIDATE_PAGES=3 npm run ingest
 FEC_MAX_CANDIDATES=25 npm run ingest
+FEC_REQUEST_DELAY_MS=1500 npm run ingest
+FEC_MAX_RETRIES=6 npm run ingest
 ```
 
 Without those caps, candidate discovery attempts the full 2026 House candidate search and then fetches related committee/report/receipt/expenditure records.
+
+For a first production smoke test, use:
+
+```bash
+FEC_MAX_CANDIDATES=25 FEC_REQUEST_DELAY_MS=1500 npm run ingest
+```
+
+The FEC API is rate-limited. National ingestion should be treated as a paced background job or scheduled task, not a route handler.
 
 Verification:
 

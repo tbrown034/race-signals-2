@@ -301,7 +301,7 @@ export async function createIngestionRun(scope: string) {
 
 export async function finishIngestionRun(
   id: string,
-  status: "success" | "failed",
+  status: "success" | "partial" | "failed",
   recordsSeen: number,
   errors: unknown[] = [],
 ) {

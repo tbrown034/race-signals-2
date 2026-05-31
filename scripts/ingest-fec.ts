@@ -89,33 +89,47 @@ async function main() {
     normalizedCandidates.forEach((candidate) => issues.push(...validateCandidate(candidate)));
 
     for (const candidate of normalizedCandidates) {
-      const fecCommittees = await fetchCommitteesForCandidate(candidate.fecCandidateId);
-      const normalizedCommittees = fecCommittees.map((record) =>
-        normalizeCommittee(record, candidate),
-      );
-      committees.push(...normalizedCommittees);
-      normalizedCommittees.forEach((committee) => issues.push(...validateCommittee(committee)));
-
-      const fecIes = await fetchIndependentExpendituresForCandidate(candidate.fecCandidateId, cycle);
-      const normalizedIes = fecIes.map((record) =>
-        normalizeIndependentExpenditure(record, candidate.raceId),
-      );
-      independentExpenditures.push(...normalizedIes);
-      normalizedIes.forEach((ie) => issues.push(...validateIndependentExpenditure(ie)));
-
-      for (const committee of normalizedCommittees) {
-        const [fecReports, fecReceipts] = await Promise.all([
-          fetchReportsForCommittee(committee.fecCommitteeId, cycle),
-          fetchReceiptsForCommittee(committee.fecCommitteeId, cycle),
-        ]);
-        const normalizedFilings = fecReports.map(normalizeFiling);
-        const normalizedTransactions = fecReceipts.map(normalizeTransaction);
-        filings.push(...normalizedFilings);
-        transactions.push(...normalizedTransactions);
-        normalizedFilings.forEach((filing) => issues.push(...validateFiling(filing)));
-        normalizedTransactions.forEach((transaction) =>
-          issues.push(...validateTransaction(transaction)),
+      try {
+        const fecCommittees = await fetchCommitteesForCandidate(candidate.fecCandidateId);
+        const normalizedCommittees = fecCommittees.map((record) =>
+          normalizeCommittee(record, candidate),
         );
+        committees.push(...normalizedCommittees);
+        normalizedCommittees.forEach((committee) => issues.push(...validateCommittee(committee)));
+
+        const fecIes = await fetchIndependentExpendituresForCandidate(
+          candidate.fecCandidateId,
+          cycle,
+        );
+        const normalizedIes = fecIes.map((record) =>
+          normalizeIndependentExpenditure(record, candidate.raceId),
+        );
+        independentExpenditures.push(...normalizedIes);
+        normalizedIes.forEach((ie) => issues.push(...validateIndependentExpenditure(ie)));
+
+        for (const committee of normalizedCommittees) {
+          const fecReports = await fetchReportsForCommittee(committee.fecCommitteeId, cycle);
+          const fecReceipts = await fetchReceiptsForCommittee(committee.fecCommitteeId, cycle);
+          const normalizedFilings = fecReports.map(normalizeFiling);
+          const normalizedTransactions = fecReceipts.map(normalizeTransaction);
+          filings.push(...normalizedFilings);
+          transactions.push(...normalizedTransactions);
+          normalizedFilings.forEach((filing) => issues.push(...validateFiling(filing)));
+          normalizedTransactions.forEach((transaction) =>
+            issues.push(...validateTransaction(transaction)),
+          );
+        }
+      } catch (error) {
+        const message = error instanceof Error ? error.message : String(error);
+        errors.push({ candidateId: candidate.fecCandidateId, message });
+        issues.push({
+          entityType: "candidate",
+          sourceId: candidate.fecCandidateId,
+          severity: "warning",
+          rule: "partial_ingestion_error",
+          message,
+          sourceUrl: candidate.sourceUrl,
+        });
       }
     }
 
@@ -146,7 +160,7 @@ async function main() {
       transactions.length +
       independentExpenditures.length +
       signals.length;
-    await finishIngestionRun(runId, "success", recordsSeen);
+    await finishIngestionRun(runId, errors.length ? "partial" : "success", recordsSeen, errors);
 
     console.log(
       `Ingested ${recordsSeen} records/signals from ${candidates.length} House candidates with ${issues.length} validation issues.`,

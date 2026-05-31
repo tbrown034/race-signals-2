@@ -1,5 +1,9 @@
 const FEC_BASE_URL = "https://api.open.fec.gov/v1";
 const FEC_WEB_BASE_URL = "https://www.fec.gov/data";
+const DEFAULT_REQUEST_DELAY_MS = 750;
+const DEFAULT_MAX_RETRIES = 4;
+
+let lastRequestAt = 0;
 
 type FecListResponse<T> = {
   results: T[];
@@ -70,6 +74,34 @@ export type FecScheduleE = {
   expenditure_description?: string;
 };
 
+function numberFromEnv(name: string, fallback: number) {
+  const value = process.env[name];
+  if (!value) return fallback;
+  const parsed = Number(value);
+  return Number.isFinite(parsed) && parsed >= 0 ? parsed : fallback;
+}
+
+function wait(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+async function throttle() {
+  const delay = numberFromEnv("FEC_REQUEST_DELAY_MS", DEFAULT_REQUEST_DELAY_MS);
+  const now = Date.now();
+  const waitFor = Math.max(0, lastRequestAt + delay - now);
+  if (waitFor > 0) await wait(waitFor);
+  lastRequestAt = Date.now();
+}
+
+function retryDelay(response: Response, attempt: number) {
+  const retryAfter = response.headers.get("retry-after");
+  if (retryAfter) {
+    const seconds = Number(retryAfter);
+    if (Number.isFinite(seconds)) return seconds * 1000;
+  }
+  return Math.min(60000, 2000 * 2 ** attempt);
+}
+
 async function fecGet<T>(path: string, params: Record<string, string | number | undefined>) {
   const key = process.env.FEC_API_KEY;
   if (!key) throw new Error("FEC_API_KEY is not configured.");
@@ -82,12 +114,22 @@ async function fecGet<T>(path: string, params: Record<string, string | number | 
     if (value !== undefined) url.searchParams.set(name, String(value));
   }
 
-  const response = await fetch(url, { headers: { accept: "application/json" } });
-  if (!response.ok) {
+  const maxRetries = numberFromEnv("FEC_MAX_RETRIES", DEFAULT_MAX_RETRIES);
+
+  for (let attempt = 0; attempt <= maxRetries; attempt += 1) {
+    await throttle();
+    const response = await fetch(url, { headers: { accept: "application/json" } });
+    if (response.ok) {
+      return (await response.json()) as FecListResponse<T>;
+    }
+    if ((response.status === 429 || response.status >= 500) && attempt < maxRetries) {
+      await wait(retryDelay(response, attempt));
+      continue;
+    }
     throw new Error(`FEC request failed ${response.status}: ${path}`);
   }
 
-  return (await response.json()) as FecListResponse<T>;
+  throw new Error(`FEC request failed: ${path}`);
 }
 
 async function firstPages<T>(

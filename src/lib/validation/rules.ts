@@ -10,7 +10,7 @@ import type {
 const SUSPICIOUS_AMOUNT = 100000;
 
 function sourceUrlIssue(entityType: string, sourceId?: string | null, sourceUrl?: string | null) {
-  if (sourceUrl?.startsWith("https://www.fec.gov/")) return [];
+  if (usableFecSourceUrl(entityType, sourceId, sourceUrl)) return [];
   return [
     {
       entityType,
@@ -21,6 +21,27 @@ function sourceUrlIssue(entityType: string, sourceId?: string | null, sourceUrl?
       sourceUrl,
     },
   ];
+}
+
+function usableFecSourceUrl(entityType: string, sourceId?: string | null, sourceUrl?: string | null) {
+  if (!sourceUrl) return false;
+  let url: URL;
+  try {
+    url = new URL(sourceUrl);
+  } catch {
+    return false;
+  }
+  if (url.origin !== "https://www.fec.gov") return false;
+  if (entityType === "candidate") return /^\/data\/candidate\/[^/]+\/?$/.test(url.pathname);
+  if (entityType === "committee") return /^\/data\/committee\/[^/]+\/?$/.test(url.pathname);
+  if (entityType === "filing") {
+    return /^\/data\/filing\/[^/]+\/?$/.test(url.pathname) && Boolean(sourceId);
+  }
+  if (entityType === "independent_expenditure") {
+    return url.pathname === "/data/independent-expenditures/" && Boolean(sourceId) && url.searchParams.has("sub_id");
+  }
+  if (entityType === "transaction") return url.pathname.startsWith("/data/receipts/");
+  return url.pathname.startsWith("/data/");
 }
 
 export function validateCandidate(candidate: Candidate): ValidationIssue[] {

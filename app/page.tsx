@@ -103,10 +103,10 @@ export default async function Home({
                   Source-linked FEC record feed
                 </h1>
                 <p className="mt-2 max-w-full break-words text-sm leading-5 whitespace-normal text-neutral-700 sm:hidden">
-                  {visibleSignals.length}{hasMoreSignals ? "+" : ""} stored signals. FEC links preserved.
+                  {visibleSignals.length}{hasMoreSignals ? "+" : ""} signals. Event-date sort. FEC links kept.
                 </p>
                 <p className="mt-2 hidden max-w-full break-words text-sm leading-5 whitespace-normal text-neutral-700 sm:block">
-                  Latest {visibleSignals.length}{hasMoreSignals ? "+" : ""} stored alerts. Each item links to its FEC source; coverage depends on the latest ingest scope.
+                  Latest {visibleSignals.length}{hasMoreSignals ? "+" : ""} stored alerts, sorted by event date. Use Added to feed to isolate newly ingested records; each item links to its FEC source.
                 </p>
                 {activeFilters.length ? (
                   <p className="mt-1 font-mono text-[11px] uppercase tracking-[0.12em] text-neutral-500">

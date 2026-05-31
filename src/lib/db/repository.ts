@@ -335,6 +335,8 @@ export async function getSignals(filters: SignalFilters = {}) {
       if (filters.ingestedSince && signal.dataFreshness <= resolveSince(filters.ingestedSince)) return false;
       if (filters.minAmount && (signal.amount ?? 0) < resolveMinAmount(filters.minAmount)) return false;
       if (filters.position && signal.metadata?.supportOpposeIndicator !== filters.position) return false;
+      if (filters.targetParty && signal.candidateParty !== filters.targetParty) return false;
+      if (filters.targetStatus && signal.candidateIncumbentChallengeStatus !== filters.targetStatus) return false;
       if (q && !demoSignalSearchText(signal).includes(q)) return false;
       return true;
     }).slice(0, filters.limit ?? 50);
@@ -381,6 +383,14 @@ export async function getSignals(filters: SignalFilters = {}) {
   if (filters.position) {
     values.push(filters.position);
     where.push(`s.metadata->>'supportOpposeIndicator' = $${values.length}`);
+  }
+  if (filters.targetParty) {
+    values.push(filters.targetParty);
+    where.push(`c.party = $${values.length}`);
+  }
+  if (filters.targetStatus) {
+    values.push(filters.targetStatus);
+    where.push(`c.incumbent_challenge_status = $${values.length}`);
   }
   if (filters.q) {
     where.push(signalSearchClause(values, filters.q));
@@ -467,6 +477,14 @@ export async function getSpendingSignals(
   if (scopedFilters.position) {
     values.push(scopedFilters.position);
     where.push(`s.metadata->>'supportOpposeIndicator' = $${values.length}`);
+  }
+  if (scopedFilters.targetParty) {
+    values.push(scopedFilters.targetParty);
+    where.push(`c.party = $${values.length}`);
+  }
+  if (scopedFilters.targetStatus) {
+    values.push(scopedFilters.targetStatus);
+    where.push(`c.incumbent_challenge_status = $${values.length}`);
   }
   if (scopedFilters.q) {
     where.push(signalSearchClause(values, scopedFilters.q));

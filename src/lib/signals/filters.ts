@@ -10,6 +10,8 @@ export type SignalFilters = {
   ingestedSince?: string;
   minAmount?: string;
   position?: string;
+  targetParty?: string;
+  targetStatus?: string;
   limit?: number;
 };
 
@@ -41,6 +43,8 @@ export function signalFiltersFromSearchParams(
     ingestedSince: first(params.ingestedSince),
     minAmount: first(params.minAmount),
     position: first(params.position),
+    targetParty: first(params.targetParty),
+    targetStatus: first(params.targetStatus),
     limit,
   };
 }
@@ -58,6 +62,8 @@ export function signalFiltersFromUrl(url: URL, limit?: number): SignalFilters {
     ingestedSince: url.searchParams.get("ingestedSince") ?? undefined,
     minAmount: url.searchParams.get("minAmount") ?? undefined,
     position: url.searchParams.get("position") ?? undefined,
+    targetParty: url.searchParams.get("targetParty") ?? undefined,
+    targetStatus: url.searchParams.get("targetStatus") ?? undefined,
     limit,
   };
 }

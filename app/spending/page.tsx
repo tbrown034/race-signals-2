@@ -29,6 +29,8 @@ export default async function SpendingPage({
   const ingestedSince = typeof params.ingestedSince === "string" ? params.ingestedSince : undefined;
   const minAmount = typeof params.minAmount === "string" ? params.minAmount : undefined;
   const position = typeof params.position === "string" ? params.position : undefined;
+  const targetParty = typeof params.targetParty === "string" ? params.targetParty : undefined;
+  const targetStatus = typeof params.targetStatus === "string" ? params.targetStatus : undefined;
   const committeeId = typeof params.committee === "string" ? params.committee : undefined;
   const [signals, races, status, stateSignalCounts, stateSignalFreshness, committeeFilter] = await Promise.all([
     getSpendingSignals(signalFiltersFromSearchParams(params, 101), sort),
@@ -122,6 +124,8 @@ export default async function SpendingPage({
             Showing {visibleSignals.length}{hasMoreSignals ? "+" : ""} outside-spending signals
             {committeeId ? ` for ${committeeFilter?.name ?? committeeId}` : ""}
             {position ? ` / ${supportOpposeLabel(position)}` : ""}
+            {targetParty ? ` / target ${targetParty}` : ""}
+            {targetStatus ? ` / ${targetStatusLabel(targetStatus)} targets` : ""}
             {minAmount ? ` / $${Number(minAmount).toLocaleString("en-US")}+` : ""}
             {committeeId ? (
               <>
@@ -186,6 +190,7 @@ export default async function SpendingPage({
                                   id={signal.candidateId}
                                   label={signal.candidateName}
                                 />
+                                {targetContext(signal) ? ` (${targetContext(signal)})` : ""}
                               </dd>
                             </div>
                             <div>
@@ -244,6 +249,11 @@ export default async function SpendingPage({
                             id={signal.candidateId}
                             label={signal.candidateName}
                           />
+                          {targetContext(signal) ? (
+                            <p className="mt-1 font-mono text-[11px] uppercase tracking-[0.12em] text-neutral-500">
+                              {targetContext(signal)}
+                            </p>
+                          ) : null}
                         </td>
                         <td className="hidden px-4 py-3 md:table-cell">{supportOpposeLabel(signal.metadata?.supportOpposeIndicator)}</td>
                         <td className="hidden px-4 py-3 text-neutral-700 md:table-cell">{sourcePurpose(signal.metadata?.purpose)}</td>
@@ -344,6 +354,22 @@ function sourcePurpose(value: unknown) {
   return "Not specified";
 }
 
+function targetContext(signal: {
+  candidateParty?: string | null;
+  candidateState?: string | null;
+  candidateDistrict?: string | null;
+  candidateIncumbentChallengeStatus?: string | null;
+}) {
+  const parts = [
+    signal.candidateParty,
+    signal.candidateState && signal.candidateDistrict
+      ? `${signal.candidateState}-${signal.candidateDistrict}`
+      : signal.candidateState,
+    targetStatusLabel(signal.candidateIncumbentChallengeStatus),
+  ].filter(Boolean);
+  return parts.join(", ");
+}
+
 function SpendingQuickFilters({
   params,
 }: {
@@ -351,9 +377,11 @@ function SpendingQuickFilters({
 }) {
   const selectedPosition = typeof params.position === "string" ? params.position : "";
   const selectedMinAmount = typeof params.minAmount === "string" ? params.minAmount : "";
+  const selectedTargetParty = typeof params.targetParty === "string" ? params.targetParty : "";
+  const selectedTargetStatus = typeof params.targetStatus === "string" ? params.targetStatus : "";
   return (
     <div className="border-b border-neutral-300 px-5 py-3 text-sm">
-      <div className="grid gap-3 md:grid-cols-2">
+      <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
         <div>
           <p className="font-mono text-[11px] uppercase tracking-[0.12em] text-neutral-500">
             Position
@@ -375,6 +403,27 @@ function SpendingQuickFilters({
             <Link className={quickFilterClass(selectedMinAmount === "250000")} href={spendingToggleHref(params, "minAmount", "250000")}>$250k+</Link>
           </div>
         </div>
+        <div>
+          <p className="font-mono text-[11px] uppercase tracking-[0.12em] text-neutral-500">
+            Target party
+          </p>
+          <div className="mt-2 flex flex-wrap gap-2">
+            <Link className={quickFilterClass(!selectedTargetParty)} href={spendingToggleHref(params, "targetParty", "")}>All</Link>
+            <Link className={quickFilterClass(selectedTargetParty === "REP")} href={spendingToggleHref(params, "targetParty", "REP")}>REP</Link>
+            <Link className={quickFilterClass(selectedTargetParty === "DEM")} href={spendingToggleHref(params, "targetParty", "DEM")}>DEM</Link>
+          </div>
+        </div>
+        <div>
+          <p className="font-mono text-[11px] uppercase tracking-[0.12em] text-neutral-500">
+            Target status
+          </p>
+          <div className="mt-2 flex flex-wrap gap-2">
+            <Link className={quickFilterClass(!selectedTargetStatus)} href={spendingToggleHref(params, "targetStatus", "")}>All</Link>
+            <Link className={quickFilterClass(selectedTargetStatus === "I")} href={spendingToggleHref(params, "targetStatus", "I")}>Incumbent</Link>
+            <Link className={quickFilterClass(selectedTargetStatus === "C")} href={spendingToggleHref(params, "targetStatus", "C")}>Challenger</Link>
+            <Link className={quickFilterClass(selectedTargetStatus === "O")} href={spendingToggleHref(params, "targetStatus", "O")}>Open seat</Link>
+          </div>
+        </div>
       </div>
     </div>
   );
@@ -388,7 +437,7 @@ function quickFilterClass(active: boolean) {
 
 function spendingToggleHref(
   params: { [key: string]: string | string[] | undefined },
-  key: "minAmount" | "position",
+  key: "minAmount" | "position" | "targetParty" | "targetStatus",
   value: string,
 ) {
   const next = spendingExportQuery(params);
@@ -408,7 +457,7 @@ function spendingSortHref(
   sort: "amount" | "date",
 ) {
   const next = new URLSearchParams();
-  for (const key of ["q", "state", "office", "race", "status", "since", "ingestedSince", "committee", "minAmount", "position"]) {
+  for (const key of ["q", "state", "office", "race", "status", "since", "ingestedSince", "committee", "minAmount", "position", "targetParty", "targetStatus"]) {
     const value = params[key];
     if (typeof value === "string" && value) next.set(key, value);
   }
@@ -419,10 +468,17 @@ function spendingSortHref(
 
 function spendingExportQuery(params: { [key: string]: string | string[] | undefined }) {
   const next = new URLSearchParams();
-  for (const key of ["q", "state", "office", "race", "status", "since", "ingestedSince", "committee", "minAmount", "position"]) {
+  for (const key of ["q", "state", "office", "race", "status", "since", "ingestedSince", "committee", "minAmount", "position", "targetParty", "targetStatus"]) {
     const value = params[key];
     if (typeof value === "string" && value) next.set(key, value);
   }
   next.set("type", "large_independent_expenditure");
   return next;
+}
+
+function targetStatusLabel(value?: string | null) {
+  if (value === "I") return "incumbent";
+  if (value === "C") return "challenger";
+  if (value === "O") return "open seat";
+  return null;
 }

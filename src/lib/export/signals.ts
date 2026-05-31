@@ -17,6 +17,10 @@ export type SignalExportRow = {
   why_it_matters: string;
   candidate_name: string | null;
   candidate_id: string | null;
+  candidate_party: string | null;
+  candidate_state: string | null;
+  candidate_district: string | null;
+  candidate_incumbent_challenge_status: string | null;
   committee_name: string | null;
   committee_id: string | null;
   race_name: string | null;
@@ -69,6 +73,10 @@ export function signalToExportRow(
     why_it_matters: signal.whyItMatters,
     candidate_name: signal.candidateName ?? null,
     candidate_id: signal.candidateId ?? null,
+    candidate_party: signal.candidateParty ?? null,
+    candidate_state: signal.candidateState ?? null,
+    candidate_district: signal.candidateDistrict ?? null,
+    candidate_incumbent_challenge_status: signal.candidateIncumbentChallengeStatus ?? null,
     committee_name: signal.committeeName ?? null,
     committee_id: signal.committeeId ?? null,
     race_name: signal.raceName ?? null,
@@ -97,6 +105,10 @@ export function rowsToCsv(rows: SignalExportRow[]) {
     "why_it_matters",
     "candidate_name",
     "candidate_id",
+    "candidate_party",
+    "candidate_state",
+    "candidate_district",
+    "candidate_incumbent_challenge_status",
     "committee_name",
     "committee_id",
     "race_name",

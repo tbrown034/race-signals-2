@@ -1,6 +1,6 @@
 import { PageShell } from "@/src/components/page-shell";
 import { getStatus } from "@/src/lib/db/repository";
-import { formatDateTime } from "@/src/lib/format";
+import { formatDateTime, isOlderThanHours } from "@/src/lib/format";
 import { endpointHealthClass } from "@/src/lib/status-health";
 import type { Metadata } from "next";
 
@@ -39,6 +39,10 @@ export default async function StatusPage() {
         <PublishabilityPanel
           latestRun={latestRun}
           mode={status.mode}
+          validationIssueCount={status.validationIssues.reduce((sum, issue) => sum + issue.count, 0)}
+        />
+        <ReporterActionPanel
+          latestRun={latestRun}
           validationIssueCount={status.validationIssues.reduce((sum, issue) => sum + issue.count, 0)}
         />
 
@@ -247,6 +251,44 @@ export default async function StatusPage() {
   );
 }
 
+function ReporterActionPanel({
+  latestRun,
+  validationIssueCount,
+}: {
+  latestRun?: {
+    status: string;
+    state?: string | null;
+    scope: string;
+    finishedAt?: string | null;
+    startedAt: string;
+  };
+  validationIssueCount: number;
+}) {
+  const finishedAt = latestRun?.finishedAt ?? latestRun?.startedAt ?? null;
+  const stale = isOlderThanHours(finishedAt, 36);
+  const scope = latestRun?.state ? `${latestRun.state} slice` : latestRun?.scope ?? "no recorded ingest";
+  const absenceRead = stale
+    ? "Do not treat absence of a signal as meaningful until the next ingest succeeds."
+    : "Absence of a signal only means no stored FEC record matched this slice and threshold.";
+
+  return (
+    <section className="mt-4 border border-neutral-300 bg-white p-5">
+      <h2 className="text-sm font-semibold uppercase tracking-[0.14em] text-neutral-600">
+        What this means
+      </h2>
+      <div className="mt-3 grid gap-3 text-sm leading-6 text-neutral-700 md:grid-cols-3">
+        <p>
+          Latest usable scope: <span className="font-semibold text-neutral-950">{scope}</span>. Use filters with that scope in mind.
+        </p>
+        <p>{absenceRead}</p>
+        <p>
+          Before publication, open the FEC source link and account for {validationIssueLabel(validationIssueCount)}.
+        </p>
+      </div>
+    </section>
+  );
+}
+
 function PublishabilityPanel({
   latestRun,
   mode,
@@ -298,9 +340,7 @@ function PublishabilityPanel({
         </div>
         <div>
           <dt className="font-mono text-[11px] uppercase tracking-[0.12em] text-neutral-500">Open caveats</dt>
-          <dd className="mt-1 font-medium">
-            {validationIssueCount} validation issue{validationIssueCount === 1 ? "" : "s"}
-          </dd>
+          <dd className="mt-1 font-medium">{validationIssueLabel(validationIssueCount)}</dd>
         </div>
       </dl>
       {latestRun?.errors?.length ? (
@@ -310,6 +350,10 @@ function PublishabilityPanel({
       ) : null}
     </section>
   );
+}
+
+function validationIssueLabel(count: number) {
+  return `${count} validation ${count === 1 ? "issue" : "issues"}`;
 }
 
 function LegendSquare({ className, label }: { className: string; label: string }) {

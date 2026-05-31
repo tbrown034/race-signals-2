@@ -1,65 +1,81 @@
-import Image from "next/image";
+import { FeedFilters } from "@/src/components/feed-filters";
+import { PageShell } from "@/src/components/page-shell";
+import { SignalCard } from "@/src/components/signal-card";
+import { getRaces, getSignals, getStatus } from "@/src/lib/db/repository";
 
-export default function Home() {
+export default async function Home({
+  searchParams,
+}: {
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+}) {
+  const params = await searchParams;
+  const q = typeof params.q === "string" ? params.q : undefined;
+  const raceId = typeof params.race === "string" ? params.race : undefined;
+  const type = typeof params.type === "string" ? params.type : undefined;
+  const [signals, races, status] = await Promise.all([
+    getSignals({ q, raceId, type, limit: 50 }),
+    getRaces(),
+    getStatus(),
+  ]);
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
+    <PageShell>
+      <main className="mx-auto grid max-w-7xl gap-6 px-5 py-6 sm:px-8 lg:grid-cols-[1fr_320px]">
+        <section className="border border-neutral-300 bg-white">
+          <div className="border-b border-neutral-300 px-5 py-5">
+            <p className="font-mono text-xs uppercase tracking-[0.18em] text-neutral-500">
+              Chronological signal feed
+            </p>
+            <h1 className="mt-2 text-3xl font-semibold tracking-tight">
+              What changed in the money trail?
+            </h1>
+            <p className="mt-3 max-w-3xl text-sm leading-6 text-neutral-700">
+              A narrow FEC-first feed for 2026 Indiana House races. Each alert links
+              back to source records so a reporter can verify, contextualize and
+              decide whether to follow up.
+            </p>
+          </div>
+          <FeedFilters races={races} q={q} raceId={raceId} type={type} />
+          {signals.length ? (
+            signals.map((signal) => <SignalCard signal={signal} key={signal.dedupeKey} />)
+          ) : (
+            <p className="p-5 text-sm text-neutral-600">
+              No signals match the current filters.
+            </p>
+          )}
+        </section>
+
+        <aside className="h-fit border border-neutral-300 bg-white p-5">
+          <p className="font-mono text-xs uppercase tracking-[0.18em] text-neutral-500">
+            Scope
           </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
+          <h2 className="mt-2 text-lg font-semibold">2026 Indiana House watchlist</h2>
+          <p className="mt-2 text-sm leading-6 text-neutral-700">
+            FEC-only MVP coverage. Demo mode appears automatically when no database
+            is configured; real ingestion uses `FEC_API_KEY` and Postgres.
+          </p>
+          <dl className="mt-5 space-y-3 text-sm">
+            <div>
+              <dt className="font-mono text-xs uppercase tracking-[0.12em] text-neutral-500">
+                Mode
+              </dt>
+              <dd className="mt-1">{status.mode}</dd>
+            </div>
+            <div>
+              <dt className="font-mono text-xs uppercase tracking-[0.12em] text-neutral-500">
+                Signals
+              </dt>
+              <dd className="mt-1">{status.counts.signals}</dd>
+            </div>
+            <div>
+              <dt className="font-mono text-xs uppercase tracking-[0.12em] text-neutral-500">
+                Races
+              </dt>
+              <dd className="mt-1">{races.map((race) => `${race.state}-${race.district}`).join(", ")}</dd>
+            </div>
+          </dl>
+        </aside>
       </main>
-    </div>
+    </PageShell>
   );
 }

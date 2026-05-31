@@ -1,0 +1,164 @@
+const FEC_BASE_URL = "https://api.open.fec.gov/v1";
+const FEC_WEB_BASE_URL = "https://www.fec.gov/data";
+
+type FecListResponse<T> = {
+  results: T[];
+  pagination?: {
+    pages: number;
+    page: number;
+    per_page: number;
+    count: number;
+  };
+};
+
+export type FecCandidate = {
+  candidate_id: string;
+  name: string;
+  party?: string;
+  office: string;
+  state: string;
+  district?: string;
+  election_years?: number[];
+  incumbent_challenge_full?: string;
+};
+
+export type FecCommittee = {
+  committee_id: string;
+  name: string;
+  committee_type?: string;
+  designation?: string;
+  party?: string;
+  treasurer_name?: string;
+  candidate_ids?: string[];
+};
+
+export type FecReport = {
+  report_year?: number;
+  report_type?: string;
+  coverage_start_date?: string;
+  coverage_end_date?: string;
+  receipt_date?: string;
+  beginning_image_number?: string;
+  file_number?: number;
+  committee_id?: string;
+  total_receipts?: number;
+  total_disbursements?: number;
+  cash_on_hand_end_period?: number;
+};
+
+export type FecScheduleA = {
+  sub_id?: string;
+  committee_id?: string;
+  contributor_name?: string;
+  contributor_employer?: string;
+  contributor_occupation?: string;
+  contribution_receipt_amount?: number;
+  contribution_receipt_date?: string;
+  receipt_type?: string;
+  memo_text?: string;
+};
+
+export type FecScheduleE = {
+  sub_id?: string;
+  committee_id?: string;
+  committee_name?: string;
+  candidate_id?: string;
+  candidate_name?: string;
+  support_oppose_indicator?: string;
+  expenditure_amount?: number;
+  expenditure_date?: string;
+  expenditure_description?: string;
+};
+
+async function fecGet<T>(path: string, params: Record<string, string | number | undefined>) {
+  const key = process.env.FEC_API_KEY;
+  if (!key) throw new Error("FEC_API_KEY is not configured.");
+
+  const url = new URL(`${FEC_BASE_URL}${path}`);
+  url.searchParams.set("api_key", key);
+  url.searchParams.set("per_page", String(params.per_page ?? 100));
+
+  for (const [name, value] of Object.entries(params)) {
+    if (value !== undefined) url.searchParams.set(name, String(value));
+  }
+
+  const response = await fetch(url, { headers: { accept: "application/json" } });
+  if (!response.ok) {
+    throw new Error(`FEC request failed ${response.status}: ${path}`);
+  }
+
+  return (await response.json()) as FecListResponse<T>;
+}
+
+async function firstPages<T>(
+  path: string,
+  params: Record<string, string | number | undefined>,
+  maxPages = 2,
+) {
+  const records: T[] = [];
+  for (let page = 1; page <= maxPages; page += 1) {
+    const data = await fecGet<T>(path, { ...params, page });
+    records.push(...data.results);
+    if (!data.pagination || page >= data.pagination.pages) break;
+  }
+  return records;
+}
+
+export async function fetchCandidatesForRace(state: string, district: string, cycle: number) {
+  return firstPages<FecCandidate>("/candidates/search/", {
+    office: "H",
+    state,
+    district,
+    election_year: cycle,
+    sort: "name",
+  });
+}
+
+export async function fetchCommitteesForCandidate(candidateId: string) {
+  return firstPages<FecCommittee>(`/candidate/${candidateId}/committees/`, {
+    designation: "P",
+  });
+}
+
+export async function fetchReportsForCommittee(committeeId: string, cycle: number) {
+  return firstPages<FecReport>(`/committee/${committeeId}/reports/`, {
+    report_year: cycle,
+    sort: "-receipt_date",
+  });
+}
+
+export async function fetchReceiptsForCommittee(committeeId: string, cycle: number) {
+  return firstPages<FecScheduleA>("/schedules/schedule_a/", {
+    committee_id: committeeId,
+    two_year_transaction_period: cycle,
+    sort: "-contribution_receipt_date",
+  });
+}
+
+export async function fetchIndependentExpendituresForCandidate(candidateId: string, cycle: number) {
+  return firstPages<FecScheduleE>("/schedules/schedule_e/", {
+    candidate_id: candidateId,
+    two_year_transaction_period: cycle,
+    sort: "-expenditure_date",
+  });
+}
+
+export function fecCandidateUrl(candidateId: string) {
+  return `${FEC_WEB_BASE_URL}/candidate/${candidateId}/`;
+}
+
+export function fecCommitteeUrl(committeeId: string) {
+  return `${FEC_WEB_BASE_URL}/committee/${committeeId}/`;
+}
+
+export function fecFilingUrl(imageOrFile?: string | number | null) {
+  return imageOrFile ? `${FEC_WEB_BASE_URL}/filing/${imageOrFile}/` : `${FEC_WEB_BASE_URL}/filings/`;
+}
+
+export function fecReceiptsUrl(committeeId: string) {
+  return `${FEC_WEB_BASE_URL}/receipts/?committee_id=${committeeId}`;
+}
+
+export function fecIndependentExpendituresUrl(candidateId: string) {
+  return `${FEC_WEB_BASE_URL}/independent-expenditures/?candidate_id=${candidateId}`;
+}

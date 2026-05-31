@@ -7,7 +7,7 @@ import type { Metadata } from "next";
 
 export const revalidate = 21600;
 export const metadata: Metadata = {
-  title: "Top outside spenders",
+  title: "Top stored outside spenders",
   description: "Committees ranked by independent expenditure totals in the Race Signals FEC slice.",
 };
 

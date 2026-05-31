@@ -385,7 +385,7 @@ function StateRaceBoard({ rows, state }: { rows: StateRaceBoardRow[]; state: str
             <tr>
               <th className="px-4 py-3 font-medium" scope="col">Race</th>
               <th className="hidden px-4 py-3 text-right font-medium md:table-cell" scope="col">Candidates</th>
-              <th className="hidden px-4 py-3 text-right font-medium md:table-cell" scope="col">Inc.</th>
+              <th className="hidden px-4 py-3 text-right font-medium md:table-cell" scope="col">Matched inc.</th>
               <th className="hidden px-4 py-3 text-right font-medium md:table-cell" scope="col">FEC receipts</th>
               <th className="hidden px-4 py-3 text-right font-medium md:table-cell" scope="col">Signals</th>
               <th className="hidden px-4 py-3 text-right font-medium md:table-cell" scope="col">Stored IE</th>
@@ -407,7 +407,7 @@ function StateRaceBoard({ rows, state }: { rows: StateRaceBoardRow[]; state: str
                         <dd className="inline">{race.candidateCount}</dd>
                       </div>
                       <div>
-                        <dt className="inline font-mono uppercase tracking-[0.12em] text-neutral-500">Incumbents </dt>
+                        <dt className="inline font-mono uppercase tracking-[0.12em] text-neutral-500">Matched incumbents </dt>
                         <dd className="inline">{race.incumbentCount}</dd>
                       </div>
                       <div>

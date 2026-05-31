@@ -69,6 +69,21 @@ const canonicalFiles = [
   },
 ];
 
+const reporterBlocks = [
+  {
+    title: "Use",
+    body: "Use the feed to spot newly stored FEC paperwork, then open the candidate, race, committee or Schedule E evidence page for context.",
+  },
+  {
+    title: "Verify",
+    body: "Cite the linked FEC source URL and source ID. For exports, keep the methodology URL and scope note with the spreadsheet.",
+  },
+  {
+    title: "Limitations",
+    body: "No alert does not mean no activity. This is a stored FEC slice, not live national coverage, and donor-level Schedule A rows are not stored.",
+  },
+];
+
 export default function DocsPage() {
   return (
     <PageShell>
@@ -86,6 +101,19 @@ export default function DocsPage() {
               source boundaries and implementation guardrails.
             </p>
           </header>
+
+        <section className="grid gap-px border border-neutral-300 bg-neutral-300 md:grid-cols-3">
+          {reporterBlocks.map((block) => (
+            <article className="bg-white p-4" key={block.title}>
+              <h2 className="font-mono text-xs uppercase tracking-[0.14em] text-neutral-500">
+                {block.title}
+              </h2>
+              <p className="mt-2 text-sm leading-6 text-neutral-700">
+                {block.body}
+              </p>
+            </article>
+          ))}
+        </section>
 
         <section className="divide-y divide-neutral-200 border border-neutral-300 bg-white">
           {sections.map((section) => (

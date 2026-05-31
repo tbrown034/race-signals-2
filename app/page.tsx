@@ -144,7 +144,6 @@ export default async function Home({
           <CoverageStrip counts={status.counts} latestRun={status.runs[0]} mode={status.mode} />
           <FeedTriageStrip signals={triageSignals} />
           {state ? <StateRaceBoard state={state} rows={stateRaceBoard} /> : null}
-          <StartPointStrip />
           <FeedFilters
             key={[q, state, office, raceId, committeeId, type, statusFilter, since, ingestedSince].join("|")}
             races={races}
@@ -174,6 +173,7 @@ export default async function Home({
               type={type}
             />
           )}
+          <StartPointStrip />
         </section>
 
         <aside className="h-fit min-w-0 border border-neutral-300 bg-white p-5">
@@ -213,7 +213,7 @@ export default async function Home({
             </div>
           </dl>
           <div className="mt-6 border-t border-neutral-300 pt-5 text-sm leading-6 text-neutral-700">
-            Use the start-point strip above the filters for common reporting cuts: a state desk, Senate records, outside spending and review items.
+            Use common cuts below the feed for reporting starts: a state desk, Senate records, outside spending and review items.
           </div>
         </aside>
       </main>

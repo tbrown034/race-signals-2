@@ -38,7 +38,7 @@ export function CandidatePhoto({
     // eslint-disable-next-line @next/next/no-img-element
     <img
       alt={alt}
-      className={`block object-cover grayscale ${dimensions.className} ${className}`}
+      className={`block border border-neutral-300 bg-neutral-200 object-cover grayscale ${dimensions.className} ${className}`}
       decoding="async"
       height={dimensions.height}
       loading="lazy"

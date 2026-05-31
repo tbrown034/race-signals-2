@@ -5,7 +5,7 @@ import { PartySquare } from "@/src/components/party-square";
 import { SignalCopyLink } from "@/src/components/signal-copy-link";
 import { committeeDesignationLabel, committeeTypeLabel } from "@/src/lib/fec-codes";
 import { reportTypeDisplay } from "@/src/lib/fec-report-types";
-import { formatDate, formatDateTime, formatMoney, formatRelativeTime } from "@/src/lib/format";
+import { formatDate, formatDateTime, formatMoney } from "@/src/lib/format";
 import { displayCandidateName } from "@/src/lib/names";
 import type { Signal } from "@/src/lib/types";
 
@@ -54,9 +54,6 @@ export function SignalCard({ signal }: { signal: Signal }) {
         <p className="flex items-center gap-1.5 text-neutral-950">
           <FreshMark signalDate={signal.signalDate} status={signal.status} />
           FEC date {formatDate(signal.signalDate)}
-        </p>
-        <p className="mt-1 text-neutral-600" title={`Ingested by Race Signals ${formatDateTime(signal.dataFreshness)}`}>
-          Added to Race Signals {formatRelativeTime(signal.dataFreshness)}
         </p>
         <Link
           className="mt-1 block uppercase tracking-[0.12em] underline-offset-4 hover:underline"
@@ -246,7 +243,7 @@ export function SignalCard({ signal }: { signal: Signal }) {
           {amount}
         </span>
         <Link
-          className="border border-neutral-400 px-2 py-1 font-mono uppercase tracking-[0.12em] text-neutral-600 underline-offset-4 hover:underline"
+          className="font-mono text-[11px] uppercase tracking-[0.12em] text-neutral-500 underline-offset-4 hover:underline"
           href="/methodology#confidence"
           title="How Race Signals assigns confidence labels"
         >

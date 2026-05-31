@@ -4,6 +4,7 @@ import { FeedFilters } from "@/src/components/feed-filters";
 import { PageShell } from "@/src/components/page-shell";
 import { SignalCard } from "@/src/components/signal-card";
 import { getRaces, getSignalStateCounts, getSpendingSignals, getStatus } from "@/src/lib/db/repository";
+import { formatDate, formatMoney } from "@/src/lib/format";
 import { signalFiltersFromSearchParams } from "@/src/lib/signals/filters";
 import type { Metadata } from "next";
 
@@ -90,6 +91,61 @@ export default async function SpendingPage({
             Showing {visibleSignals.length}{hasMoreSignals ? "+" : ""} outside-spending signals
           </div>
           {visibleSignals.length ? (
+            <div className="border-b border-neutral-300">
+              <div className="overflow-x-auto">
+                <table className="w-full min-w-[920px] text-left text-sm">
+                  <thead className="bg-neutral-100 font-mono text-xs uppercase tracking-[0.12em] text-neutral-500">
+                    <tr>
+                      <th className="px-4 py-3 font-medium" scope="col">Date</th>
+                      <th className="px-4 py-3 font-medium" scope="col">Spender</th>
+                      <th className="px-4 py-3 font-medium" scope="col">Target</th>
+                      <th className="px-4 py-3 font-medium" scope="col">Position</th>
+                      <th className="px-4 py-3 font-medium" scope="col">Race</th>
+                      <th className="px-4 py-3 text-right font-medium" scope="col">Amount</th>
+                      <th className="px-4 py-3 font-medium" scope="col">Source</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-neutral-200">
+                    {visibleSignals.map((signal) => (
+                      <tr key={`row-${signal.dedupeKey}`}>
+                        <td className="px-4 py-3 font-mono">{formatDate(signal.signalDate)}</td>
+                        <td className="px-4 py-3">{signal.committeeName ?? "Unknown spender"}</td>
+                        <td className="px-4 py-3">{signal.candidateName ?? "Unknown candidate"}</td>
+                        <td className="px-4 py-3">{supportOpposeLabel(signal.metadata?.supportOpposeIndicator)}</td>
+                        <td className="px-4 py-3">
+                          {signal.raceId ? (
+                            <Link className="font-medium underline underline-offset-4" href={`/races/${signal.raceId}`}>
+                              {signal.raceName ?? signal.raceId}
+                            </Link>
+                          ) : (
+                            "Unmatched"
+                          )}
+                        </td>
+                        <td className="px-4 py-3 text-right font-mono font-semibold">
+                          {formatMoney(signal.amount)}
+                        </td>
+                        <td className="px-4 py-3">
+                          {signal.sourceUrl ? (
+                            <a
+                              className="font-medium underline underline-offset-4"
+                              href={signal.sourceUrl}
+                              rel="noreferrer"
+                              target="_blank"
+                            >
+                              FEC
+                            </a>
+                          ) : (
+                            "Missing"
+                          )}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          ) : null}
+          {visibleSignals.length ? (
             visibleSignals.map((signal) => <SignalCard signal={signal} key={signal.dedupeKey} />)
           ) : (
             <div className="p-5 text-sm text-neutral-700">
@@ -116,6 +172,12 @@ export default async function SpendingPage({
       </main>
     </PageShell>
   );
+}
+
+function supportOpposeLabel(value: unknown) {
+  if (value === "S") return "Support";
+  if (value === "O") return "Oppose";
+  return "Unknown";
 }
 
 function spendingSortHref(

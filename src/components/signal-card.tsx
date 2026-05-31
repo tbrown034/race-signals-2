@@ -73,8 +73,44 @@ export function SignalCard({ signal }: { signal: Signal }) {
         <p className="mt-1 max-w-3xl text-sm leading-5 text-neutral-700">
           {signal.whyItMatters}
         </p>
+        <details className="mt-2 border border-neutral-300 px-2 py-1.5 text-xs text-neutral-700 md:hidden">
+          <summary className="cursor-pointer font-mono uppercase tracking-[0.12em] text-neutral-600">
+            Record details
+          </summary>
+          {evidenceItems.length ? (
+            <div className="mt-2 flex flex-wrap gap-1.5">
+              {evidenceItems.map((item) => (
+                <span
+                  className="border border-neutral-300 px-1.5 py-0.5 leading-5"
+                  key={`mobile-${item}`}
+                >
+                  {item}
+                </span>
+              ))}
+            </div>
+          ) : null}
+          <p className="mt-2 leading-5">
+            <span className="font-mono uppercase tracking-[0.12em] text-neutral-500">Verify:</span>{" "}
+            {verifyLine}
+          </p>
+          {comparisonSources.length || relatedFilingSources.length ? (
+            <div className="mt-2 flex flex-wrap gap-2">
+              {[...comparisonSources, ...relatedFilingSources].map((source) => (
+                <a
+                  className="font-medium underline underline-offset-4"
+                  href={source.href}
+                  key={`mobile-${source.label}-${source.href}`}
+                  rel="noreferrer"
+                  target="_blank"
+                >
+                  {source.label}
+                </a>
+              ))}
+            </div>
+          ) : null}
+        </details>
         {evidenceItems.length ? (
-          <div className="mt-2 flex flex-wrap gap-1.5">
+          <div className="mt-2 hidden flex-wrap gap-1.5 md:flex">
             <span className="font-mono text-[11px] uppercase tracking-[0.12em] text-neutral-500">
               Record
             </span>
@@ -88,12 +124,12 @@ export function SignalCard({ signal }: { signal: Signal }) {
             ))}
           </div>
         ) : null}
-        <p className="mt-1 text-xs leading-5 text-neutral-600">
+        <p className="mt-1 hidden text-xs leading-5 text-neutral-600 md:block">
           <span className="font-mono uppercase tracking-[0.12em] text-neutral-500">Verify:</span>{" "}
           {verifyLine}
         </p>
         {comparisonSources.length ? (
-          <div className="mt-1 flex flex-wrap gap-2 text-xs">
+          <div className="mt-1 hidden flex-wrap gap-2 text-xs md:flex">
             {comparisonSources.map((source) => (
               <a
                 className="font-medium underline underline-offset-4"
@@ -108,7 +144,7 @@ export function SignalCard({ signal }: { signal: Signal }) {
           </div>
         ) : null}
         {relatedFilingSources.length ? (
-          <div className="mt-1 flex flex-wrap gap-2 text-xs">
+          <div className="mt-1 hidden flex-wrap gap-2 text-xs md:flex">
             {relatedFilingSources.map((source) => (
               <a
                 className="font-medium underline underline-offset-4"

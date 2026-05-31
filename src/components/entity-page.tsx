@@ -38,6 +38,8 @@ export function EntityPage({
   });
   const visibleSignals = prioritySignals.slice(0, 25);
   const hiddenSignals = Math.max(signals.length - visibleSignals.length, 0);
+  const mobileVisibleSignals = 10;
+  const mobileHiddenSignals = Math.max(signals.length - mobileVisibleSignals, 0);
   const primaryMeta = meta.slice(0, primaryMetaCount);
   const secondaryMeta = meta.slice(primaryMetaCount);
 
@@ -251,7 +253,20 @@ export function EntityPage({
                 {formatCount(signals.length, "loaded related signal")}. Open the feed view for broader filtering.
               </p>
             ) : null}
-            {visibleSignals.map((signal) => <SignalCard signal={signal} key={signal.dedupeKey} />)}
+            {mobileHiddenSignals && allSignalsHref ? (
+              <p className="border-b border-neutral-300 px-5 py-3 text-sm text-neutral-600 md:hidden">
+                Showing 10 related signals on mobile.{" "}
+                <Link className="font-medium underline underline-offset-4" href={allSignalsHref}>
+                  Open matching feed
+                </Link>{" "}
+                for the full set.
+              </p>
+            ) : null}
+            {visibleSignals.map((signal, index) => (
+              <div className={index >= mobileVisibleSignals ? "hidden md:block" : undefined} key={signal.dedupeKey}>
+                <SignalCard signal={signal} />
+              </div>
+            ))}
           </>
         ) : (
           <p className="p-5 text-sm text-neutral-600">No related signals in the current slice.</p>

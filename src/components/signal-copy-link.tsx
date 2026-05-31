@@ -24,7 +24,14 @@ export function SignalCopyLink({ anchorId }: { anchorId: string }) {
       title="Copy signal permalink"
       type="button"
     >
-      {copied ? "copied" : "#"}
+      {copied ? (
+        "copied"
+      ) : (
+        <>
+          <span className="hidden sm:inline">#</span>
+          <span className="sm:hidden">Copy link</span>
+        </>
+      )}
     </button>
   );
 }

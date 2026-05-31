@@ -40,7 +40,7 @@ export async function PageShell({ children }: { children: ReactNode }) {
             </p>
           </div>
           <div className="w-full max-w-full min-w-0 lg:flex lg:w-auto lg:flex-col lg:items-end lg:gap-2">
-            <nav className="flex max-w-full flex-wrap gap-x-3 gap-y-2 text-sm sm:gap-x-4">
+            <nav className="-mx-5 flex max-w-[calc(100vw-2.5rem)] flex-nowrap gap-x-3 overflow-x-auto px-5 pb-1 text-sm whitespace-nowrap sm:mx-0 sm:max-w-full sm:flex-wrap sm:gap-x-4 sm:px-0 sm:pb-0">
               {nav.map((item) => (
                 <Link
                   className="shrink-0 font-medium text-neutral-700 underline-offset-4 hover:underline"
@@ -52,7 +52,7 @@ export async function PageShell({ children }: { children: ReactNode }) {
               ))}
             </nav>
             <Link
-              className={`mt-1 block max-w-full break-words font-mono text-[11px] uppercase tracking-[0.12em] underline-offset-4 hover:underline lg:mt-0 ${stale ? "font-semibold text-neutral-950" : "text-neutral-500"}`}
+              className={`mt-1 block max-w-full font-mono text-[10px] uppercase tracking-[0.12em] underline-offset-4 hover:underline sm:text-[11px] lg:mt-0 ${stale ? "font-semibold text-neutral-950" : "text-neutral-500"}`}
               href="/status"
               title={latestFinishedAt ? `Last ingestion finished ${formatDateTime(latestFinishedAt)}` : "No ingestion run recorded"}
             >
@@ -63,7 +63,9 @@ export async function PageShell({ children }: { children: ReactNode }) {
       </header>
       {children}
       <footer className="border-t border-neutral-300 bg-white px-5 py-3 text-xs leading-5 text-neutral-600 sm:px-8">
-        FEC records via the Federal Election Commission API. Election timeline data, when available, cites Wikidata (CC0) and Wikipedia (CC BY-SA 4.0). Member photos use public-domain Bioguide images mirrored by unitedstates/images. Identifier crosswalks use unitedstates/congress-legislators.
+        <p>FEC records via the Federal Election Commission API.</p>
+        <p>Election timeline data, when available, cites Wikidata (CC0) and Wikipedia (CC BY-SA 4.0).</p>
+        <p>Member photos use public-domain Bioguide images mirrored by unitedstates/images; identifier crosswalks use unitedstates/congress-legislators.</p>
       </footer>
     </div>
   );

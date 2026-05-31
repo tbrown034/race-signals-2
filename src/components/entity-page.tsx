@@ -36,6 +36,8 @@ export function EntityPage({
   });
   const visibleSignals = prioritySignals.slice(0, 25);
   const hiddenSignals = Math.max(signals.length - visibleSignals.length, 0);
+  const primaryMeta = meta.slice(0, 8);
+  const secondaryMeta = meta.slice(8);
 
   return (
     <main className="mx-auto grid max-w-7xl grid-cols-1 gap-6 px-5 py-6 sm:px-8 lg:grid-cols-[320px_1fr]">
@@ -51,15 +53,23 @@ export function EntityPage({
           {titleAccessory}
         </h1>
         <dl className="mt-5 space-y-4 text-sm">
-          {meta.map(([label, value]) => (
-            <div key={label}>
-              <dt className="font-mono text-xs uppercase tracking-[0.12em] text-neutral-500">
-                {label}
-              </dt>
-              <dd className="mt-1">{value ?? "Not available"}</dd>
-            </div>
-          ))}
+          <MetaRows rows={primaryMeta} />
         </dl>
+        {secondaryMeta.length ? (
+          <>
+            <details className="mt-4 border-t border-neutral-300 pt-4 text-sm md:hidden">
+              <summary className="cursor-pointer font-mono text-xs uppercase tracking-[0.12em] text-neutral-600">
+                Source details
+              </summary>
+              <dl className="mt-4 space-y-4">
+                <MetaRows rows={secondaryMeta} />
+              </dl>
+            </details>
+            <dl className="mt-4 hidden space-y-4 text-sm md:block">
+              <MetaRows rows={secondaryMeta} />
+            </dl>
+          </>
+        ) : null}
         {sourceUrl ? (
           <a
             className="mt-5 inline-block text-sm font-medium underline underline-offset-4"
@@ -247,6 +257,17 @@ export function EntityPage({
       </section>
     </main>
   );
+}
+
+function MetaRows({ rows }: { rows: Array<[string, ReactNode | null | undefined]> }) {
+  return rows.map(([label, value]) => (
+    <div key={label}>
+      <dt className="font-mono text-xs uppercase tracking-[0.12em] text-neutral-500">
+        {label}
+      </dt>
+      <dd className="mt-1">{value ?? "Not available"}</dd>
+    </div>
+  ));
 }
 
 function supportLabel(value?: string | null) {

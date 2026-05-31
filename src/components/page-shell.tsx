@@ -32,10 +32,10 @@ export async function PageShell({ children }: { children: ReactNode }) {
   return (
     <div className="min-h-screen bg-stone-50 text-neutral-950">
       <header className="border-b border-neutral-300 bg-white">
-        <div className="mx-auto flex max-w-7xl flex-col gap-4 px-5 py-4 sm:px-8 lg:flex-row lg:items-end lg:justify-between">
+        <div className="mx-auto flex max-w-7xl flex-col gap-3 px-5 py-3 sm:px-8 sm:py-4 lg:flex-row lg:items-end lg:justify-between">
           <div className="min-w-0">
             <BrandMark />
-            <p className="mt-1 text-sm text-neutral-600">
+            <p className="mt-1 hidden text-sm text-neutral-600 sm:block">
               Early campaign-finance alerts for reporters covering 2026 House and Senate races.
             </p>
           </div>

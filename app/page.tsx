@@ -396,7 +396,7 @@ function StateRaceBoard({ rows, state }: { rows: StateRaceBoardRow[]; state: str
               <th className="hidden px-4 py-3 text-right font-medium md:table-cell" scope="col">Matched inc.</th>
               <th className="hidden px-4 py-3 text-right font-medium md:table-cell" scope="col">Stored receipts</th>
               <th className="hidden px-4 py-3 text-right font-medium md:table-cell" scope="col">Signals</th>
-              <th className="hidden px-4 py-3 text-right font-medium md:table-cell" scope="col">Stored IE</th>
+              <th className="hidden px-4 py-3 text-right font-medium md:table-cell" scope="col">Stored slice IE</th>
               <th className="hidden px-4 py-3 font-medium md:table-cell" scope="col">Totals fetched</th>
               <th className="hidden px-4 py-3 font-medium md:table-cell" scope="col">Latest signal</th>
             </tr>
@@ -435,7 +435,7 @@ function StateRaceBoard({ rows, state }: { rows: StateRaceBoardRow[]; state: str
                         <dd className="inline">{race.signalCount}</dd>
                       </div>
                       <div>
-                        <dt className="inline font-mono uppercase tracking-[0.12em] text-neutral-500">Stored IE </dt>
+                        <dt className="inline font-mono uppercase tracking-[0.12em] text-neutral-500">Stored slice IE </dt>
                         <dd className="inline font-mono text-neutral-950">
                           {race.independentExpenditureTotal > 0 ? (
                             <Link className="underline underline-offset-4" href={`/records/schedule-e?race=${race.raceId}`}>

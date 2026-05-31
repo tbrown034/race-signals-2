@@ -276,6 +276,8 @@ export type CandidateSignalGap = {
   raceId?: string | null;
   raceName?: string | null;
   totalReceiptsCycle?: number | null;
+  committeeCount?: number;
+  filingCount?: number;
   totalsUpdatedAt?: string | null;
   totalsFetchedAt?: string | null;
   sourceUrl?: string | null;

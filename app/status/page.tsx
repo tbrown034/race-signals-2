@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { PageShell } from "@/src/components/page-shell";
 import { getSignalStateFreshness, getStatus } from "@/src/lib/db/repository";
-import { formatDateTime, formatMoney, formatRelativeTime, isOlderThanHours } from "@/src/lib/format";
+import { formatCount, formatDateTime, formatMoney, formatRelativeTime, isOlderThanHours } from "@/src/lib/format";
 import { endpointHealthClass } from "@/src/lib/status-health";
 import type { Metadata } from "next";
 
@@ -296,6 +296,7 @@ export default async function StatusPage() {
                     <th className="px-4 py-3 font-medium" scope="col">Candidate</th>
                     <th className="hidden px-4 py-3 font-medium md:table-cell" scope="col">Race</th>
                     <th className="hidden px-4 py-3 text-right font-medium md:table-cell" scope="col">Cycle receipts</th>
+                    <th className="hidden px-4 py-3 font-medium md:table-cell" scope="col">Source records</th>
                     <th className="hidden px-4 py-3 font-medium md:table-cell" scope="col">FEC record</th>
                     <th className="hidden px-4 py-3 font-medium md:table-cell" scope="col">Totals freshness</th>
                   </tr>
@@ -327,6 +328,12 @@ export default async function StatusPage() {
                           <div>
                             <dt className="inline font-mono uppercase tracking-[0.12em] text-neutral-500">FEC ID </dt>
                             <dd className="inline font-mono text-neutral-950">{candidate.fecCandidateId}</dd>
+                          </div>
+                          <div>
+                            <dt className="inline font-mono uppercase tracking-[0.12em] text-neutral-500">Records </dt>
+                            <dd className="inline">
+                              {formatCount(candidate.committeeCount ?? 0, "committee")} / {formatCount(candidate.filingCount ?? 0, "filing")}
+                            </dd>
                           </div>
                           <div>
                             <dt className="inline font-mono uppercase tracking-[0.12em] text-neutral-500">Source </dt>
@@ -361,6 +368,15 @@ export default async function StatusPage() {
                       </td>
                       <td className="hidden px-4 py-3 text-right font-mono md:table-cell">
                         {formatMoney(candidate.totalReceiptsCycle) ?? "FEC totals not loaded"}
+                      </td>
+                      <td className="hidden px-4 py-3 text-xs text-neutral-600 md:table-cell">
+                        <span className="block">{formatCount(candidate.committeeCount ?? 0, "committee")}</span>
+                        <span className="block">{formatCount(candidate.filingCount ?? 0, "filing")}</span>
+                        {candidate.totalReceiptsCycle && !(candidate.committeeCount || candidate.filingCount) ? (
+                          <span className="mt-1 block text-neutral-700">
+                            Totals exist, but no committee/report records are matched.
+                          </span>
+                        ) : null}
                       </td>
                       <td className="hidden px-4 py-3 md:table-cell">
                         <div className="flex flex-col gap-1">

@@ -503,7 +503,7 @@ function candidateReporterNotes(
 ) {
   return [
     `Stored FEC money snapshot: ${candidateMoney(candidate.totalReceiptsCycle, candidate.totalsFetchedAt).toLowerCase()} raised this cycle; ${candidateMoney(candidate.cashOnHandLatest, candidate.totalsFetchedAt).toLowerCase()} cash on hand${candidate.cashOnHandAsOf ? ` as of ${formatDate(candidate.cashOnHandAsOf)}` : ""}.`,
-    `${formatCount(totalSignals, "related signal")} in this slice: ${formatCount(signalCounts.filings, "filing")}, ${formatCount(signalCounts.committees, "committee record")}, ${formatCount(signalCounts.outsideSpending, "outside-spending alert")}, ${formatCount(signalCounts.review, "review flag")}.`,
+    `${formatCount(totalSignals, "related signal")} in this slice: ${formatCount(signalCounts.filings, "filing")}, ${formatCount(signalCounts.committees, "new-committee record")}, ${formatCount(signalCounts.outsideSpending, "outside-spending alert")}; ${formatCount(signalCounts.review, "signal")} flagged for editor review.`,
     candidate.totalReceiptsCycle && candidate.totalReceiptsCycle > 0 && totalSignals === 0
       ? "FEC aggregate totals show activity, but Race Signals has not matched a committee, filing or Schedule E record that generates a source-record signal for this candidate yet."
       : null,
@@ -541,7 +541,7 @@ function candidateMobileNotes(
   return [
     `FEC totals: ${candidateMoney(candidate.totalReceiptsCycle, candidate.totalsFetchedAt)} raised; ${candidateMoney(candidate.cashOnHandLatest, candidate.totalsFetchedAt)} cash${candidate.cashOnHandAsOf ? ` as of ${formatDate(candidate.cashOnHandAsOf)}` : ""}${candidate.totalsFetchedAt ? `, fetched ${formatDate(candidate.totalsFetchedAt)}` : ""}.`,
     totalSignals
-      ? `${formatCount(totalSignals, "signal")}: ${signalCounts.filings} filings, ${signalCounts.committees} committees, ${signalCounts.outsideSpending} IE, ${signalCounts.review} review.`
+      ? `${formatCount(totalSignals, "signal")} (${signalCounts.filings} filings, ${signalCounts.committees} new-committee, ${signalCounts.outsideSpending} IE); ${signalCounts.review} flagged for review.`
       : "No matched source-record signals in this stored slice yet.",
     candidate.totalReceiptsCycle && candidate.totalReceiptsCycle > 0 && totalSignals === 0
       ? "FEC totals show activity; no matched signal yet."

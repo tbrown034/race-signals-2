@@ -19,6 +19,9 @@ const confidenceStyles: Record<string, string> = {
 
 export function SignalCard({ signal }: { signal: Signal }) {
   const amount = formatMoney(signal.amount);
+  const contributorName = textMetadata(signal.metadata?.contributorName);
+  const contributorNameNormalized = textMetadata(signal.metadata?.contributorNameNormalized);
+  const contributorEmployerNormalized = textMetadata(signal.metadata?.contributorEmployerNormalized);
 
   return (
     <article className="grid gap-3 border-b border-neutral-300 bg-white px-4 py-4 md:grid-cols-[112px_1fr_190px]">
@@ -44,6 +47,14 @@ export function SignalCard({ signal }: { signal: Signal }) {
           {signal.whyItMatters}
         </p>
         <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-xs text-neutral-600">
+          {contributorNameNormalized ? (
+            <span title={contributorName ?? contributorNameNormalized}>
+              Donor: {contributorNameNormalized}
+            </span>
+          ) : null}
+          {contributorEmployerNormalized ? (
+            <span>Employer: {contributorEmployerNormalized}</span>
+          ) : null}
           {signal.candidateId ? (
             <Link className="font-medium underline underline-offset-4" href={`/candidates/${signal.candidateId}`}>
               {signal.candidateName ?? signal.candidateId}
@@ -84,4 +95,8 @@ export function SignalCard({ signal }: { signal: Signal }) {
       </div>
     </article>
   );
+}
+
+function textMetadata(value: unknown) {
+  return typeof value === "string" && value ? value : null;
 }

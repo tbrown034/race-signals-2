@@ -185,13 +185,17 @@ export async function upsertTransactions(transactions: Transaction[]) {
       `
         insert into transactions (
           source_id, committee_id, fec_committee_id, contributor_name,
-          contributor_employer, contributor_occupation, amount, transaction_date,
+          contributor_name_normalized, contributor_employer,
+          contributor_employer_normalized, contributor_occupation, amount, transaction_date,
           transaction_type, memo_text, source_url, raw
         )
-        values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)
+        values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14)
         on conflict (source, source_id) do update set
           committee_id = excluded.committee_id,
           contributor_name = excluded.contributor_name,
+          contributor_name_normalized = excluded.contributor_name_normalized,
+          contributor_employer = excluded.contributor_employer,
+          contributor_employer_normalized = excluded.contributor_employer_normalized,
           amount = excluded.amount,
           transaction_date = excluded.transaction_date,
           transaction_type = excluded.transaction_type,
@@ -204,7 +208,9 @@ export async function upsertTransactions(transactions: Transaction[]) {
         transaction.committeeId,
         transaction.fecCommitteeId,
         transaction.contributorName,
+        transaction.contributorNameNormalized,
         transaction.contributorEmployer,
+        transaction.contributorEmployerNormalized,
         transaction.contributorOccupation,
         transaction.amount,
         transaction.transactionDate,

@@ -129,7 +129,12 @@ export function generateSignals(input: SignalInput): Signal[] {
       confidence: transaction.amount >= 100000 ? "low" : "medium",
       status: transaction.amount >= 100000 ? "review" : status,
       dataFreshness: input.dataFreshness,
-      metadata: { contributorName: transaction.contributorName },
+      metadata: {
+        contributorName: transaction.contributorName,
+        contributorNameNormalized: transaction.contributorNameNormalized,
+        contributorEmployer: transaction.contributorEmployer,
+        contributorEmployerNormalized: transaction.contributorEmployerNormalized,
+      },
     });
   }
 

@@ -1,4 +1,5 @@
 import { raceIdFor } from "@/src/lib/scope";
+import { normalizeDonorName, normalizeEmployer } from "@/src/lib/normalization/entities";
 import {
   fecCandidateUrl,
   fecCommitteeUrl,
@@ -74,12 +75,16 @@ export function normalizeFiling(record: FecReport): Filing {
 }
 
 export function normalizeTransaction(record: FecScheduleA): Transaction {
+  const contributorName = record.contributor_name ?? null;
+  const contributorEmployer = record.contributor_employer ?? null;
   return {
     sourceId: String(record.sub_id ?? ""),
     committeeId: record.committee_id ? `cmte-${record.committee_id}` : null,
     fecCommitteeId: record.committee_id ?? null,
-    contributorName: record.contributor_name ?? null,
-    contributorEmployer: record.contributor_employer ?? null,
+    contributorName,
+    contributorNameNormalized: contributorName ? normalizeDonorName(contributorName) : null,
+    contributorEmployer,
+    contributorEmployerNormalized: contributorEmployer ? normalizeEmployer(contributorEmployer) : null,
     contributorOccupation: record.contributor_occupation ?? null,
     amount: record.contribution_receipt_amount ?? 0,
     transactionDate: record.contribution_receipt_date ?? null,

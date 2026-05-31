@@ -58,7 +58,9 @@ export type Transaction = {
   committeeId?: string | null;
   fecCommitteeId?: string | null;
   contributorName?: string | null;
+  contributorNameNormalized?: string | null;
   contributorEmployer?: string | null;
+  contributorEmployerNormalized?: string | null;
   contributorOccupation?: string | null;
   amount: number;
   transactionDate?: string | null;

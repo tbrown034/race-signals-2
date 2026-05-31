@@ -1,5 +1,6 @@
 import { SignalCard } from "@/src/components/signal-card";
-import type { RaceRating, Signal } from "@/src/lib/types";
+import { formatDate, formatMoney } from "@/src/lib/format";
+import type { RaceRating, Signal, Transaction } from "@/src/lib/types";
 
 export function EntityPage({
   eyebrow,
@@ -7,6 +8,7 @@ export function EntityPage({
   meta,
   sourceUrl,
   ratings = [],
+  transactions = [],
   signals,
 }: {
   eyebrow: string;
@@ -14,6 +16,7 @@ export function EntityPage({
   meta: Array<[string, string | number | null | undefined]>;
   sourceUrl?: string | null;
   ratings?: RaceRating[];
+  transactions?: Transaction[];
   signals: Signal[];
 }) {
   return (
@@ -65,6 +68,43 @@ export function EntityPage({
         ) : null}
       </aside>
       <section className="border border-neutral-300 bg-white">
+        {transactions.length ? (
+          <div className="border-b border-neutral-300">
+            <div className="border-b border-neutral-300 px-5 py-4">
+              <h2 className="text-sm font-semibold uppercase tracking-[0.14em] text-neutral-600">
+                Recent receipts
+              </h2>
+            </div>
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-sm">
+                <thead className="bg-neutral-100 text-xs uppercase tracking-[0.12em] text-neutral-500">
+                  <tr>
+                    <th className="px-4 py-3 font-medium">Date</th>
+                    <th className="px-4 py-3 font-medium">Contributor</th>
+                    <th className="px-4 py-3 font-medium">Employer</th>
+                    <th className="px-4 py-3 text-right font-medium">Amount</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-neutral-200">
+                  {transactions.map((transaction) => (
+                    <tr key={transaction.sourceId}>
+                      <td className="px-4 py-3">{formatDate(transaction.transactionDate)}</td>
+                      <td className="px-4 py-3" title={transaction.contributorName ?? undefined}>
+                        {transaction.contributorNameNormalized ?? transaction.contributorName ?? "Unknown"}
+                      </td>
+                      <td className="px-4 py-3" title={transaction.contributorEmployer ?? undefined}>
+                        {transaction.contributorEmployerNormalized ?? transaction.contributorEmployer ?? "Unknown"}
+                      </td>
+                      <td className="px-4 py-3 text-right font-mono">
+                        {formatMoney(transaction.amount)}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        ) : null}
         <div className="border-b border-neutral-300 px-5 py-4">
           <h2 className="text-sm font-semibold uppercase tracking-[0.14em] text-neutral-600">
             Related signals

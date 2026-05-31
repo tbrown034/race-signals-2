@@ -8,7 +8,7 @@ import {
 } from "@/src/lib/demo/data";
 import { hasDatabase, sql } from "@/src/lib/db/client";
 import type { SignalFilters } from "@/src/lib/signals/filters";
-import type { Candidate, Committee, IngestionRun, Race, RaceRating, Signal } from "@/src/lib/types";
+import type { Candidate, Committee, IngestionRun, Race, RaceRating, Signal, Transaction } from "@/src/lib/types";
 
 type SignalRow = {
   id: string;
@@ -207,6 +207,51 @@ export async function getCommittee(id: string): Promise<Committee | null> {
     discoveredVia: row.discovered_via,
     sourceUrl: row.source_url,
   };
+}
+
+export async function getCommitteeTransactions(id: string, limit = 10): Promise<Transaction[]> {
+  if (!hasDatabase()) return [];
+  const rows = await sql<{
+    source_id: string;
+    committee_id: string | null;
+    fec_committee_id: string | null;
+    contributor_name: string | null;
+    contributor_name_normalized: string | null;
+    contributor_employer: string | null;
+    contributor_employer_normalized: string | null;
+    contributor_occupation: string | null;
+    amount: string;
+    transaction_date: string | Date | null;
+    transaction_type: string | null;
+    memo_text: string | null;
+    source_url: string | null;
+    raw: unknown;
+  }>(
+    `
+      select *
+      from transactions
+      where committee_id = $1
+      order by transaction_date desc nulls last, amount desc
+      limit $2
+    `,
+    [id, limit],
+  );
+  return rows.map((row) => ({
+    sourceId: row.source_id,
+    committeeId: row.committee_id,
+    fecCommitteeId: row.fec_committee_id,
+    contributorName: row.contributor_name,
+    contributorNameNormalized: row.contributor_name_normalized,
+    contributorEmployer: row.contributor_employer,
+    contributorEmployerNormalized: row.contributor_employer_normalized,
+    contributorOccupation: row.contributor_occupation,
+    amount: Number(row.amount),
+    transactionDate: row.transaction_date ? toDateString(row.transaction_date) : null,
+    transactionType: row.transaction_type,
+    memoText: row.memo_text,
+    sourceUrl: row.source_url,
+    raw: row.raw,
+  }));
 }
 
 export async function getRace(id: string): Promise<Race | null> {

@@ -74,7 +74,9 @@ create table if not exists transactions (
   committee_id text references committees(id),
   fec_committee_id text,
   contributor_name text,
+  contributor_name_normalized text,
   contributor_employer text,
+  contributor_employer_normalized text,
   contributor_occupation text,
   amount numeric not null,
   transaction_date date,
@@ -85,6 +87,9 @@ create table if not exists transactions (
   created_at timestamptz not null default now(),
   unique (source, source_id)
 );
+
+alter table transactions add column if not exists contributor_name_normalized text;
+alter table transactions add column if not exists contributor_employer_normalized text;
 
 create table if not exists independent_expenditures (
   id uuid primary key default gen_random_uuid(),
@@ -199,6 +204,7 @@ create index if not exists committees_candidate_idx on committees(candidate_id);
 create index if not exists committees_race_idx on committees(race_id);
 create index if not exists filings_committee_date_idx on filings(committee_id, receipt_date desc);
 create index if not exists transactions_committee_date_idx on transactions(committee_id, transaction_date desc);
+create index if not exists transactions_future_dedupe_idx on transactions(committee_id, contributor_name_normalized, transaction_date, amount);
 create index if not exists independent_expenditures_race_date_idx on independent_expenditures(race_id, expenditure_date desc);
 create index if not exists signals_date_idx on signals(signal_date desc, created_at desc);
 create index if not exists signals_type_idx on signals(signal_type);

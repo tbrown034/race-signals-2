@@ -30,6 +30,9 @@ async function main() {
       { path: "/methodology", text: "Methodology" },
       { path: "/docs", text: "North Star" },
       { path: `/candidates/${dynamicRoutes.candidateId}`, text: "Candidate" },
+      ...(dynamicRoutes.noSignalCandidateId
+        ? [{ path: `/candidates/${dynamicRoutes.noSignalCandidateId}`, text: "Check coverage gaps" }]
+        : []),
       { path: `/races/${dynamicRoutes.raceId}`, text: "Candidate cohort" },
       { path: `/committees/${dynamicRoutes.committeeId}`, text: "Committee" },
     ];
@@ -61,20 +64,31 @@ async function dynamicRouteIds() {
     return {
       candidateId: "cand-H6IN05101",
       committeeId: "cmte-C00890501",
+      noSignalCandidateId: null,
       raceId: "2026-IN-05-H",
     };
   }
 
   const pool = getPool();
-  const [candidate, committee, race] = await Promise.all([
+  const [candidate, committee, noSignalCandidate, race] = await Promise.all([
     pool.query<{ id: string }>("select id from candidates order by total_receipts_cycle desc nulls last, id limit 1"),
     pool.query<{ id: string }>("select id from committees order by name, id limit 1"),
+    pool.query<{ id: string }>(`
+      select c.id
+      from candidates c
+      left join signals s on s.candidate_id = c.id
+      group by c.id
+      having count(s.id) = 0
+      order by c.total_receipts_cycle desc nulls last, c.id
+      limit 1
+    `),
     pool.query<{ id: string }>("select id from races order by state, office, district nulls first, id limit 1"),
   ]);
 
   return {
     candidateId: candidate.rows[0]?.id ?? "cand-H6IN05101",
     committeeId: committee.rows[0]?.id ?? "cmte-C00890501",
+    noSignalCandidateId: noSignalCandidate.rows[0]?.id ?? null,
     raceId: race.rows[0]?.id ?? "2026-IN-05-H",
   };
 }

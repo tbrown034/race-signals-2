@@ -88,6 +88,17 @@ export function FeedFilters({
   const selectedUncoveredState = selectedState && !stateSignalCounts[selectedState]
     ? sortedStateOptions.find((item) => item.code === selectedState)
     : null;
+  const activeFilterTokens = [
+    q ? { key: "q", label: `Search: ${q}` } : null,
+    state ? { key: "state", label: `State: ${state}` } : null,
+    office ? { key: "office", label: `Office: ${officeLabel(office)}` } : null,
+    raceId ? { key: "race", label: `Race: ${selectedRace?.name ?? raceId}` } : null,
+    committeeId ? { key: "committee", label: `Committee: ${committeeId}` } : null,
+    !lockedType && type ? { key: "type", label: `Type: ${signalTypeLabel(type)}` } : null,
+    status ? { key: "status", label: `Status: ${statusLabel(status)}` } : null,
+    since ? { key: "since", label: `Event: ${windowLabel(since)}` } : null,
+    ingestedSince ? { key: "ingestedSince", label: `Added: ${windowLabel(ingestedSince)}` } : null,
+  ].filter((token): token is { key: string; label: string } => Boolean(token));
 
   function updateFilter(name: string, value: string) {
     const next = new URLSearchParams(searchParams.toString());
@@ -146,6 +157,13 @@ export function FeedFilters({
     return `${pathname}?${next.toString()}`;
   }
 
+  function removeFilterHref(name: string) {
+    const next = new URLSearchParams(searchParams.toString());
+    next.delete(name);
+    if (name === "state" || name === "office") next.delete("race");
+    return next.toString() ? `${pathname}?${next.toString()}` : pathname;
+  }
+
   return (
     <form className="border-b border-neutral-300 bg-white p-4" onSubmit={onSubmit}>
       <div className="space-y-3">
@@ -158,6 +176,23 @@ export function FeedFilters({
             placeholder="Candidate, committee, race, source ID"
           />
         </label>
+        {activeFilterTokens.length ? (
+          <div className="flex flex-wrap items-center gap-2 border border-neutral-200 bg-neutral-50 p-2 text-xs">
+            <span className="font-mono uppercase tracking-[0.12em] text-neutral-500">
+              Active filters
+            </span>
+            {activeFilterTokens.map((token) => (
+              <Link
+                className="border border-neutral-300 bg-white px-2 py-1 text-neutral-700 underline-offset-4 hover:border-neutral-900 hover:underline"
+                href={removeFilterHref(token.key)}
+                key={token.key}
+                title={`Remove ${token.label}`}
+              >
+                {token.label} x
+              </Link>
+            ))}
+          </div>
+        ) : null}
         <div className="grid min-w-0 grid-cols-1 gap-3 sm:grid-cols-2 xl:flex xl:flex-wrap">
           <div className="min-w-0 text-xs font-medium uppercase tracking-[0.12em] text-neutral-500 xl:min-w-[96px] xl:flex-none">
             <label htmlFor="state-filter">State</label>
@@ -431,4 +466,22 @@ function stateOptionLabel(
     ? `, refreshed ${formatRelativeTime(freshness.latestDataFreshness)}`
     : "";
   return `${name} (${code}) - ${count}${latest}`;
+}
+
+function officeLabel(value: string) {
+  if (value === "H") return "House";
+  if (value === "S") return "Senate";
+  return value;
+}
+
+function signalTypeLabel(value: string) {
+  return signalTypes.find(([key]) => key === value)?.[1] ?? value.replaceAll("_", " ");
+}
+
+function statusLabel(value: string) {
+  return statuses.find(([key]) => key === value)?.[1] ?? value;
+}
+
+function windowLabel(value: string) {
+  return windows.find(([key]) => key === value)?.[1] ?? value;
 }

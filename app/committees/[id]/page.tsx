@@ -11,6 +11,7 @@ import {
   getSignalsForEntity,
 } from "@/src/lib/db/repository";
 import { committeeContext, committeeDesignationLabel, committeeTypeLabel } from "@/src/lib/fec-codes";
+import { formatCount } from "@/src/lib/format";
 import type { Metadata } from "next";
 
 export async function generateMetadata({
@@ -87,7 +88,7 @@ export default async function CommitteePage({
               ? `Directly linked to ${linkedCandidate.name}; party context comes from that candidate record.`
               : "No direct candidate affiliation is stored for this committee, so the page does not assign a party reading.",
             independentExpenditures.length
-              ? `${independentExpenditures.length} current-cycle Schedule E independent expenditure records are attached to this committee in this slice.`
+              ? `${formatCount(independentExpenditures.length, "current-cycle Schedule E independent expenditure record")} attached to this committee in this slice.`
               : "No current-cycle Schedule E independent expenditures are attached to this committee in this slice.",
             "Low-cost mode does not store itemized Schedule A donor receipts; use the FEC source link for donor-level lookup.",
           ]}

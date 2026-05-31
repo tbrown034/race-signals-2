@@ -1,5 +1,5 @@
 import { SignalCard } from "@/src/components/signal-card";
-import { formatDate, formatMoney } from "@/src/lib/format";
+import { formatCount, formatDate, formatMoney } from "@/src/lib/format";
 import Link from "next/link";
 import type { ReactNode } from "react";
 import type { CommitteeIndependentExpenditure, RaceRating, Signal } from "@/src/lib/types";
@@ -193,7 +193,8 @@ export function EntityPage({
           <>
             {hiddenSignals ? (
               <p className="border-b border-neutral-300 px-5 py-3 text-sm text-neutral-600">
-                Showing the latest and review-worthy {visibleSignals.length} of {signals.length} related signals.
+                Showing the latest and review-worthy {visibleSignals.length} of{" "}
+                {formatCount(signals.length, "related signal")}.
               </p>
             ) : null}
             {visibleSignals.map((signal) => <SignalCard signal={signal} key={signal.dedupeKey} />)}

@@ -24,10 +24,14 @@ export default async function ScheduleERecordsPage({
   const candidateId = textParam(params.candidate);
   const sourceId = textParam(params.sourceId) ?? textParam(params.sub_id);
   const state = textParam(params.state)?.toUpperCase();
+  const minAmount = textParam(params.minAmount);
+  const position = positionParam(textParam(params.position));
   const filters = {
     candidateId,
     committeeId,
     fecCommitteeId,
+    minAmount,
+    position,
     raceId,
     sourceId,
     state,
@@ -55,6 +59,8 @@ export default async function ScheduleERecordsPage({
     fecCommitteeId ? `FEC spender ${fecCommitteeId}` : null,
     candidateId ? `candidate ${candidateId}` : null,
     sourceId ? `Schedule E source ${sourceId}` : null,
+    position ? supportLabel(position) : null,
+    minAmount ? `amount $${Number(minAmount).toLocaleString("en-US")}+` : null,
   ].filter(Boolean);
   const exportQuery = new URLSearchParams();
   if (state) exportQuery.set("state", state);
@@ -63,6 +69,8 @@ export default async function ScheduleERecordsPage({
   if (fecCommitteeId) exportQuery.set("fecCommittee", fecCommitteeId);
   if (candidateId) exportQuery.set("candidate", candidateId);
   if (sourceId) exportQuery.set("sourceId", sourceId);
+  if (position) exportQuery.set("position", position);
+  if (minAmount) exportQuery.set("minAmount", minAmount);
   const exportSuffix = exportQuery.toString();
 
   return (
@@ -126,6 +134,16 @@ export default async function ScheduleERecordsPage({
               Totals are summed from stored, source-linked Schedule E rows in this database slice, not a completeness claim.
             </p>
           </div>
+          <ScheduleEFilters
+            candidateId={candidateId}
+            committeeId={committeeId}
+            fecCommitteeId={fecCommitteeId}
+            minAmount={minAmount}
+            position={position}
+            raceId={raceId}
+            sourceId={sourceId}
+            state={state}
+          />
           <CoverageWarning issues={validationWarnings} />
 
           {records.length ? (
@@ -243,6 +261,115 @@ export default async function ScheduleERecordsPage({
 
 function textParam(value: string | string[] | undefined) {
   return typeof value === "string" && value ? value : undefined;
+}
+
+function positionParam(value?: string) {
+  if (value === "S" || value === "O" || value === "U") return value;
+  return undefined;
+}
+
+function ScheduleEFilters({
+  candidateId,
+  committeeId,
+  fecCommitteeId,
+  minAmount,
+  position,
+  raceId,
+  sourceId,
+  state,
+}: {
+  candidateId?: string;
+  committeeId?: string;
+  fecCommitteeId?: string;
+  minAmount?: string;
+  position?: string;
+  raceId?: string;
+  sourceId?: string;
+  state?: string;
+}) {
+  return (
+    <form action="/records/schedule-e" className="border-b border-neutral-300 px-5 py-4">
+      <div className="grid gap-3 lg:grid-cols-[repeat(6,minmax(0,1fr))]">
+        <label className="min-w-0 text-sm lg:col-span-1">
+          <span className="font-mono text-[11px] uppercase tracking-[0.12em] text-neutral-500">State</span>
+          <input
+            className="mt-1 w-full border border-neutral-300 bg-white px-2 py-2 font-mono text-sm uppercase outline-none focus:border-neutral-900"
+            defaultValue={state ?? ""}
+            maxLength={2}
+            name="state"
+            placeholder="IN"
+          />
+        </label>
+        <label className="min-w-0 text-sm lg:col-span-2">
+          <span className="font-mono text-[11px] uppercase tracking-[0.12em] text-neutral-500">Race</span>
+          <input
+            className="mt-1 w-full border border-neutral-300 bg-white px-2 py-2 font-mono text-sm outline-none focus:border-neutral-900"
+            defaultValue={raceId ?? ""}
+            name="race"
+            placeholder="2026-IN-04-H"
+          />
+        </label>
+        <label className="min-w-0 text-sm lg:col-span-1">
+          <span className="font-mono text-[11px] uppercase tracking-[0.12em] text-neutral-500">Target code</span>
+          <select
+            className="mt-1 w-full border border-neutral-300 bg-white px-2 py-2 text-sm outline-none focus:border-neutral-900"
+            defaultValue={position ?? ""}
+            name="position"
+          >
+            <option value="">Any</option>
+            <option value="S">Supports target</option>
+            <option value="O">Opposes target</option>
+            <option value="U">Uncoded</option>
+          </select>
+        </label>
+        <label className="min-w-0 text-sm lg:col-span-1">
+          <span className="font-mono text-[11px] uppercase tracking-[0.12em] text-neutral-500">Min amount</span>
+          <input
+            className="mt-1 w-full border border-neutral-300 bg-white px-2 py-2 font-mono text-sm outline-none focus:border-neutral-900"
+            defaultValue={minAmount ?? ""}
+            inputMode="numeric"
+            name="minAmount"
+            placeholder="25000"
+          />
+        </label>
+        <label className="min-w-0 text-sm lg:col-span-1">
+          <span className="font-mono text-[11px] uppercase tracking-[0.12em] text-neutral-500">Source ID</span>
+          <input
+            className="mt-1 w-full border border-neutral-300 bg-white px-2 py-2 font-mono text-sm outline-none focus:border-neutral-900"
+            defaultValue={sourceId ?? ""}
+            name="sourceId"
+          />
+        </label>
+      </div>
+      <details className="mt-3 text-sm text-neutral-700">
+        <summary className="cursor-pointer font-mono text-[11px] uppercase tracking-[0.12em] text-neutral-600">
+          Committee and candidate filters
+        </summary>
+        <div className="mt-3 grid gap-3 md:grid-cols-3">
+          <label className="min-w-0">
+            <span className="font-mono text-[11px] uppercase tracking-[0.12em] text-neutral-500">Candidate ID</span>
+            <input className="mt-1 w-full border border-neutral-300 bg-white px-2 py-2 font-mono text-sm outline-none focus:border-neutral-900" defaultValue={candidateId ?? ""} name="candidate" />
+          </label>
+          <label className="min-w-0">
+            <span className="font-mono text-[11px] uppercase tracking-[0.12em] text-neutral-500">Internal spender ID</span>
+            <input className="mt-1 w-full border border-neutral-300 bg-white px-2 py-2 font-mono text-sm outline-none focus:border-neutral-900" defaultValue={committeeId ?? ""} name="committee" />
+          </label>
+          <label className="min-w-0">
+            <span className="font-mono text-[11px] uppercase tracking-[0.12em] text-neutral-500">FEC spender ID</span>
+            <input className="mt-1 w-full border border-neutral-300 bg-white px-2 py-2 font-mono text-sm outline-none focus:border-neutral-900" defaultValue={fecCommitteeId ?? ""} name="fecCommittee" />
+          </label>
+        </div>
+      </details>
+      <div className="mt-3 flex flex-wrap gap-2 text-sm">
+        <button className="border border-neutral-400 px-3 py-2 font-medium hover:border-neutral-900" type="submit">
+          Apply filters
+        </button>
+        <Link className="border border-neutral-300 px-3 py-2 font-medium hover:border-neutral-900" href="/records/schedule-e">
+          Clear
+        </Link>
+      </div>
+    </form>
+  );
 }
 
 function spendingHref({ raceId, state }: { raceId?: string; state?: string }) {

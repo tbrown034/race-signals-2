@@ -1225,6 +1225,8 @@ export async function getScheduleERecords(
     raceId?: string;
     sourceId?: string;
     state?: string;
+    minAmount?: string;
+    position?: string;
     limit?: number;
   } = {},
 ): Promise<CommitteeIndependentExpenditure[]> {
@@ -1238,6 +1240,9 @@ export async function getScheduleERecords(
         if (filters.raceId && expenditure.raceId !== filters.raceId) return false;
         if (filters.sourceId && expenditure.sourceId !== filters.sourceId) return false;
         if (filters.state && expenditure.raceId?.split("-")[1] !== filters.state) return false;
+        if (filters.minAmount && expenditure.amount < resolveMinAmount(filters.minAmount)) return false;
+        if (filters.position === "U" && (expenditure.supportOpposeIndicator === "S" || expenditure.supportOpposeIndicator === "O")) return false;
+        if (filters.position && filters.position !== "U" && expenditure.supportOpposeIndicator !== filters.position) return false;
         return true;
       })
       .sort((a, b) => String(b.expenditureDate).localeCompare(String(a.expenditureDate)) || b.amount - a.amount)
@@ -1279,6 +1284,16 @@ export async function getScheduleERecords(
   if (filters.state) {
     values.push(filters.state);
     where.push(`r.state = $${values.length}`);
+  }
+  if (filters.minAmount) {
+    values.push(resolveMinAmount(filters.minAmount));
+    where.push(`ie.amount >= $${values.length}`);
+  }
+  if (filters.position === "U") {
+    where.push(`(ie.support_oppose_indicator is null or ie.support_oppose_indicator not in ('S', 'O'))`);
+  } else if (filters.position) {
+    values.push(filters.position);
+    where.push(`ie.support_oppose_indicator = $${values.length}`);
   }
   values.push(limit);
 
@@ -1359,6 +1374,8 @@ export async function getScheduleERecordSummary(
     raceId?: string;
     sourceId?: string;
     state?: string;
+    minAmount?: string;
+    position?: string;
   } = {},
 ) {
   if (!hasDatabase()) {
@@ -1369,6 +1386,9 @@ export async function getScheduleERecordSummary(
       if (filters.raceId && expenditure.raceId !== filters.raceId) return false;
       if (filters.sourceId && expenditure.sourceId !== filters.sourceId) return false;
       if (filters.state && expenditure.raceId?.split("-")[1] !== filters.state) return false;
+      if (filters.minAmount && expenditure.amount < resolveMinAmount(filters.minAmount)) return false;
+      if (filters.position === "U" && (expenditure.supportOpposeIndicator === "S" || expenditure.supportOpposeIndicator === "O")) return false;
+      if (filters.position && filters.position !== "U" && expenditure.supportOpposeIndicator !== filters.position) return false;
       return true;
     });
     return records.reduce(
@@ -1412,6 +1432,16 @@ export async function getScheduleERecordSummary(
   if (filters.state) {
     values.push(filters.state);
     where.push(`r.state = $${values.length}`);
+  }
+  if (filters.minAmount) {
+    values.push(resolveMinAmount(filters.minAmount));
+    where.push(`ie.amount >= $${values.length}`);
+  }
+  if (filters.position === "U") {
+    where.push(`(ie.support_oppose_indicator is null or ie.support_oppose_indicator not in ('S', 'O'))`);
+  } else if (filters.position) {
+    values.push(filters.position);
+    where.push(`ie.support_oppose_indicator = $${values.length}`);
   }
 
   const rows = await sql<{

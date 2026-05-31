@@ -27,6 +27,20 @@ async function main() {
       limit 10
     `));
 
+    checks.push(await countCheck(pool, "Missing signal source ID", "fail", `
+      select dedupe_key, signal_type, headline
+      from signals
+      where metadata->>'sourceId' is null or metadata->>'sourceId' = ''
+      limit 10
+    `));
+
+    checks.push(await countCheck(pool, "Missing signal source kind", "fail", `
+      select dedupe_key, signal_type, headline
+      from signals
+      where metadata->>'sourceKind' is null or metadata->>'sourceKind' = ''
+      limit 10
+    `));
+
     checks.push(await countCheck(pool, "Duplicate signal keys", "fail", `
       select dedupe_key, count(*)::int as count
       from signals
@@ -84,6 +98,14 @@ async function main() {
       limit 10
     `));
 
+    checks.push(await countCheck(pool, "Schedule E signals missing stance", "fail", `
+      select dedupe_key, signal_type, headline, metadata->>'sourceId' as source_id
+      from signals
+      where signal_type = 'large_independent_expenditure'
+        and (metadata->>'supportOpposeIndicator' is null or metadata->>'supportOpposeIndicator' = '')
+      limit 10
+    `));
+
     checks.push(await countCheck(pool, "Filings before race cycle window", "fail", `
       select f.source_id, f.receipt_date, cm.race_id, r.cycle
       from filings f
@@ -101,6 +123,13 @@ async function main() {
       where s.signal_type = 'new_committee'
         and c.incumbent_challenge_status in ('I', 'Incumbent')
         and s.why_it_matters ilike '%first durable paperwork signal%'
+      limit 10
+    `));
+
+    checks.push(await countCheck(pool, "Signals without matched race", "fail", `
+      select dedupe_key, signal_type, headline, metadata->>'sourceId' as source_id
+      from signals
+      where race_id is null or race_id = ''
       limit 10
     `));
 

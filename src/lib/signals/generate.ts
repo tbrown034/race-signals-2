@@ -78,6 +78,8 @@ export function generateSignals(input: SignalInput): Signal[] {
       metadata: {
         sourceId: committee.fecCommitteeId,
         sourceKind: "committee",
+        committeeType: committee.committeeType,
+        designation: committee.designation,
       },
     });
   }

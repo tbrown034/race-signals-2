@@ -229,6 +229,19 @@ function signalEvidence(signal: Signal) {
       .join(" | ");
   }
 
+  if (signal.signalType === "new_committee") {
+    const sourceId = textMetadata(signal.metadata?.sourceId);
+    const committeeType = textMetadata(signal.metadata?.committeeType);
+    const designation = textMetadata(signal.metadata?.designation);
+    return [
+      sourceId ? `committee ${sourceId}` : null,
+      committeeType ? `type ${committeeType}` : null,
+      designation ? `designation ${designation}` : null,
+    ]
+      .filter(Boolean)
+      .join(" | ");
+  }
+
   return null;
 }
 

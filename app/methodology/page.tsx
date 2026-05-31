@@ -27,7 +27,7 @@ const signalTypes = [
   [
     "new_committee",
     "New committee",
-    "A new candidate-linked committee can be the first durable paperwork signal that a campaign is moving from exploration to execution.",
+    "A candidate-linked principal committee is a durable paperwork signal, but context matters: for incumbents it may reflect continuing campaign infrastructure rather than a first-time launch.",
   ],
   [
     "new_filing",

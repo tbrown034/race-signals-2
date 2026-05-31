@@ -115,4 +115,11 @@ assert.equal(filingSignal.metadata?.reportType, "Q1");
 assert.equal(filingSignal.metadata?.totalReceipts, 61000);
 assert.equal(filingSignal.metadata?.cashOnHand, 25000);
 
+const committeeSignal = signals.find((signal) => signal.dedupeKey === "fec:new_committee:C00999999");
+assert.ok(committeeSignal, "current-cycle committee should generate a signal");
+assert.equal(committeeSignal.metadata?.sourceId, "C00999999");
+assert.equal(committeeSignal.metadata?.sourceKind, "committee");
+assert.equal(committeeSignal.metadata?.committeeType, "H");
+assert.equal(committeeSignal.metadata?.designation, "P");
+
 console.log("Signal logic tests passed.");

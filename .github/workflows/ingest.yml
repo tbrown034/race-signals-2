@@ -49,6 +49,7 @@ jobs:
       - run: npm ci
       - run: npm run ingest
       - run: SIGNAL_AUDIT_STRICT=1 npm run audit:signals
+      - run: npm run repair:history
       - run: npm run audit:cost
 
   manual-ingest:
@@ -73,4 +74,5 @@ jobs:
       - run: npm ci
       - run: npm run ingest
       - run: SIGNAL_AUDIT_STRICT=1 npm run audit:signals
+      - run: npm run repair:history
       - run: npm run audit:cost

@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { PageShell } from "@/src/components/page-shell";
-import { getSignalStateFreshness, getStatus } from "@/src/lib/db/repository";
+import { getStateCoverageBoard, getStatus } from "@/src/lib/db/repository";
 import { formatCount, formatDateTime, formatMoney, formatRelativeTime, isOlderThanHours } from "@/src/lib/format";
 import { displayCandidateName } from "@/src/lib/names";
 import { endpointHealthClass } from "@/src/lib/status-health";
@@ -27,14 +27,14 @@ function stateFreshnessLabel(value?: string | null) {
 }
 
 export default async function StatusPage() {
-  const [status, stateFreshness] = await Promise.all([
+  const [status, stateCoverage] = await Promise.all([
     getStatus(),
-    getSignalStateFreshness(),
+    getStateCoverageBoard(),
   ]);
   const latestRun = status.runs[0];
-  const stateRows = Object.values(stateFreshness).sort((a, b) => (
-    String(b.latestDataFreshness ?? "").localeCompare(String(a.latestDataFreshness ?? "")) ||
-    b.count - a.count ||
+  const stateRows = stateCoverage.sort((a, b) => (
+    String(b.latestSignalFreshness ?? "").localeCompare(String(a.latestSignalFreshness ?? "")) ||
+    b.signalCount - a.signalCount ||
     a.state.localeCompare(b.state)
   ));
 
@@ -67,7 +67,7 @@ export default async function StatusPage() {
           aria-label="Status page sections"
           className="mt-4 flex min-w-0 max-w-full flex-nowrap gap-x-4 overflow-x-auto whitespace-nowrap border border-neutral-300 bg-white px-4 py-3 font-mono text-[11px] uppercase tracking-[0.12em] text-neutral-600"
         >
-          <a className="underline-offset-4 hover:underline" href="#state-freshness">State freshness</a>
+          <a className="underline-offset-4 hover:underline" href="#state-freshness">State coverage</a>
           <a className="underline-offset-4 hover:underline" href="#election-coverage">Election coverage</a>
           <a className="underline-offset-4 hover:underline" href="#storage">Storage</a>
           <a className="underline-offset-4 hover:underline" href="#endpoint-freshness">Endpoint freshness</a>
@@ -93,19 +93,23 @@ export default async function StatusPage() {
         <section className="mt-6 min-w-0 max-w-full border border-neutral-300 bg-white" id="state-freshness">
           <div className="border-b border-neutral-300 px-5 py-4">
             <h2 className="text-sm font-semibold uppercase tracking-[0.14em] text-neutral-600">
-              Stored signal freshness by state
+              State coverage board
             </h2>
             <p className="mt-1 text-sm text-neutral-600">
-              This reports the newest stored signal freshness per state. It is not a claim that every state was checked in the latest ingest.
+              All states with configured 2026 race shells. Quiet rows distinguish no stored signal from no matched candidates or Schedule E rows in this database slice.
             </p>
           </div>
           <div className="overflow-x-auto">
-            <table className="w-full min-w-0 text-left text-sm md:min-w-[560px]">
+            <table className="w-full min-w-0 text-left text-sm md:min-w-[820px]">
               <thead className="bg-neutral-100 font-mono text-xs uppercase tracking-[0.12em] text-neutral-500">
                 <tr>
                   <th className="px-4 py-3 font-medium" scope="col">State</th>
+                  <th className="hidden px-4 py-3 text-right font-medium md:table-cell" scope="col">Race shells</th>
+                  <th className="hidden px-4 py-3 text-right font-medium md:table-cell" scope="col">Candidates</th>
                   <th className="hidden px-4 py-3 text-right font-medium md:table-cell" scope="col">Signals</th>
-                  <th className="hidden px-4 py-3 font-medium md:table-cell" scope="col">Newest stored freshness</th>
+                  <th className="hidden px-4 py-3 text-right font-medium md:table-cell" scope="col">Schedule E</th>
+                  <th className="hidden px-4 py-3 font-medium md:table-cell" scope="col">Newest signal freshness</th>
+                  <th className="hidden px-4 py-3 font-medium md:table-cell" scope="col">Latest state ingest</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-neutral-200">
@@ -118,23 +122,39 @@ export default async function StatusPage() {
                         </Link>
                         <dl className="mt-2 space-y-1 text-xs leading-5 text-neutral-600 md:hidden">
                           <div>
+                            <dt className="inline font-mono uppercase tracking-[0.12em] text-neutral-500">Races </dt>
+                            <dd className="inline">{state.raceCount}</dd>
+                          </div>
+                          <div>
+                            <dt className="inline font-mono uppercase tracking-[0.12em] text-neutral-500">Candidates </dt>
+                            <dd className="inline">{state.candidateCount}</dd>
+                          </div>
+                          <div>
                             <dt className="inline font-mono uppercase tracking-[0.12em] text-neutral-500">Signals </dt>
-                            <dd className="inline">{state.count}</dd>
+                            <dd className="inline">{state.signalCount}</dd>
+                          </div>
+                          <div>
+                            <dt className="inline font-mono uppercase tracking-[0.12em] text-neutral-500">Schedule E </dt>
+                            <dd className="inline">{state.independentExpenditureCount}</dd>
                           </div>
                           <div>
                             <dt className="inline font-mono uppercase tracking-[0.12em] text-neutral-500">Freshness </dt>
-                            <dd className="inline">{stateFreshnessLabel(state.latestDataFreshness)}</dd>
+                            <dd className="inline">{stateFreshnessLabel(state.latestSignalFreshness)}</dd>
                           </div>
                         </dl>
                       </td>
-                      <td className="hidden px-4 py-3 text-right font-mono md:table-cell">{state.count}</td>
-                      <td className="hidden px-4 py-3 md:table-cell">{stateFreshnessLabel(state.latestDataFreshness)}</td>
+                      <td className="hidden px-4 py-3 text-right font-mono md:table-cell">{state.raceCount}</td>
+                      <td className="hidden px-4 py-3 text-right font-mono md:table-cell">{state.candidateCount}</td>
+                      <td className="hidden px-4 py-3 text-right font-mono md:table-cell">{state.signalCount}</td>
+                      <td className="hidden px-4 py-3 text-right font-mono md:table-cell">{state.independentExpenditureCount}</td>
+                      <td className="hidden px-4 py-3 md:table-cell">{stateFreshnessLabel(state.latestSignalFreshness)}</td>
+                      <td className="hidden px-4 py-3 md:table-cell">{state.latestIngestFinishedAt ? stateFreshnessLabel(state.latestIngestFinishedAt) : "No state run recorded"}</td>
                     </tr>
                   ))
                 ) : (
                   <tr>
-                    <td className="px-4 py-3 text-neutral-600" colSpan={3}>
-                      No state-level signal freshness is available yet.
+                    <td className="px-4 py-3 text-neutral-600" colSpan={7}>
+                      No state-level coverage rows are available yet.
                     </td>
                   </tr>
                 )}

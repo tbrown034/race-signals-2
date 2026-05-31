@@ -195,6 +195,16 @@ export type StateSignalFreshness = {
   latestDataFreshness?: string | null;
 };
 
+export type StateCoverageRow = {
+  state: string;
+  raceCount: number;
+  candidateCount: number;
+  signalCount: number;
+  independentExpenditureCount: number;
+  latestSignalFreshness?: string | null;
+  latestIngestFinishedAt?: string | null;
+};
+
 export type Signal = {
   id?: string;
   dedupeKey: string;

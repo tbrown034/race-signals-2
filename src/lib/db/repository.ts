@@ -24,6 +24,7 @@ import type {
   RecentValidationIssue,
   Signal,
   SourceRecordArchiveSummary,
+  StateCoverageRow,
   StateRaceBoardRow,
   StateSignalFreshness,
   StorageUsage,
@@ -908,6 +909,80 @@ export async function getSignalStateFreshness(signalType?: string): Promise<Reco
       latestDataFreshness: row.latest_data_freshness ? toIsoString(row.latest_data_freshness) : null,
     },
   ]));
+}
+
+export async function getStateCoverageBoard(): Promise<StateCoverageRow[]> {
+  if (!hasDatabase()) {
+    const states = [...new Set(demoRaces.map((race) => race.state))].sort();
+    return states.map((state) => {
+      const stateRaces = demoRaces.filter((race) => race.state === state);
+      const stateRaceIds = new Set(stateRaces.map((race) => race.id));
+      const stateSignals = demoSignals.filter((signal) => signal.raceId && stateRaceIds.has(signal.raceId));
+      const stateIes = demoIndependentExpenditures.filter((record) => record.raceId && stateRaceIds.has(record.raceId));
+      return {
+        state,
+        raceCount: stateRaces.length,
+        candidateCount: demoCandidates.filter((candidate) => candidate.state === state).length,
+        signalCount: stateSignals.length,
+        independentExpenditureCount: stateIes.length,
+        latestSignalFreshness: stateSignals.map((signal) => signal.dataFreshness).sort().at(-1) ?? null,
+        latestIngestFinishedAt: demoIngestionRuns[0]?.finishedAt ?? demoIngestionRuns[0]?.startedAt ?? null,
+      };
+    });
+  }
+
+  const rows = await sql<{
+    state: string;
+    race_count: string;
+    candidate_count: string;
+    signal_count: string;
+    independent_expenditure_count: string;
+    latest_signal_freshness: string | Date | null;
+    latest_ingest_finished_at: string | Date | null;
+  }>(
+    `
+      with coverage as (
+        select
+          r.state,
+          count(distinct r.id)::text as race_count,
+          count(distinct c.id)::text as candidate_count,
+          count(distinct s.id)::text as signal_count,
+          count(distinct ie.source_id)::text as independent_expenditure_count,
+          max(s.data_freshness) as latest_signal_freshness
+        from races r
+        left join candidates c on c.race_id = r.id
+        left join signals s on s.race_id = r.id
+          and ${currentCycleSignalPredicate}
+        left join independent_expenditures ie on ie.race_id = r.id
+          and ie.expenditure_date >= make_date(coalesce(r.cycle, $1) - 1, 1, 1)
+          and ie.expenditure_date <= make_date(coalesce(r.cycle, $1), 12, 31)
+        group by r.state
+      ),
+      latest_runs as (
+        select state, max(coalesce(finished_at, started_at)) as latest_ingest_finished_at
+        from ingestion_runs
+        where state is not null
+        group by state
+      )
+      select
+        coverage.*,
+        latest_runs.latest_ingest_finished_at
+      from coverage
+      left join latest_runs on latest_runs.state = coverage.state
+      order by coverage.state
+    `,
+    [CURRENT_CYCLE],
+  );
+
+  return rows.map((row) => ({
+    state: row.state,
+    raceCount: Number(row.race_count),
+    candidateCount: Number(row.candidate_count),
+    signalCount: Number(row.signal_count),
+    independentExpenditureCount: Number(row.independent_expenditure_count),
+    latestSignalFreshness: row.latest_signal_freshness ? toIsoString(row.latest_signal_freshness) : null,
+    latestIngestFinishedAt: row.latest_ingest_finished_at ? toIsoString(row.latest_ingest_finished_at) : null,
+  }));
 }
 
 export async function getSitemapEntities() {

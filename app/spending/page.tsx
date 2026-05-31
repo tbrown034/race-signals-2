@@ -146,7 +146,7 @@ export default async function SpendingPage({
                       <th className="hidden px-4 py-3 text-right font-medium md:table-cell" scope="col">Amount</th>
                       <th className="hidden px-4 py-3 font-medium md:table-cell" scope="col">Spender</th>
                       <th className="hidden px-4 py-3 font-medium md:table-cell" scope="col">Target</th>
-                      <th className="hidden px-4 py-3 font-medium md:table-cell" scope="col">Position</th>
+                      <th className="hidden px-4 py-3 font-medium md:table-cell" scope="col">Target code</th>
                       <th className="hidden px-4 py-3 font-medium md:table-cell" scope="col">Purpose</th>
                       <th className="hidden px-4 py-3 font-medium md:table-cell" scope="col">Race</th>
                       <th className="hidden px-4 py-3 font-medium md:table-cell" scope="col">Source</th>
@@ -213,7 +213,7 @@ export default async function SpendingPage({
                               </dd>
                             </div>
                             <div>
-                              <dt className="inline font-mono uppercase tracking-[0.12em] text-neutral-500">Position </dt>
+                              <dt className="inline font-mono uppercase tracking-[0.12em] text-neutral-500">Target code </dt>
                               <dd className="inline">{supportOpposeLabel(signal.metadata?.supportOpposeIndicator)}</dd>
                             </div>
                             <div>
@@ -339,8 +339,8 @@ export default async function SpendingPage({
 }
 
 function supportOpposeLabel(value: unknown) {
-  if (value === "S") return "Support";
-  if (value === "O") return "Oppose";
+  if (value === "S") return "Supports target";
+  if (value === "O") return "Opposes target";
   return "Not coded by FEC";
 }
 
@@ -403,12 +403,12 @@ function SpendingQuickFilters({
       <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
         <div>
           <p className="font-mono text-[11px] uppercase tracking-[0.12em] text-neutral-500">
-            Position
+            Target code
           </p>
           <div className="mt-2 flex flex-wrap gap-2">
             <Link className={quickFilterClass(!selectedPosition)} href={spendingToggleHref(params, "position", "")}>All</Link>
-            <Link className={quickFilterClass(selectedPosition === "S")} href={spendingToggleHref(params, "position", "S")}>Support</Link>
-            <Link className={quickFilterClass(selectedPosition === "O")} href={spendingToggleHref(params, "position", "O")}>Oppose</Link>
+            <Link className={quickFilterClass(selectedPosition === "S")} href={spendingToggleHref(params, "position", "S")}>Supports target</Link>
+            <Link className={quickFilterClass(selectedPosition === "O")} href={spendingToggleHref(params, "position", "O")}>Opposes target</Link>
           </div>
         </div>
         <div>

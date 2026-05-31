@@ -26,7 +26,7 @@ const steps = [
 const signalTypes = [
   [
     "new_committee",
-    "New committee",
+    "Committee record",
     "A candidate-linked principal committee is a durable FEC paperwork signal, not a ballot-status or campaign-launch claim. For incumbents it may reflect continuing campaign infrastructure; for challengers or open seats, verify candidacy and ballot context separately.",
   ],
   [

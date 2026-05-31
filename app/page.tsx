@@ -84,7 +84,7 @@ export default async function Home({
     since ? `event ${sinceLabel(since)}` : null,
     ingestedSince ? `ingested ${sinceLabel(ingestedSince)}` : null,
     typeof params.minAmount === "string" ? `$${Number(params.minAmount).toLocaleString("en-US")}+` : null,
-    params.position === "S" ? "support spending" : params.position === "O" ? "opposition spending" : null,
+    params.position === "S" ? "spending that supports targets" : params.position === "O" ? "spending that opposes targets" : null,
     targetParty ? `target ${targetParty}` : null,
     targetStatus ? `${targetStatusLabel(targetStatus)} targets` : null,
   ].filter(Boolean);
@@ -188,7 +188,7 @@ export default async function Home({
           <h2 className="mt-2 text-lg font-semibold">2026 U.S. congressional scope</h2>
           <p className="mt-2 text-sm leading-6 text-neutral-700">
             FEC-only MVP coverage. The database can represent every 2026 House and Senate
-            race, but the scheduled low-cost ingest is intentionally capped to a small daily
+            race, but the scheduled low-cost ingest is intentionally limited to a small daily
             slice. Demo mode appears automatically when no database is configured.
           </p>
           <dl className="mt-5 space-y-3 text-sm">
@@ -214,7 +214,7 @@ export default async function Home({
               <dt className="font-mono text-xs uppercase tracking-[0.12em] text-neutral-500">
                 Cost guard
               </dt>
-              <dd className="mt-1">Daily ingest is capped; broader national runs are manual.</dd>
+              <dd className="mt-1">Daily ingest is limited; broader national runs are manual.</dd>
             </div>
           </dl>
           <div className="mt-6 border-t border-neutral-300 pt-5 text-sm leading-6 text-neutral-700">

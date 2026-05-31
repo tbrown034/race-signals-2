@@ -7,7 +7,7 @@ import { formatDate, formatDateTime, formatMoney, formatRelativeTime } from "@/s
 import type { Signal } from "@/src/lib/types";
 
 const typeLabels: Record<string, string> = {
-  new_committee: "New committee",
+  new_committee: "Committee record",
   new_filing: "New filing",
   large_contribution: "Large receipt",
   large_independent_expenditure: "Independent expenditure",
@@ -426,7 +426,7 @@ function supportOpposeLabel(value: string) {
 
 function verificationLine(signalType: string) {
   if (signalType === "large_independent_expenditure") {
-    return "Open the FEC Schedule E source, confirm spender, target, support/oppose marker and race context.";
+    return "Open the FEC Schedule E source, confirm spender, target, target-position code and race context.";
   }
   if (signalType === "new_filing") {
     return "Open the FEC filing source, check report type, coverage period, totals and amendments.";

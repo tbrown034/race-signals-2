@@ -151,11 +151,11 @@ export default async function SpendersPage({
                             <dd className="inline font-mono text-neutral-950">{formatDate(spender.lastExpenditureDate)}</dd>
                           </div>
                           <div>
-                            <dt className="inline font-mono uppercase tracking-[0.12em] text-neutral-500">Support </dt>
+                            <dt className="inline font-mono uppercase tracking-[0.12em] text-neutral-500">Supports targets </dt>
                             <dd className="inline font-mono text-neutral-950">{formatMoney(spender.supportAmount) ?? "$0"}</dd>
                           </div>
                           <div>
-                            <dt className="inline font-mono uppercase tracking-[0.12em] text-neutral-500">Oppose </dt>
+                            <dt className="inline font-mono uppercase tracking-[0.12em] text-neutral-500">Opposes targets </dt>
                             <dd className="inline font-mono text-neutral-950">{formatMoney(spender.opposeAmount) ?? "$0"}</dd>
                           </div>
                           {positionNote ? (
@@ -224,8 +224,8 @@ export default async function SpendersPage({
                         {formatDate(spender.lastExpenditureDate)}
                       </td>
                       <td className="hidden px-4 py-3 text-xs leading-5 text-neutral-700 md:table-cell">
-                        <span className="block">Support {formatMoney(spender.supportAmount) ?? "$0"}</span>
-                        <span className="block">Oppose {formatMoney(spender.opposeAmount) ?? "$0"}</span>
+                        <span className="block">Supports targets {formatMoney(spender.supportAmount) ?? "$0"}</span>
+                        <span className="block">Opposes targets {formatMoney(spender.opposeAmount) ?? "$0"}</span>
                         {positionNote ? (
                           <span className="mt-1 block font-mono text-[11px] uppercase tracking-[0.12em] text-neutral-700">
                             {positionNote}
@@ -314,8 +314,8 @@ function formatPercent(value: number) {
 }
 
 function positionConcentrationNote(supportShare: number, opposeShare: number) {
-  if (opposeShare >= 0.75) return `Mostly oppose (${formatPercent(opposeShare)})`;
-  if (supportShare >= 0.75) return `Mostly support (${formatPercent(supportShare)})`;
+  if (opposeShare >= 0.75) return `Mostly opposes targets (${formatPercent(opposeShare)})`;
+  if (supportShare >= 0.75) return `Mostly supports targets (${formatPercent(supportShare)})`;
   return null;
 }
 

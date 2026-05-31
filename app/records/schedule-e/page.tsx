@@ -94,8 +94,8 @@ export default async function ScheduleERecordsPage({
           <div className="grid gap-px border-b border-neutral-300 bg-neutral-300 sm:grid-cols-2 xl:grid-cols-5">
             <RecordStat label="Stored records" value={formatCount(summary.recordCount, "record")} />
             <RecordStat label="Stored IE" value={formatMoney(summary.totalAmount) ?? "$0"} />
-            <RecordStat label="Support" value={formatMoney(summary.supportAmount) ?? "$0"} />
-            <RecordStat label="Oppose" value={formatMoney(summary.opposeAmount) ?? "$0"} />
+            <RecordStat label="Supports target" value={formatMoney(summary.supportAmount) ?? "$0"} />
+            <RecordStat label="Opposes target" value={formatMoney(summary.opposeAmount) ?? "$0"} />
             <RecordStat label="Not classified" value={formatMoney(summary.uncodedAmount) ?? "$0"} />
           </div>
 
@@ -111,7 +111,7 @@ export default async function ScheduleERecordsPage({
                     <th className="hidden px-4 py-3 font-medium md:table-cell" scope="col">Date</th>
                     <th className="px-4 py-3 font-medium" scope="col">Spender</th>
                     <th className="hidden px-4 py-3 font-medium md:table-cell" scope="col">Target</th>
-                    <th className="hidden px-4 py-3 font-medium md:table-cell" scope="col">Position</th>
+                    <th className="hidden px-4 py-3 font-medium md:table-cell" scope="col">Target code</th>
                     <th className="hidden px-4 py-3 font-medium md:table-cell" scope="col">Race</th>
                     <th className="hidden px-4 py-3 font-medium md:table-cell" scope="col">Source</th>
                     <th className="hidden px-4 py-3 text-right font-medium md:table-cell" scope="col">Amount</th>
@@ -135,7 +135,7 @@ export default async function ScheduleERecordsPage({
                         <dl className="mt-2 space-y-1 text-xs leading-5 text-neutral-600 md:hidden">
                           <RecordMobileRow label="Date" value={formatDate(record.expenditureDate)} />
                           <RecordMobileRow label="Amount" value={formatMoney(record.amount) ?? "$0"} />
-                          <RecordMobileRow label="Position" value={supportLabel(record.supportOpposeIndicator)} />
+                          <RecordMobileRow label="Target code" value={supportLabel(record.supportOpposeIndicator)} />
                           <div>
                             <dt className="inline font-mono uppercase tracking-[0.12em] text-neutral-500">Target </dt>
                             <dd className="inline">{targetLink(record)}</dd>
@@ -207,8 +207,8 @@ function RecordMobileRow({ label, value }: { label: string; value: string }) {
 }
 
 function supportLabel(value?: string | null) {
-  if (value === "S") return "Support";
-  if (value === "O") return "Oppose";
+  if (value === "S") return "Supports target";
+  if (value === "O") return "Opposes target";
   return "Not classified by FEC";
 }
 

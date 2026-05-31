@@ -2,13 +2,13 @@
 
 Race Signals is a serious portfolio MVP for spotting early campaign-finance signals before they become obvious stories.
 
-It is built for reporters and editors who need a fast answer to: what changed, who filed, who formed a committee, where money is moving and what deserves follow-up.
+It is built for reporters and editors who need a fast answer to: what changed, who filed, which committees appear in the FEC record, where money is moving and what deserves follow-up.
 
 The MVP is intentionally focused: FEC API only for campaign-finance records, covering 2026 U.S. House races across all 50 states plus 2026 U.S. Senate races. Election timeline and photo context, when present, comes from attributed public sources.
 
 ## Why It Matters Journalistically
 
-Campaign-finance stories often start as paperwork before they become public campaign narratives. A new committee, a filing, or outside spending can show intent, momentum or outside interest earlier than speeches, polling or ads.
+Campaign-finance stories often start as paperwork before they become public campaign narratives. A committee record, a filing, or outside spending can show reportable activity earlier than speeches, polling or ads.
 
 Race Signals turns those records into a chronological feed of source-linked alerts with plain-English context.
 
@@ -100,8 +100,8 @@ Current validation checks:
 - Broken or missing FEC source URL
 - Unmatched race
 - Cross-cycle filings or independent expenditures attached to a current race
-- Possible duplicate Schedule E records with the same spender, target, date, amount and support/oppose marker
-- FEC endpoint pagination truncation when a capped ingest sees more pages than it fetched
+- Possible duplicate Schedule E records with the same spender, target, date, amount and target-position code
+- FEC endpoint pagination truncation when a limited ingest sees more pages than it fetched
 
 Issues are stored in `validation_issues` during ingestion.
 
@@ -130,7 +130,7 @@ Candidate pages may also show source context that did not become a signal. For e
 
 ## Known Limitations
 
-- The data model contains national 2026 U.S. House and U.S. Senate race shells, but stored signals reflect the latest capped ingest slice unless a broader manual run has been completed.
+- The data model contains national 2026 U.S. House and U.S. Senate race shells, but stored signals reflect the latest limited ingest slice unless a broader manual run has been completed.
 - Scheduled FEC ingest is intentionally capped for cost and rate-limit control.
 - Demo data is illustrative and clearly marked as demo mode.
 - Signal thresholds are simple editorial heuristics, not statistical anomaly detection.

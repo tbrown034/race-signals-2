@@ -400,13 +400,13 @@ function candidateMobileNotes(
     `${candidateMoney(candidate.totalReceiptsCycle, candidate.totalsFetchedAt)} raised; ${candidateMoney(candidate.cashOnHandLatest, candidate.totalsFetchedAt)} cash${candidate.cashOnHandAsOf ? ` as of ${formatDate(candidate.cashOnHandAsOf)}` : ""}.`,
     totalSignals
       ? `${formatCount(totalSignals, "signal")}: ${signalCounts.filings} filings, ${signalCounts.committees} committees, ${signalCounts.outsideSpending} IE, ${signalCounts.review} review.`
-      : "No filing, committee, IE or review signals yet.",
+      : "No matched source-record signals in this stored slice yet.",
     candidate.totalReceiptsCycle && candidate.totalReceiptsCycle > 0 && totalSignals === 0
       ? "FEC totals show activity; no matched signal yet."
       : null,
     independentExpenditureCount
       ? `Latest ${formatCount(independentExpenditureCount, "Schedule E record")} naming this candidate; below-threshold records are context.`
-      : "No stored Schedule E records name this candidate.",
+      : "No stored current-cycle Schedule E rows name this candidate in this slice.",
   ].filter((note): note is string => Boolean(note));
 }
 
@@ -428,8 +428,8 @@ function MobileCandidateRead({ notes }: { notes: string[] }) {
 }
 
 function supportLabel(value?: string | null) {
-  if (value === "S") return "Support";
-  if (value === "O") return "Oppose";
+  if (value === "S") return "Supports target";
+  if (value === "O") return "Opposes target";
   return "Not classified by FEC";
 }
 

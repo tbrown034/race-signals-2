@@ -116,7 +116,7 @@ export default async function RacePage({
             `${candidates.length} FEC candidates matched to this race; ${candidatesWithMoney} currently show cycle receipts in the FEC totals endpoint.`,
             `Known candidate receipts in this slice total ${formatMoney(totalReceipts) ?? "$0"}. Use this as FEC-filed activity, not a race forecast.`,
             `Schedule E independent expenditures currently total ${formatMoney(stats.totalIndependentExpenditures) ?? "$0"} in this race slice.`,
-            `${formatCount(stats.independentExpenditureRecordCount, "stored Schedule E record")} in this race: support ${formatMoney(stats.supportIndependentExpenditures) ?? "$0"}; oppose ${formatMoney(stats.opposeIndependentExpenditures) ?? "$0"}.`,
+            `${formatCount(stats.independentExpenditureRecordCount, "stored Schedule E record")} in this race: supports targets ${formatMoney(stats.supportIndependentExpenditures) ?? "$0"}; opposes targets ${formatMoney(stats.opposeIndependentExpenditures) ?? "$0"}.`,
             `Latest stored signal: ${latestSignalDate ? formatDate(latestSignalDate) : "none"}; latest stored Schedule E record: ${stats.latestIndependentExpenditureDate ? formatDate(stats.latestIndependentExpenditureDate) : "none"}.`,
             `${formatCount(signals.length, "related signal")}: ${formatCount(signalCounts.filings, "filing")}, ${formatCount(signalCounts.committees, "committee record")}, ${formatCount(signalCounts.outsideSpending, "outside-spending alert")}, ${formatCount(signalCounts.review, "review flag")}.`,
             incumbentCount
@@ -132,7 +132,7 @@ export default async function RacePage({
           />
           <RaceStat label="Outside spending" value={formatMoney(stats.totalIndependentExpenditures) ?? "$0"} />
           <RaceStat
-            detail={`Support ${formatMoney(stats.supportIndependentExpenditures) ?? "$0"} / oppose ${formatMoney(stats.opposeIndependentExpenditures) ?? "$0"}`}
+            detail={`Supports targets ${formatMoney(stats.supportIndependentExpenditures) ?? "$0"} / opposes targets ${formatMoney(stats.opposeIndependentExpenditures) ?? "$0"}`}
             label="IE direction"
             value={formatCount(stats.independentExpenditureRecordCount, "record")}
           />

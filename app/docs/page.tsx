@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 const sections = [
   {
     title: "North Star",
-    body: "Race Signals is a feed-first civic data product for spotting early campaign-finance signals before they become obvious stories. Campaign-finance records come from the FEC API; election and photo context comes from attributed public sources when available.",
+    body: "Race Signals is a source-linked FEC record feed for spotting campaign-finance paperwork before it is widely reported. Campaign-finance records come from the FEC API; election and photo context comes from attributed public sources when available.",
   },
   {
     title: "Working Notes",
@@ -22,7 +22,7 @@ const sections = [
   },
   {
     title: "Coverage Truth",
-    body: "The schema can represent national 2026 House and Senate race shells, but the scheduled ingest is capped to a small daily slice. Stored signal counts should be read as current database coverage, not a national activity total.",
+    body: "The schema can represent national 2026 House and Senate race shells, but the scheduled ingest is limited to a small daily slice. Stored signal counts should be read as current database coverage, not a national activity total.",
   },
   {
     title: "Reporter Verification",

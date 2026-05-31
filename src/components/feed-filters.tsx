@@ -10,7 +10,7 @@ import { useState } from "react";
 
 const signalTypes = [
   ["", "All signal types"],
-  ["new_committee", "New committee"],
+  ["new_committee", "Committee record"],
   ["new_filing", "New filing"],
   ["large_independent_expenditure", "Independent expenditure"],
   ["committee_activity_spike", "Activity spike"],

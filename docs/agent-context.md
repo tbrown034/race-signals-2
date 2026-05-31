@@ -12,12 +12,12 @@ The core questions are:
 
 - What changed?
 - Who filed?
-- Who formed a new committee?
+- Which committees appear in the FEC record?
 - Where is money moving?
 - Who is spending in a race?
 - What looks unusual enough to deserve a reporter's attention?
 
-The MVP is FEC API only for campaign-finance records. The data model contains 2026 U.S. House race shells across all 50 states plus 2026 U.S. Senate races, but stored signals reflect the latest capped ingest slice unless a broader manual run has completed. Do not imply coverage beyond federal House/Senate races or beyond the records actually ingested.
+The MVP is FEC API only for campaign-finance records. The data model contains 2026 U.S. House race shells across all 50 states plus 2026 U.S. Senate races, but stored signals reflect the latest limited ingest slice unless a broader manual run has completed. Do not imply coverage beyond federal House/Senate races or beyond the records actually ingested.
 
 ## Editorial Product Principles
 
@@ -168,7 +168,7 @@ Implemented or expected validation rules:
 - Broken or missing source URL
 - Unmatched race
 - Cross-cycle records attached to current-cycle races
-- Schedule E signals missing support/oppose marker
+- Schedule E signals missing FEC target-position code
 
 Validation issues should be stored and visible through status/freshness surfaces where practical.
 

@@ -68,6 +68,7 @@ export default async function RacePage({
     sourceIds: candidates.map((candidate) => candidate.fecCandidateId),
     sourcePrefixes: [`candidate-scope:${race.state}:`],
   });
+  const aggregateOnlyCandidates = candidates.filter(isAggregateOnly);
 
   return (
     <PageShell>
@@ -133,6 +134,7 @@ export default async function RacePage({
             ]}
         />
         <CoverageWarning issues={validationWarnings} />
+        <AggregateOnlyRaceNotice candidates={aggregateOnlyCandidates} />
         <div className="grid gap-px border-b border-neutral-300 bg-neutral-300 sm:grid-cols-2 xl:grid-cols-5" id="race-stats">
           <RaceStat
             detail="Source-linked Schedule E rows in this Race Signals slice; verify evidence before publication."
@@ -376,6 +378,8 @@ function sourceRecordSummary(candidate: {
 }
 
 function isAggregateOnly(candidate: {
+  id?: string;
+  name?: string | null;
   committeeCount?: number;
   filingCount?: number;
   signalCount?: number;
@@ -386,6 +390,57 @@ function isAggregateOnly(candidate: {
     (candidate.committeeCount ?? 0) === 0 &&
     (candidate.filingCount ?? 0) === 0 &&
     (candidate.signalCount ?? 0) === 0
+  );
+}
+
+function AggregateOnlyRaceNotice({
+  candidates,
+}: {
+  candidates: Array<{
+    id: string;
+    name: string;
+    totalReceiptsCycle?: number | null;
+    cashOnHandLatest?: number | null;
+    sourceUrl?: string | null;
+  }>;
+}) {
+  if (!candidates.length) return null;
+
+  return (
+    <section className="border-b border-neutral-300 bg-neutral-50 px-5 py-4">
+      <h2 className="font-mono text-xs uppercase tracking-[0.14em] text-neutral-700">
+        Aggregate-only candidate money
+      </h2>
+      <p className="mt-1 max-w-3xl text-sm leading-6 text-neutral-700">
+        The FEC totals endpoint reports receipts for {formatCount(candidates.length, "candidate")} in this race, but Race Signals has not matched source filings,
+        committees or signals for them in the current stored slice. Treat this as a follow-up queue, not a quiet-candidate finding.
+      </p>
+      <ul className="mt-3 space-y-2 text-sm leading-5 text-neutral-700">
+        {candidates.slice(0, 5).map((candidate) => (
+          <li className="max-w-full break-words [overflow-wrap:anywhere]" key={candidate.id}>
+            <Link className="font-medium underline underline-offset-4" href={`/candidates/${candidate.id}`}>
+              {displayCandidateName(candidate.name) ?? candidate.name}
+            </Link>
+            {": "}
+            <span className="font-mono text-neutral-950">
+              {candidateMoney(candidate.totalReceiptsCycle)}
+            </span>
+            {" stored receipts"}
+            {candidate.cashOnHandLatest !== null && candidate.cashOnHandLatest !== undefined ? (
+              <> / {candidateMoney(candidate.cashOnHandLatest)} cash</>
+            ) : null}
+            {candidate.sourceUrl ? (
+              <>
+                {" "}
+                <a className="font-medium underline underline-offset-4" href={candidate.sourceUrl} rel="noreferrer" target="_blank">
+                  FEC totals
+                </a>
+              </>
+            ) : null}
+          </li>
+        ))}
+      </ul>
+    </section>
   );
 }
 

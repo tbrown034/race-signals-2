@@ -62,8 +62,10 @@ export default async function Home({
     if (typeof value === "string" && value) exportQuery.set(key, value);
   }
   const exportSuffix = exportQuery.toString();
-  const [signals, races, status, stateSignalCounts, stateSignalFreshness, stateRaceBoard] = await Promise.all([
-    getSignals(signalFiltersFromSearchParams(params, 51)),
+  const baseSignalFilters = signalFiltersFromSearchParams(params, 51);
+  const [signals, newestAddedSignals, races, status, stateSignalCounts, stateSignalFreshness, stateRaceBoard] = await Promise.all([
+    getSignals(baseSignalFilters),
+    getSignals({ ...baseSignalFilters, limit: 1, sort: "ingested" }),
     getRaces(),
     getCoverageSummary(),
     getSignalStateCounts(),
@@ -73,7 +75,7 @@ export default async function Home({
   const visibleSignals = signals.slice(0, 50);
   const hasMoreSignals = signals.length > visibleSignals.length;
   const selectedRace = raceId ? races.find((race) => race.id === raceId) : null;
-  const triageSignals = feedTriageSignals(visibleSignals);
+  const triageSignals = feedTriageSignals(visibleSignals, newestAddedSignals[0]);
   const activeFilters = [
     q ? `search "${q}"` : null,
     state ? `state ${state}` : null,
@@ -314,13 +316,13 @@ function TriageItem({
   );
 }
 
-function feedTriageSignals(signals: Signal[]) {
+function feedTriageSignals(signals: Signal[], newestAdded?: Signal) {
   const byDataFreshness = [...signals].sort((a, b) => {
     const freshnessCompare = b.dataFreshness.localeCompare(a.dataFreshness);
     return freshnessCompare || b.signalDate.localeCompare(a.signalDate);
   });
   return {
-    newestAdded: byDataFreshness[0] ?? signals[0],
+    newestAdded: newestAdded ?? byDataFreshness[0] ?? signals[0],
     review: signals.find((signal) => signal.status === "review"),
     incumbentNamed: signals.find((signal) => signal.candidateIncumbentChallengeStatus === "I" || signal.candidateIncumbentChallengeStatus === "Incumbent"),
     largestIe: signals

@@ -13,6 +13,7 @@ export type SignalFilters = {
   targetParty?: string;
   targetStatus?: string;
   limit?: number;
+  sort?: "event" | "ingested";
 };
 
 export function sinceLabel(value?: string) {

@@ -452,7 +452,7 @@ function demoSignalSearchText(signal: Signal) {
 export async function getSignals(filters: SignalFilters = {}) {
   if (!hasDatabase()) {
     const q = filters.q?.toLowerCase();
-    return demoSignals.filter((signal) => {
+    const filtered = demoSignals.filter((signal) => {
       if (filters.raceId && signal.raceId !== filters.raceId) return false;
       if (filters.committeeId && signal.committeeId !== filters.committeeId) return false;
       if (filters.state && !signal.raceId?.includes(`-${filters.state}-`)) return false;
@@ -467,7 +467,11 @@ export async function getSignals(filters: SignalFilters = {}) {
       if (filters.targetStatus && signal.candidateIncumbentChallengeStatus !== filters.targetStatus) return false;
       if (q && !demoSignalSearchText(signal).includes(q)) return false;
       return true;
-    }).slice(0, filters.limit ?? 50);
+    });
+    const sorted = filters.sort === "ingested"
+      ? [...filtered].sort((a, b) => b.dataFreshness.localeCompare(a.dataFreshness) || b.signalDate.localeCompare(a.signalDate))
+      : filtered;
+    return sorted.slice(0, filters.limit ?? 50);
   }
 
   const values: unknown[] = [];
@@ -543,7 +547,11 @@ export async function getSignals(filters: SignalFilters = {}) {
       left join committees cm on cm.id = s.committee_id
       left join races r on r.id = s.race_id
       ${where.length ? `where ${where.join(" and ")}` : ""}
-      order by s.signal_date desc, s.created_at desc
+      order by ${
+        filters.sort === "ingested"
+          ? "s.data_freshness desc, s.signal_date desc, s.created_at desc"
+          : "s.signal_date desc, s.created_at desc"
+      }
       limit $${values.length}
     `,
     values,

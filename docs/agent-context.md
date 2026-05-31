@@ -126,6 +126,7 @@ Core tables:
 - `filings`
 - `transactions`
 - `independent_expenditures`
+- `source_records`
 - `signals`
 - `ingestion_runs`
 - `ingestion_endpoint_runs`

@@ -905,6 +905,83 @@ export async function getCommitteeIndependentExpenditures(
   }));
 }
 
+export async function getCandidateIndependentExpenditures(
+  id: string,
+  limit = 25,
+): Promise<CommitteeIndependentExpenditure[]> {
+  if (!hasDatabase()) {
+    return demoIndependentExpenditures
+      .filter((expenditure) => expenditure.candidateId === id)
+      .slice(0, limit)
+      .map((expenditure) => ({
+        ...expenditure,
+        candidateName: demoCandidates.find((candidate) => candidate.id === expenditure.candidateId)?.name ?? null,
+        candidateParty: demoCandidates.find((candidate) => candidate.id === expenditure.candidateId)?.party ?? null,
+        committeeName: demoCommittees.find((committee) => committee.id === expenditure.spenderCommitteeId)?.name ?? null,
+        raceName: demoRaces.find((race) => race.id === expenditure.raceId)?.name ?? null,
+      }));
+  }
+  const rows = await sql<{
+    source_id: string;
+    cycle: number | null;
+    spender_committee_id: string | null;
+    fec_committee_id: string | null;
+    candidate_id: string | null;
+    fec_candidate_id: string | null;
+    race_id: string | null;
+    support_oppose_indicator: string | null;
+    amount: string;
+    expenditure_date: string | Date | null;
+    purpose: string | null;
+    source_url: string | null;
+    raw: unknown;
+    candidate_name: string | null;
+    candidate_party: string | null;
+    committee_name: string | null;
+    race_name: string | null;
+  }>(
+    `
+      select
+        ie.*,
+        c.name as candidate_name,
+        c.party as candidate_party,
+        cm.name as committee_name,
+        r.name as race_name
+      from independent_expenditures ie
+      left join candidates c on c.id = ie.candidate_id
+      left join committees cm on cm.id = ie.spender_committee_id
+      left join races r on r.id = ie.race_id
+      where ie.candidate_id = $1
+        and (
+          ie.expenditure_date >= make_date(coalesce(r.cycle, $3) - 1, 1, 1)
+          and ie.expenditure_date <= make_date(coalesce(r.cycle, $3), 12, 31)
+        )
+      order by ie.expenditure_date desc nulls last, ie.amount desc
+      limit $2
+    `,
+    [id, limit, CURRENT_CYCLE],
+  );
+  return rows.map((row) => ({
+    sourceId: row.source_id,
+    cycle: row.cycle,
+    spenderCommitteeId: row.spender_committee_id,
+    fecCommitteeId: row.fec_committee_id,
+    candidateId: row.candidate_id,
+    fecCandidateId: row.fec_candidate_id,
+    raceId: row.race_id,
+    supportOpposeIndicator: row.support_oppose_indicator,
+    amount: Number(row.amount),
+    expenditureDate: row.expenditure_date ? toDateString(row.expenditure_date) : null,
+    purpose: row.purpose,
+    sourceUrl: row.source_url,
+    raw: row.raw,
+    candidateName: row.candidate_name,
+    candidateParty: row.candidate_party,
+    committeeName: row.committee_name,
+    raceName: row.race_name,
+  }));
+}
+
 export async function getTopSpenders(limit = 100): Promise<TopSpender[]> {
   if (!hasDatabase()) {
     return demoCommittees

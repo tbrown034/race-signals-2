@@ -7,7 +7,7 @@ import { IncumbentBadge } from "@/src/components/incumbent-badge";
 import { PageShell } from "@/src/components/page-shell";
 import { PartySquare } from "@/src/components/party-square";
 import { ReporterRead } from "@/src/components/reporter-read";
-import { getCandidate, getCandidateElections, getCandidatesForRace, getRace, getSignalsForEntity } from "@/src/lib/db/repository";
+import { getCandidate, getCandidateElections, getCandidateIndependentExpenditures, getCandidatesForRace, getRace, getSignalsForEntity } from "@/src/lib/db/repository";
 import { formatCount, formatDate, formatDateTime, formatMoney } from "@/src/lib/format";
 import type { Metadata } from "next";
 
@@ -33,10 +33,11 @@ export default async function CandidatePage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const [candidate, signals, elections] = await Promise.all([
+  const [candidate, signals, elections, independentExpenditures] = await Promise.all([
     getCandidate(id),
     getSignalsForEntity("candidate", id),
     getCandidateElections(id),
+    getCandidateIndependentExpenditures(id),
   ]);
 
   if (!candidate) notFound();
@@ -44,7 +45,7 @@ export default async function CandidatePage({
     ? await Promise.all([getCandidatesForRace(candidate.raceId), getRace(candidate.raceId)])
     : [[], null] as const;
   const signalCounts = countSignals(signals);
-  const reporterNotes = candidateReporterNotes(candidate, signalCounts, signals.length);
+  const reporterNotes = candidateReporterNotes(candidate, signalCounts, signals.length, independentExpenditures.length);
 
   return (
     <PageShell>
@@ -62,7 +63,7 @@ export default async function CandidatePage({
             {isIncumbent(candidate.incumbentChallengeStatus) ? <IncumbentBadge /> : null}
           </span>
         }
-        mobileLead={<MobileCandidateRead notes={candidateMobileNotes(candidate, signalCounts, signals.length)} />}
+        mobileLead={<MobileCandidateRead notes={candidateMobileNotes(candidate, signalCounts, signals.length, independentExpenditures.length)} />}
         primaryMetaCount={11}
         sourceUrl={candidate.sourceUrl}
         signals={signals}
@@ -104,6 +105,9 @@ export default async function CandidatePage({
           <div className="flex flex-wrap gap-x-4 gap-y-2">
             <a className="underline-offset-4 hover:underline" href="#reporter-read">Reporter read</a>
             <a className="underline-offset-4 hover:underline" href="#race-context">Race context</a>
+            {independentExpenditures.length ? (
+              <a className="underline-offset-4 hover:underline" href="#outside-spending-records">Schedule E</a>
+            ) : null}
             <a className="underline-offset-4 hover:underline" href="#related-signals">Signals</a>
             <a className="underline-offset-4 hover:underline" href="#election-history">Election history</a>
           </div>
@@ -178,6 +182,9 @@ export default async function CandidatePage({
             </div>
           </div>
         ) : null}
+        {independentExpenditures.length ? (
+          <CandidateOutsideSpendingTable expenditures={independentExpenditures} />
+        ) : null}
         <ElectionTimeline
           collapseOnMobile
           elections={elections}
@@ -195,10 +202,14 @@ function candidateReporterNotes(
   candidate: NonNullable<Awaited<ReturnType<typeof getCandidate>>>,
   signalCounts: ReturnType<typeof countSignals>,
   totalSignals: number,
+  independentExpenditureCount: number,
 ) {
   return [
     `Money position: ${candidateMoney(candidate.totalReceiptsCycle, candidate.totalsFetchedAt).toLowerCase()} raised this cycle; ${candidateMoney(candidate.cashOnHandLatest, candidate.totalsFetchedAt).toLowerCase()} cash on hand${candidate.cashOnHandAsOf ? ` as of ${formatDate(candidate.cashOnHandAsOf)}` : ""}.`,
     `${formatCount(totalSignals, "related signal")} in this slice: ${formatCount(signalCounts.filings, "filing")}, ${formatCount(signalCounts.committees, "committee record")}, ${formatCount(signalCounts.outsideSpending, "outside-spending alert")}, ${formatCount(signalCounts.review, "review flag")}.`,
+    independentExpenditureCount
+      ? `${formatCount(independentExpenditureCount, "stored Schedule E record")} names this candidate; records below the $25,000 alert threshold are shown as context but do not become signals.`
+      : "No stored current-cycle Schedule E records name this candidate in the current slice.",
     isIncumbent(candidate.incumbentChallengeStatus)
       ? "Incumbent context: committee records usually reflect cycle operations or continuing campaign infrastructure, not a first-time launch."
       : "Non-incumbent context: a principal committee is useful early evidence of campaign organization, but ballot status still needs election-office verification.",
@@ -210,10 +221,14 @@ function candidateMobileNotes(
   candidate: NonNullable<Awaited<ReturnType<typeof getCandidate>>>,
   signalCounts: ReturnType<typeof countSignals>,
   totalSignals: number,
+  independentExpenditureCount: number,
 ) {
   return [
     `${candidateMoney(candidate.totalReceiptsCycle, candidate.totalsFetchedAt)} raised; ${candidateMoney(candidate.cashOnHandLatest, candidate.totalsFetchedAt)} cash${candidate.cashOnHandAsOf ? ` as of ${formatDate(candidate.cashOnHandAsOf)}` : ""}.`,
     `${formatCount(totalSignals, "signal")}: ${formatCount(signalCounts.filings, "filing")}, ${formatCount(signalCounts.committees, "committee record")}, ${formatCount(signalCounts.outsideSpending, "outside-spending alert")}, ${formatCount(signalCounts.review, "review flag")}.`,
+    independentExpenditureCount
+      ? `${formatCount(independentExpenditureCount, "Schedule E record")} names this candidate; below-threshold records are context, not alerts.`
+      : "No stored Schedule E records name this candidate in this slice.",
   ];
 }
 
@@ -230,6 +245,110 @@ function MobileCandidateRead({ notes }: { notes: string[] }) {
           </li>
         ))}
       </ul>
+    </div>
+  );
+}
+
+function supportLabel(value?: string | null) {
+  if (value === "S") return "Support";
+  if (value === "O") return "Oppose";
+  return "Mention";
+}
+
+function CandidateOutsideSpendingTable({
+  expenditures,
+}: {
+  expenditures: Awaited<ReturnType<typeof getCandidateIndependentExpenditures>>;
+}) {
+  return (
+    <div className="border-b border-neutral-300" id="outside-spending-records">
+      <div className="border-b border-neutral-300 px-5 py-4">
+        <h2 className="text-sm font-semibold uppercase tracking-[0.14em] text-neutral-600">
+          Outside spending records
+        </h2>
+        <p className="mt-1 text-sm text-neutral-600">
+          Current-cycle Schedule E records naming this candidate. Records below the $25,000 alert threshold are context, not signal cards.
+        </p>
+      </div>
+      <div className="overflow-x-auto">
+        <table className="w-full min-w-0 text-left text-sm md:min-w-[760px]">
+          <thead className="bg-neutral-100 font-mono text-xs uppercase tracking-[0.12em] text-neutral-500">
+            <tr>
+              <th className="hidden px-4 py-3 font-medium md:table-cell" scope="col">Date</th>
+              <th className="px-4 py-3 font-medium" scope="col">Spender</th>
+              <th className="hidden px-4 py-3 font-medium md:table-cell" scope="col">Position</th>
+              <th className="hidden px-4 py-3 font-medium md:table-cell" scope="col">Purpose</th>
+              <th className="hidden px-4 py-3 font-medium md:table-cell" scope="col">Source</th>
+              <th className="hidden px-4 py-3 text-right font-medium md:table-cell" scope="col">Amount</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-neutral-200">
+            {expenditures.map((expenditure) => (
+              <tr key={expenditure.sourceId}>
+                <td className="hidden px-4 py-3 font-mono md:table-cell">{formatDate(expenditure.expenditureDate)}</td>
+                <td className="px-4 py-3">
+                  {expenditure.spenderCommitteeId ? (
+                    <Link className="font-medium underline underline-offset-4" href={`/committees/${expenditure.spenderCommitteeId}`}>
+                      {expenditure.committeeName ?? expenditure.fecCommitteeId ?? "Spender not resolved"}
+                    </Link>
+                  ) : (
+                    expenditure.committeeName ?? expenditure.fecCommitteeId ?? "Spender not resolved"
+                  )}
+                  <dl className="mt-2 space-y-1 text-xs leading-5 text-neutral-600 md:hidden">
+                    <div>
+                      <dt className="inline font-mono uppercase tracking-[0.12em] text-neutral-500">Date </dt>
+                      <dd className="inline font-mono text-neutral-950">{formatDate(expenditure.expenditureDate)}</dd>
+                    </div>
+                    <div>
+                      <dt className="inline font-mono uppercase tracking-[0.12em] text-neutral-500">Amount </dt>
+                      <dd className="inline font-mono font-semibold text-neutral-950">{formatMoney(expenditure.amount)}</dd>
+                    </div>
+                    <div>
+                      <dt className="inline font-mono uppercase tracking-[0.12em] text-neutral-500">Position </dt>
+                      <dd className="inline">{supportLabel(expenditure.supportOpposeIndicator)}</dd>
+                    </div>
+                    <div>
+                      <dt className="inline font-mono uppercase tracking-[0.12em] text-neutral-500">Purpose </dt>
+                      <dd className="inline">{expenditure.purpose ?? "Not specified"}</dd>
+                    </div>
+                    <div>
+                      <dt className="inline font-mono uppercase tracking-[0.12em] text-neutral-500">Source </dt>
+                      <dd className="inline">
+                        {expenditure.sourceUrl ? (
+                          <a className="font-medium underline underline-offset-4" href={expenditure.sourceUrl} rel="noreferrer" target="_blank">
+                            FEC Schedule E
+                          </a>
+                        ) : (
+                          "Source not stored"
+                        )}
+                      </dd>
+                    </div>
+                  </dl>
+                </td>
+                <td className="hidden px-4 py-3 md:table-cell">{supportLabel(expenditure.supportOpposeIndicator)}</td>
+                <td className="hidden px-4 py-3 text-neutral-700 md:table-cell">{expenditure.purpose ?? "Not specified"}</td>
+                <td className="hidden px-4 py-3 md:table-cell">
+                  <div className="flex flex-col gap-1">
+                    {expenditure.sourceUrl ? (
+                      <a className="font-medium underline underline-offset-4" href={expenditure.sourceUrl} rel="noreferrer" target="_blank">
+                        FEC Schedule E
+                      </a>
+                    ) : (
+                      <span className="text-neutral-600">Source not stored</span>
+                    )}
+                    <span className="font-mono text-[11px] uppercase tracking-[0.12em] text-neutral-500">
+                      {expenditure.sourceId}
+                    </span>
+                  </div>
+                </td>
+                <td className="hidden px-4 py-3 text-right font-mono font-semibold md:table-cell">
+                  {formatMoney(expenditure.amount)}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 }

@@ -203,6 +203,22 @@ assert.match(
   "incumbent committee copy should not frame routine campaign infrastructure as a launch",
 );
 
+const openSeatSignals = generateSignals({
+  candidates: [{ ...candidate, incumbentChallengeStatus: "O", name: "TEST, OPEN SEAT" }],
+  committees: [{ ...committee, candidateId: candidate.id, fecCommitteeId: "C00666666", id: "cmte-C00666666" }],
+  races: [race],
+  filings: [],
+  independentExpenditures: [],
+  dataFreshness: "2026-05-31T12:00:00.000Z",
+});
+const openSeatCommitteeSignal = openSeatSignals.find((signal) => signal.signalType === "new_committee");
+assert.ok(openSeatCommitteeSignal, "open-seat principal committee should generate a source-linked signal");
+assert.match(
+  openSeatCommitteeSignal.headline,
+  /Open Seat Test/,
+  "open-seat committee headlines should name the candidate because several candidates may be organizing",
+);
+
 const mixedBasisSignals = generateSignals({
   candidates: [candidate],
   committees: [committee],

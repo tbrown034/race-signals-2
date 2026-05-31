@@ -307,7 +307,7 @@ function newCommitteeCopy(committee: Committee, candidate?: Candidate, race?: Ra
   }
   if (isOpenSeat(candidate?.incumbentChallengeStatus)) {
     return {
-      headline: `FEC lists a principal campaign committee${fileDate} in open-seat ${raceLabel}.`,
+      headline: `FEC lists a principal campaign committee for ${candidateName}${fileDate} in open-seat ${raceLabel}.`,
       whyItMatters:
         "In an open-seat race, a principal committee is a paperwork signal of campaign organization; verify candidacy and ballot status separately.",
       };

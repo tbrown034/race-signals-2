@@ -391,7 +391,7 @@ function StateRaceBoard({ rows, state }: { rows: StateRaceBoardRow[]; state: str
               <th className="px-4 py-3 font-medium" scope="col">Race</th>
               <th className="hidden px-4 py-3 text-right font-medium md:table-cell" scope="col">Candidates</th>
               <th className="hidden px-4 py-3 text-right font-medium md:table-cell" scope="col">Matched inc.</th>
-              <th className="hidden px-4 py-3 text-right font-medium md:table-cell" scope="col">FEC receipts</th>
+              <th className="hidden px-4 py-3 text-right font-medium md:table-cell" scope="col">Stored receipts</th>
               <th className="hidden px-4 py-3 text-right font-medium md:table-cell" scope="col">Signals</th>
               <th className="hidden px-4 py-3 text-right font-medium md:table-cell" scope="col">Stored IE</th>
               <th className="hidden px-4 py-3 font-medium md:table-cell" scope="col">Totals fetched</th>
@@ -416,8 +416,16 @@ function StateRaceBoard({ rows, state }: { rows: StateRaceBoardRow[]; state: str
                         <dd className="inline">{race.incumbentCount}</dd>
                       </div>
                       <div>
-                        <dt className="inline font-mono uppercase tracking-[0.12em] text-neutral-500">FEC receipts </dt>
-                        <dd className="inline font-mono text-neutral-950">{formatMoney(race.candidateReceiptsTotal) ?? "$0"}</dd>
+                        <dt className="inline font-mono uppercase tracking-[0.12em] text-neutral-500">Stored receipts </dt>
+                        <dd className="inline font-mono text-neutral-950">
+                          {race.candidateReceiptsTotal > 0 ? (
+                            <Link className="underline underline-offset-4" href={`/races/${race.raceId}#candidate-cohort`}>
+                              {formatMoney(race.candidateReceiptsTotal) ?? "$0"}
+                            </Link>
+                          ) : (
+                            "$0"
+                          )}
+                        </dd>
                       </div>
                       <div>
                         <dt className="inline font-mono uppercase tracking-[0.12em] text-neutral-500">Signals </dt>
@@ -455,7 +463,15 @@ function StateRaceBoard({ rows, state }: { rows: StateRaceBoardRow[]; state: str
                   </td>
                   <td className="hidden px-4 py-3 text-right font-mono md:table-cell">{race.candidateCount}</td>
                   <td className="hidden px-4 py-3 text-right font-mono md:table-cell">{race.incumbentCount}</td>
-                  <td className="hidden px-4 py-3 text-right font-mono md:table-cell">{formatMoney(race.candidateReceiptsTotal) ?? "$0"}</td>
+                  <td className="hidden px-4 py-3 text-right font-mono md:table-cell">
+                    {race.candidateReceiptsTotal > 0 ? (
+                      <Link className="underline underline-offset-4" href={`/races/${race.raceId}#candidate-cohort`}>
+                        {formatMoney(race.candidateReceiptsTotal) ?? "$0"}
+                      </Link>
+                    ) : (
+                      "$0"
+                    )}
+                  </td>
                   <td className="hidden px-4 py-3 text-right font-mono md:table-cell">{race.signalCount}</td>
                   <td className="hidden px-4 py-3 text-right font-mono md:table-cell">
                     {race.independentExpenditureTotal > 0 ? (

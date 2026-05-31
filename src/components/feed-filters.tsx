@@ -131,17 +131,17 @@ export function FeedFilters({
         <label className="block text-xs font-medium uppercase tracking-[0.12em] text-neutral-500">
           Search
           <input
-            className="mt-1 block h-9 w-full border border-neutral-300 bg-white px-3 text-sm normal-case tracking-normal text-neutral-950 outline-none focus:border-neutral-700"
+            className="mt-1 block h-9 w-full min-w-0 border border-neutral-300 bg-white px-3 text-sm normal-case tracking-normal text-neutral-950 outline-none focus:border-neutral-700"
             defaultValue={q}
             name="q"
             placeholder="Candidate, committee, race, source ID"
           />
         </label>
-        <div className="flex flex-wrap gap-3">
-        <label className="min-w-[96px] flex-1 text-xs font-medium uppercase tracking-[0.12em] text-neutral-500 sm:flex-none">
+        <div className="grid grid-cols-1 gap-3 xl:flex xl:flex-wrap">
+          <label className="min-w-0 text-xs font-medium uppercase tracking-[0.12em] text-neutral-500 xl:min-w-[96px] xl:flex-none">
           State
           <select
-            className="mt-1 block h-9 w-full border border-neutral-300 bg-white px-2 text-sm normal-case tracking-normal text-neutral-950"
+            className="mt-1 block h-9 w-full min-w-0 border border-neutral-300 bg-white px-2 text-sm normal-case tracking-normal text-neutral-950"
             value={selectedState}
             name="state"
             onChange={(event) => updateFilter("state", event.target.value)}
@@ -165,10 +165,10 @@ export function FeedFilters({
             </optgroup>
           </select>
         </label>
-        <label className="min-w-[120px] flex-1 text-xs font-medium uppercase tracking-[0.12em] text-neutral-500 sm:flex-none">
+          <label className="min-w-0 text-xs font-medium uppercase tracking-[0.12em] text-neutral-500 xl:min-w-[120px] xl:flex-none">
           Office
           <select
-            className="mt-1 block h-9 w-full border border-neutral-300 bg-white px-2 text-sm normal-case tracking-normal text-neutral-950"
+            className="mt-1 block h-9 w-full min-w-0 border border-neutral-300 bg-white px-2 text-sm normal-case tracking-normal text-neutral-950"
             value={selectedOffice}
             name="office"
             onChange={(event) => updateFilter("office", event.target.value)}
@@ -178,10 +178,10 @@ export function FeedFilters({
             <option value="S">Senate</option>
           </select>
         </label>
-        <label className="min-w-[180px] flex-1 text-xs font-medium uppercase tracking-[0.12em] text-neutral-500">
+          <label className="col-span-2 min-w-0 text-xs font-medium uppercase tracking-[0.12em] text-neutral-500 xl:min-w-[180px] xl:flex-1">
           Race
           <select
-            className="mt-1 block h-9 w-full border border-neutral-300 bg-white px-2 text-sm normal-case tracking-normal text-neutral-950"
+            className="mt-1 block h-9 w-full min-w-0 border border-neutral-300 bg-white px-2 text-sm normal-case tracking-normal text-neutral-950"
             value={selectedRaceId}
             name="race"
             onChange={(event) => updateFilter("race", event.target.value)}
@@ -197,17 +197,17 @@ export function FeedFilters({
           </select>
         </label>
         {lockedType ? (
-          <div className="min-w-[210px] flex-1 text-xs font-medium uppercase tracking-[0.12em] text-neutral-500 sm:flex-none">
+          <div className="col-span-2 min-w-0 text-xs font-medium uppercase tracking-[0.12em] text-neutral-500 xl:min-w-[210px] xl:flex-none">
             Type
             <div className="mt-1 flex h-9 items-center border border-neutral-300 bg-neutral-100 px-2 text-sm normal-case tracking-normal text-neutral-700">
               {signalTypes.find(([value]) => value === selectedType)?.[1] ?? "Locked"}
             </div>
           </div>
         ) : (
-          <label className="min-w-[210px] flex-1 text-xs font-medium uppercase tracking-[0.12em] text-neutral-500 sm:flex-none">
+          <label className="col-span-2 min-w-0 text-xs font-medium uppercase tracking-[0.12em] text-neutral-500 xl:min-w-[210px] xl:flex-none">
             Type
             <select
-              className="mt-1 block h-9 w-full border border-neutral-300 bg-white px-2 text-sm normal-case tracking-normal text-neutral-950"
+              className="mt-1 block h-9 w-full min-w-0 border border-neutral-300 bg-white px-2 text-sm normal-case tracking-normal text-neutral-950"
               value={selectedType}
               name="type"
               onChange={(event) => updateFilter("type", event.target.value)}
@@ -220,10 +220,10 @@ export function FeedFilters({
             </select>
           </label>
         )}
-        <label className="min-w-[150px] flex-1 text-xs font-medium uppercase tracking-[0.12em] text-neutral-500 sm:flex-none">
+          <label className="min-w-0 text-xs font-medium uppercase tracking-[0.12em] text-neutral-500 xl:min-w-[150px] xl:flex-none">
           Status
           <select
-            className="mt-1 block h-9 w-full border border-neutral-300 bg-white px-2 text-sm normal-case tracking-normal text-neutral-950"
+            className="mt-1 block h-9 w-full min-w-0 border border-neutral-300 bg-white px-2 text-sm normal-case tracking-normal text-neutral-950"
             value={selectedStatus}
             name="status"
             onChange={(event) => updateFilter("status", event.target.value)}
@@ -235,10 +235,10 @@ export function FeedFilters({
             ))}
           </select>
         </label>
-        <label className="min-w-[150px] flex-1 text-xs font-medium uppercase tracking-[0.12em] text-neutral-500 sm:flex-none">
+          <label className="min-w-0 text-xs font-medium uppercase tracking-[0.12em] text-neutral-500 xl:min-w-[150px] xl:flex-none">
           Window
           <select
-            className="mt-1 block h-9 w-full border border-neutral-300 bg-white px-2 text-sm normal-case tracking-normal text-neutral-950"
+            className="mt-1 block h-9 w-full min-w-0 border border-neutral-300 bg-white px-2 text-sm normal-case tracking-normal text-neutral-950"
             value={selectedSince}
             name="since"
             onChange={(event) => updateFilter("since", event.target.value)}
@@ -250,11 +250,11 @@ export function FeedFilters({
             ))}
           </select>
         </label>
-        <button className="self-end border border-neutral-900 bg-neutral-950 px-4 py-2 text-sm font-medium text-white">
+          <button className="self-end border border-neutral-900 bg-neutral-950 px-4 py-2 text-sm font-medium text-white xl:self-end">
           Search
         </button>
         {hasFilters ? (
-          <Link className="self-end border border-neutral-300 px-4 py-2 text-center text-sm font-medium" href={clearHref ?? "/"}>
+          <Link className="self-end border border-neutral-300 px-4 py-2 text-center text-sm font-medium xl:self-end" href={clearHref ?? "/"}>
             Clear
           </Link>
         ) : null}

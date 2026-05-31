@@ -39,7 +39,7 @@ export function EntityPage({
 
   return (
     <main className="mx-auto grid max-w-7xl gap-6 px-5 py-6 sm:px-8 lg:grid-cols-[320px_1fr]">
-      <aside className="h-fit border border-neutral-300 bg-white p-5">
+      <aside className="h-fit min-w-0 border border-neutral-300 bg-white p-5">
         {asideMedia ? <div className="mb-4">{asideMedia}</div> : null}
         <p className="font-mono text-xs uppercase tracking-[0.18em] text-neutral-500">
           {eyebrow}
@@ -94,7 +94,7 @@ export function EntityPage({
           </div>
         ) : null}
       </aside>
-      <section className="border border-neutral-300 bg-white">
+      <section className="min-w-0 border border-neutral-300 bg-white">
         {children}
         {independentExpenditures.length ? (
           <div className="border-b border-neutral-300">

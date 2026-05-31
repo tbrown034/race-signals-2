@@ -76,7 +76,7 @@ export default async function Home({
   return (
     <PageShell>
       <main className="mx-auto grid max-w-7xl gap-6 px-5 py-6 sm:px-8 lg:grid-cols-[1fr_320px]">
-        <section className="border border-neutral-300 bg-white">
+        <section className="min-w-0 border border-neutral-300 bg-white">
           <div className="border-b border-neutral-300 px-5 py-5">
             <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
               <div>
@@ -149,7 +149,7 @@ export default async function Home({
           )}
         </section>
 
-        <aside className="h-fit border border-neutral-300 bg-white p-5">
+        <aside className="h-fit min-w-0 border border-neutral-300 bg-white p-5">
           <p className="font-mono text-xs uppercase tracking-[0.18em] text-neutral-500">
             Scope
           </p>

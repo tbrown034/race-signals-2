@@ -33,17 +33,17 @@ export async function PageShell({ children }: { children: ReactNode }) {
     <div className="min-h-screen bg-stone-50 text-neutral-950">
       <header className="border-b border-neutral-300 bg-white">
         <div className="mx-auto flex max-w-7xl flex-col gap-4 px-5 py-4 sm:px-8 lg:flex-row lg:items-end lg:justify-between">
-          <div>
+          <div className="min-w-0">
             <BrandMark />
             <p className="mt-1 text-sm text-neutral-600">
               Early campaign-finance alerts for reporters covering 2026 House and Senate races.
             </p>
           </div>
-          <div className="flex flex-col gap-2 lg:items-end">
-            <nav className="flex flex-wrap gap-4 text-sm">
+          <div className="min-w-0 overflow-hidden lg:flex lg:flex-col lg:items-end lg:gap-2">
+            <nav className="-mx-5 flex gap-4 overflow-x-auto px-5 pb-1 text-sm sm:mx-0 sm:flex-wrap sm:px-0 sm:pb-0">
               {nav.map((item) => (
                 <Link
-                  className="font-medium text-neutral-700 underline-offset-4 hover:underline"
+                  className="shrink-0 font-medium text-neutral-700 underline-offset-4 hover:underline"
                   href={item.href}
                   key={item.href}
                 >
@@ -52,7 +52,7 @@ export async function PageShell({ children }: { children: ReactNode }) {
               ))}
             </nav>
             <Link
-              className={`font-mono text-[11px] uppercase tracking-[0.12em] underline-offset-4 hover:underline ${stale ? "font-semibold text-neutral-950" : "text-neutral-500"}`}
+              className={`mt-1 block font-mono text-[11px] uppercase tracking-[0.12em] underline-offset-4 hover:underline lg:mt-0 ${stale ? "font-semibold text-neutral-950" : "text-neutral-500"}`}
               href="/status"
               title={latestFinishedAt ? `Last ingestion finished ${formatDateTime(latestFinishedAt)}` : "No ingestion run recorded"}
             >

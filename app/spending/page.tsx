@@ -39,7 +39,7 @@ export default async function SpendingPage({
   return (
     <PageShell>
       <main className="mx-auto max-w-7xl px-5 py-6 sm:px-8">
-        <section className="border border-neutral-300 bg-white">
+        <section className="min-w-0 border border-neutral-300 bg-white">
           <div className="border-b border-neutral-300 px-5 py-5">
             <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
               <div>

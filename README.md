@@ -239,7 +239,7 @@ npm run repair:schedule-e-links
 
 `npm run audit:signals` checks more than missingness. It also verifies FEC source URL shape by source kind, including Schedule E links with the expected `sub_id`, so source-linked cards do not silently point at the wrong FEC surface.
 
-`npm run audit:pages` starts the built app locally and checks the main reporter routes, including feed, review, Schedule E evidence, spending, spenders, status, docs, methodology and one dynamic candidate/race/committee route. It also smoke-tests CSV and JSON export endpoints for review signals and Schedule E evidence filters.
+`npm run audit:pages` starts the built app locally and checks the main reporter routes, including feed, review, Schedule E evidence, spending, spenders, status, docs, methodology and one dynamic candidate/race/committee route. It also smoke-tests CSV and JSON export endpoints for signals, Schedule E evidence, state race boards and top spenders.
 
 ## How To Add A Source Adapter Later
 

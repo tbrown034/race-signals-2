@@ -344,8 +344,10 @@ function PublishabilityPanel({
         </div>
       </dl>
       {latestRun?.errors?.length ? (
-        <p className="mt-3 text-sm text-neutral-700">
-          Latest run recorded {latestRun.errors.length} error{latestRun.errors.length === 1 ? "" : "s"}; inspect run notes before relying on freshness.
+        <p className="mt-3 text-sm leading-6 text-neutral-700">
+          Latest run recorded {latestRun.errors.length} error{latestRun.errors.length === 1 ? "" : "s"}:
+          {" "}<span className="font-mono text-xs">{runErrorSummary(latestRun.errors[0])}</span>.
+          Inspect run notes before relying on freshness.
         </p>
       ) : null}
     </section>
@@ -354,6 +356,19 @@ function PublishabilityPanel({
 
 function validationIssueLabel(count: number) {
   return `${count} validation ${count === 1 ? "issue" : "issues"}`;
+}
+
+function runErrorSummary(error: unknown) {
+  if (error && typeof error === "object") {
+    const record = error as Record<string, unknown>;
+    const message = typeof record.message === "string" ? record.message : "error";
+    const context = [
+      typeof record.candidateId === "string" ? `candidate ${record.candidateId}` : null,
+      typeof record.endpoint === "string" ? `endpoint ${record.endpoint}` : null,
+    ].filter(Boolean);
+    return context.length ? `${message} (${context.join(", ")})` : message;
+  }
+  return String(error ?? "error");
 }
 
 function LegendSquare({ className, label }: { className: string; label: string }) {

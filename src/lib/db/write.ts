@@ -67,9 +67,11 @@ export async function upsertCandidates(candidates: Candidate[]) {
       `
         insert into candidates (
           id, fec_candidate_id, name, party, office, state, district, election_year,
-          incumbent_challenge_status, race_id, source_url
+          incumbent_challenge_status, total_receipts_cycle, total_disbursements_cycle,
+          cash_on_hand_latest, cash_on_hand_as_of, individual_contribution_pct,
+          pac_contribution_pct, totals_updated_at, general_election_status, race_id, source_url
         )
-        values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)
+        values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19)
         on conflict (fec_candidate_id) do update set
           name = excluded.name,
           party = excluded.party,
@@ -78,6 +80,14 @@ export async function upsertCandidates(candidates: Candidate[]) {
           district = excluded.district,
           election_year = excluded.election_year,
           incumbent_challenge_status = excluded.incumbent_challenge_status,
+          total_receipts_cycle = excluded.total_receipts_cycle,
+          total_disbursements_cycle = excluded.total_disbursements_cycle,
+          cash_on_hand_latest = excluded.cash_on_hand_latest,
+          cash_on_hand_as_of = excluded.cash_on_hand_as_of,
+          individual_contribution_pct = excluded.individual_contribution_pct,
+          pac_contribution_pct = excluded.pac_contribution_pct,
+          totals_updated_at = excluded.totals_updated_at,
+          general_election_status = coalesce(candidates.general_election_status, excluded.general_election_status),
           race_id = excluded.race_id,
           source_url = excluded.source_url,
           updated_at = now()
@@ -92,6 +102,14 @@ export async function upsertCandidates(candidates: Candidate[]) {
         candidate.district,
         candidate.electionYear,
         candidate.incumbentChallengeStatus,
+        candidate.totalReceiptsCycle,
+        candidate.totalDisbursementsCycle,
+        candidate.cashOnHandLatest,
+        candidate.cashOnHandAsOf,
+        candidate.individualContributionPct,
+        candidate.pacContributionPct,
+        candidate.totalsUpdatedAt,
+        candidate.generalElectionStatus,
         candidate.raceId,
         candidate.sourceUrl,
       ],

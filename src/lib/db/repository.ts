@@ -157,6 +157,14 @@ export async function getCandidate(id: string): Promise<Candidate | null> {
     district: string | null;
     election_year: number | null;
     incumbent_challenge_status: string | null;
+    total_receipts_cycle: string | null;
+    total_disbursements_cycle: string | null;
+    cash_on_hand_latest: string | null;
+    cash_on_hand_as_of: string | Date | null;
+    individual_contribution_pct: string | null;
+    pac_contribution_pct: string | null;
+    totals_updated_at: string | Date | null;
+    general_election_status: string | null;
     race_id: string | null;
     source_url: string | null;
   }>("select * from candidates where id = $1", [id]);
@@ -172,6 +180,16 @@ export async function getCandidate(id: string): Promise<Candidate | null> {
     district: row.district,
     electionYear: row.election_year,
     incumbentChallengeStatus: row.incumbent_challenge_status,
+    totalReceiptsCycle: row.total_receipts_cycle === null ? null : Number(row.total_receipts_cycle),
+    totalDisbursementsCycle:
+      row.total_disbursements_cycle === null ? null : Number(row.total_disbursements_cycle),
+    cashOnHandLatest: row.cash_on_hand_latest === null ? null : Number(row.cash_on_hand_latest),
+    cashOnHandAsOf: row.cash_on_hand_as_of ? toDateString(row.cash_on_hand_as_of) : null,
+    individualContributionPct:
+      row.individual_contribution_pct === null ? null : Number(row.individual_contribution_pct),
+    pacContributionPct: row.pac_contribution_pct === null ? null : Number(row.pac_contribution_pct),
+    totalsUpdatedAt: row.totals_updated_at ? toIsoString(row.totals_updated_at) : null,
+    generalElectionStatus: row.general_election_status,
     raceId: row.race_id,
     sourceUrl: row.source_url,
   };

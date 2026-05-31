@@ -20,6 +20,14 @@ export type Candidate = {
   district?: string | null;
   electionYear?: number | null;
   incumbentChallengeStatus?: string | null;
+  totalReceiptsCycle?: number | null;
+  totalDisbursementsCycle?: number | null;
+  cashOnHandLatest?: number | null;
+  cashOnHandAsOf?: string | null;
+  individualContributionPct?: number | null;
+  pacContributionPct?: number | null;
+  totalsUpdatedAt?: string | null;
+  generalElectionStatus?: string | null;
   raceId?: string | null;
   sourceUrl?: string | null;
 };

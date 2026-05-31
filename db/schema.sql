@@ -23,11 +23,28 @@ create table if not exists candidates (
   district text,
   election_year integer,
   incumbent_challenge_status text,
+  total_receipts_cycle numeric,
+  total_disbursements_cycle numeric,
+  cash_on_hand_latest numeric,
+  cash_on_hand_as_of date,
+  individual_contribution_pct numeric,
+  pac_contribution_pct numeric,
+  totals_updated_at timestamptz,
+  general_election_status text,
   race_id text references races(id),
   source_url text,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
+
+alter table candidates add column if not exists total_receipts_cycle numeric;
+alter table candidates add column if not exists total_disbursements_cycle numeric;
+alter table candidates add column if not exists cash_on_hand_latest numeric;
+alter table candidates add column if not exists cash_on_hand_as_of date;
+alter table candidates add column if not exists individual_contribution_pct numeric;
+alter table candidates add column if not exists pac_contribution_pct numeric;
+alter table candidates add column if not exists totals_updated_at timestamptz;
+alter table candidates add column if not exists general_election_status text;
 
 create table if not exists committees (
   id text primary key,

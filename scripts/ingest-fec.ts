@@ -30,6 +30,7 @@ import {
 } from "@/src/lib/sources/fec/client";
 import { DEFAULT_CYCLE, TARGET_RACES } from "@/src/lib/scope";
 import { getPublicWatchlistRatings } from "@/src/lib/ratings/public-watchlist";
+import { applyCandidateTotals } from "@/src/lib/sources/fec/totals";
 import {
   validateCandidate,
   validateCommittee,
@@ -135,6 +136,7 @@ async function main() {
     committees: 0,
     reports: 0,
     schedule_e: 0,
+    totals: 0,
   };
 
   try {
@@ -155,10 +157,15 @@ async function main() {
       )
     ).flat();
     endpointCounts.candidates += fecCandidates.length;
-    const normalizedCandidates = fecCandidates
+    const normalizedCandidatesBase = fecCandidates
       .map((record) => normalizeCandidate(record, cycle))
       .filter((candidate) => candidate.raceId && raceIds.has(candidate.raceId))
       .slice(0, maxCandidates);
+    const normalizedCandidates: Candidate[] = [];
+    for (const candidate of normalizedCandidatesBase) {
+      normalizedCandidates.push(await applyCandidateTotals(candidate, cycle));
+      endpointCounts.totals += 1;
+    }
 
     candidates.push(...normalizedCandidates);
     normalizedCandidates.forEach((candidate) => issues.push(...validateCandidate(candidate)));

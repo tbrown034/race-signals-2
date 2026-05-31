@@ -330,7 +330,7 @@ function StateRaceBoard({ rows, state }: { rows: StateRaceBoardRow[]; state: str
                         <dt className="inline font-mono uppercase tracking-[0.12em] text-neutral-500">Latest </dt>
                         <dd className="inline">
                           {race.latestSignalDate && race.latestSignalDedupeKey ? (
-                            <Link className="underline underline-offset-4" href={`/?race=${race.raceId}#${race.latestSignalDedupeKey}`}>
+                            <Link className="underline underline-offset-4" href={`/?race=${race.raceId}#${signalAnchorId(race.latestSignalDedupeKey)}`}>
                               {formatDate(race.latestSignalDate)}
                             </Link>
                           ) : (
@@ -358,7 +358,7 @@ function StateRaceBoard({ rows, state }: { rows: StateRaceBoardRow[]; state: str
                     {race.latestSignalDate && race.latestSignalDedupeKey ? (
                       <Link
                         className="block max-w-[240px] underline underline-offset-4"
-                        href={`/?race=${race.raceId}#${race.latestSignalDedupeKey}`}
+                        href={`/?race=${race.raceId}#${signalAnchorId(race.latestSignalDedupeKey)}`}
                         title={race.latestSignalHeadline ?? undefined}
                       >
                         <span className="block">{formatDate(race.latestSignalDate)}</span>
@@ -398,4 +398,8 @@ function raceTotalsFreshness(race: StateRaceBoardRow) {
     return `${latest}; oldest ${formatRelativeTime(race.candidateTotalsFetchedAtOldest)}`;
   }
   return latest;
+}
+
+function signalAnchorId(dedupeKey: string) {
+  return `signal-${dedupeKey.replace(/[^a-zA-Z0-9_-]/g, "-")}`;
 }

@@ -1,4 +1,4 @@
-import { getScheduleERecords } from "@/src/lib/db/repository";
+import { getCoverageSummary, getScheduleERecords } from "@/src/lib/db/repository";
 import {
   SCHEDULE_E_EXPORT_LIMIT,
   type ScheduleEExportManifest,
@@ -22,7 +22,7 @@ export async function GET(request: Request) {
     );
   }
 
-  const manifest = exportManifest(url);
+  const manifest = await exportManifest(url);
   return Response.json(records.map((record) => scheduleEToExportRow(record, manifest)), {
     headers: {
       ...headers,
@@ -31,10 +31,12 @@ export async function GET(request: Request) {
   });
 }
 
-function exportManifest(url: URL): ScheduleEExportManifest {
+async function exportManifest(url: URL): Promise<ScheduleEExportManifest> {
+  const status = await getCoverageSummary();
   return {
     exportedAt: new Date().toISOString(),
     filters: exportFilters(url),
+    latestRun: status.runs[0] ?? null,
   };
 }
 

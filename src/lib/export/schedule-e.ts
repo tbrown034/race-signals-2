@@ -1,10 +1,11 @@
-import type { CommitteeIndependentExpenditure } from "@/src/lib/types";
+import type { CommitteeIndependentExpenditure, IngestionRun } from "@/src/lib/types";
 
 export const SCHEDULE_E_EXPORT_LIMIT = 10000;
 
 export type ScheduleEExportManifest = {
   exportedAt: string;
   filters: Record<string, string>;
+  latestRun?: IngestionRun | null;
 };
 
 export type ScheduleEExportRow = {
@@ -26,6 +27,12 @@ export type ScheduleEExportRow = {
   source_id: string;
   exported_at: string;
   filters: string;
+  latest_run_id: string | null;
+  latest_run_scope: string | null;
+  latest_run_mode: string | null;
+  latest_run_state: string | null;
+  latest_run_status: string | null;
+  latest_run_finished_at: string | null;
 };
 
 export function scheduleEToExportRow(
@@ -51,6 +58,12 @@ export function scheduleEToExportRow(
     source_id: record.sourceId,
     exported_at: manifest.exportedAt,
     filters: JSON.stringify(manifest.filters),
+    latest_run_id: manifest.latestRun?.id ?? null,
+    latest_run_scope: manifest.latestRun?.scope ?? null,
+    latest_run_mode: manifest.latestRun?.mode ?? null,
+    latest_run_state: manifest.latestRun?.state ?? null,
+    latest_run_status: manifest.latestRun?.status ?? null,
+    latest_run_finished_at: manifest.latestRun?.finishedAt ?? null,
   };
 }
 
@@ -74,6 +87,12 @@ export function scheduleERowsToCsv(rows: ScheduleEExportRow[]) {
     "source_id",
     "exported_at",
     "filters",
+    "latest_run_id",
+    "latest_run_scope",
+    "latest_run_mode",
+    "latest_run_state",
+    "latest_run_status",
+    "latest_run_finished_at",
   ];
 
   return [

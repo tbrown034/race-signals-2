@@ -19,6 +19,7 @@ const countLabels: Record<string, string> = {
 
 export default async function StatusPage() {
   const status = await getStatus();
+  const latestRun = status.runs[0];
 
   return (
     <PageShell>
@@ -34,6 +35,12 @@ export default async function StatusPage() {
             Current mode: <span className="font-semibold">{status.mode}</span>
           </p>
         </section>
+
+        <PublishabilityPanel
+          latestRun={latestRun}
+          mode={status.mode}
+          validationIssueCount={status.validationIssues.reduce((sum, issue) => sum + issue.count, 0)}
+        />
 
         <section className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
           {Object.entries(status.counts).map(([name, count]) => (
@@ -215,7 +222,10 @@ export default async function StatusPage() {
                 {status.validationIssues.length ? (
                   status.validationIssues.map((issue) => (
                     <tr key={`${issue.rule}-${issue.severity}`}>
-                      <td className="px-4 py-3 font-mono">{issue.rule}</td>
+                      <td className="px-4 py-3">
+                        <span className="block font-medium">{validationRuleLabel(issue.rule)}</span>
+                        <span className="mt-1 block font-mono text-xs text-neutral-500">{issue.rule}</span>
+                      </td>
                       <td className="px-4 py-3">{issue.severity}</td>
                       <td className="px-4 py-3 text-right font-mono">{issue.count}</td>
                       <td className="px-4 py-3">{formatDateTime(issue.latestAt)}</td>
@@ -234,6 +244,71 @@ export default async function StatusPage() {
         </section>
       </main>
     </PageShell>
+  );
+}
+
+function PublishabilityPanel({
+  latestRun,
+  mode,
+  validationIssueCount,
+}: {
+  latestRun?: {
+    status: string;
+    state?: string | null;
+    scope: string;
+    finishedAt?: string | null;
+    startedAt: string;
+    errors: unknown[];
+  };
+  mode: string;
+  validationIssueCount: number;
+}) {
+  const finishedAt = latestRun?.finishedAt ?? latestRun?.startedAt ?? null;
+  const isPartial = latestRun?.status === "partial";
+  const isError = latestRun?.status === "failed" || latestRun?.status === "error";
+  const headline = isError
+    ? "Use with caution: latest ingest recorded an error."
+    : isPartial
+      ? "Use with caution: latest ingest is partial."
+      : "Usable with source checks.";
+  const scope = latestRun?.state ? `State ${latestRun.state}` : latestRun?.scope ?? "No ingest run recorded";
+
+  return (
+    <section className="mt-6 border border-neutral-300 bg-white p-5">
+      <p className="font-mono text-xs uppercase tracking-[0.18em] text-neutral-500">
+        Publishability read
+      </p>
+      <h2 className="mt-2 text-lg font-semibold">{headline}</h2>
+      <p className="mt-2 max-w-3xl text-sm leading-6 text-neutral-700">
+        Race Signals is a source-finding desk, not an election-night wire. Cite the linked FEC record,
+        check the current ingest scope, and do not treat an empty result as proof of no activity.
+      </p>
+      <dl className="mt-4 grid gap-3 text-sm sm:grid-cols-4">
+        <div>
+          <dt className="font-mono text-[11px] uppercase tracking-[0.12em] text-neutral-500">Mode</dt>
+          <dd className="mt-1 font-medium">{mode}</dd>
+        </div>
+        <div>
+          <dt className="font-mono text-[11px] uppercase tracking-[0.12em] text-neutral-500">Latest scope</dt>
+          <dd className="mt-1 font-medium">{scope}</dd>
+        </div>
+        <div>
+          <dt className="font-mono text-[11px] uppercase tracking-[0.12em] text-neutral-500">Finished</dt>
+          <dd className="mt-1 font-medium">{formatDateTime(finishedAt)}</dd>
+        </div>
+        <div>
+          <dt className="font-mono text-[11px] uppercase tracking-[0.12em] text-neutral-500">Open caveats</dt>
+          <dd className="mt-1 font-medium">
+            {validationIssueCount} validation issue{validationIssueCount === 1 ? "" : "s"}
+          </dd>
+        </div>
+      </dl>
+      {latestRun?.errors?.length ? (
+        <p className="mt-3 text-sm text-neutral-700">
+          Latest run recorded {latestRun.errors.length} error{latestRun.errors.length === 1 ? "" : "s"}; inspect run notes before relying on freshness.
+        </p>
+      ) : null}
+    </section>
   );
 }
 
@@ -275,6 +350,21 @@ function runNotes(run: {
 function noteValue(label: string, value: unknown) {
   if (value === null || value === undefined || value === "") return null;
   return `${label}: ${String(value)}`;
+}
+
+function validationRuleLabel(rule: string) {
+  const labels: Record<string, string> = {
+    broken_source_url: "Broken or missing source URL",
+    missing_candidate_name: "Missing candidate name",
+    missing_committee_id: "Missing committee ID",
+    missing_date: "Missing date",
+    missing_source_id: "Missing source ID",
+    unmatched_race: "Unmatched race",
+    suspicious_amount: "Suspicious amount",
+    duplicate_source_record: "Duplicate source record",
+    elections_lookup: "Election timeline lookup",
+  };
+  return labels[rule] ?? rule.replaceAll("_", " ");
 }
 
 function CoverageStat({ label, value }: { label: string; value: number }) {

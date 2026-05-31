@@ -144,7 +144,11 @@ export function generateSignals(input: SignalInput): Signal[] {
       confidence: expenditure.amount >= 100000 ? "medium" : "high",
       status: expenditure.amount >= 100000 && computedStatus !== "historical" ? "review" : computedStatus,
       dataFreshness: input.dataFreshness,
-      metadata: { supportOpposeIndicator: expenditure.supportOpposeIndicator },
+      metadata: {
+        supportOpposeIndicator: expenditure.supportOpposeIndicator,
+        purpose: expenditure.purpose,
+        sourceId: expenditure.sourceId,
+      },
     });
   }
 

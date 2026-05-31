@@ -176,10 +176,14 @@ function reviewReason(signal: Signal) {
 function signalEvidence(signal: Signal) {
   if (signal.signalType === "large_independent_expenditure") {
     const support = textMetadata(signal.metadata?.supportOpposeIndicator);
+    const purpose = textMetadata(signal.metadata?.purpose);
+    const sourceId = textMetadata(signal.metadata?.sourceId);
     return [
       support ? `stance ${supportOpposeLabel(support)}` : null,
       signal.amount ? `amount ${formatMoney(signal.amount)}` : null,
       signal.committeeName ? `spender ${signal.committeeName}` : null,
+      purpose ? `purpose ${purpose}` : null,
+      sourceId ? `source ${sourceId}` : null,
     ]
       .filter(Boolean)
       .join(" | ");

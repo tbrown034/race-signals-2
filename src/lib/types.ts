@@ -27,6 +27,7 @@ export type Candidate = {
   individualContributionPct?: number | null;
   pacContributionPct?: number | null;
   totalsUpdatedAt?: string | null;
+  totalsFetchedAt?: string | null;
   generalElectionStatus?: string | null;
   bioguideId?: string | null;
   wikidataId?: string | null;

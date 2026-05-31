@@ -37,7 +37,8 @@ export async function applyCandidateTotals(candidate: Candidate, cycle: number) 
     cashOnHandAsOf: total.coverage_end_date ?? total.load_date?.slice(0, 10) ?? null,
     individualContributionPct: pct(individual, receipts),
     pacContributionPct: pct(pac, receipts),
-    totalsUpdatedAt: total.load_date ?? new Date().toISOString(),
+    totalsUpdatedAt: total.load_date ?? null,
+    totalsFetchedAt: new Date().toISOString(),
     sourceUrl: candidate.sourceUrl ?? fecCandidateUrl(candidate.fecCandidateId),
   };
 }

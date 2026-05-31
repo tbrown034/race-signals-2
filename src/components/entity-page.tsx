@@ -16,6 +16,7 @@ export function EntityPage({
   independentExpenditures = [],
   signals,
   allSignalsHref,
+  primaryMetaCount = 8,
 }: {
   asideMedia?: ReactNode;
   children?: ReactNode;
@@ -28,6 +29,7 @@ export function EntityPage({
   independentExpenditures?: CommitteeIndependentExpenditure[];
   signals: Signal[];
   allSignalsHref?: string;
+  primaryMetaCount?: number;
 }) {
   const prioritySignals = [...signals].sort((a, b) => {
     if (a.status === "review" && b.status !== "review") return -1;
@@ -36,8 +38,8 @@ export function EntityPage({
   });
   const visibleSignals = prioritySignals.slice(0, 25);
   const hiddenSignals = Math.max(signals.length - visibleSignals.length, 0);
-  const primaryMeta = meta.slice(0, 8);
-  const secondaryMeta = meta.slice(8);
+  const primaryMeta = meta.slice(0, primaryMetaCount);
+  const secondaryMeta = meta.slice(primaryMetaCount);
 
   return (
     <main className="mx-auto grid max-w-7xl grid-cols-1 gap-6 px-5 py-6 sm:px-8 lg:grid-cols-[320px_1fr]">

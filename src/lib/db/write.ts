@@ -70,10 +70,10 @@ export async function upsertCandidates(candidates: Candidate[]) {
           id, fec_candidate_id, name, party, office, state, district, election_year,
           incumbent_challenge_status, total_receipts_cycle, total_disbursements_cycle,
           cash_on_hand_latest, cash_on_hand_as_of, individual_contribution_pct,
-          pac_contribution_pct, totals_updated_at, general_election_status,
+          pac_contribution_pct, totals_updated_at, totals_fetched_at, general_election_status,
           bioguide_id, wikidata_id, photo_url, wikipedia_url, elections_checked_at, race_id, source_url
         )
-        values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24)
+        values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24,$25)
         on conflict (fec_candidate_id) do update set
           name = excluded.name,
           party = excluded.party,
@@ -89,6 +89,7 @@ export async function upsertCandidates(candidates: Candidate[]) {
           individual_contribution_pct = excluded.individual_contribution_pct,
           pac_contribution_pct = excluded.pac_contribution_pct,
           totals_updated_at = excluded.totals_updated_at,
+          totals_fetched_at = excluded.totals_fetched_at,
           general_election_status = coalesce(candidates.general_election_status, excluded.general_election_status),
           bioguide_id = coalesce(excluded.bioguide_id, candidates.bioguide_id),
           wikidata_id = coalesce(excluded.wikidata_id, candidates.wikidata_id),
@@ -116,6 +117,7 @@ export async function upsertCandidates(candidates: Candidate[]) {
         candidate.individualContributionPct,
         candidate.pacContributionPct,
         candidate.totalsUpdatedAt,
+        candidate.totalsFetchedAt,
         candidate.generalElectionStatus,
         candidate.bioguideId,
         candidate.wikidataId,

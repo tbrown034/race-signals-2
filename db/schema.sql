@@ -30,6 +30,7 @@ create table if not exists candidates (
   individual_contribution_pct numeric,
   pac_contribution_pct numeric,
   totals_updated_at timestamptz,
+  totals_fetched_at timestamptz,
   general_election_status text,
   bioguide_id text,
   wikidata_id text,
@@ -49,6 +50,7 @@ alter table candidates add column if not exists cash_on_hand_as_of date;
 alter table candidates add column if not exists individual_contribution_pct numeric;
 alter table candidates add column if not exists pac_contribution_pct numeric;
 alter table candidates add column if not exists totals_updated_at timestamptz;
+alter table candidates add column if not exists totals_fetched_at timestamptz;
 alter table candidates add column if not exists general_election_status text;
 alter table candidates add column if not exists bioguide_id text;
 alter table candidates add column if not exists wikidata_id text;

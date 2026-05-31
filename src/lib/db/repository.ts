@@ -72,6 +72,7 @@ type CandidateRow = {
   individual_contribution_pct: string | null;
   pac_contribution_pct: string | null;
   totals_updated_at: string | Date | null;
+  totals_fetched_at: string | Date | null;
   general_election_status: string | null;
   bioguide_id: string | null;
   wikidata_id: string | null;
@@ -135,6 +136,7 @@ function mapCandidateRow(row: CandidateRow): Candidate {
       row.individual_contribution_pct === null ? null : Number(row.individual_contribution_pct),
     pacContributionPct: row.pac_contribution_pct === null ? null : Number(row.pac_contribution_pct),
     totalsUpdatedAt: row.totals_updated_at ? toIsoString(row.totals_updated_at) : null,
+    totalsFetchedAt: row.totals_fetched_at ? toIsoString(row.totals_fetched_at) : null,
     generalElectionStatus: row.general_election_status,
     bioguideId: row.bioguide_id,
     wikidataId: row.wikidata_id,

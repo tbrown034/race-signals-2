@@ -132,7 +132,7 @@ export default async function RacePage({
                     <th className="hidden px-4 py-3 font-medium md:table-cell" scope="col">FEC record</th>
                     <th className="hidden px-4 py-3 text-right font-medium md:table-cell" scope="col">Receipts</th>
                     <th className="hidden px-4 py-3 text-right font-medium md:table-cell" scope="col">Cash</th>
-                    <th className="hidden px-4 py-3 font-medium md:table-cell" scope="col">FEC totals load date</th>
+                    <th className="hidden px-4 py-3 font-medium md:table-cell" scope="col">Totals freshness</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-neutral-200">
@@ -168,11 +168,11 @@ export default async function RacePage({
                               </div>
                               <div>
                                 <dt className="inline font-mono uppercase tracking-[0.12em] text-neutral-500">Receipts </dt>
-                                <dd className="inline font-mono text-neutral-950">{candidateMoney(candidate.totalReceiptsCycle, candidate.totalsUpdatedAt)}</dd>
+                                <dd className="inline font-mono text-neutral-950">{candidateMoney(candidate.totalReceiptsCycle, candidate.totalsFetchedAt)}</dd>
                               </div>
                               <div>
                                 <dt className="inline font-mono uppercase tracking-[0.12em] text-neutral-500">Cash </dt>
-                                <dd className="inline font-mono text-neutral-950">{candidateMoney(candidate.cashOnHandLatest, candidate.totalsUpdatedAt)}</dd>
+                                <dd className="inline font-mono text-neutral-950">{candidateMoney(candidate.cashOnHandLatest, candidate.totalsFetchedAt)}</dd>
                               </div>
                               <div>
                                 <dt className="inline font-mono uppercase tracking-[0.12em] text-neutral-500">Source </dt>
@@ -187,7 +187,11 @@ export default async function RacePage({
                                 </dd>
                               </div>
                               <div>
-                                <dt className="inline font-mono uppercase tracking-[0.12em] text-neutral-500">Totals as of </dt>
+                                <dt className="inline font-mono uppercase tracking-[0.12em] text-neutral-500">Fetched </dt>
+                                <dd className="inline">{candidateTotalsFetched(candidate.totalsFetchedAt)}</dd>
+                              </div>
+                              <div>
+                                <dt className="inline font-mono uppercase tracking-[0.12em] text-neutral-500">FEC load </dt>
                                 <dd className="inline">{candidateTotalsAsOf(candidate.totalsUpdatedAt)}</dd>
                               </div>
                             </dl>
@@ -218,13 +222,14 @@ export default async function RacePage({
                         </div>
                       </td>
                       <td className="hidden px-4 py-3 text-right font-mono md:table-cell">
-                        {candidateMoney(candidate.totalReceiptsCycle, candidate.totalsUpdatedAt)}
+                        {candidateMoney(candidate.totalReceiptsCycle, candidate.totalsFetchedAt)}
                       </td>
                       <td className="hidden px-4 py-3 text-right font-mono md:table-cell">
-                        {candidateMoney(candidate.cashOnHandLatest, candidate.totalsUpdatedAt)}
+                        {candidateMoney(candidate.cashOnHandLatest, candidate.totalsFetchedAt)}
                       </td>
                       <td className="hidden px-4 py-3 text-xs text-neutral-600 md:table-cell">
-                        {candidateTotalsAsOf(candidate.totalsUpdatedAt)}
+                        <span className="block">Fetched {candidateTotalsFetched(candidate.totalsFetchedAt)}</span>
+                        <span className="block">FEC load {candidateTotalsAsOf(candidate.totalsUpdatedAt)}</span>
                       </td>
                     </tr>
                   ))}
@@ -257,12 +262,16 @@ function partyLabel(party?: string | null) {
   return party;
 }
 
-function candidateMoney(value?: number | null, totalsUpdatedAt?: string | null) {
-  return formatMoney(value) ?? (totalsUpdatedAt ? "Not reported by FEC" : "FEC totals not loaded");
+function candidateMoney(value?: number | null, totalsFetchedAt?: string | null) {
+  return formatMoney(value) ?? (totalsFetchedAt ? "Not reported by FEC" : "FEC totals not loaded");
 }
 
 function candidateTotalsAsOf(value?: string | null) {
-  return value ? formatDateTime(value) : "FEC totals not loaded";
+  return value ? formatDateTime(value) : "Not reported by FEC";
+}
+
+function candidateTotalsFetched(value?: string | null) {
+  return value ? formatDateTime(value) : "Not recorded";
 }
 
 function countSignals(signals: Awaited<ReturnType<typeof getSignalsForEntity>>) {

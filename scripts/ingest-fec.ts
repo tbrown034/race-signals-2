@@ -422,13 +422,15 @@ async function main() {
     await insertValidationIssues(issues);
     await insertEndpointRuns(
       runId,
-      Object.entries(endpointCounts).map(([endpoint, recordsFetched]) => ({
-        endpoint,
-        status: errors.length ? "partial" : "success",
-        recordsFetched,
-        validationIssuesCount: issues.filter((issue) => endpointForIssue(issue.entityType) === endpoint)
-          .length,
-      })),
+      Object.entries(endpointCounts).map(([endpoint, recordsFetched]) => {
+        const endpointIssues = issues.filter((issue) => endpointForIssue(issue.entityType) === endpoint);
+        return {
+          endpoint,
+          status: endpointRunStatus(endpointIssues, errors.length > 0),
+          recordsFetched,
+          validationIssuesCount: endpointIssues.length,
+        };
+      }),
     );
 
     const recordsSeen =
@@ -490,6 +492,16 @@ function endpointForIssue(entityType: string) {
   if (entityType === "independent_expenditure") return "schedule_e";
   if (entityType === "congress_legislators") return "congress_legislators";
   return "unknown";
+}
+
+function endpointRunStatus(issues: ValidationIssue[], runHadErrors: boolean) {
+  if (
+    runHadErrors ||
+    issues.some((issue) => issue.rule === "fec_pagination_truncated" || issue.rule === "partial_ingestion_error")
+  ) {
+    return "partial";
+  }
+  return "success";
 }
 
 function isCurrentCycleExpenditure(date: string | undefined, cycle: number) {

@@ -66,6 +66,7 @@ export default async function StatusPage() {
           aria-label="Status page sections"
           className="mt-4 flex flex-wrap gap-x-4 gap-y-2 border border-neutral-300 bg-white px-4 py-3 font-mono text-[11px] uppercase tracking-[0.12em] text-neutral-600"
         >
+          <a className="underline-offset-4 hover:underline" href="#election-coverage">Election coverage</a>
           <a className="underline-offset-4 hover:underline" href="#storage">Storage</a>
           <a className="underline-offset-4 hover:underline" href="#state-freshness">State freshness</a>
           <a className="underline-offset-4 hover:underline" href="#endpoint-freshness">Endpoint freshness</a>
@@ -141,7 +142,7 @@ export default async function StatusPage() {
           </div>
         </section>
 
-        <section className="mt-6 border border-neutral-300 bg-white p-5" id="storage">
+        <section className="mt-6 border border-neutral-300 bg-white p-5" id="election-coverage">
           <h2 className="text-sm font-semibold uppercase tracking-[0.14em] text-neutral-600">
             Election timeline coverage
           </h2>
@@ -160,7 +161,7 @@ export default async function StatusPage() {
           </dl>
         </section>
 
-        <section className="mt-6 border border-neutral-300 bg-white p-5">
+        <section className="mt-6 border border-neutral-300 bg-white p-5" id="storage">
           <h2 className="text-sm font-semibold uppercase tracking-[0.14em] text-neutral-600">
             Storage footprint
           </h2>

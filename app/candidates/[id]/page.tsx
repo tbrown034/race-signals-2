@@ -107,7 +107,7 @@ export default async function CandidatePage({
         />
         <ElectionTimeline
           elections={elections}
-          emptyText={`No election timeline available for this candidate. Wikidata and Wikipedia coverage of congressional primaries can be thin - follow the ${candidate.state} secretary of state for authoritative results.`}
+          emptyText={`No election timeline available for this candidate. ${electionLookupStatus(candidate)} Wikidata and Wikipedia coverage of congressional primaries can be thin - follow the ${candidate.state} secretary of state for authoritative results.`}
           note="Historical election rows from Wikidata or conservative Wikipedia parsing. This is not a live 2026 election calendar."
           title="Historical election results"
         />
@@ -255,6 +255,13 @@ function profileSourceRows(candidate: NonNullable<Awaited<ReturnType<typeof getC
 
 function candidateMoney(value?: number | null, totalsFetchedAt?: string | null) {
   return formatMoney(value) ?? (totalsFetchedAt ? "Not reported by FEC" : "FEC totals not loaded");
+}
+
+function electionLookupStatus(candidate: Awaited<ReturnType<typeof getCandidate>>) {
+  if (!candidate) return "";
+  if (!candidate.wikidataId && !candidate.wikipediaUrl) return "No Wikidata or Wikipedia identifier is matched yet.";
+  if (candidate.electionsCheckedAt) return `Open-source lookup was checked on ${formatDate(candidate.electionsCheckedAt)} but returned no structured rows.`;
+  return "Open-source lookup has not run yet for the matched identifier.";
 }
 
 function countSignals(signals: Awaited<ReturnType<typeof getSignalsForEntity>>) {

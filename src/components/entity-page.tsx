@@ -113,7 +113,7 @@ export function EntityPage({
       <section className="min-w-0 border border-neutral-300 bg-white">
         {children}
         {independentExpenditures.length ? (
-          <div className="border-b border-neutral-300">
+          <div className="border-b border-neutral-300" id="schedule-e-records">
             <div className="border-b border-neutral-300 px-5 py-4">
               <h2 className="text-sm font-semibold uppercase tracking-[0.14em] text-neutral-600">
                 Recent independent expenditures

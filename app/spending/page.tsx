@@ -2,7 +2,7 @@ import Link from "next/link";
 import { CoverageStrip } from "@/src/components/coverage-strip";
 import { FeedFilters } from "@/src/components/feed-filters";
 import { PageShell } from "@/src/components/page-shell";
-import { getCoverageSummary, getRaces, getSignalStateCounts, getSpendingSignals } from "@/src/lib/db/repository";
+import { getCommittee, getCoverageSummary, getRaces, getSignalStateCounts, getSpendingSignals } from "@/src/lib/db/repository";
 import { formatDate, formatMoney } from "@/src/lib/format";
 import { signalFiltersFromSearchParams } from "@/src/lib/signals/filters";
 import type { Metadata } from "next";
@@ -27,11 +27,12 @@ export default async function SpendingPage({
   const statusFilter = typeof params.status === "string" ? params.status : undefined;
   const since = typeof params.since === "string" ? params.since : undefined;
   const committeeId = typeof params.committee === "string" ? params.committee : undefined;
-  const [signals, races, status, stateSignalCounts] = await Promise.all([
+  const [signals, races, status, stateSignalCounts, committeeFilter] = await Promise.all([
     getSpendingSignals(signalFiltersFromSearchParams(params, 101), sort),
     getRaces(),
     getCoverageSummary(),
     getSignalStateCounts("large_independent_expenditure"),
+    committeeId ? getCommittee(committeeId) : Promise.resolve(null),
   ]);
   const visibleSignals = signals.slice(0, 100);
   const hasMoreSignals = signals.length > visibleSignals.length;
@@ -111,7 +112,15 @@ export default async function SpendingPage({
           />
           <div className="border-b border-neutral-300 px-5 py-3 font-mono text-[11px] uppercase tracking-[0.12em] text-neutral-500">
             Showing {visibleSignals.length}{hasMoreSignals ? "+" : ""} outside-spending signals
-            {committeeId ? ` for committee ${committeeId}` : ""}
+            {committeeId ? ` for ${committeeFilter?.name ?? committeeId}` : ""}
+            {committeeId ? (
+              <>
+                {" / "}
+                <Link className="font-medium underline underline-offset-4" href="/spending">
+                  clear committee filter
+                </Link>
+              </>
+            ) : null}
           </div>
           {visibleSignals.length ? (
             <div className="border-b border-neutral-300">

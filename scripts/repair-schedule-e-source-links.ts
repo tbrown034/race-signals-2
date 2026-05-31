@@ -53,6 +53,15 @@ async function main() {
         `,
         [`fec:large_ie:${row.source_id}`, sourceUrl],
       );
+      await pool.query(
+        `
+          update validation_issues
+          set source_url = $2
+          where entity_type = 'independent_expenditure'
+            and source_id = $1
+        `,
+        [row.source_id, sourceUrl],
+      );
       updated += 1;
     }
 

@@ -89,7 +89,10 @@ export default function MethodologyPage() {
               latest filing receipts and at least 2x the prior stored filing with
               the same period-receipts basis.
               Current-cycle Schedule E independent expenditures of $100,000 or
-              more are marked for review.
+              more are marked for review. The top-spenders page ranks all stored
+              current-cycle Schedule E records in this database slice, including
+              records below the alert threshold; its record links point to the
+              committee page&apos;s Schedule E table for verification.
             </p>
           </div>
           {signalTypes.map(([id, title, body]) => (

@@ -86,7 +86,7 @@ export default async function SpendersPage() {
                           <div>
                             <dt className="inline font-mono uppercase tracking-[0.12em] text-neutral-500">Records </dt>
                             <dd className="inline">
-                              <Link className="font-medium underline underline-offset-4" href={spenderRecordsHref(spender.committeeId)}>
+                              <Link className="font-medium underline underline-offset-4" href={spenderRecordsHref(spender.committeeId, spender.latestScheduleESourceUrl)}>
                                 {spender.recordCount} Schedule E record{spender.recordCount === 1 ? "" : "s"}
                               </Link>
                             </dd>
@@ -106,7 +106,7 @@ export default async function SpendersPage() {
                           <div>
                             <dt className="inline font-mono uppercase tracking-[0.12em] text-neutral-500">Source </dt>
                             <dd className="inline">
-                              <Link className="font-medium underline underline-offset-4" href={spenderRecordsHref(spender.committeeId)}>
+                              <Link className="font-medium underline underline-offset-4" href={spenderRecordsHref(spender.committeeId, spender.latestScheduleESourceUrl)}>
                                 Open contributing records
                               </Link>
                             </dd>
@@ -144,13 +144,13 @@ export default async function SpendersPage() {
                         {formatMoney(spender.totalAmount)}
                       </td>
                       <td className="hidden px-4 py-3 text-right font-mono md:table-cell">
-                        <Link className="font-medium underline underline-offset-4" href={spenderRecordsHref(spender.committeeId)}>
+                        <Link className="font-medium underline underline-offset-4" href={spenderRecordsHref(spender.committeeId, spender.latestScheduleESourceUrl)}>
                           {spender.recordCount}
                         </Link>
                       </td>
                       <td className="hidden px-4 py-3 md:table-cell">
                         <div className="flex flex-col gap-1">
-                          <Link className="font-medium underline underline-offset-4" href={spenderRecordsHref(spender.committeeId)}>
+                          <Link className="font-medium underline underline-offset-4" href={spenderRecordsHref(spender.committeeId, spender.latestScheduleESourceUrl)}>
                             Open contributing records
                           </Link>
                           {spender.latestScheduleESourceUrl ? (
@@ -198,8 +198,7 @@ export default async function SpendersPage() {
   );
 }
 
-function spenderRecordsHref(committeeId?: string | null) {
-  const params = new URLSearchParams({ type: "large_independent_expenditure" });
-  if (committeeId) params.set("committee", committeeId);
-  return `/spending?${params.toString()}`;
+function spenderRecordsHref(committeeId?: string | null, latestSourceUrl?: string | null) {
+  if (committeeId) return `/committees/${committeeId}#schedule-e-records`;
+  return latestSourceUrl ?? "/spending?type=large_independent_expenditure";
 }

@@ -1202,10 +1202,19 @@ export async function getStatus() {
     }>(`
       select entity_type, source_id, severity, rule, message, source_url, created_at
       from (
-        select distinct on (rule, coalesce(source_id, ''), message)
-          entity_type, source_id, severity, rule, message, source_url, created_at
-        from validation_issues
-        order by rule, coalesce(source_id, ''), message, created_at desc
+        select distinct on (vi.rule, coalesce(vi.source_id, ''), vi.message)
+          vi.entity_type,
+          vi.source_id,
+          vi.severity,
+          vi.rule,
+          vi.message,
+          coalesce(ie.source_url, vi.source_url) as source_url,
+          vi.created_at
+        from validation_issues vi
+        left join independent_expenditures ie
+          on vi.entity_type = 'independent_expenditure'
+          and ie.source_id = vi.source_id
+        order by vi.rule, coalesce(vi.source_id, ''), vi.message, vi.created_at desc
       ) latest_examples
       order by created_at desc
       limit 8

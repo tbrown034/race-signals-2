@@ -63,10 +63,10 @@ export async function PageShell({ children }: { children: ReactNode }) {
         </div>
       </header>
       {children}
-      <footer className="border-t border-neutral-300 bg-white px-5 py-3 text-xs leading-5 text-neutral-600 sm:px-8">
-        <p>FEC records via the Federal Election Commission API.</p>
-        <p>Election timeline data, when available, cites Wikidata (CC0) and Wikipedia (CC BY-SA 4.0).</p>
-        <p>Member photos use public-domain Bioguide images mirrored by unitedstates/images; identifier crosswalks use unitedstates/congress-legislators.</p>
+      <footer className="min-w-0 border-t border-neutral-300 bg-white px-5 py-3 text-xs leading-5 text-neutral-600 sm:px-8">
+        <p className="max-w-full break-words [overflow-wrap:anywhere]">FEC records via the Federal Election Commission API.</p>
+        <p className="max-w-full break-words [overflow-wrap:anywhere]">Election timeline data, when available, cites Wikidata (CC0) and Wikipedia (CC BY-SA 4.0).</p>
+        <p className="max-w-full break-words [overflow-wrap:anywhere]">Member photos use public-domain Bioguide images mirrored by unitedstates/images; identifier crosswalks use unitedstates/congress-legislators.</p>
       </footer>
     </div>
   );

@@ -165,14 +165,24 @@ export default async function ScheduleERecordsPage({
               </table>
             </div>
           ) : (
-            <div className="p-5 text-sm text-neutral-700">
+            <div className="min-w-0 max-w-full p-5 text-sm text-neutral-700">
               <p className="font-semibold text-neutral-950">No stored Schedule E records match this scope.</p>
-              <p className="mt-1">Broaden the filter or check the status page to see the latest ingest scope.</p>
-              <div className="mt-3 flex flex-wrap gap-3">
-                <Link className="font-medium underline underline-offset-4" href="/records/schedule-e">
+              <p className="mt-1 max-w-[min(280px,100%)] break-words leading-6 [overflow-wrap:anywhere] sm:max-w-3xl">
+                This evidence table includes records below the alert threshold. If it is empty, broaden the scope or check whether the latest ingest covered this race, spender or candidate.
+              </p>
+              <div className="mt-3 grid max-w-[min(280px,100%)] gap-2 sm:max-w-full sm:grid-flow-col sm:auto-cols-max sm:justify-start">
+                <Link className="max-w-full break-words font-medium underline underline-offset-4 [overflow-wrap:anywhere]" href="/records/schedule-e">
                   Show all stored Schedule E records
                 </Link>
-                <Link className="font-medium underline underline-offset-4" href="/status">
+                <Link className="max-w-full break-words font-medium underline underline-offset-4 [overflow-wrap:anywhere]" href={spendingHref({ raceId, state })}>
+                  Check outside-spending signals
+                </Link>
+                {raceId ? (
+                  <Link className="max-w-full break-words font-medium underline underline-offset-4 [overflow-wrap:anywhere]" href={`/races/${raceId}`}>
+                    Open race page
+                  </Link>
+                ) : null}
+                <Link className="max-w-full break-words font-medium underline underline-offset-4 [overflow-wrap:anywhere]" href="/status">
                   Check status
                 </Link>
               </div>
@@ -186,6 +196,14 @@ export default async function ScheduleERecordsPage({
 
 function textParam(value: string | string[] | undefined) {
   return typeof value === "string" && value ? value : undefined;
+}
+
+function spendingHref({ raceId, state }: { raceId?: string; state?: string }) {
+  const params = new URLSearchParams();
+  if (raceId) params.set("race", raceId);
+  if (state) params.set("state", state);
+  const query = params.toString();
+  return query ? `/spending?${query}` : "/spending";
 }
 
 function RecordStat({ label, value }: { label: string; value: string }) {

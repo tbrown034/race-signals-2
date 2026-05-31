@@ -4,7 +4,7 @@ import { FeedFilters } from "@/src/components/feed-filters";
 import { PageShell } from "@/src/components/page-shell";
 import { SignalCard } from "@/src/components/signal-card";
 import { getCoverageSummary, getRaces, getSignals, getSignalStateCounts, getSignalStateFreshness, getStateRaceBoard } from "@/src/lib/db/repository";
-import { formatDate, formatMoney, formatRelativeTime } from "@/src/lib/format";
+import { formatDate, formatMoney, formatRelativeTime, isOlderThanHours } from "@/src/lib/format";
 import { signalFiltersFromSearchParams, sinceLabel } from "@/src/lib/signals/filters";
 import type { Signal, StateRaceBoardRow } from "@/src/lib/types";
 import type { Metadata } from "next";
@@ -109,7 +109,7 @@ export default async function Home({
                   Latest {visibleSignals.length}{hasMoreSignals ? "+" : ""} stored alerts, sorted by event date. Use Added to feed to isolate newly ingested records; each item links to its FEC source.
                 </p>
                 {activeFilters.length ? (
-                  <p className="mt-1 font-mono text-[11px] uppercase tracking-[0.12em] text-neutral-500">
+                  <p className="mt-1 hidden max-w-full break-words font-mono text-[11px] uppercase tracking-[0.12em] text-neutral-500 [overflow-wrap:anywhere] sm:block">
                     Filtered by {activeFilters.join(" / ")}
                   </p>
                 ) : null}
@@ -159,25 +159,12 @@ export default async function Home({
           {visibleSignals.length ? (
             visibleSignals.map((signal) => <SignalCard signal={signal} key={signal.dedupeKey} />)
           ) : (
-            <div className="p-5 text-sm text-neutral-700">
-              <p className="font-semibold text-neutral-950">No signals match this view.</p>
-              <p className="mt-1">
-                The filters may be too narrow, or the current database slice may not include recent FEC activity for this race.
-              </p>
-              <div className="mt-3 flex gap-3">
-                {state ? (
-                  <Link className="font-medium underline underline-offset-4" href={`/?state=${state}`}>
-                    Show all {state} signals
-                  </Link>
-                ) : null}
-                <Link className="font-medium underline underline-offset-4" href="/">
-                  Show all signals
-                </Link>
-                <Link className="font-medium underline underline-offset-4" href="/status">
-                  Check ingestion status
-                </Link>
-              </div>
-            </div>
+            <FeedEmptyState
+              isStale={isOlderThanHours(status.runs[0]?.finishedAt ?? status.runs[0]?.startedAt, 48)}
+              raceId={raceId}
+              state={state}
+              type={type}
+            />
           )}
         </section>
 
@@ -223,6 +210,54 @@ export default async function Home({
         </aside>
       </main>
     </PageShell>
+  );
+}
+
+function FeedEmptyState({
+  isStale,
+  raceId,
+  state,
+  type,
+}: {
+  isStale: boolean;
+  raceId?: string;
+  state?: string;
+  type?: string;
+}) {
+  return (
+    <div className="min-w-0 max-w-full border-b border-neutral-300 p-5 text-sm text-neutral-700">
+      <p className="font-semibold text-neutral-950">No signals match this view.</p>
+      <p className="mt-1 max-w-[min(280px,100%)] break-words leading-6 [overflow-wrap:anywhere] sm:max-w-3xl">
+        This is not evidence of no activity. It means no stored FEC record in the current Race Signals slice matched these filters and signal rules.
+      </p>
+      {isStale ? (
+        <p className="mt-2 max-w-[min(280px,100%)] break-words leading-6 text-neutral-800 [overflow-wrap:anywhere] sm:max-w-3xl">
+          The latest ingest is older than 48 hours, so check pipeline status before treating this as a quiet race.
+        </p>
+      ) : null}
+      <div className="mt-3 grid max-w-[min(280px,100%)] gap-2 sm:max-w-full sm:grid-flow-col sm:auto-cols-max sm:justify-start">
+        {state ? (
+          <Link className="max-w-full break-words font-medium underline underline-offset-4 [overflow-wrap:anywhere]" href={`/?state=${state}`}>
+            Show all {state} signals
+          </Link>
+        ) : null}
+        {raceId ? (
+          <Link className="max-w-full break-words font-medium underline underline-offset-4 [overflow-wrap:anywhere]" href={`/records/schedule-e?race=${raceId}`}>
+            Check Schedule E evidence
+          </Link>
+        ) : type === "large_independent_expenditure" ? (
+          <Link className="max-w-full break-words font-medium underline underline-offset-4 [overflow-wrap:anywhere]" href="/records/schedule-e">
+            Check stored Schedule E records
+          </Link>
+        ) : null}
+        <Link className="max-w-full break-words font-medium underline underline-offset-4 [overflow-wrap:anywhere]" href="/">
+          Show all signals
+        </Link>
+        <Link className="max-w-full break-words font-medium underline underline-offset-4 [overflow-wrap:anywhere]" href="/status">
+          Check ingestion status
+        </Link>
+      </div>
+    </div>
   );
 }
 

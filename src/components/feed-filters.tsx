@@ -191,13 +191,13 @@ export function FeedFilters({
           </div>
         </div>
         {activeFilterTokens.length ? (
-          <div className="flex flex-wrap items-center gap-2 border border-neutral-200 bg-neutral-50 p-2 text-xs">
-            <span className="font-mono uppercase tracking-[0.12em] text-neutral-500">
+          <div className="flex min-w-0 flex-wrap items-center gap-2 border border-neutral-200 bg-neutral-50 p-2 text-xs">
+            <span className="shrink-0 font-mono uppercase tracking-[0.12em] text-neutral-500">
               Active filters
             </span>
             {activeFilterTokens.map((token) => (
               <Link
-                className="border border-neutral-300 bg-white px-2 py-1 text-neutral-700 underline-offset-4 hover:border-neutral-900 hover:underline"
+                className="w-full max-w-full min-w-0 break-words border border-neutral-300 bg-white px-2 py-1 text-neutral-700 underline-offset-4 [overflow-wrap:anywhere] hover:border-neutral-900 hover:underline sm:w-auto sm:max-w-[32rem]"
                 href={removeFilterHref(token.key)}
                 key={token.key}
                 title={`Remove ${token.label}`}

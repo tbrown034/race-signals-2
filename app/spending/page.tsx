@@ -3,7 +3,7 @@ import { CoverageStrip } from "@/src/components/coverage-strip";
 import { FeedFilters } from "@/src/components/feed-filters";
 import { PageShell } from "@/src/components/page-shell";
 import { getCommittee, getCoverageSummary, getRaces, getSignalStateCounts, getSignalStateFreshness, getSpendingSignals } from "@/src/lib/db/repository";
-import { formatDate, formatMoney } from "@/src/lib/format";
+import { formatDate, formatMoney, isOlderThanHours } from "@/src/lib/format";
 import { signalFiltersFromSearchParams } from "@/src/lib/signals/filters";
 import type { Metadata } from "next";
 
@@ -311,29 +311,63 @@ export default async function SpendingPage({
             </div>
           ) : null}
           {!visibleSignals.length ? (
-            <div className="p-5 text-sm text-neutral-700">
-              <p className="font-semibold text-neutral-950">No outside-spending signals match this view.</p>
-              <p className="mt-1">
-                Narrow filters can hide Schedule E activity. Broaden to a state, or check status to confirm the latest ingest window.
-              </p>
-              <div className="mt-3 flex flex-wrap gap-3">
-                {state ? (
-                  <Link className="font-medium underline underline-offset-4" href={`/spending?state=${state}`}>
-                    Show all {state} outside spending
-                  </Link>
-                ) : null}
-                <Link className="font-medium underline underline-offset-4" href="/spending">
-                  Show all outside spending
-                </Link>
-                <Link className="font-medium underline underline-offset-4" href="/status">
-                  Check ingestion status
-                </Link>
-              </div>
-            </div>
+            <SpendingEmptyState
+              isStale={isOlderThanHours(status.runs[0]?.finishedAt ?? status.runs[0]?.startedAt, 48)}
+              raceId={raceId}
+              state={state}
+              evidenceHref={scheduleERecordsHref({ candidateId: undefined, committeeId, raceId, state })}
+            />
           ) : null}
         </section>
       </main>
     </PageShell>
+  );
+}
+
+function SpendingEmptyState({
+  evidenceHref,
+  isStale,
+  raceId,
+  state,
+}: {
+  evidenceHref: string;
+  isStale: boolean;
+  raceId?: string;
+  state?: string;
+}) {
+  return (
+    <div className="min-w-0 max-w-full border-b border-neutral-300 p-5 text-sm text-neutral-700">
+      <p className="font-semibold text-neutral-950">No outside-spending signals match this view.</p>
+      <p className="mt-1 max-w-[min(280px,100%)] break-words leading-6 [overflow-wrap:anywhere] sm:max-w-3xl">
+        Signal filters can hide lower-dollar Schedule E records. Check the evidence table before concluding there is no outside-spending activity in this scope.
+      </p>
+      {isStale ? (
+        <p className="mt-2 max-w-[min(280px,100%)] break-words leading-6 text-neutral-800 [overflow-wrap:anywhere] sm:max-w-3xl">
+          The latest ingest is older than 48 hours, so verify pipeline status before treating this race as quiet.
+        </p>
+      ) : null}
+      <div className="mt-3 grid max-w-[min(280px,100%)] gap-2 sm:max-w-full sm:grid-flow-col sm:auto-cols-max sm:justify-start">
+        <Link className="max-w-full break-words font-medium underline underline-offset-4 [overflow-wrap:anywhere]" href={evidenceHref}>
+          Check Schedule E evidence
+        </Link>
+        {state ? (
+          <Link className="max-w-full break-words font-medium underline underline-offset-4 [overflow-wrap:anywhere]" href={`/spending?state=${state}`}>
+            Show all {state} outside spending
+          </Link>
+        ) : null}
+        {raceId ? (
+          <Link className="max-w-full break-words font-medium underline underline-offset-4 [overflow-wrap:anywhere]" href={`/races/${raceId}`}>
+            Open race page
+          </Link>
+        ) : null}
+        <Link className="max-w-full break-words font-medium underline underline-offset-4 [overflow-wrap:anywhere]" href="/spending">
+          Show all outside spending
+        </Link>
+        <Link className="max-w-full break-words font-medium underline underline-offset-4 [overflow-wrap:anywhere]" href="/status">
+          Check ingestion status
+        </Link>
+      </div>
+    </div>
   );
 }
 
@@ -538,6 +572,26 @@ function spendingExportQuery(params: { [key: string]: string | string[] | undefi
   }
   next.set("type", "large_independent_expenditure");
   return next;
+}
+
+function scheduleERecordsHref({
+  candidateId,
+  committeeId,
+  raceId,
+  state,
+}: {
+  candidateId?: string;
+  committeeId?: string;
+  raceId?: string;
+  state?: string;
+}) {
+  const params = new URLSearchParams();
+  if (candidateId) params.set("candidate", candidateId);
+  if (committeeId) params.set("committee", committeeId);
+  if (raceId) params.set("race", raceId);
+  if (state) params.set("state", state);
+  const query = params.toString();
+  return query ? `/records/schedule-e?${query}` : "/records/schedule-e";
 }
 
 function targetStatusLabel(value?: string | null) {

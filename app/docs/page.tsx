@@ -26,7 +26,7 @@ const sections = [
   },
   {
     title: "Reporter Verification",
-    body: "Before citing a signal, open the linked FEC source, confirm the candidate, committee, date, amount and race context, then check the status page for ingest freshness. Missing signals do not mean no activity; they usually mean the current stored slice has not matched a report, committee record or Schedule E row that crosses the signal rules.",
+    body: "Before citing a signal, open the linked FEC source, confirm the candidate, committee, date, amount and race context, then check the status page for ingest freshness. Use the Schedule E records page to reconcile outside-spending totals against stored source rows. Missing signals do not mean no activity; they usually mean the current stored slice has not matched a report, committee record or Schedule E row that crosses the signal rules.",
   },
   {
     title: "What To Cite",

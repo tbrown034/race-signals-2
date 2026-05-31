@@ -112,7 +112,8 @@ export default function MethodologyPage() {
               more are marked for review. The top-spenders page ranks all stored
               current-cycle Schedule E records in this database slice, including
               records below the alert threshold; its record links point to the
-              committee page&apos;s Schedule E table for verification.
+              Schedule E evidence table so totals can be checked against source
+              rows, not just alert-level signals.
             </p>
           </div>
           {signalTypes.map(([id, title, body]) => (

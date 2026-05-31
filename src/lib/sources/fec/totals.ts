@@ -22,24 +22,31 @@ export async function fetchCandidateTotal(candidateId: string, cycle: number) {
 }
 
 export async function applyCandidateTotals(candidate: Candidate, cycle: number) {
+  return (await applyCandidateTotalsWithRaw(candidate, cycle)).candidate;
+}
+
+export async function applyCandidateTotalsWithRaw(candidate: Candidate, cycle: number) {
   const total = await fetchCandidateTotal(candidate.fecCandidateId, cycle);
-  if (!total) return candidate;
+  if (!total) return { candidate, raw: null };
 
   const receipts = numberValue(total.receipts);
   const individual = numberValue(total.individual_itemized_contributions);
   const pac = numberValue(total.other_political_committee_contributions);
 
   return {
-    ...candidate,
-    totalReceiptsCycle: receipts,
-    totalDisbursementsCycle: numberValue(total.disbursements),
-    cashOnHandLatest: numberValue(total.cash_on_hand_end_period),
-    cashOnHandAsOf: total.coverage_end_date ?? total.load_date?.slice(0, 10) ?? null,
-    individualContributionPct: pct(individual, receipts),
-    pacContributionPct: pct(pac, receipts),
-    totalsUpdatedAt: total.load_date ?? null,
-    totalsFetchedAt: new Date().toISOString(),
-    sourceUrl: candidate.sourceUrl ?? fecCandidateUrl(candidate.fecCandidateId),
+    raw: total,
+    candidate: {
+      ...candidate,
+      totalReceiptsCycle: receipts,
+      totalDisbursementsCycle: numberValue(total.disbursements),
+      cashOnHandLatest: numberValue(total.cash_on_hand_end_period),
+      cashOnHandAsOf: total.coverage_end_date ?? total.load_date?.slice(0, 10) ?? null,
+      individualContributionPct: pct(individual, receipts),
+      pacContributionPct: pct(pac, receipts),
+      totalsUpdatedAt: total.load_date ?? null,
+      totalsFetchedAt: new Date().toISOString(),
+      sourceUrl: candidate.sourceUrl ?? fecCandidateUrl(candidate.fecCandidateId),
+    },
   };
 }
 

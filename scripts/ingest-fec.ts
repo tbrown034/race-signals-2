@@ -15,6 +15,7 @@ import {
   upsertRaceRatings,
   upsertRaces,
   upsertSignals,
+  upsertSourceRecords,
 } from "@/src/lib/db/write";
 import {
   normalizeCandidate,
@@ -36,7 +37,7 @@ import {
 import { DEFAULT_CYCLE, TARGET_RACES } from "@/src/lib/scope";
 import { getPublicWatchlistRatings } from "@/src/lib/ratings/public-watchlist";
 import { applyCongressLegislatorIds } from "@/src/lib/sources/congress-legislators/sync";
-import { applyCandidateTotals } from "@/src/lib/sources/fec/totals";
+import { applyCandidateTotalsWithRaw } from "@/src/lib/sources/fec/totals";
 import { fetchCandidateElections } from "@/src/lib/sources/wikidata/elections";
 import {
   validateCandidate,
@@ -50,6 +51,7 @@ import type {
   Filing,
   IndependentExpenditure,
   Election,
+  SourceRecord,
   ValidationIssue,
 } from "@/src/lib/types";
 
@@ -185,6 +187,7 @@ async function main() {
     const committees: Committee[] = [];
     const filings: Filing[] = [];
     const independentExpenditures: IndependentExpenditure[] = [];
+    const sourceRecords: SourceRecord[] = [];
     const issues: ValidationIssue[] = [];
 
     const raceScope = TARGET_RACES.filter(
@@ -203,6 +206,11 @@ async function main() {
     }
     const fecCandidates = candidatePageResults.flat();
     endpointCounts.candidates += fecCandidates.length;
+    sourceRecords.push(
+      ...fecCandidates.map((record) =>
+        sourceRecord("fec", "candidates", record.candidate_id, record, `https://www.fec.gov/data/candidate/${record.candidate_id}/`),
+      ),
+    );
     const normalizedCandidatesBase = fecCandidates
       .map((record) => normalizeCandidate(record, cycle))
       .filter((candidate) => candidate.raceId && raceIds.has(candidate.raceId))
@@ -246,7 +254,19 @@ async function main() {
         }
       }
       try {
-        normalizedCandidates.push(await applyCandidateTotals(candidateWithLookupState, cycle));
+        const totalsResult = await applyCandidateTotalsWithRaw(candidateWithLookupState, cycle);
+        normalizedCandidates.push(totalsResult.candidate);
+        if (totalsResult.raw) {
+          sourceRecords.push(
+            sourceRecord(
+              "fec",
+              "candidate_totals",
+              `${candidateWithLookupState.fecCandidateId}-${cycle}`,
+              totalsResult.raw,
+              candidateWithLookupState.sourceUrl,
+            ),
+          );
+        }
         endpointCounts.totals += 1;
       } catch (error) {
         const message = error instanceof Error ? error.message : String(error);
@@ -270,6 +290,11 @@ async function main() {
     for (const candidate of normalizedCandidates) {
       try {
         const fecCommittees = await fetchCommitteesForCandidate(candidate.fecCandidateId);
+        sourceRecords.push(
+          ...fecCommittees.map((record) =>
+            sourceRecord("fec", "committees", record.committee_id, record, `https://www.fec.gov/data/committee/${record.committee_id}/`),
+          ),
+        );
         const committeeTruncation = getPaginationTruncation(fecCommittees);
         if (committeeTruncation) {
           issues.push(paginationIssue("committee", candidate.fecCandidateId, committeeTruncation, candidate.sourceUrl));
@@ -292,6 +317,19 @@ async function main() {
           issues.push(paginationIssue("independent_expenditure", candidate.fecCandidateId, ieTruncation, candidate.sourceUrl));
         }
         endpointCounts.schedule_e += fecIes.length;
+        sourceRecords.push(
+          ...fecIes
+            .filter((record) => record.sub_id)
+            .map((record) =>
+              sourceRecord(
+                "fec",
+                "schedule_e",
+                String(record.sub_id),
+                record,
+                normalizeIndependentExpenditure(record, candidate.raceId, cycle).sourceUrl,
+              ),
+            ),
+        );
         const normalizedIes = fecIes
           .filter((record) => isCurrentCycleExpenditure(record.expenditure_date, cycle))
           .map((record) => normalizeIndependentExpenditure(record, candidate.raceId, cycle));
@@ -309,6 +347,9 @@ async function main() {
         for (const committeeId of orphanSpenderIds) {
           const spender = await fetchCommittee(committeeId);
           if (!spender) continue;
+          sourceRecords.push(
+            sourceRecord("fec", "committees", spender.committee_id, spender, `https://www.fec.gov/data/committee/${spender.committee_id}/`),
+          );
           endpointCounts.committees += 1;
           const normalizedSpender = normalizeCommittee(spender);
           committees.push(normalizedSpender);
@@ -321,6 +362,19 @@ async function main() {
             committee.fecCommitteeId,
             cycle,
             dateWindow,
+          );
+          sourceRecords.push(
+            ...fecReports
+              .filter((record) => record.beginning_image_number || record.file_number)
+              .map((record) =>
+                sourceRecord(
+                  "fec",
+                  "filings",
+                  String(record.beginning_image_number ?? record.file_number),
+                  record,
+                  normalizeFiling(record).sourceUrl,
+                ),
+              ),
           );
           const reportTruncation = getPaginationTruncation(fecReports);
           if (reportTruncation) {
@@ -367,6 +421,7 @@ async function main() {
     await upsertFilings(filings);
     await upsertIndependentExpenditures(independentExpenditures);
     await upsertSignals(signals);
+    await upsertSourceRecords(sourceRecords);
     await insertValidationIssues(issues);
     await insertEndpointRuns(
       runId,
@@ -412,6 +467,22 @@ function paginationIssue(
     message: `FEC endpoint ${truncation.path} returned ${truncation.totalPages} pages; Race Signals fetched ${truncation.pagesFetched}. Treat this endpoint window as partial.`,
     sourceUrl,
     raw: truncation,
+  };
+}
+
+function sourceRecord(
+  source: string,
+  sourceTable: string,
+  sourceId: string,
+  raw: unknown,
+  sourceUrl?: string | null,
+): SourceRecord {
+  return {
+    source,
+    sourceTable,
+    sourceId,
+    sourceUrl,
+    raw,
   };
 }
 

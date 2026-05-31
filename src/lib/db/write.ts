@@ -1,3 +1,4 @@
+import { createHash } from "crypto";
 import { getPool } from "@/src/lib/db/client";
 import type {
   Candidate,
@@ -8,6 +9,7 @@ import type {
   RaceRating,
   Election,
   Signal,
+  SourceRecord,
   Transaction,
   ValidationIssue,
 } from "@/src/lib/types";
@@ -406,6 +408,34 @@ export async function upsertSignals(signals: Signal[]) {
   }
 }
 
+export async function upsertSourceRecords(records: SourceRecord[]) {
+  const pool = getPool();
+  for (const record of records.filter((item) => item.sourceId)) {
+    const rawJson = stableJson(record.raw ?? {});
+    await pool.query(
+      `
+        insert into source_records (
+          source, source_table, source_id, source_url, content_hash, raw, fetched_at
+        )
+        values ($1,$2,$3,$4,$5,$6,now())
+        on conflict (source, source_table, source_id) do update set
+          source_url = excluded.source_url,
+          content_hash = excluded.content_hash,
+          raw = excluded.raw,
+          fetched_at = now()
+      `,
+      [
+        record.source,
+        record.sourceTable,
+        record.sourceId,
+        record.sourceUrl,
+        createHash("sha256").update(rawJson).digest("hex"),
+        rawJson,
+      ],
+    );
+  }
+}
+
 export async function insertValidationIssues(issues: ValidationIssue[]) {
   const pool = getPool();
   for (const issue of issues) {
@@ -427,6 +457,20 @@ export async function insertValidationIssues(issues: ValidationIssue[]) {
       ],
     );
   }
+}
+
+function stableJson(value: unknown): string {
+  return JSON.stringify(sortForStableJson(value));
+}
+
+function sortForStableJson(value: unknown): unknown {
+  if (Array.isArray(value)) return value.map(sortForStableJson);
+  if (!value || typeof value !== "object") return value;
+  return Object.fromEntries(
+    Object.entries(value as Record<string, unknown>)
+      .sort(([a], [b]) => a.localeCompare(b))
+      .map(([key, nested]) => [key, sortForStableJson(nested)]),
+  );
 }
 
 export async function insertEndpointRuns(

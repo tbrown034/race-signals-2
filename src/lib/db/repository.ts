@@ -1474,6 +1474,10 @@ export async function getStatus() {
         databaseSizeBytes: null,
         largestTables: [],
       },
+      sourceRecordArchive: {
+        count: 0,
+        latestFetchedAt: null,
+      },
       mode: "demo",
     };
   }
@@ -1590,6 +1594,14 @@ export async function getStatus() {
   `);
   const storageCounts = await getTableCounts(storageRows.map((row) => row.table_name));
   const databaseSizeRows = await sql<{ size: string }>("select pg_database_size(current_database())::text as size");
+  const sourceRecordArchiveRows = await sql<{
+    count: string;
+    latest_fetched_at: string | Date | null;
+  }>(`
+    select count(*)::text as count, max(fetched_at) as latest_fetched_at
+    from source_records
+  `);
+  const sourceRecordArchiveRow = sourceRecordArchiveRows[0];
   try {
     validationIssues = await sql<{
       rule: string;
@@ -1741,6 +1753,10 @@ export async function getStatus() {
         rowCount: storageCounts.get(row.table_name) ?? null,
       })),
     } satisfies StorageUsage,
+    sourceRecordArchive: {
+      count: Number(sourceRecordArchiveRow?.count ?? 0),
+      latestFetchedAt: sourceRecordArchiveRow?.latest_fetched_at ? toIsoString(sourceRecordArchiveRow.latest_fetched_at) : null,
+    },
     mode: "database",
   };
 }

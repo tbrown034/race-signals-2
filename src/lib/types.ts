@@ -231,6 +231,14 @@ export type ValidationIssue = {
   raw?: unknown;
 };
 
+export type SourceRecord = {
+  source: string;
+  sourceTable: string;
+  sourceId: string;
+  sourceUrl?: string | null;
+  raw: unknown;
+};
+
 export type IngestionRun = {
   id: string;
   source: string;

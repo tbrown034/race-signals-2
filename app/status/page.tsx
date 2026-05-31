@@ -167,6 +167,7 @@ export default async function StatusPage() {
           </h2>
           <p className="mt-2 text-sm leading-6 text-neutral-700">
             Database size is {formatBytes(status.storageUsage.databaseSizeBytes)}. The target operating model is Neon free-tier compatible; large storage jumps usually mean an ingest scope changed.
+            {" "}Raw source archive: {formatCount(status.sourceRecordArchive.count, "record")} with latest hash refresh {status.sourceRecordArchive.latestFetchedAt ? formatRelativeTime(status.sourceRecordArchive.latestFetchedAt) : "not yet recorded"}.
           </p>
           {status.storageUsage.largestTables.length ? (
             <div className="mt-4 overflow-x-auto">

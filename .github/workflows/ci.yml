@@ -22,4 +22,5 @@ jobs:
       - run: npm run lint
       - run: npm run test:logic
       - run: SIGNAL_AUDIT_STRICT=1 npm run audit:signals
+      - run: npm run audit:cost
       - run: npm run build

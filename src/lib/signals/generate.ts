@@ -53,7 +53,7 @@ export function generateSignals(input: SignalInput): Signal[] {
   const status = input.status ?? "new";
 
   for (const committee of input.committees) {
-    if (committee.designation !== "P") continue;
+    if (committee.designation !== "P" || !committee.sourceUrl) continue;
     const race = committee.raceId ? races.get(committee.raceId) : undefined;
     const candidate = committee.candidateId ? candidates.get(committee.candidateId) : undefined;
     const signalDate = committee.firstFileDate ?? input.dataFreshness.slice(0, 10);
@@ -75,11 +75,15 @@ export function generateSignals(input: SignalInput): Signal[] {
       confidence: "high",
       status: eventStatus(status, signalDate, input.dataFreshness),
       dataFreshness: input.dataFreshness,
+      metadata: {
+        sourceId: committee.fecCommitteeId,
+        sourceKind: "committee",
+      },
     });
   }
 
   for (const filing of input.filings) {
-    if (!filing.receiptDate) continue;
+    if (!filing.receiptDate || !filing.sourceUrl) continue;
     const committee = filing.committeeId ? committees.get(filing.committeeId) : undefined;
     const race = committee?.raceId ? races.get(committee.raceId) : undefined;
     if (!isCurrentCycleRecord(filing.receiptDate, race, filing.cycle)) continue;
@@ -109,12 +113,13 @@ export function generateSignals(input: SignalInput): Signal[] {
         totalReceipts: filing.totalReceipts,
         cashOnHand: filing.cashOnHand,
         sourceId: filing.sourceId,
+        sourceKind: "filing",
       },
     });
   }
 
   for (const expenditure of input.independentExpenditures) {
-    if (!expenditure.expenditureDate || expenditure.amount < LARGE_IE_THRESHOLD) continue;
+    if (!expenditure.expenditureDate || !expenditure.sourceUrl || expenditure.amount < LARGE_IE_THRESHOLD) continue;
     const committee = expenditure.spenderCommitteeId
       ? committees.get(expenditure.spenderCommitteeId)
       : undefined;
@@ -148,6 +153,7 @@ export function generateSignals(input: SignalInput): Signal[] {
         supportOpposeIndicator: expenditure.supportOpposeIndicator,
         purpose: expenditure.purpose,
         sourceId: expenditure.sourceId,
+        sourceKind: "schedule_e",
       },
     });
   }
@@ -184,7 +190,7 @@ export function generateSignals(input: SignalInput): Signal[] {
       signalType: "committee_activity_spike",
       headline: `${committee?.name ?? "A committee"} reported a filing-level receipts spike in ${displayRace(race)}.`,
       whyItMatters:
-        "A sharp increase in report-level receipts can signal fundraising momentum worth source-level review.",
+      "A sharp increase compared with the prior stored filing can signal fundraising momentum worth source-level review.",
       candidateId: candidate?.id ?? null,
       candidateName: candidate?.name ?? null,
       committeeId,
@@ -203,6 +209,10 @@ export function generateSignals(input: SignalInput): Signal[] {
         reportType: latest.reportType,
         coverageStartDate: latest.coverageStartDate,
         coverageEndDate: latest.coverageEndDate,
+        latestSourceId: latest.sourceId,
+        priorSourceId: prior.sourceId,
+        sourceId: latest.sourceId,
+        sourceKind: "filing",
       },
     });
   }

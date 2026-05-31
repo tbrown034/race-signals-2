@@ -57,7 +57,10 @@ function numberFromEnv(name: string) {
   const value = process.env[name];
   if (!value) return undefined;
   const parsed = Number(value);
-  return Number.isFinite(parsed) && parsed > 0 ? parsed : undefined;
+  if (!Number.isFinite(parsed) || parsed <= 0) {
+    throw new Error(`${name} must be a positive number when set.`);
+  }
+  return parsed;
 }
 
 function envValue(name: string) {
@@ -100,12 +103,15 @@ function enforceScheduledCostGuard({
   maxCandidatePages?: number;
   state?: string;
 }) {
-  if (process.env.GITHUB_ACTIONS !== "true" || process.env.GITHUB_EVENT_NAME !== "schedule") {
+  if (process.env.GITHUB_ACTIONS !== "true") {
+    return;
+  }
+  if (process.env.GITHUB_EVENT_NAME === "workflow_dispatch" && process.env.ALLOW_UNBOUNDED_INGEST === "1") {
     return;
   }
   if (!state || !maxCandidates || !maxCandidatePages) {
     throw new Error(
-      "Scheduled GitHub Actions ingest must set RACE_SIGNALS_STATE, FEC_MAX_CANDIDATES and FEC_MAX_CANDIDATE_PAGES. Use workflow_dispatch for broader runs.",
+      "GitHub Actions ingest must set RACE_SIGNALS_STATE, FEC_MAX_CANDIDATES and FEC_MAX_CANDIDATE_PAGES. Set ALLOW_UNBOUNDED_INGEST=1 only for an intentional manual uncapped run.",
     );
   }
 }

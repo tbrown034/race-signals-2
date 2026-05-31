@@ -222,6 +222,8 @@ function signalEvidence(signal: Signal) {
       latest ? `latest ${formatMoney(latest)}` : null,
       prior ? `prior ${formatMoney(prior)}` : null,
       coverage.length === 2 ? `period ${coverage.join(" to ")}` : null,
+      textMetadata(signal.metadata?.latestSourceId) ? `latest ${textMetadata(signal.metadata?.latestSourceId)}` : null,
+      textMetadata(signal.metadata?.priorSourceId) ? `prior ${textMetadata(signal.metadata?.priorSourceId)}` : null,
     ]
       .filter(Boolean)
       .join(" | ");

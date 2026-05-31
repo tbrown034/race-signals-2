@@ -231,7 +231,10 @@ export async function upsertFilings(filings: Filing[]) {
         on conflict (source, source_id) do update set
           cycle = excluded.cycle,
           committee_id = excluded.committee_id,
+          fec_committee_id = excluded.fec_committee_id,
           report_type = excluded.report_type,
+          coverage_start_date = excluded.coverage_start_date,
+          coverage_end_date = excluded.coverage_end_date,
           receipt_date = excluded.receipt_date,
           total_receipts = excluded.total_receipts,
           total_disbursements = excluded.total_disbursements,
@@ -324,7 +327,9 @@ export async function upsertIndependentExpenditures(expenditures: IndependentExp
         on conflict (source, source_id) do update set
           cycle = excluded.cycle,
           spender_committee_id = excluded.spender_committee_id,
+          fec_committee_id = excluded.fec_committee_id,
           candidate_id = excluded.candidate_id,
+          fec_candidate_id = excluded.fec_candidate_id,
           race_id = excluded.race_id,
           support_oppose_indicator = excluded.support_oppose_indicator,
           amount = excluded.amount,

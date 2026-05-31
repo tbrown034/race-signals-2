@@ -19,6 +19,8 @@ export type SignalExportRow = {
   confidence: string;
   status: string;
   source_url: string | null;
+  source_id: string | null;
+  source_kind: string | null;
   signal_permalink: string;
   data_freshness: string;
   dedupe_key: string;
@@ -43,6 +45,8 @@ export function signalToExportRow(signal: Signal, baseUrl = process.env.NEXT_PUB
     confidence: signal.confidence,
     status: signal.status,
     source_url: signal.sourceUrl ?? null,
+    source_id: sourceId(signal),
+    source_kind: sourceKind(signal),
     signal_permalink: `${baseUrl}/#${signalAnchorId(signal.dedupeKey)}`,
     data_freshness: signal.dataFreshness,
     dedupe_key: signal.dedupeKey,
@@ -68,6 +72,8 @@ export function rowsToCsv(rows: SignalExportRow[]) {
     "confidence",
     "status",
     "source_url",
+    "source_id",
+    "source_kind",
     "signal_permalink",
     "data_freshness",
     "dedupe_key",
@@ -97,4 +103,20 @@ function officeFromRaceId(raceId?: string | null) {
 
 function signalAnchorId(dedupeKey: string) {
   return `signal-${dedupeKey.replace(/[^a-zA-Z0-9_-]/g, "-")}`;
+}
+
+function sourceId(signal: Signal) {
+  const value = signal.metadata?.sourceId;
+  if (typeof value === "string" && value) return value;
+  const parts = signal.dedupeKey.split(":");
+  return parts.length >= 3 ? parts.slice(2).join(":") : signal.dedupeKey;
+}
+
+function sourceKind(signal: Signal) {
+  const value = signal.metadata?.sourceKind;
+  if (typeof value === "string" && value) return value;
+  if (signal.signalType === "large_independent_expenditure") return "schedule_e";
+  if (signal.signalType === "new_filing" || signal.signalType === "committee_activity_spike") return "filing";
+  if (signal.signalType === "new_committee") return "committee";
+  return null;
 }

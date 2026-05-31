@@ -42,7 +42,7 @@ const signalTypes = [
   [
     "committee_activity_spike",
     "Activity spike",
-    "A filing-level spike flags a committee whose latest receipts crossed the flat review threshold and doubled the prior comparable report.",
+    "A filing-level spike flags a committee whose latest stored filing receipts crossed the flat review threshold and doubled the prior stored filing.",
   ],
   [
     "large_contribution",

@@ -3,7 +3,7 @@ import { CoverageStrip } from "@/src/components/coverage-strip";
 import { FeedFilters } from "@/src/components/feed-filters";
 import { PageShell } from "@/src/components/page-shell";
 import { SignalCard } from "@/src/components/signal-card";
-import { getRaces, getSpendingSignals, getStatus } from "@/src/lib/db/repository";
+import { getRaces, getSignalStateCounts, getSpendingSignals, getStatus } from "@/src/lib/db/repository";
 import { signalFiltersFromSearchParams } from "@/src/lib/signals/filters";
 import type { Metadata } from "next";
 
@@ -25,10 +25,11 @@ export default async function SpendingPage({
   const raceId = typeof params.race === "string" ? params.race : undefined;
   const statusFilter = typeof params.status === "string" ? params.status : undefined;
   const since = typeof params.since === "string" ? params.since : undefined;
-  const [signals, races, status] = await Promise.all([
+  const [signals, races, status, stateSignalCounts] = await Promise.all([
     getSpendingSignals(signalFiltersFromSearchParams(params, 101), sort),
     getRaces(),
     getStatus(),
+    getSignalStateCounts("large_independent_expenditure"),
   ]);
   const visibleSignals = signals.slice(0, 100);
   const hasMoreSignals = signals.length > visibleSignals.length;
@@ -81,6 +82,7 @@ export default async function SpendingPage({
             races={races}
             since={since}
             state={state}
+            stateSignalCounts={stateSignalCounts}
             status={statusFilter}
             type="large_independent_expenditure"
           />

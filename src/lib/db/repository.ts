@@ -445,6 +445,36 @@ export async function getRaces(): Promise<Race[]> {
   );
 }
 
+export async function getSignalStateCounts(signalType?: string): Promise<Record<string, number>> {
+  if (!hasDatabase()) {
+    return demoSignals.reduce<Record<string, number>>((counts, signal) => {
+      if (signalType && signal.signalType !== signalType) return counts;
+      const state = signal.raceId?.split("-")[1] ?? signal.candidateState;
+      if (state) counts[state] = (counts[state] ?? 0) + 1;
+      return counts;
+    }, {});
+  }
+
+  const values: unknown[] = [];
+  const where = ["r.state is not null", "(r.cycle is null or s.signal_date >= make_date(r.cycle - 1, 1, 1))"];
+  if (signalType) {
+    values.push(signalType);
+    where.push(`s.signal_type = $${values.length}`);
+  }
+  const rows = await sql<{ state: string; count: string }>(
+    `
+      select r.state, count(*)::text as count
+      from signals s
+      join races r on r.id = s.race_id
+      where ${where.join(" and ")}
+      group by r.state
+      order by count(*) desc, r.state asc
+    `,
+    values,
+  );
+  return Object.fromEntries(rows.map((row) => [row.state, Number(row.count)]));
+}
+
 export async function getSitemapEntities() {
   if (!hasDatabase()) {
     return {

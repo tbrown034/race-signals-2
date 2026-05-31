@@ -39,6 +39,7 @@ export function FeedFilters({
   type,
   status,
   since,
+  stateSignalCounts = {},
   lockedType,
   clearHref,
 }: {
@@ -50,6 +51,7 @@ export function FeedFilters({
   type?: string;
   status?: string;
   since?: string;
+  stateSignalCounts?: Record<string, number>;
   lockedType?: boolean;
   clearHref?: string;
 }) {
@@ -69,6 +71,10 @@ export function FeedFilters({
     : selectedRace
       ? [selectedRace]
       : [];
+  const stateOptions = [...STATE_SCOPES].sort((a, b) => {
+    const countDiff = (stateSignalCounts[b.code] ?? 0) - (stateSignalCounts[a.code] ?? 0);
+    return countDiff || a.code.localeCompare(b.code);
+  });
 
   function updateFilter(name: string, value: string) {
     const next = new URLSearchParams(searchParams.toString());
@@ -139,9 +145,9 @@ export function FeedFilters({
             onChange={(event) => updateFilter("state", event.target.value)}
           >
             <option value="">All</option>
-            {STATE_SCOPES.map((item) => (
+            {stateOptions.map((item) => (
               <option value={item.code} key={item.code}>
-                {item.code}
+                {item.code}{stateSignalCounts[item.code] ? ` (${stateSignalCounts[item.code]})` : ""}
               </option>
             ))}
           </select>

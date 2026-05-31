@@ -3,7 +3,7 @@ import { CoverageStrip } from "@/src/components/coverage-strip";
 import { FeedFilters } from "@/src/components/feed-filters";
 import { PageShell } from "@/src/components/page-shell";
 import { SignalCard } from "@/src/components/signal-card";
-import { getRaces, getSignals, getStatus } from "@/src/lib/db/repository";
+import { getRaces, getSignals, getSignalStateCounts, getStatus } from "@/src/lib/db/repository";
 import { signalFiltersFromSearchParams, sinceLabel } from "@/src/lib/signals/filters";
 import type { Metadata } from "next";
 
@@ -54,10 +54,11 @@ export default async function Home({
     if (typeof value === "string" && value) exportQuery.set(key, value);
   }
   const exportSuffix = exportQuery.toString();
-  const [signals, races, status] = await Promise.all([
+  const [signals, races, status, stateSignalCounts] = await Promise.all([
     getSignals(signalFiltersFromSearchParams(params, 51)),
     getRaces(),
     getStatus(),
+    getSignalStateCounts(),
   ]);
   const visibleSignals = signals.slice(0, 50);
   const hasMoreSignals = signals.length > visibleSignals.length;
@@ -116,6 +117,7 @@ export default async function Home({
             races={races}
             q={q}
             state={state}
+            stateSignalCounts={stateSignalCounts}
             office={office}
             raceId={raceId}
             type={type}

@@ -27,13 +27,13 @@ const designationLabels: Record<string, string> = {
 };
 
 export function committeeTypeLabel(code?: string | null) {
-  if (!code) return "Unknown";
+  if (!code) return "Not reported by FEC";
   const normalized = code.trim().toUpperCase();
   return committeeTypeLabels[normalized] ?? `FEC type ${normalized}`;
 }
 
 export function committeeDesignationLabel(code?: string | null) {
-  if (!code) return "Unknown";
+  if (!code) return "Not reported by FEC";
   const normalized = code.trim().toUpperCase();
   return designationLabels[normalized] ?? `FEC designation ${normalized}`;
 }

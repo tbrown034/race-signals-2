@@ -15,6 +15,17 @@ type FecListResponse<T> = {
   };
 };
 
+export type FecPaginationTruncation = {
+  path: string;
+  pagesFetched: number;
+  totalPages: number;
+  totalRecords?: number;
+};
+
+export type FecPagedRecords<T> = T[] & {
+  paginationTruncation?: FecPaginationTruncation;
+};
+
 export type FecCandidate = {
   candidate_id: string;
   name: string;
@@ -132,13 +143,25 @@ async function firstPages<T>(
   params: Record<string, string | number | undefined>,
   maxPages?: number,
 ) {
-  const records: T[] = [];
+  const records = [] as FecPagedRecords<T>;
   for (let page = 1; maxPages === undefined || page <= maxPages; page += 1) {
     const data = await fecGet<T>(path, { ...params, page });
     records.push(...data.results);
+    if (maxPages !== undefined && data.pagination && page >= maxPages && data.pagination.pages > page) {
+      records.paginationTruncation = {
+        path,
+        pagesFetched: page,
+        totalPages: data.pagination.pages,
+        totalRecords: data.pagination.count,
+      };
+    }
     if (!data.pagination || page >= data.pagination.pages) break;
   }
   return records;
+}
+
+export function getPaginationTruncation<T>(records: T[] | FecPagedRecords<T>) {
+  return (records as FecPagedRecords<T>).paginationTruncation ?? null;
 }
 
 export type DateWindow = {

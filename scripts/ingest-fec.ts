@@ -29,7 +29,9 @@ import {
   fetchCommittee,
   fetchIndependentExpendituresForCandidate,
   fetchReportsForCommittee,
+  getPaginationTruncation,
   type DateWindow,
+  type FecPaginationTruncation,
 } from "@/src/lib/sources/fec/client";
 import { DEFAULT_CYCLE, TARGET_RACES } from "@/src/lib/scope";
 import { getPublicWatchlistRatings } from "@/src/lib/ratings/public-watchlist";
@@ -190,11 +192,16 @@ async function main() {
         race.cycle === cycle && offices.includes(race.office as "H" | "S") && (!state || race.state === state),
     );
     const raceIds = new Set(raceScope.map((race) => race.id));
-    const fecCandidates = (
-      await Promise.all(
-        offices.map((office) => fetchCandidatesForOffice(office, cycle, maxCandidatePages, state)),
-      )
-    ).flat();
+    const candidatePageResults = await Promise.all(
+      offices.map((office) => fetchCandidatesForOffice(office, cycle, maxCandidatePages, state)),
+    );
+    for (const records of candidatePageResults) {
+      const truncation = getPaginationTruncation(records);
+      if (truncation) {
+        issues.push(paginationIssue("candidate", `candidate-search:${state ?? "national"}`, truncation));
+      }
+    }
+    const fecCandidates = candidatePageResults.flat();
     endpointCounts.candidates += fecCandidates.length;
     const normalizedCandidatesBase = fecCandidates
       .map((record) => normalizeCandidate(record, cycle))
@@ -263,6 +270,10 @@ async function main() {
     for (const candidate of normalizedCandidates) {
       try {
         const fecCommittees = await fetchCommitteesForCandidate(candidate.fecCandidateId);
+        const committeeTruncation = getPaginationTruncation(fecCommittees);
+        if (committeeTruncation) {
+          issues.push(paginationIssue("committee", candidate.fecCandidateId, committeeTruncation, candidate.sourceUrl));
+        }
         endpointCounts.committees += fecCommittees.length;
         const normalizedCommittees = fecCommittees.map((record) =>
           normalizeCommittee(record, candidate),
@@ -276,6 +287,10 @@ async function main() {
           cycle,
           dateWindow,
         );
+        const ieTruncation = getPaginationTruncation(fecIes);
+        if (ieTruncation) {
+          issues.push(paginationIssue("independent_expenditure", candidate.fecCandidateId, ieTruncation, candidate.sourceUrl));
+        }
         endpointCounts.schedule_e += fecIes.length;
         const normalizedIes = fecIes
           .filter((record) => isCurrentCycleExpenditure(record.expenditure_date, cycle))
@@ -307,6 +322,10 @@ async function main() {
             cycle,
             dateWindow,
           );
+          const reportTruncation = getPaginationTruncation(fecReports);
+          if (reportTruncation) {
+            issues.push(paginationIssue("filing", committee.fecCommitteeId, reportTruncation, committee.sourceUrl));
+          }
           endpointCounts.reports += fecReports.length;
           const normalizedFilings = fecReports
             .filter((record) => isCurrentCycleFiling(record.receipt_date, cycle))
@@ -377,6 +396,23 @@ async function main() {
     await finishIngestionRun(runId, "failed", 0, errors);
     throw error;
   }
+}
+
+function paginationIssue(
+  entityType: string,
+  sourceId: string,
+  truncation: FecPaginationTruncation,
+  sourceUrl?: string | null,
+): ValidationIssue {
+  return {
+    entityType,
+    sourceId,
+    severity: "warning",
+    rule: "fec_pagination_truncated",
+    message: `FEC endpoint ${truncation.path} returned ${truncation.totalPages} pages; Race Signals fetched ${truncation.pagesFetched}. Treat this endpoint window as partial.`,
+    sourceUrl,
+    raw: truncation,
+  };
 }
 
 function endpointForIssue(entityType: string) {

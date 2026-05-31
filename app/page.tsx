@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { CoverageStrip } from "@/src/components/coverage-strip";
 import { FeedFilters } from "@/src/components/feed-filters";
+import { LandingIntro } from "@/src/components/landing-intro";
 import { PageShell } from "@/src/components/page-shell";
 import { SignalCard } from "@/src/components/signal-card";
 import { SignalKeyboardNav } from "@/src/components/signal-keyboard-nav";
@@ -18,14 +19,14 @@ export const revalidate = 300;
 
 const quickViews = [
   {
-    href: "/?state=IN",
-    label: "Indiana desk",
-    body: "State-level congressional slice for a local politics reporter.",
+    href: "/?office=H",
+    label: "House",
+    body: "House records present in the current stored slice.",
   },
   {
     href: "/?office=S",
     label: "Senate",
-    body: "Shows Senate records present in the current stored slice.",
+    body: "Senate records present in the current stored slice.",
   },
   {
     href: "/?type=large_independent_expenditure",
@@ -95,8 +96,15 @@ export default async function Home({
     targetStatus ? `${targetStatusLabel(targetStatus)} targets` : null,
   ].filter(Boolean);
 
+  const hasActiveFilters = activeFilters.length > 0;
+
   return (
     <PageShell>
+      {hasActiveFilters ? null : (
+        <div className="mx-auto max-w-7xl px-5 pt-6 sm:px-8">
+          <LandingIntro />
+        </div>
+      )}
       <main className="mx-auto grid max-w-7xl grid-cols-1 gap-6 px-5 py-6 sm:px-8 lg:grid-cols-[1fr_320px]">
         <section className="w-full max-w-[calc(100vw-2.5rem)] min-w-0 border border-neutral-300 bg-white sm:max-w-none">
           <div className="border-b border-neutral-300 px-5 py-5">

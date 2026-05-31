@@ -35,6 +35,8 @@ export type SignalExportRow = {
   source_kind: string | null;
   total_receipts_basis: string | null;
   signal_permalink: string;
+  methodology_url: string;
+  scope_note: string;
   data_freshness: string;
   dedupe_key: string;
   metadata_json: string;
@@ -93,6 +95,8 @@ export function signalToExportRow(
     source_kind: sourceKind(signal),
     total_receipts_basis: textMetadata(signal.metadata?.totalReceiptsBasis),
     signal_permalink: `${baseUrl}/?q=${encodeURIComponent(stableSourceId ?? signal.dedupeKey)}#${signalAnchorId(signal.dedupeKey)}`,
+    methodology_url: `${baseUrl}/methodology#${signal.signalType}`,
+    scope_note: "Source-linked Race Signals alert generated from stored FEC records in the current database slice; not a completeness claim.",
     data_freshness: signal.dataFreshness,
     dedupe_key: signal.dedupeKey,
     metadata_json: JSON.stringify(signal.metadata ?? {}),
@@ -126,6 +130,8 @@ export function rowsToCsv(rows: SignalExportRow[]) {
     "source_kind",
     "total_receipts_basis",
     "signal_permalink",
+    "methodology_url",
+    "scope_note",
     "data_freshness",
     "dedupe_key",
     "metadata_json",

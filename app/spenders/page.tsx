@@ -23,25 +23,49 @@ export default async function SpendersPage({
   const visibleSpenders = selectedState
     ? spenders.filter((spender) => spender.states.includes(selectedState))
     : spenders;
+  const exportSuffix = selectedState ? `?state=${selectedState}` : "";
 
   return (
     <PageShell>
       <main className="mx-auto max-w-7xl px-5 py-6 sm:px-8">
         <section className="border border-neutral-300 bg-white">
           <div className="border-b border-neutral-300 px-5 py-5">
-            <p className="font-mono text-xs uppercase tracking-[0.18em] text-neutral-500">
-              Schedule E ranking
-            </p>
-            <h1 className="mt-1 text-xl font-semibold tracking-tight">
-              Top outside spenders
-            </h1>
-            <p className="mt-2 max-w-3xl break-words text-sm leading-5 text-neutral-700">
-              Committees ranked by all stored current-cycle independent expenditure
-              totals in the current database slice, including records below the
-              $25,000 alert threshold. Amounts are sourced from FEC Schedule E
-              records and should be checked against the linked records view before
-              publication.
-            </p>
+            <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
+              <div className="min-w-0">
+                <p className="font-mono text-xs uppercase tracking-[0.18em] text-neutral-500">
+                  Schedule E ranking
+                </p>
+                <h1 className="mt-1 text-xl font-semibold tracking-tight">
+                  Top outside spenders
+                </h1>
+                <p className="mt-2 max-w-3xl break-words text-sm leading-5 text-neutral-700">
+                  Committees ranked by all stored current-cycle independent expenditure
+                  totals in the current database slice, including records below the
+                  $25,000 alert threshold. Amounts are sourced from FEC Schedule E
+                  records and should be checked against the linked records view before
+                  publication.
+                </p>
+              </div>
+              <div className="flex flex-col gap-1 md:items-end">
+                <div className="flex flex-wrap gap-2 text-sm">
+                  <a
+                    className="border border-neutral-400 px-3 py-2 font-medium hover:border-neutral-900"
+                    href={`/api/spenders/export.csv${exportSuffix}`}
+                  >
+                    Export CSV
+                  </a>
+                  <a
+                    className="border border-neutral-400 px-3 py-2 font-medium hover:border-neutral-900"
+                    href={`/api/spenders/export.json${exportSuffix}`}
+                  >
+                    Export JSON
+                  </a>
+                </div>
+                <p className="text-xs text-neutral-600">
+                  Exports include current filters and ingest metadata.
+                </p>
+              </div>
+            </div>
           </div>
           {stateOptions.length ? (
             <nav

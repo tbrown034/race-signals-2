@@ -131,9 +131,12 @@ export type TopSpender = {
   designation?: string | null;
   sourceUrl?: string | null;
   totalAmount: number;
+  supportAmount: number;
+  opposeAmount: number;
   recordCount: number;
   raceCount: number;
   states: string[];
+  lastExpenditureDate?: string | null;
   topRaceId?: string | null;
   topRaceName?: string | null;
   topRaceAmount?: number | null;

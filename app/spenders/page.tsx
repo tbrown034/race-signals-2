@@ -2,7 +2,7 @@ import Link from "next/link";
 import { PageShell } from "@/src/components/page-shell";
 import { getTopSpenders } from "@/src/lib/db/repository";
 import { committeeDesignationLabel, committeeTypeLabel } from "@/src/lib/fec-codes";
-import { formatMoney } from "@/src/lib/format";
+import { formatDate, formatMoney } from "@/src/lib/format";
 import type { Metadata } from "next";
 
 export const revalidate = 21600;
@@ -32,12 +32,14 @@ export default async function SpendersPage() {
             </p>
           </div>
           <div className="overflow-x-auto">
-            <table className="w-full min-w-[820px] text-left text-sm">
+            <table className="w-full min-w-[1040px] text-left text-sm">
               <thead className="bg-neutral-100 font-mono text-xs uppercase tracking-[0.12em] text-neutral-500">
                 <tr>
                   <th className="px-4 py-3 font-medium" scope="col">Committee</th>
                   <th className="px-4 py-3 font-medium" scope="col">Type</th>
                   <th className="px-4 py-3 font-medium" scope="col">Where</th>
+                  <th className="px-4 py-3 font-medium" scope="col">Last IE</th>
+                  <th className="px-4 py-3 font-medium" scope="col">Position split</th>
                   <th className="px-4 py-3 text-right font-medium" scope="col">Total IE</th>
                   <th className="px-4 py-3 text-right font-medium" scope="col">Records</th>
                   <th className="px-4 py-3 font-medium" scope="col">Source</th>
@@ -82,6 +84,13 @@ export default async function SpendersPage() {
                           {spender.topRaceAmount ? ` / top race ${formatMoney(spender.topRaceAmount)}` : ""}
                         </p>
                       </td>
+                      <td className="px-4 py-3 font-mono">
+                        {formatDate(spender.lastExpenditureDate)}
+                      </td>
+                      <td className="px-4 py-3 text-xs leading-5 text-neutral-700">
+                        <span className="block">Support {formatMoney(spender.supportAmount) ?? "$0"}</span>
+                        <span className="block">Oppose {formatMoney(spender.opposeAmount) ?? "$0"}</span>
+                      </td>
                       <td className="px-4 py-3 text-right font-mono font-semibold">
                         {formatMoney(spender.totalAmount)}
                       </td>
@@ -104,7 +113,7 @@ export default async function SpendersPage() {
                   ))
                 ) : (
                   <tr>
-                    <td className="px-4 py-4 text-neutral-600" colSpan={6}>
+                    <td className="px-4 py-4 text-neutral-600" colSpan={8}>
                       No Schedule E spender records are available in the current database slice.
                     </td>
                   </tr>

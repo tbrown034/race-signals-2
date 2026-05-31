@@ -674,9 +674,20 @@ export async function getTopSpenders(limit = 100): Promise<TopSpender[]> {
           designation: committee.designation,
           sourceUrl: committee.sourceUrl,
           totalAmount: records.reduce((sum, record) => sum + record.amount, 0),
+          supportAmount: records
+            .filter((record) => record.supportOpposeIndicator === "S")
+            .reduce((sum, record) => sum + record.amount, 0),
+          opposeAmount: records
+            .filter((record) => record.supportOpposeIndicator === "O")
+            .reduce((sum, record) => sum + record.amount, 0),
           recordCount: records.length,
           raceCount: new Set(records.map((record) => record.raceId).filter(Boolean)).size,
           states: [...new Set(records.map((record) => record.raceId?.split("-")[1]).filter(Boolean))] as string[],
+          lastExpenditureDate: records
+            .map((record) => record.expenditureDate)
+            .filter(Boolean)
+            .sort()
+            .at(-1) ?? null,
           topRaceId: records[0]?.raceId ?? null,
           topRaceName: demoRaces.find((race) => race.id === records[0]?.raceId)?.name ?? null,
           topRaceAmount: records[0]?.amount ?? null,
@@ -695,9 +706,12 @@ export async function getTopSpenders(limit = 100): Promise<TopSpender[]> {
     designation: string | null;
     source_url: string | null;
     total_amount: string;
+    support_amount: string;
+    oppose_amount: string;
     record_count: string;
     race_count: string;
     states: string[] | null;
+    last_expenditure_date: string | Date | null;
     top_race_id: string | null;
     top_race_name: string | null;
     top_race_amount: string | null;
@@ -708,8 +722,11 @@ export async function getTopSpenders(limit = 100): Promise<TopSpender[]> {
           ie.spender_committee_id,
           coalesce(ie.fec_committee_id, ie.spender_committee_id) as spender_key,
           sum(ie.amount) as total_amount,
+          coalesce(sum(ie.amount) filter (where ie.support_oppose_indicator = 'S'), 0) as support_amount,
+          coalesce(sum(ie.amount) filter (where ie.support_oppose_indicator = 'O'), 0) as oppose_amount,
           count(*) as record_count,
           count(distinct ie.race_id) as race_count,
+          max(ie.expenditure_date) as last_expenditure_date,
           array_remove(array_agg(distinct r.state), null) as states
         from independent_expenditures ie
         left join races r on r.id = ie.race_id
@@ -746,8 +763,11 @@ export async function getTopSpenders(limit = 100): Promise<TopSpender[]> {
         cm.designation,
         cm.source_url,
         s.total_amount::text as total_amount,
+        s.support_amount::text as support_amount,
+        s.oppose_amount::text as oppose_amount,
         s.record_count::text as record_count,
         s.race_count::text as race_count,
+        s.last_expenditure_date,
         s.states,
         top_race.race_id as top_race_id,
         top_race.race_name as top_race_name,
@@ -769,9 +789,12 @@ export async function getTopSpenders(limit = 100): Promise<TopSpender[]> {
     designation: row.designation,
     sourceUrl: row.source_url,
     totalAmount: Number(row.total_amount),
+    supportAmount: Number(row.support_amount),
+    opposeAmount: Number(row.oppose_amount),
     recordCount: Number(row.record_count),
     raceCount: Number(row.race_count),
     states: row.states ?? [],
+    lastExpenditureDate: row.last_expenditure_date ? toDateString(row.last_expenditure_date) : null,
     topRaceId: row.top_race_id,
     topRaceName: row.top_race_name,
     topRaceAmount: row.top_race_amount === null ? null : Number(row.top_race_amount),

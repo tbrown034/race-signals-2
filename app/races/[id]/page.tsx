@@ -55,6 +55,12 @@ export default async function RacePage({
   const candidatesWithMoney = candidates.filter((candidate) => (candidate.totalReceiptsCycle ?? 0) > 0).length;
   const incumbentCount = candidates.filter((candidate) => isIncumbent(candidate.incumbentChallengeStatus)).length;
   const latestSignalDate = signals.map((signal) => signal.signalDate).sort().at(-1) ?? null;
+  const totalsFetchedDates = candidates
+    .map((candidate) => candidate.totalsFetchedAt)
+    .filter((value): value is string => Boolean(value))
+    .sort();
+  const oldestTotalsFetchedAt = totalsFetchedDates[0] ?? null;
+  const latestTotalsFetchedAt = totalsFetchedDates.at(-1) ?? null;
 
   return (
     <PageShell>
@@ -116,14 +122,18 @@ export default async function RacePage({
             ]}
         />
         <div className="grid gap-px border-b border-neutral-300 bg-neutral-300 sm:grid-cols-2 xl:grid-cols-5" id="race-stats">
-          <RaceStat label="Cohort receipts" value={formatMoney(stats.totalRaised) ?? "$0"} />
+          <RaceStat
+            detail={raceTotalsDetail(oldestTotalsFetchedAt, latestTotalsFetchedAt)}
+            label="Stored FEC candidate totals"
+            value={formatMoney(stats.totalRaised) ?? "$0"}
+          />
           <RaceStat label="Outside spending" value={formatMoney(stats.totalIndependentExpenditures) ?? "$0"} />
           <RaceStat
             detail={`Support ${formatMoney(stats.supportIndependentExpenditures) ?? "$0"} / oppose ${formatMoney(stats.opposeIndependentExpenditures) ?? "$0"}`}
             label="IE direction"
             value={formatCount(stats.independentExpenditureRecordCount, "record")}
           />
-          <RaceStat label="Candidates filed" value={String(stats.candidateCount)} />
+          <RaceStat label="FEC candidate records" value={String(stats.candidateCount)} />
           <RaceStat label="Incumbents" value={String(stats.incumbentCount)} />
         </div>
         <div className="border-b border-neutral-300" id="candidate-cohort">
@@ -368,4 +378,12 @@ function RaceStat({ detail, label, value }: { detail?: string; label: string; va
       {detail ? <p className="mt-1 text-xs leading-5 text-neutral-600">{detail}</p> : null}
     </div>
   );
+}
+
+function raceTotalsDetail(oldest?: string | null, latest?: string | null) {
+  if (!latest) return "FEC totals not loaded for this cohort.";
+  if (oldest && oldest !== latest) {
+    return `Fetched ${formatDateTime(latest)}; oldest candidate fetch ${formatDateTime(oldest)}.`;
+  }
+  return `Fetched ${formatDateTime(latest)}.`;
 }

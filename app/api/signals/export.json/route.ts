@@ -15,7 +15,7 @@ export async function GET(request: Request) {
     );
   }
 
-  return Response.json(signals.map(signalToExportRow), {
+  return Response.json(signals.map((signal) => signalToExportRow(signal)), {
     headers: {
       "content-disposition": 'attachment; filename="race-signals.json"',
     },

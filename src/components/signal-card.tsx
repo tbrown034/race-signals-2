@@ -2,6 +2,7 @@ import Link from "next/link";
 import { FreshMark } from "@/src/components/fresh-mark";
 import { IncumbentBadge } from "@/src/components/incumbent-badge";
 import { PartySquare } from "@/src/components/party-square";
+import { SignalCopyLink } from "@/src/components/signal-copy-link";
 import { formatDate, formatDateTime, formatMoney } from "@/src/lib/format";
 import type { Signal } from "@/src/lib/types";
 
@@ -133,9 +134,7 @@ export function SignalCard({ signal }: { signal: Signal }) {
         ) : (
           <span>Source URL missing</span>
         )}
-        <a className="font-medium underline underline-offset-4" href={`#${anchorId}`} title="Signal permalink">
-          #
-        </a>
+        <SignalCopyLink anchorId={anchorId} />
         <span className="text-neutral-500">Ingested {formatDateTime(signal.dataFreshness)}</span>
       </div>
     </article>

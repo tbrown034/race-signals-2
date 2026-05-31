@@ -15,7 +15,7 @@ export async function GET(request: Request) {
     );
   }
 
-  const csv = rowsToCsv(signals.map(signalToExportRow));
+  const csv = rowsToCsv(signals.map((signal) => signalToExportRow(signal)));
   return new Response(csv, {
     headers: {
       "content-type": "text/csv; charset=utf-8",

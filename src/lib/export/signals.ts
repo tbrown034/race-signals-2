@@ -25,7 +25,7 @@ export type SignalExportRow = {
   metadata: Record<string, unknown>;
 };
 
-export function signalToExportRow(signal: Signal): SignalExportRow {
+export function signalToExportRow(signal: Signal, baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://race-signals.vercel.app"): SignalExportRow {
   return {
     signal_date: signal.signalDate,
     signal_type: signal.signalType,
@@ -43,7 +43,7 @@ export function signalToExportRow(signal: Signal): SignalExportRow {
     confidence: signal.confidence,
     status: signal.status,
     source_url: signal.sourceUrl ?? null,
-    signal_permalink: `/#${signalAnchorId(signal.dedupeKey)}`,
+    signal_permalink: `${baseUrl}/#${signalAnchorId(signal.dedupeKey)}`,
     data_freshness: signal.dataFreshness,
     dedupe_key: signal.dedupeKey,
     metadata: signal.metadata ?? {},

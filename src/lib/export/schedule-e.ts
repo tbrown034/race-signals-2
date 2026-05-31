@@ -11,6 +11,7 @@ export type ScheduleEExportRow = {
   expenditure_date: string | null;
   amount: number;
   support_oppose: string | null;
+  target_position_label: string;
   spender_committee_name: string | null;
   spender_committee_id: string | null;
   fec_committee_id: string | null;
@@ -35,6 +36,7 @@ export function scheduleEToExportRow(
     expenditure_date: record.expenditureDate ?? null,
     amount: record.amount,
     support_oppose: record.supportOpposeIndicator ?? null,
+    target_position_label: targetPositionLabel(record.supportOpposeIndicator),
     spender_committee_name: record.committeeName ?? null,
     spender_committee_id: record.spenderCommitteeId ?? null,
     fec_committee_id: record.fecCommitteeId ?? null,
@@ -57,6 +59,7 @@ export function scheduleERowsToCsv(rows: ScheduleEExportRow[]) {
     "expenditure_date",
     "amount",
     "support_oppose",
+    "target_position_label",
     "spender_committee_name",
     "spender_committee_id",
     "fec_committee_id",
@@ -77,6 +80,12 @@ export function scheduleERowsToCsv(rows: ScheduleEExportRow[]) {
     columns.join(","),
     ...rows.map((row) => columns.map((column) => csvCell(row[column])).join(",")),
   ].join("\n");
+}
+
+function targetPositionLabel(value?: string | null) {
+  if (value === "S") return "Supports target";
+  if (value === "O") return "Opposes target";
+  return "Not classified by FEC";
 }
 
 function csvCell(value: string | number | null) {

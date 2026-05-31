@@ -18,6 +18,8 @@ export type SpenderExportRow = {
   total_ie: number;
   support_ie: number;
   oppose_ie: number;
+  supports_targets_ie: number;
+  opposes_targets_ie: number;
   record_count: number;
   race_count: number;
   states: string;
@@ -62,6 +64,8 @@ export function spenderToExportRow(
     total_ie: spender.totalAmount,
     support_ie: spender.supportAmount,
     oppose_ie: spender.opposeAmount,
+    supports_targets_ie: spender.supportAmount,
+    opposes_targets_ie: spender.opposeAmount,
     record_count: spender.recordCount,
     race_count: spender.raceCount,
     states: spender.states.join("|"),
@@ -102,6 +106,8 @@ export function spenderRowsToCsv(rows: SpenderExportRow[]) {
     "total_ie",
     "support_ie",
     "oppose_ie",
+    "supports_targets_ie",
+    "opposes_targets_ie",
     "record_count",
     "race_count",
     "states",

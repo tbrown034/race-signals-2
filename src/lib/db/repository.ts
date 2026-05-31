@@ -1210,6 +1210,90 @@ export async function getScheduleERecords(
   }));
 }
 
+export async function getScheduleERecordSummary(
+  filters: {
+    candidateId?: string;
+    committeeId?: string;
+    raceId?: string;
+    state?: string;
+  } = {},
+) {
+  if (!hasDatabase()) {
+    const records = demoIndependentExpenditures.filter((expenditure) => {
+      if (filters.candidateId && expenditure.candidateId !== filters.candidateId) return false;
+      if (filters.committeeId && expenditure.spenderCommitteeId !== filters.committeeId) return false;
+      if (filters.raceId && expenditure.raceId !== filters.raceId) return false;
+      if (filters.state && expenditure.raceId?.split("-")[1] !== filters.state) return false;
+      return true;
+    });
+    return records.reduce(
+      (summary, record) => {
+        summary.recordCount += 1;
+        summary.totalAmount += record.amount;
+        if (record.supportOpposeIndicator === "S") summary.supportAmount += record.amount;
+        else if (record.supportOpposeIndicator === "O") summary.opposeAmount += record.amount;
+        else summary.uncodedAmount += record.amount;
+        return summary;
+      },
+      { opposeAmount: 0, recordCount: 0, supportAmount: 0, totalAmount: 0, uncodedAmount: 0 },
+    );
+  }
+
+  const values: unknown[] = [CURRENT_CYCLE];
+  const where = [
+    `ie.expenditure_date >= make_date(coalesce(r.cycle, $1) - 1, 1, 1)`,
+    `ie.expenditure_date <= make_date(coalesce(r.cycle, $1), 12, 31)`,
+  ];
+  if (filters.candidateId) {
+    values.push(filters.candidateId);
+    where.push(`ie.candidate_id = $${values.length}`);
+  }
+  if (filters.committeeId) {
+    values.push(filters.committeeId);
+    where.push(`ie.spender_committee_id = $${values.length}`);
+  }
+  if (filters.raceId) {
+    values.push(filters.raceId);
+    where.push(`ie.race_id = $${values.length}`);
+  }
+  if (filters.state) {
+    values.push(filters.state);
+    where.push(`r.state = $${values.length}`);
+  }
+
+  const rows = await sql<{
+    oppose_amount: string | null;
+    record_count: string;
+    support_amount: string | null;
+    total_amount: string | null;
+    uncoded_amount: string | null;
+  }>(
+    `
+      select
+        count(*)::text as record_count,
+        coalesce(sum(ie.amount), 0)::text as total_amount,
+        coalesce(sum(ie.amount) filter (where ie.support_oppose_indicator = 'S'), 0)::text as support_amount,
+        coalesce(sum(ie.amount) filter (where ie.support_oppose_indicator = 'O'), 0)::text as oppose_amount,
+        coalesce(sum(ie.amount) filter (
+          where ie.support_oppose_indicator is null
+             or ie.support_oppose_indicator not in ('S', 'O')
+        ), 0)::text as uncoded_amount
+      from independent_expenditures ie
+      left join races r on r.id = ie.race_id
+      where ${where.join(" and ")}
+    `,
+    values,
+  );
+  const row = rows[0];
+  return {
+    opposeAmount: Number(row?.oppose_amount ?? 0),
+    recordCount: Number(row?.record_count ?? 0),
+    supportAmount: Number(row?.support_amount ?? 0),
+    totalAmount: Number(row?.total_amount ?? 0),
+    uncodedAmount: Number(row?.uncoded_amount ?? 0),
+  };
+}
+
 export async function getTopSpenders(limit = 100, state?: string | null): Promise<TopSpender[]> {
   if (!hasDatabase()) {
     return demoCommittees

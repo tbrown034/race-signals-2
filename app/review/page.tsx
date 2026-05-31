@@ -31,6 +31,10 @@ export default async function ReviewPage({
   const moneyGaps = aggregateGaps.rows;
   const retainedWarnings = status.validationIssues.reduce((sum, issue) => sum + issue.count, 0);
   const exportSuffix = reviewExportQuery(state).toString();
+  const reviewStateRows = [...stateCoverage].sort((a, b) => (
+    (reviewStateCounts[b.state] ?? 0) - (reviewStateCounts[a.state] ?? 0) ||
+    a.state.localeCompare(b.state)
+  ));
 
   return (
     <PageShell>
@@ -94,7 +98,7 @@ export default async function ReviewPage({
             />
           </div>
 
-          {stateCoverage.length ? (
+          {reviewStateRows.length ? (
             <nav
               aria-label="Review queue state filters"
               className="flex min-w-0 max-w-full flex-nowrap gap-2 overflow-x-auto border-b border-neutral-300 px-5 py-3 text-sm"
@@ -105,7 +109,7 @@ export default async function ReviewPage({
               >
                 All
               </Link>
-              {stateCoverage.map((row) => (
+              {reviewStateRows.map((row) => (
                 <Link
                   className={`shrink-0 border px-2.5 py-1.5 font-mono text-[11px] uppercase tracking-[0.12em] ${state === row.state ? "border-neutral-950 bg-neutral-950 text-white" : "border-neutral-300 hover:border-neutral-900"}`}
                   href={`/review?state=${row.state}`}

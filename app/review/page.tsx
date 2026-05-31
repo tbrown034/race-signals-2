@@ -29,6 +29,7 @@ export default async function ReviewPage({
     .filter((candidate) => !state || candidate.raceId?.includes(`-${state}-`))
     .sort((a, b) => (b.totalReceiptsCycle ?? 0) - (a.totalReceiptsCycle ?? 0));
   const retainedWarnings = status.validationIssues.reduce((sum, issue) => sum + issue.count, 0);
+  const exportSuffix = reviewExportQuery(state).toString();
 
   return (
     <PageShell>
@@ -62,6 +63,18 @@ export default async function ReviewPage({
                 <Link className="border border-neutral-400 px-3 py-2 font-medium hover:border-neutral-900" href="/?status=review">
                   Open in feed
                 </Link>
+                <a
+                  className="border border-neutral-400 px-3 py-2 font-medium hover:border-neutral-900"
+                  href={`/api/signals/export.csv?${exportSuffix}`}
+                >
+                  Export CSV
+                </a>
+                <a
+                  className="border border-neutral-400 px-3 py-2 font-medium hover:border-neutral-900"
+                  href={`/api/signals/export.json?${exportSuffix}`}
+                >
+                  Export JSON
+                </a>
                 <Link className="border border-neutral-400 px-3 py-2 font-medium hover:border-neutral-900" href="/status">
                   Pipeline status
                 </Link>
@@ -237,4 +250,12 @@ function sourceRecordSummary(candidate: {
     formatCount(candidate.filingCount ?? 0, "filing"),
     formatCount(candidate.independentExpenditureCount ?? 0, "Schedule E record"),
   ].join(" / ");
+}
+
+function reviewExportQuery(state?: string) {
+  const params = new URLSearchParams();
+  params.set("status", "review");
+  params.set("sort", "amount");
+  if (state) params.set("state", state);
+  return params;
 }

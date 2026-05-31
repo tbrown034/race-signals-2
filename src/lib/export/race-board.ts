@@ -1,3 +1,4 @@
+import { csvCell } from "@/src/lib/export/csv";
 import type { IngestionRun, StateRaceBoardRow } from "@/src/lib/types";
 
 export type RaceBoardExportManifest = {
@@ -123,13 +124,6 @@ export function raceBoardRowsToCsv(rows: RaceBoardExportRow[]) {
     columns.join(","),
     ...rows.map((row) => columns.map((column) => csvCell(row[column])).join(",")),
   ].join("\n");
-}
-
-function csvCell(value: string | number | null) {
-  if (value === null) return "";
-  const text = String(value);
-  if (!/[",\n\r]/.test(text)) return text;
-  return `"${text.replaceAll('"', '""')}"`;
 }
 
 function signalAnchorId(dedupeKey: string) {

@@ -12,6 +12,7 @@ export async function GET(request: Request) {
     candidateId: url.searchParams.get("candidate") ?? undefined,
     committeeId: url.searchParams.get("committee") ?? undefined,
     raceId: url.searchParams.get("race") ?? undefined,
+    sourceId: url.searchParams.get("sourceId") ?? url.searchParams.get("sub_id") ?? undefined,
     state: url.searchParams.get("state")?.toUpperCase() ?? undefined,
     limit: SCHEDULE_E_EXPORT_LIMIT + 1,
   });
@@ -45,10 +46,12 @@ async function exportManifest(url: URL): Promise<ScheduleEExportManifest> {
 
 function exportFilters(url: URL) {
   const filters: Record<string, string> = {};
-  for (const key of ["candidate", "committee", "race", "state"]) {
+  for (const key of ["candidate", "committee", "race", "sourceId", "state"]) {
     const value = url.searchParams.get(key);
     if (value) filters[key] = key === "state" ? value.toUpperCase() : value;
   }
+  const subId = url.searchParams.get("sub_id");
+  if (subId && !filters.sourceId) filters.sourceId = subId;
   return filters;
 }
 

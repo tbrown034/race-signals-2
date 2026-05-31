@@ -1,3 +1,4 @@
+import { csvCell } from "@/src/lib/export/csv";
 import type { CommitteeIndependentExpenditure, IngestionRun } from "@/src/lib/types";
 
 export const SCHEDULE_E_EXPORT_LIMIT = 10000;
@@ -60,7 +61,7 @@ export function scheduleEToExportRow(
     purpose: record.purpose ?? null,
     source_url: record.sourceUrl ?? null,
     source_id: record.sourceId,
-    evidence_url: manifest.baseUrl ? `${manifest.baseUrl}/records/schedule-e${evidenceQuery(manifest.filters)}#${scheduleEAnchorId(record.sourceId)}` : null,
+    evidence_url: manifest.baseUrl ? `${manifest.baseUrl}/records/schedule-e${evidenceQuery(manifest.filters, record.sourceId)}#${scheduleEAnchorId(record.sourceId)}` : null,
     methodology_url: manifest.baseUrl
       ? `${manifest.baseUrl}/methodology#large_independent_expenditure`
       : "/methodology#large_independent_expenditure",
@@ -123,19 +124,13 @@ function scheduleEAnchorId(sourceId: string) {
   return `schedule-e-${sourceId.replace(/[^a-zA-Z0-9_-]/g, "-")}`;
 }
 
-function evidenceQuery(filters: Record<string, string>) {
+function evidenceQuery(filters: Record<string, string>, sourceId: string) {
   const params = new URLSearchParams();
   for (const key of ["state", "race", "committee", "candidate"]) {
     const value = filters[key];
     if (value) params.set(key, value);
   }
+  params.set("sourceId", sourceId);
   const query = params.toString();
   return query ? `?${query}` : "";
-}
-
-function csvCell(value: string | number | null) {
-  if (value === null) return "";
-  const text = String(value);
-  if (!/[",\n\r]/.test(text)) return text;
-  return `"${text.replaceAll('"', '""')}"`;
 }

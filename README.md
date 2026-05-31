@@ -224,6 +224,7 @@ Verification:
 ```bash
 npm run lint
 npm run test:logic
+npm run test:exports
 npm run build
 npm run audit:signals
 npm run audit:cost

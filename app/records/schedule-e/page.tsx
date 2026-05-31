@@ -20,11 +20,13 @@ export default async function ScheduleERecordsPage({
   const raceId = textParam(params.race);
   const committeeId = textParam(params.committee);
   const candidateId = textParam(params.candidate);
+  const sourceId = textParam(params.sourceId) ?? textParam(params.sub_id);
   const state = textParam(params.state)?.toUpperCase();
   const filters = {
     candidateId,
     committeeId,
     raceId,
+    sourceId,
     state,
   };
   const [records, summary] = await Promise.all([
@@ -39,12 +41,14 @@ export default async function ScheduleERecordsPage({
     raceId ? `race ${raceId}` : null,
     committeeId ? `spender ${committeeId}` : null,
     candidateId ? `candidate ${candidateId}` : null,
+    sourceId ? `Schedule E source ${sourceId}` : null,
   ].filter(Boolean);
   const exportQuery = new URLSearchParams();
   if (state) exportQuery.set("state", state);
   if (raceId) exportQuery.set("race", raceId);
   if (committeeId) exportQuery.set("committee", committeeId);
   if (candidateId) exportQuery.set("candidate", candidateId);
+  if (sourceId) exportQuery.set("sourceId", sourceId);
   const exportSuffix = exportQuery.toString();
 
   return (

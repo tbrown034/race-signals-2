@@ -1194,6 +1194,7 @@ export async function getScheduleERecords(
     candidateId?: string;
     committeeId?: string;
     raceId?: string;
+    sourceId?: string;
     state?: string;
     limit?: number;
   } = {},
@@ -1205,6 +1206,7 @@ export async function getScheduleERecords(
         if (filters.candidateId && expenditure.candidateId !== filters.candidateId) return false;
         if (filters.committeeId && expenditure.spenderCommitteeId !== filters.committeeId) return false;
         if (filters.raceId && expenditure.raceId !== filters.raceId) return false;
+        if (filters.sourceId && expenditure.sourceId !== filters.sourceId) return false;
         if (filters.state && expenditure.raceId?.split("-")[1] !== filters.state) return false;
         return true;
       })
@@ -1235,6 +1237,10 @@ export async function getScheduleERecords(
   if (filters.raceId) {
     values.push(filters.raceId);
     where.push(`ie.race_id = $${values.length}`);
+  }
+  if (filters.sourceId) {
+    values.push(filters.sourceId);
+    where.push(`ie.source_id = $${values.length}`);
   }
   if (filters.state) {
     values.push(filters.state);
@@ -1304,6 +1310,7 @@ export async function getScheduleERecordSummary(
     candidateId?: string;
     committeeId?: string;
     raceId?: string;
+    sourceId?: string;
     state?: string;
   } = {},
 ) {
@@ -1312,6 +1319,7 @@ export async function getScheduleERecordSummary(
       if (filters.candidateId && expenditure.candidateId !== filters.candidateId) return false;
       if (filters.committeeId && expenditure.spenderCommitteeId !== filters.committeeId) return false;
       if (filters.raceId && expenditure.raceId !== filters.raceId) return false;
+      if (filters.sourceId && expenditure.sourceId !== filters.sourceId) return false;
       if (filters.state && expenditure.raceId?.split("-")[1] !== filters.state) return false;
       return true;
     });
@@ -1344,6 +1352,10 @@ export async function getScheduleERecordSummary(
   if (filters.raceId) {
     values.push(filters.raceId);
     where.push(`ie.race_id = $${values.length}`);
+  }
+  if (filters.sourceId) {
+    values.push(filters.sourceId);
+    where.push(`ie.source_id = $${values.length}`);
   }
   if (filters.state) {
     values.push(filters.state);

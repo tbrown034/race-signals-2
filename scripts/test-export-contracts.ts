@@ -19,7 +19,7 @@ const manifest: ExportManifest = {
 const signal: Signal = {
   dedupeKey: "fec:activity_spike:filing-test",
   signalType: "committee_activity_spike",
-  headline: "Committee reported a filing-level receipts spike.",
+  headline: "=Committee reported a filing-level receipts spike.",
   whyItMatters: "Compare source filings before publication.",
   candidateId: "cand-H6IN05000",
   candidateName: "TEST, CANDIDATE",
@@ -64,7 +64,7 @@ const scheduleERow: ScheduleEExportRow = {
   amount: 125000,
   support_oppose: "O",
   target_position_label: "FEC code: opposes target",
-  spender_committee_name: "OUTSIDE GROUP",
+  spender_committee_name: "+OUTSIDE GROUP",
   spender_committee_id: "cmte-C00888888",
   fec_committee_id: "C00888888",
   candidate_name: "TEST, CANDIDATE",
@@ -76,7 +76,7 @@ const scheduleERow: ScheduleEExportRow = {
   purpose: "Digital ads",
   source_url: "https://www.fec.gov/data/independent-expenditures/?sub_id=123",
   source_id: "123",
-  evidence_url: "https://race-signals.test/records/schedule-e?state=IN#schedule-e-123",
+  evidence_url: "https://race-signals.test/records/schedule-e?state=IN&sourceId=123#schedule-e-123",
   methodology_url: "https://race-signals.test/methodology#large_independent_expenditure",
   scope_note: "Stored source-linked rows.",
   exported_at: manifest.exportedAt,
@@ -92,7 +92,7 @@ const scheduleERow: ScheduleEExportRow = {
 const spenderRow: SpenderExportRow = {
   committee_id: "cmte-C00888888",
   fec_committee_id: "C00888888",
-  committee_name: "OUTSIDE GROUP",
+  committee_name: "-OUTSIDE GROUP",
   committee_type: "O",
   designation: "U",
   total_ie: 125000,
@@ -132,7 +132,7 @@ const spenderRow: SpenderExportRow = {
 const raceBoardRow: RaceBoardExportRow = {
   state: "IN",
   race_id: "2026-IN-05-H",
-  race_name: "Indiana 05 Congressional District",
+  race_name: "@Indiana 05 Congressional District",
   race_url: "https://race-signals.test/races/2026-IN-05-H",
   outside_spending_records_url: "https://race-signals.test/records/schedule-e?race=2026-IN-05-H",
   outside_spending_signals_url: "https://race-signals.test/spending?race=2026-IN-05-H",
@@ -174,6 +174,7 @@ assertHeader(rowsToCsv([signalToExportRow(signal, "https://race-signals.test", m
   "prior_receipts",
   "comparison_basis",
 ]);
+assertFormulaNeutralized(rowsToCsv([signalToExportRow(signal, "https://race-signals.test", manifest)]), "'=Committee");
 
 assertHeader(scheduleERowsToCsv([scheduleERow]), [
   "source_url",
@@ -182,6 +183,7 @@ assertHeader(scheduleERowsToCsv([scheduleERow]), [
   "methodology_url",
   "scope_note",
 ]);
+assertFormulaNeutralized(scheduleERowsToCsv([scheduleERow]), "'+OUTSIDE");
 
 assertHeader(spenderRowsToCsv([spenderRow]), [
   "latest_schedule_e_source_url",
@@ -190,6 +192,7 @@ assertHeader(spenderRowsToCsv([spenderRow]), [
   "methodology_url",
   "scope_note",
 ]);
+assertFormulaNeutralized(spenderRowsToCsv([spenderRow]), "'-OUTSIDE");
 
 assertHeader(raceBoardRowsToCsv([raceBoardRow]), [
   "race_url",
@@ -197,6 +200,7 @@ assertHeader(raceBoardRowsToCsv([raceBoardRow]), [
   "methodology_url",
   "scope_note",
 ]);
+assertFormulaNeutralized(raceBoardRowsToCsv([raceBoardRow]), "'@Indiana");
 
 function assertHeader(csv: string, required: string[]) {
   const header = csv.split("\n")[0]?.split(",") ?? [];
@@ -205,6 +209,10 @@ function assertHeader(csv: string, required: string[]) {
   for (const column of required) {
     assert.ok(header.includes(column), `missing CSV column: ${column}`);
   }
+}
+
+function assertFormulaNeutralized(csv: string, expected: string) {
+  assert.ok(csv.includes(expected), `CSV did not neutralize spreadsheet formula prefix: ${expected}`);
 }
 
 console.log("Export contract tests passed.");

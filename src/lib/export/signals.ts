@@ -1,3 +1,4 @@
+import { csvCell } from "@/src/lib/export/csv";
 import type { Signal } from "@/src/lib/types";
 
 export const EXPORT_LIMIT = 10000;
@@ -195,13 +196,6 @@ export function rowsToCsv(rows: SignalExportRow[]) {
     columns.join(","),
     ...rows.map((row) => columns.map((column) => csvCell(row[column])).join(",")),
   ].join("\n");
-}
-
-function csvCell(value: string | number | null) {
-  if (value === null) return "";
-  const text = String(value);
-  if (!/[",\n\r]/.test(text)) return text;
-  return `"${text.replaceAll('"', '""')}"`;
 }
 
 function stateFromRaceId(raceId?: string | null) {

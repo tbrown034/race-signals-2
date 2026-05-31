@@ -94,6 +94,8 @@ export type Signal = {
   committeeName?: string | null;
   raceId?: string | null;
   raceName?: string | null;
+  state?: string | null;
+  office?: string | null;
   amount?: number | null;
   signalDate: string;
   sourceUrl?: string | null;

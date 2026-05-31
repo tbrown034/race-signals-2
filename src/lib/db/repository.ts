@@ -9,6 +9,7 @@ import {
   demoSignals,
 } from "@/src/lib/demo/data";
 import { hasDatabase, sql } from "@/src/lib/db/client";
+import type { SignalFilters } from "@/src/lib/signals/filters";
 import type { Candidate, Committee, IngestionRun, Race, RaceRating, Signal } from "@/src/lib/types";
 
 type SignalRow = {
@@ -23,12 +24,14 @@ type SignalRow = {
   committee_name: string | null;
   race_id: string | null;
   race_name: string | null;
+  race_state: string | null;
+  race_office: string | null;
   amount: string | null;
-  signal_date: string;
+  signal_date: string | Date;
   source_url: string | null;
   confidence: "high" | "medium" | "low";
   status: string;
-  data_freshness: string;
+  data_freshness: string | Date;
   metadata: Record<string, unknown>;
 };
 
@@ -45,25 +48,29 @@ function mapSignal(row: SignalRow): Signal {
     committeeName: row.committee_name,
     raceId: row.race_id,
     raceName: row.race_name,
+    state: row.race_state,
+    office: row.race_office,
     amount: row.amount === null ? null : Number(row.amount),
-    signalDate: row.signal_date,
+    signalDate: toDateString(row.signal_date),
     sourceUrl: row.source_url,
     confidence: row.confidence,
     status: row.status,
-    dataFreshness: row.data_freshness,
+    dataFreshness: toIsoString(row.data_freshness),
     metadata: row.metadata,
   };
 }
 
-export async function getSignals(filters: {
-  q?: string;
-  raceId?: string;
-  state?: string;
-  office?: string;
-  type?: string;
-  status?: string;
-  limit?: number;
-} = {}) {
+function toDateString(value: string | Date) {
+  if (value instanceof Date) return value.toISOString().slice(0, 10);
+  return String(value).slice(0, 10);
+}
+
+function toIsoString(value: string | Date) {
+  if (value instanceof Date) return value.toISOString();
+  return String(value);
+}
+
+export async function getSignals(filters: SignalFilters = {}) {
   if (!hasDatabase()) {
     const q = filters.q?.toLowerCase();
     return demoSignals.filter((signal) => {
@@ -76,7 +83,7 @@ export async function getSignals(filters: {
         return false;
       }
       return true;
-    });
+    }).slice(0, filters.limit ?? 50);
   }
 
   const values: unknown[] = [];
@@ -113,7 +120,9 @@ export async function getSignals(filters: {
         s.*,
         c.name as candidate_name,
         cm.name as committee_name,
-        r.name as race_name
+        r.name as race_name,
+        r.state as race_state,
+        r.office as race_office
       from signals s
       left join candidates c on c.id = s.candidate_id
       left join committees cm on cm.id = s.committee_id

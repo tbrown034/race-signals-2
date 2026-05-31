@@ -2,6 +2,7 @@ import { FeedFilters } from "@/src/components/feed-filters";
 import { PageShell } from "@/src/components/page-shell";
 import { SignalCard } from "@/src/components/signal-card";
 import { getRaces, getSignals, getStatus } from "@/src/lib/db/repository";
+import { signalFiltersFromSearchParams } from "@/src/lib/signals/filters";
 
 export default async function Home({
   searchParams,
@@ -15,8 +16,13 @@ export default async function Home({
   const raceId = typeof params.race === "string" ? params.race : undefined;
   const type = typeof params.type === "string" ? params.type : undefined;
   const statusFilter = typeof params.status === "string" ? params.status : undefined;
+  const exportQuery = new URLSearchParams();
+  for (const key of ["q", "state", "office", "race", "type", "status"]) {
+    const value = params[key];
+    if (typeof value === "string" && value) exportQuery.set(key, value);
+  }
   const [signals, races, status] = await Promise.all([
-    getSignals({ q, state, office, raceId, type, status: statusFilter, limit: 50 }),
+    getSignals(signalFiltersFromSearchParams(params, 50)),
     getRaces(),
     getStatus(),
   ]);
@@ -37,6 +43,20 @@ export default async function Home({
               back to source records so a reporter can verify, contextualize and
               decide whether to follow up.
             </p>
+            <div className="mt-4 flex flex-wrap gap-2 text-sm">
+              <a
+                className="border border-neutral-400 px-3 py-2 font-medium hover:border-neutral-900"
+                href={`/api/signals/export.csv?${exportQuery.toString()}`}
+              >
+                Export CSV
+              </a>
+              <a
+                className="border border-neutral-400 px-3 py-2 font-medium hover:border-neutral-900"
+                href={`/api/signals/export.json?${exportQuery.toString()}`}
+              >
+                Export JSON
+              </a>
+            </div>
           </div>
           <FeedFilters
             races={races}

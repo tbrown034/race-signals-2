@@ -163,7 +163,7 @@ export default async function SpendersPage({
                           <div>
                             <dt className="inline font-mono uppercase tracking-[0.12em] text-neutral-500">Records </dt>
                             <dd className="inline">
-                              <Link className="font-medium underline underline-offset-4" href={spenderRecordsHref(spender.committeeId, spender.latestScheduleESourceUrl)}>
+                              <Link className="font-medium underline underline-offset-4" href={spenderTableHref(spender.committeeId, spender.latestScheduleESourceUrl)}>
                                 {spender.recordCount} Schedule E record{spender.recordCount === 1 ? "" : "s"}
                               </Link>
                             </dd>
@@ -184,8 +184,8 @@ export default async function SpendersPage({
                           <div>
                             <dt className="inline font-mono uppercase tracking-[0.12em] text-neutral-500">Source </dt>
                             <dd className="inline">
-                              <Link className="font-medium underline underline-offset-4" href={spenderRecordsHref(spender.committeeId, spender.latestScheduleESourceUrl)}>
-                                Open contributing records
+                              <Link className="font-medium underline underline-offset-4" href={spenderTableHref(spender.committeeId, spender.latestScheduleESourceUrl)}>
+                                Open records table
                               </Link>
                             </dd>
                           </div>
@@ -232,15 +232,26 @@ export default async function SpendersPage({
                         {formatMoney(spender.totalAmount)}
                       </td>
                       <td className="hidden px-4 py-3 text-right font-mono md:table-cell">
-                        <Link className="font-medium underline underline-offset-4" href={spenderRecordsHref(spender.committeeId, spender.latestScheduleESourceUrl)}>
+                        <Link className="font-medium underline underline-offset-4" href={spenderTableHref(spender.committeeId, spender.latestScheduleESourceUrl)}>
                           {spender.recordCount}
                         </Link>
                       </td>
                       <td className="hidden px-4 py-3 md:table-cell">
                         <div className="flex flex-col gap-1">
-                          <Link className="font-medium underline underline-offset-4" href={spenderRecordsHref(spender.committeeId, spender.latestScheduleESourceUrl)}>
-                            Open contributing records
+                          <Link className="font-medium underline underline-offset-4" href={spenderTableHref(spender.committeeId, spender.latestScheduleESourceUrl)}>
+                            Open records table
                           </Link>
+                          {spender.committeeId ? (
+                            <Link className="text-xs underline underline-offset-4" href={`/committees/${spender.committeeId}#schedule-e-records`}>
+                              Committee evidence page
+                            </Link>
+                          ) : null}
+                          <a
+                            className="text-xs underline underline-offset-4"
+                            href={`/api/signals/export.csv?type=large_independent_expenditure${spender.committeeId ? `&committee=${spender.committeeId}` : ""}`}
+                          >
+                            Export this spender
+                          </a>
                           {spender.latestScheduleESourceUrl ? (
                             <a
                               className="text-xs underline underline-offset-4"
@@ -304,8 +315,8 @@ function positionConcentrationNote(supportShare: number, opposeShare: number) {
   return null;
 }
 
-function spenderRecordsHref(committeeId?: string | null, latestSourceUrl?: string | null) {
-  if (committeeId) return `/committees/${committeeId}#schedule-e-records`;
+function spenderTableHref(committeeId?: string | null, latestSourceUrl?: string | null) {
+  if (committeeId) return `/spending?committee=${committeeId}&sort=date`;
   return latestSourceUrl ?? "/spending?type=large_independent_expenditure";
 }
 

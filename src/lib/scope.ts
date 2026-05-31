@@ -66,6 +66,44 @@ const atLargeStates = new Set(
   STATE_SCOPES.filter((state) => state.districts === 1).map((state) => state.code),
 );
 
+export const SENATE_RACE_SCOPES = [
+  { state: "AL", kind: "regular" },
+  { state: "AK", kind: "regular" },
+  { state: "AR", kind: "regular" },
+  { state: "CO", kind: "regular" },
+  { state: "DE", kind: "regular" },
+  { state: "FL", kind: "special" },
+  { state: "GA", kind: "regular" },
+  { state: "ID", kind: "regular" },
+  { state: "IL", kind: "regular" },
+  { state: "IA", kind: "regular" },
+  { state: "KS", kind: "regular" },
+  { state: "KY", kind: "regular" },
+  { state: "LA", kind: "regular" },
+  { state: "ME", kind: "regular" },
+  { state: "MA", kind: "regular" },
+  { state: "MI", kind: "regular" },
+  { state: "MN", kind: "regular" },
+  { state: "MS", kind: "regular" },
+  { state: "MT", kind: "regular" },
+  { state: "NE", kind: "regular" },
+  { state: "NH", kind: "regular" },
+  { state: "NJ", kind: "regular" },
+  { state: "NM", kind: "regular" },
+  { state: "NC", kind: "regular" },
+  { state: "OH", kind: "special" },
+  { state: "OK", kind: "regular" },
+  { state: "OR", kind: "regular" },
+  { state: "RI", kind: "regular" },
+  { state: "SC", kind: "regular" },
+  { state: "SD", kind: "regular" },
+  { state: "TN", kind: "regular" },
+  { state: "TX", kind: "regular" },
+  { state: "VA", kind: "regular" },
+  { state: "WV", kind: "regular" },
+  { state: "WY", kind: "regular" },
+] as const;
+
 export function getDistrictCode(state: string, district: number | string) {
   const numeric = Number(district);
   if (atLargeStates.has(state.toUpperCase())) return "00";
@@ -94,15 +132,38 @@ export function getHouseRaces(cycle = DEFAULT_CYCLE): Race[] {
   );
 }
 
-export const TARGET_RACES: Race[] = getHouseRaces();
+export function getSenateRaces(cycle = DEFAULT_CYCLE): Race[] {
+  return SENATE_RACE_SCOPES.map((race) => {
+    const stateName = getStateName(race.state);
+    const suffix = race.kind === "special" ? " Special" : "";
+    return {
+      id: `${cycle}-${race.state}-S${race.kind === "special" ? "-SPECIAL" : ""}`,
+      cycle,
+      state: race.state,
+      district: "00",
+      office: "S",
+      name: `${stateName} U.S. Senate${suffix}`,
+      competitiveness: "national",
+    };
+  });
+}
+
+export const TARGET_RACES: Race[] = [...getHouseRaces(), ...getSenateRaces()];
 
 export function raceIdFor(
   state?: string | null,
   district?: string | number | null,
   cycle = DEFAULT_CYCLE,
+  office = DEFAULT_OFFICE,
 ) {
-  if (!state || district === undefined || district === null) return null;
+  if (!state) return null;
   const stateCode = state.toUpperCase();
+  if (office === "S") {
+    const senateRace = SENATE_RACE_SCOPES.find((race) => race.state === stateCode);
+    if (!senateRace) return null;
+    return `${cycle}-${stateCode}-S${senateRace.kind === "special" ? "-SPECIAL" : ""}`;
+  }
+  if (district === undefined || district === null) return null;
   const normalizedDistrict = getDistrictCode(stateCode, district);
   return `${cycle}-${stateCode}-${normalizedDistrict}-H`;
 }

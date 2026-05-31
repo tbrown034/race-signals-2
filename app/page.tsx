@@ -11,11 +11,12 @@ export default async function Home({
   const params = await searchParams;
   const q = typeof params.q === "string" ? params.q : undefined;
   const state = typeof params.state === "string" ? params.state : undefined;
+  const office = typeof params.office === "string" ? params.office : undefined;
   const raceId = typeof params.race === "string" ? params.race : undefined;
   const type = typeof params.type === "string" ? params.type : undefined;
   const statusFilter = typeof params.status === "string" ? params.status : undefined;
   const [signals, races, status] = await Promise.all([
-    getSignals({ q, state, raceId, type, status: statusFilter, limit: 50 }),
+    getSignals({ q, state, office, raceId, type, status: statusFilter, limit: 50 }),
     getRaces(),
     getStatus(),
   ]);
@@ -32,7 +33,7 @@ export default async function Home({
               What changed in the money trail?
             </h1>
             <p className="mt-3 max-w-3xl text-sm leading-6 text-neutral-700">
-              A national FEC-first feed for 2026 U.S. House races. Each alert links
+              A national FEC-first feed for 2026 U.S. House and Senate races. Each alert links
               back to source records so a reporter can verify, contextualize and
               decide whether to follow up.
             </p>
@@ -41,6 +42,7 @@ export default async function Home({
             races={races}
             q={q}
             state={state}
+            office={office}
             raceId={raceId}
             type={type}
             status={statusFilter}
@@ -58,7 +60,7 @@ export default async function Home({
           <p className="font-mono text-xs uppercase tracking-[0.18em] text-neutral-500">
             Scope
           </p>
-          <h2 className="mt-2 text-lg font-semibold">2026 U.S. House national scope</h2>
+          <h2 className="mt-2 text-lg font-semibold">2026 U.S. congressional scope</h2>
           <p className="mt-2 text-sm leading-6 text-neutral-700">
             FEC-only MVP coverage. Demo mode appears automatically when no database
             is configured; real ingestion uses `FEC_API_KEY` and Postgres.
@@ -80,7 +82,7 @@ export default async function Home({
               <dt className="font-mono text-xs uppercase tracking-[0.12em] text-neutral-500">
                 Races
               </dt>
-              <dd className="mt-1">{races.length} configured House districts across all states</dd>
+              <dd className="mt-1">{races.length} configured House and Senate races</dd>
             </div>
           </dl>
         </aside>

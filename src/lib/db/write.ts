@@ -5,6 +5,7 @@ import type {
   Filing,
   IndependentExpenditure,
   Race,
+  RaceRating,
   Signal,
   Transaction,
   ValidationIssue,
@@ -27,6 +28,34 @@ export async function upsertRaces(races: Race[]) {
           updated_at = now()
       `,
       [race.id, race.cycle, race.state, race.district, race.office, race.name, race.competitiveness],
+    );
+  }
+}
+
+export async function upsertRaceRatings(ratings: RaceRating[]) {
+  const pool = getPool();
+  for (const rating of ratings) {
+    await pool.query(
+      `
+        insert into race_ratings (
+          race_id, source_name, source_url, rating, rating_date, rationale
+        )
+        values ($1,$2,$3,$4,$5,$6)
+        on conflict (race_id, source_name) do update set
+          source_url = excluded.source_url,
+          rating = excluded.rating,
+          rating_date = excluded.rating_date,
+          rationale = excluded.rationale,
+          updated_at = now()
+      `,
+      [
+        rating.raceId,
+        rating.sourceName,
+        rating.sourceUrl,
+        rating.rating,
+        rating.ratingDate,
+        rating.rationale,
+      ],
     );
   }
 }

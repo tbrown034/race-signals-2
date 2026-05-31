@@ -1,7 +1,7 @@
 import { PageShell } from "@/src/components/page-shell";
 
 const steps = [
-  ["Scope", "Start with generated 2026 U.S. House races across all 50 states."],
+  ["Scope", "Start with generated 2026 U.S. House races across all 50 states plus 2026 Senate races."],
   ["Fetch", "Use FEC candidate, committee, report, receipt and independent expenditure endpoints."],
   ["Normalize", "Map FEC records into stable internal candidates, committees, filings, transactions and expenditures."],
   ["Validate", "Flag missing names, committee IDs, dates, source URLs, unmatched races and unusually large amounts."],
@@ -21,7 +21,7 @@ export default function MethodologyPage() {
           </h1>
           <p className="mt-4 max-w-3xl text-sm leading-6 text-neutral-700">
             Race Signals is intentionally focused. The MVP does not score elections
-            or claim all-office coverage. It watches 2026 House races nationally
+            or claim all-office coverage. It watches 2026 House and Senate races
             and turns fresh FEC paperwork into source-linked reporting leads.
           </p>
         </section>

@@ -8,6 +8,7 @@ import {
   upsertCommittees,
   upsertFilings,
   upsertIndependentExpenditures,
+  upsertRaceRatings,
   upsertRaces,
   upsertSignals,
   upsertTransactions,
@@ -22,13 +23,14 @@ import {
 import { generateSignals } from "@/src/lib/signals/generate";
 import {
   fetchCommitteesForCandidate,
-  fetchHouseCandidates,
+  fetchCandidatesForOffice,
   fetchIndependentExpendituresForCandidate,
   fetchReceiptsForCommittee,
   fetchReportsForCommittee,
   type DateWindow,
 } from "@/src/lib/sources/fec/client";
 import { DEFAULT_CYCLE, TARGET_RACES } from "@/src/lib/scope";
+import { getPublicWatchlistRatings } from "@/src/lib/ratings/public-watchlist";
 import {
   validateCandidate,
   validateCommittee,
@@ -76,6 +78,15 @@ function ingestionMode() {
   return mode as "watch" | "backfill" | "repair";
 }
 
+function officesFromEnv() {
+  const value = envValue("RACE_SIGNALS_OFFICES") ?? "H,S";
+  const offices = value.split(",").map((office) => office.trim().toUpperCase());
+  if (offices.some((office) => office !== "H" && office !== "S")) {
+    throw new Error("RACE_SIGNALS_OFFICES must contain H, S, or H,S.");
+  }
+  return offices as Array<"H" | "S">;
+}
+
 async function main() {
   if (!process.env.DATABASE_URL) {
     throw new Error("DATABASE_URL is required to ingest FEC data.");
@@ -89,6 +100,7 @@ async function main() {
   const maxCandidatePages = numberFromEnv("FEC_MAX_CANDIDATE_PAGES");
   const maxCandidates = numberFromEnv("FEC_MAX_CANDIDATES");
   const mode = ingestionMode();
+  const offices = officesFromEnv();
   const state = envValue("RACE_SIGNALS_STATE")?.toUpperCase();
   const dateWindow: DateWindow = {
     startDate: dateFromEnv("BACKFILL_START_DATE"),
@@ -105,7 +117,8 @@ async function main() {
     throw new Error("BACKFILL_START_DATE must be before or equal to BACKFILL_END_DATE.");
   }
 
-  const runScope = `${cycle} ${state ? `${state} ` : "national "}House ${mode}`;
+  const officeLabel = offices.length === 2 ? "House/Senate" : offices[0] === "S" ? "Senate" : "House";
+  const runScope = `${cycle} ${state ? `${state} ` : "national "}${officeLabel} ${mode}`;
   const runId = await createIngestionRun({
     scope: runScope,
     mode,
@@ -115,6 +128,7 @@ async function main() {
     metadata: {
       maxCandidatePages,
       maxCandidates,
+      offices,
       requestDelayMs: process.env.FEC_REQUEST_DELAY_MS,
     },
   });
@@ -129,10 +143,15 @@ async function main() {
     const issues: ValidationIssue[] = [];
 
     const raceScope = TARGET_RACES.filter(
-      (race) => race.cycle === cycle && (!state || race.state === state),
+      (race) =>
+        race.cycle === cycle && offices.includes(race.office as "H" | "S") && (!state || race.state === state),
     );
     const raceIds = new Set(raceScope.map((race) => race.id));
-    const fecCandidates = await fetchHouseCandidates(cycle, maxCandidatePages, state);
+    const fecCandidates = (
+      await Promise.all(
+        offices.map((office) => fetchCandidatesForOffice(office, cycle, maxCandidatePages, state)),
+      )
+    ).flat();
     const normalizedCandidates = fecCandidates
       .map((record) => normalizeCandidate(record, cycle))
       .filter((candidate) => candidate.raceId && raceIds.has(candidate.raceId))
@@ -208,6 +227,7 @@ async function main() {
     });
 
     await upsertRaces(raceScope);
+    await upsertRaceRatings(getPublicWatchlistRatings(raceScope, cycle));
     await upsertCandidates(candidates);
     await upsertCommittees(committees);
     await upsertFilings(filings);
@@ -226,7 +246,7 @@ async function main() {
     await finishIngestionRun(runId, errors.length ? "partial" : "success", recordsSeen, errors);
 
     console.log(
-      `Ingested ${recordsSeen} records/signals from ${candidates.length} House candidates with ${issues.length} validation issues.`,
+      `Ingested ${recordsSeen} records/signals from ${candidates.length} ${officeLabel} candidates with ${issues.length} validation issues.`,
     );
   } catch (error) {
     errors.push(error instanceof Error ? error.message : error);

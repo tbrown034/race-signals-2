@@ -9,7 +9,7 @@ import {
   demoSignals,
 } from "@/src/lib/demo/data";
 import { hasDatabase, sql } from "@/src/lib/db/client";
-import type { Candidate, Committee, IngestionRun, Race, Signal } from "@/src/lib/types";
+import type { Candidate, Committee, IngestionRun, Race, RaceRating, Signal } from "@/src/lib/types";
 
 type SignalRow = {
   id: string;
@@ -59,6 +59,7 @@ export async function getSignals(filters: {
   q?: string;
   raceId?: string;
   state?: string;
+  office?: string;
   type?: string;
   status?: string;
   limit?: number;
@@ -68,6 +69,7 @@ export async function getSignals(filters: {
     return demoSignals.filter((signal) => {
       if (filters.raceId && signal.raceId !== filters.raceId) return false;
       if (filters.state && !signal.raceId?.includes(`-${filters.state}-`)) return false;
+      if (filters.office && !signal.raceId?.endsWith(`-${filters.office}`)) return false;
       if (filters.type && signal.signalType !== filters.type) return false;
       if (filters.status && signal.status !== filters.status) return false;
       if (q && !`${signal.headline} ${signal.whyItMatters}`.toLowerCase().includes(q)) {
@@ -86,6 +88,10 @@ export async function getSignals(filters: {
   if (filters.state) {
     values.push(filters.state);
     where.push(`r.state = $${values.length}`);
+  }
+  if (filters.office) {
+    values.push(filters.office);
+    where.push(`r.office = $${values.length}`);
   }
   if (filters.type) {
     values.push(filters.type);
@@ -197,6 +203,34 @@ export async function getRace(id: string): Promise<Race | null> {
     [id],
   );
   return rows[0] ?? null;
+}
+
+export async function getRaceRatings(id: string): Promise<RaceRating[]> {
+  if (!hasDatabase()) return [];
+  const rows = await sql<{
+    race_id: string;
+    source_name: string;
+    source_url: string | null;
+    rating: string;
+    rating_date: string | null;
+    rationale: string | null;
+  }>(
+    `
+      select race_id, source_name, source_url, rating, rating_date, rationale
+      from race_ratings
+      where race_id = $1
+      order by rating_date desc nulls last, source_name
+    `,
+    [id],
+  );
+  return rows.map((row) => ({
+    raceId: row.race_id,
+    sourceName: row.source_name,
+    sourceUrl: row.source_url,
+    rating: row.rating,
+    ratingDate: row.rating_date,
+    rationale: row.rationale,
+  }));
 }
 
 export async function getSignalsForEntity(entity: "candidate" | "committee" | "race", id: string) {

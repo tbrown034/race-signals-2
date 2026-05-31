@@ -17,7 +17,7 @@ The core questions are:
 - Who is spending in a race?
 - What looks unusual enough to deserve a reporter's attention?
 
-The MVP is FEC API only and now targets 2026 U.S. House races across all 50 states. Do not imply coverage beyond U.S. House races or beyond FEC-derived records.
+The MVP is FEC API only and now targets 2026 U.S. House races across all 50 states plus 2026 U.S. Senate races. Do not imply coverage beyond federal House/Senate races or beyond FEC-derived records.
 
 ## Editorial Product Principles
 
@@ -88,6 +88,7 @@ Ingestion controls:
 - `INGESTION_MODE` can be `watch`, `backfill`, or `repair`.
 - `BACKFILL_START_DATE` and `BACKFILL_END_DATE` are required for backfill mode.
 - `RACE_SIGNALS_STATE` limits a run to one state.
+- `RACE_SIGNALS_OFFICES` can be `H`, `S`, or `H,S`.
 - `FEC_MAX_CANDIDATE_PAGES` limits national candidate discovery pages.
 - `FEC_MAX_CANDIDATES` limits downstream candidate processing.
 - `FEC_REQUEST_DELAY_MS` paces API calls. Default is 4000 ms to stay under the normal 1,000-calls/hour FEC limit.
@@ -97,17 +98,22 @@ National ingestion should be paced and scheduled. Do not put broad FEC ingestion
 
 Backfilled signals must use the original event date as `signal_date` and `status = historical`. Do not present old backfilled records as fresh changes.
 
-## National House Scope
+## National Congressional Scope
 
 Default scope lives in `src/lib/scope.ts`.
 
 Current target scope:
 
 - All 435 U.S. House districts across the 50 states for the 2026 cycle.
+- The 2026 U.S. Senate races listed in `SENATE_RACE_SCOPES`, including current special-election seats.
 - At-large states use district `00`.
 - State/district definitions are generated from `STATE_SCOPES`.
 
-The goal is a working national House MVP, not a generic all-office election dashboard.
+The goal is a working federal congressional MVP, not a generic all-office election dashboard.
+
+## Race Ratings
+
+Race ratings are stored separately from FEC data in `race_ratings`. Do not scrape Cook Political Report or other proprietary ratings pages without permission. The current watchlist uses attributed public-source links and should be treated as an editorial context layer, not official FEC data.
 
 ## Data Model
 
@@ -184,7 +190,7 @@ Every signal needs:
 
 ## Agent Operating Notes
 
-- Prefer small, readable changes that preserve the national House MVP.
+- Prefer small, readable changes that preserve the national congressional MVP.
 - Do not invent coverage outside the FEC records currently ingested.
 - Do not add new data sources before the FEC-only MVP works.
 - Keep README and this context doc in sync when architecture changes.

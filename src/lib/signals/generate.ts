@@ -37,6 +37,7 @@ function raceById(races: Race[]) {
 
 function displayRace(race?: Race) {
   if (!race) return "the race";
+  if (race.office === "S") return `${race.state} Senate`;
   return `${race.state}-${race.district}`;
 }
 

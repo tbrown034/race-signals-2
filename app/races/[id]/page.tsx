@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import { EntityPage } from "@/src/components/entity-page";
 import { PageShell } from "@/src/components/page-shell";
-import { getRace, getSignalsForEntity } from "@/src/lib/db/repository";
+import { getRace, getRaceRatings, getSignalsForEntity } from "@/src/lib/db/repository";
 
 export default async function RacePage({
   params,
@@ -9,9 +9,10 @@ export default async function RacePage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const [race, signals] = await Promise.all([
+  const [race, signals, ratings] = await Promise.all([
     getRace(id),
     getSignalsForEntity("race", id),
+    getRaceRatings(id),
   ]);
 
   if (!race) notFound();
@@ -21,6 +22,7 @@ export default async function RacePage({
       <EntityPage
         eyebrow="Race"
         title={race.name}
+        ratings={ratings}
         signals={signals}
         meta={[
           ["Race ID", race.id],

@@ -22,6 +22,7 @@ export function FeedFilters({
   races,
   q,
   state,
+  office,
   raceId,
   type,
   status,
@@ -29,12 +30,13 @@ export function FeedFilters({
   races: Race[];
   q?: string;
   state?: string;
+  office?: string;
   raceId?: string;
   type?: string;
   status?: string;
 }) {
   return (
-    <form className="grid gap-3 border-b border-neutral-300 bg-white p-4 md:grid-cols-[1fr_120px_180px_220px_160px_auto]">
+    <form className="grid gap-3 border-b border-neutral-300 bg-white p-4 md:grid-cols-[1fr_105px_110px_170px_210px_150px_auto]">
       <input
         className="h-10 border border-neutral-300 bg-white px-3 text-sm outline-none focus:border-neutral-700"
         defaultValue={q}
@@ -55,15 +57,24 @@ export function FeedFilters({
       </select>
       <select
         className="h-10 border border-neutral-300 bg-white px-3 text-sm"
+        defaultValue={office ?? ""}
+        name="office"
+      >
+        <option value="">All offices</option>
+        <option value="H">House</option>
+        <option value="S">Senate</option>
+      </select>
+      <select
+        className="h-10 border border-neutral-300 bg-white px-3 text-sm"
         defaultValue={raceId ?? ""}
         name="race"
       >
         <option value="">All races</option>
         {races
-          .filter((race) => !state || race.state === state)
+          .filter((race) => (!state || race.state === state) && (!office || race.office === office))
           .map((race) => (
           <option value={race.id} key={race.id}>
-            {race.state}-{race.district}
+            {race.office === "S" ? `${race.state} Senate` : `${race.state}-${race.district}`}
           </option>
         ))}
       </select>

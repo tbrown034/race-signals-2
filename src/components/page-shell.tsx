@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
+import { BrandMark } from "@/src/components/brand-mark";
 
 const nav = [
   { href: "/", label: "Feed" },
@@ -14,11 +15,9 @@ export function PageShell({ children }: { children: ReactNode }) {
       <header className="border-b border-neutral-300 bg-white">
         <div className="mx-auto flex max-w-7xl flex-col gap-4 px-5 py-4 sm:px-8 lg:flex-row lg:items-end lg:justify-between">
           <div>
-            <Link href="/" className="text-2xl font-semibold tracking-tight">
-              Race Signals
-            </Link>
+            <BrandMark />
             <p className="mt-1 text-sm text-neutral-600">
-              Early campaign-finance alerts for reporters covering 2026 House races.
+              Early campaign-finance alerts for reporters covering 2026 House and Senate races.
             </p>
           </div>
           <nav className="flex flex-wrap gap-4 text-sm">

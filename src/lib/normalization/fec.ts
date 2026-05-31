@@ -28,10 +28,10 @@ export function normalizeCandidate(record: FecCandidate, cycle: number): Candida
     party: record.party ?? null,
     office: record.office,
     state: record.state,
-    district,
+    district: record.office === "S" ? "00" : district,
     electionYear: cycle,
     incumbentChallengeStatus: record.incumbent_challenge_full ?? null,
-    raceId: raceIdFor(record.state, district, cycle),
+    raceId: raceIdFor(record.state, district, cycle, record.office),
     sourceUrl: fecCandidateUrl(record.candidate_id),
   };
 }

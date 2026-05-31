@@ -158,7 +158,8 @@ function dateWindowParams(window?: DateWindow) {
   };
 }
 
-export async function fetchHouseCandidates(
+export async function fetchCandidatesForOffice(
+  office: "H" | "S",
   cycle: number,
   maxPages?: number,
   state?: string,
@@ -166,13 +167,21 @@ export async function fetchHouseCandidates(
   return firstPages<FecCandidate>(
     "/candidates/search/",
     {
-      office: "H",
+      office,
       election_year: cycle,
       state,
       sort: "name",
     },
     maxPages,
   );
+}
+
+export async function fetchHouseCandidates(
+  cycle: number,
+  maxPages?: number,
+  state?: string,
+) {
+  return fetchCandidatesForOffice("H", cycle, maxPages, state);
 }
 
 export async function fetchCandidatesForRace(state: string, district: string, cycle: number) {

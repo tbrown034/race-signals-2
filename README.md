@@ -4,7 +4,7 @@ Race Signals is a serious portfolio MVP for spotting early campaign-finance sign
 
 It is built for reporters and editors who need a fast answer to: what changed, who filed, who formed a committee, where money is moving and what deserves follow-up.
 
-The MVP is intentionally focused: FEC API only, covering 2026 U.S. House races across all 50 states.
+The MVP is intentionally focused: FEC API only, covering 2026 U.S. House races across all 50 states plus 2026 U.S. Senate races.
 
 ## Why It Matters Journalistically
 
@@ -38,7 +38,7 @@ Not included yet:
 ## Pipeline Overview
 
 1. `scripts/ingest-fec.ts` loads `.env.local`, migrates the schema and starts an ingestion run.
-2. `src/lib/sources/fec/` fetches 2026 House candidates, candidate committees, reports, receipts and independent expenditures from the FEC API.
+2. `src/lib/sources/fec/` fetches 2026 House/Senate candidates, candidate committees, reports, receipts and independent expenditures from the FEC API.
 3. `src/lib/normalization/` maps raw FEC records into internal entities.
 4. `src/lib/validation/` flags missing names, dates, IDs, source URLs, unmatched races and suspicious amounts.
 5. `src/lib/db/` upserts normalized records into Postgres.
@@ -52,6 +52,7 @@ Schema lives in `db/schema.sql`.
 Core tables:
 
 - `races`
+- `race_ratings`
 - `candidates`
 - `committees`
 - `filings`
@@ -104,7 +105,7 @@ Backfill mode generates historical signals from the requested date window. Those
 
 ## Known Limitations
 
-- Coverage is national for 2026 U.S. House races, but not for Senate, presidential, state or local races.
+- Coverage is national for 2026 U.S. House and U.S. Senate races, but not presidential, state or local races.
 - FEC API results are page-limited for development ergonomics.
 - Demo data is illustrative and clearly marked as demo mode.
 - Signal thresholds are simple editorial heuristics, not statistical anomaly detection.
@@ -152,9 +153,10 @@ FEC_MAX_CANDIDATE_PAGES=3 npm run ingest
 FEC_MAX_CANDIDATES=25 npm run ingest
 FEC_REQUEST_DELAY_MS=4000 npm run ingest
 FEC_MAX_RETRIES=6 npm run ingest
+RACE_SIGNALS_OFFICES=H,S npm run ingest
 ```
 
-Without those caps, candidate discovery attempts the full 2026 House candidate search and then fetches related committee/report/receipt/expenditure records.
+Without those caps, candidate discovery attempts the full 2026 House/Senate candidate search and then fetches related committee/report/receipt/expenditure records.
 
 For a first production smoke test, use:
 
@@ -193,6 +195,10 @@ The source-adapter boundary is designed for later expansion:
 - Dark-money datasets: source-specific investigative overlays once provenance is clear.
 
 Those sources should come after the FEC-only MVP works end to end.
+
+## Race Ratings
+
+Race Signals stores race ratings separately from FEC data in `race_ratings`. Cook Political Report should not be scraped or republished without licensing; the current implementation uses a small attributed public-source watchlist and keeps source URLs visible. A licensed ratings feed can be added later as another source adapter.
 
 ## Agent Context
 

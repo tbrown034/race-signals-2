@@ -103,6 +103,15 @@ export type Signal = {
   metadata?: Record<string, unknown>;
 };
 
+export type RaceRating = {
+  raceId: string;
+  sourceName: string;
+  sourceUrl?: string | null;
+  rating: string;
+  ratingDate?: string | null;
+  rationale?: string | null;
+};
+
 export type ValidationIssue = {
   entityType: string;
   sourceId?: string | null;

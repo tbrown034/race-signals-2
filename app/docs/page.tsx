@@ -3,7 +3,7 @@ import Link from "next/link";
 const sections = [
   {
     title: "North Star",
-    body: "Race Signals is a feed-first civic data product for spotting early campaign-finance signals before they become obvious stories. The first version is FEC API only, focused on 2026 U.S. House races across all states.",
+    body: "Race Signals is a feed-first civic data product for spotting early campaign-finance signals before they become obvious stories. The first version is FEC API only, focused on 2026 U.S. House and Senate races.",
   },
   {
     title: "Agent Memory",
@@ -88,7 +88,7 @@ export default function DocsPage() {
                 <tr>
                   <td className="px-4 py-3 font-mono text-xs">src/lib/scope.ts</td>
                   <td className="px-4 py-3 text-neutral-700">
-                    Generated 2026 U.S. House scope across all 50 states.
+                    Generated 2026 U.S. House and Senate scope.
                   </td>
                 </tr>
               </tbody>

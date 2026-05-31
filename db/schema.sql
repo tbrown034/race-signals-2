@@ -135,6 +135,19 @@ create table if not exists signals (
   updated_at timestamptz not null default now()
 );
 
+create table if not exists race_ratings (
+  id uuid primary key default gen_random_uuid(),
+  race_id text not null references races(id),
+  source_name text not null,
+  source_url text,
+  rating text not null,
+  rating_date date,
+  rationale text,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now(),
+  unique (race_id, source_name)
+);
+
 create table if not exists ingestion_runs (
   id uuid primary key default gen_random_uuid(),
   source text not null,
@@ -177,4 +190,5 @@ create index if not exists signals_date_idx on signals(signal_date desc, created
 create index if not exists signals_type_idx on signals(signal_type);
 create index if not exists signals_race_idx on signals(race_id);
 create index if not exists signals_status_idx on signals(status);
+create index if not exists race_ratings_race_idx on race_ratings(race_id);
 create index if not exists ingestion_runs_mode_idx on ingestion_runs(mode, started_at desc);

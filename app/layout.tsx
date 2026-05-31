@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "Race Signals",
-  description: "Campaign-finance signals for reporters covering 2026 House races.",
+  description: "Campaign-finance signals for reporters covering 2026 House and Senate races.",
 };
 
 export default function RootLayout({

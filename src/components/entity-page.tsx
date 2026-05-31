@@ -1,17 +1,19 @@
 import { SignalCard } from "@/src/components/signal-card";
-import type { Signal } from "@/src/lib/types";
+import type { RaceRating, Signal } from "@/src/lib/types";
 
 export function EntityPage({
   eyebrow,
   title,
   meta,
   sourceUrl,
+  ratings = [],
   signals,
 }: {
   eyebrow: string;
   title: string;
   meta: Array<[string, string | number | null | undefined]>;
   sourceUrl?: string | null;
+  ratings?: RaceRating[];
   signals: Signal[];
 }) {
   return (
@@ -35,6 +37,31 @@ export function EntityPage({
           <a className="mt-5 inline-block text-sm font-medium underline underline-offset-4" href={sourceUrl}>
             FEC source
           </a>
+        ) : null}
+        {ratings.length ? (
+          <div className="mt-6 border-t border-neutral-300 pt-5">
+            <h2 className="font-mono text-xs uppercase tracking-[0.12em] text-neutral-500">
+              Race ratings
+            </h2>
+            <div className="mt-3 space-y-3">
+              {ratings.map((rating) => (
+                <div className="text-sm" key={`${rating.raceId}-${rating.sourceName}`}>
+                  <p className="font-semibold">{rating.rating}</p>
+                  <p className="mt-1 text-neutral-700">{rating.rationale}</p>
+                  {rating.sourceUrl ? (
+                    <a
+                      className="mt-2 inline-block text-xs font-medium underline underline-offset-4"
+                      href={rating.sourceUrl}
+                    >
+                      {rating.sourceName}
+                    </a>
+                  ) : (
+                    <p className="mt-2 text-xs text-neutral-600">{rating.sourceName}</p>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
         ) : null}
       </aside>
       <section className="border border-neutral-300 bg-white">

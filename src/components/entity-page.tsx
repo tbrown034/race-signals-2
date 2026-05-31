@@ -10,6 +10,7 @@ export function EntityPage({
   eyebrow,
   title,
   titleAccessory,
+  mobileLead,
   meta,
   sourceUrl,
   ratings = [],
@@ -23,6 +24,7 @@ export function EntityPage({
   eyebrow: string;
   title: string;
   titleAccessory?: ReactNode;
+  mobileLead?: ReactNode;
   meta: Array<[string, ReactNode | null | undefined]>;
   sourceUrl?: string | null;
   ratings?: RaceRating[];
@@ -56,6 +58,7 @@ export function EntityPage({
           </span>
           {titleAccessory}
         </h1>
+        {mobileLead ? <div className="mt-4 md:hidden">{mobileLead}</div> : null}
         <dl className="mt-5 space-y-4 text-sm">
           <MetaRows rows={primaryMeta} />
         </dl>

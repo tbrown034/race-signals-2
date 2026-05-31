@@ -187,6 +187,8 @@ export function generateSignals(input: SignalInput): Signal[] {
     );
     const latest = sorted[0];
     const prior = sorted[1];
+    const latestVersionInfo = latest ? filingVersionInfo.get(latest.sourceId) : undefined;
+    const priorVersionInfo = prior ? filingVersionInfo.get(prior.sourceId) : undefined;
     const committee = committees.get(committeeId);
     const race = committee?.raceId ? races.get(committee.raceId) : undefined;
     if (
@@ -195,6 +197,9 @@ export function generateSignals(input: SignalInput): Signal[] {
       !latest.sourceUrl ||
       !prior?.totalReceipts ||
       !prior.sourceUrl ||
+      sameReportPeriod(latest, prior) ||
+      latestVersionInfo?.versionKind === "likely_refile" ||
+      priorVersionInfo?.versionKind === "likely_refile" ||
       latest.totalReceiptsBasis !== "period" ||
       prior.totalReceiptsBasis !== "period" ||
       !isCurrentCycleRecord(latest.receiptDate, race, latest.cycle) ||
@@ -377,9 +382,15 @@ function filingVersionKey(filing: Filing) {
     filing.reportType ?? "",
     filing.coverageStartDate ?? "",
     filing.coverageEndDate ?? "",
-    filing.totalReceipts ?? "",
-    filing.cashOnHand ?? "",
   ].join("|");
+}
+
+function sameReportPeriod(a: Filing, b: Filing) {
+  return (
+    (a.reportType ?? "") === (b.reportType ?? "") &&
+    (a.coverageStartDate ?? "") === (b.coverageStartDate ?? "") &&
+    (a.coverageEndDate ?? "") === (b.coverageEndDate ?? "")
+  );
 }
 
 function isCurrentCycleRecord(date: string, race?: Race, cycle?: number | null) {

@@ -188,6 +188,10 @@ export default async function SpendingPage({
                               <dd className="inline">{supportOpposeLabel(signal.metadata?.supportOpposeIndicator)}</dd>
                             </div>
                             <div>
+                              <dt className="inline font-mono uppercase tracking-[0.12em] text-neutral-500">Purpose </dt>
+                              <dd className="inline">{sourcePurpose(signal.metadata?.purpose)}</dd>
+                            </div>
+                            <div>
                               <dt className="inline font-mono uppercase tracking-[0.12em] text-neutral-500">Race </dt>
                               <dd className="inline">
                                 {signal.raceId ? (
@@ -208,8 +212,12 @@ export default async function SpendingPage({
                                   </a>
                                 ) : (
                                   "Source not stored"
-                                )}
-                              </dd>
+                              )}
+                            </dd>
+                          </div>
+                            <div>
+                              <dt className="inline font-mono uppercase tracking-[0.12em] text-neutral-500">Record </dt>
+                              <dd className="inline font-mono text-neutral-950">{sourceRecordLabel(signal.metadata?.sourceId)}</dd>
                             </div>
                           </dl>
                         </td>

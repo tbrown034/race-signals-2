@@ -44,6 +44,7 @@ export default async function CandidatePage({
     ? await Promise.all([getCandidatesForRace(candidate.raceId), getRace(candidate.raceId)])
     : [[], null] as const;
   const signalCounts = countSignals(signals);
+  const reporterNotes = candidateReporterNotes(candidate, signalCounts, signals.length);
 
   return (
     <PageShell>
@@ -61,6 +62,7 @@ export default async function CandidatePage({
             {isIncumbent(candidate.incumbentChallengeStatus) ? <IncumbentBadge /> : null}
           </span>
         }
+        mobileLead={<MobileCandidateRead notes={candidateMobileNotes(candidate, signalCounts, signals.length)} />}
         primaryMetaCount={11}
         sourceUrl={candidate.sourceUrl}
         signals={signals}
@@ -108,14 +110,7 @@ export default async function CandidatePage({
         </nav>
         <ReporterRead
           id="reporter-read"
-          notes={[
-            `Money position: ${candidateMoney(candidate.totalReceiptsCycle, candidate.totalsFetchedAt).toLowerCase()} raised this cycle; ${candidateMoney(candidate.cashOnHandLatest, candidate.totalsFetchedAt).toLowerCase()} cash on hand${candidate.cashOnHandAsOf ? ` as of ${formatDate(candidate.cashOnHandAsOf)}` : ""}.`,
-            `${formatCount(signals.length, "related signal")} in this slice: ${formatCount(signalCounts.filings, "filing")}, ${formatCount(signalCounts.committees, "committee record")}, ${formatCount(signalCounts.outsideSpending, "outside-spending alert")}, ${formatCount(signalCounts.review, "review flag")}.`,
-            isIncumbent(candidate.incumbentChallengeStatus)
-              ? "Incumbent context: committee records usually reflect cycle operations or continuing campaign infrastructure, not a first-time launch."
-              : "Non-incumbent context: a principal committee is useful early evidence of campaign organization, but ballot status still needs election-office verification.",
-            "Low-cost mode does not store itemized Schedule A donor receipts; use FEC source links for donor-level lookup.",
-          ]}
+          notes={reporterNotes}
         />
         {raceCohort.length ? (
           <div className="border-b border-neutral-300" id="race-context">
@@ -193,6 +188,49 @@ export default async function CandidatePage({
         />
       </EntityPage>
     </PageShell>
+  );
+}
+
+function candidateReporterNotes(
+  candidate: NonNullable<Awaited<ReturnType<typeof getCandidate>>>,
+  signalCounts: ReturnType<typeof countSignals>,
+  totalSignals: number,
+) {
+  return [
+    `Money position: ${candidateMoney(candidate.totalReceiptsCycle, candidate.totalsFetchedAt).toLowerCase()} raised this cycle; ${candidateMoney(candidate.cashOnHandLatest, candidate.totalsFetchedAt).toLowerCase()} cash on hand${candidate.cashOnHandAsOf ? ` as of ${formatDate(candidate.cashOnHandAsOf)}` : ""}.`,
+    `${formatCount(totalSignals, "related signal")} in this slice: ${formatCount(signalCounts.filings, "filing")}, ${formatCount(signalCounts.committees, "committee record")}, ${formatCount(signalCounts.outsideSpending, "outside-spending alert")}, ${formatCount(signalCounts.review, "review flag")}.`,
+    isIncumbent(candidate.incumbentChallengeStatus)
+      ? "Incumbent context: committee records usually reflect cycle operations or continuing campaign infrastructure, not a first-time launch."
+      : "Non-incumbent context: a principal committee is useful early evidence of campaign organization, but ballot status still needs election-office verification.",
+    "Low-cost mode does not store itemized Schedule A donor receipts; use FEC source links for donor-level lookup.",
+  ];
+}
+
+function candidateMobileNotes(
+  candidate: NonNullable<Awaited<ReturnType<typeof getCandidate>>>,
+  signalCounts: ReturnType<typeof countSignals>,
+  totalSignals: number,
+) {
+  return [
+    `${candidateMoney(candidate.totalReceiptsCycle, candidate.totalsFetchedAt)} raised; ${candidateMoney(candidate.cashOnHandLatest, candidate.totalsFetchedAt)} cash${candidate.cashOnHandAsOf ? ` as of ${formatDate(candidate.cashOnHandAsOf)}` : ""}.`,
+    `${formatCount(totalSignals, "signal")}: ${formatCount(signalCounts.filings, "filing")}, ${formatCount(signalCounts.committees, "committee record")}, ${formatCount(signalCounts.outsideSpending, "outside-spending alert")}, ${formatCount(signalCounts.review, "review flag")}.`,
+  ];
+}
+
+function MobileCandidateRead({ notes }: { notes: string[] }) {
+  return (
+    <div className="border border-neutral-300 bg-neutral-50">
+      <p className="border-b border-neutral-300 px-3 py-2 font-mono text-[11px] uppercase tracking-[0.12em] text-neutral-500">
+        Reporter read
+      </p>
+      <ul className="divide-y divide-neutral-200 text-sm leading-5 text-neutral-700">
+        {notes.map((note) => (
+          <li className="px-3 py-2" key={note}>
+            {note}
+          </li>
+        ))}
+      </ul>
+    </div>
   );
 }
 

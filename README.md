@@ -21,10 +21,14 @@ Current source:
 Initial endpoints:
 
 - Candidate search
+- Candidate aggregate totals
 - Candidate committees
 - Committee reports
-- Schedule A itemized receipts
 - Schedule E independent expenditures
+
+Deferred endpoints:
+
+- Schedule A itemized receipts. Donor-level storage is intentionally excluded from production ingest to protect the free-tier database budget.
 
 Not included yet:
 
@@ -38,7 +42,7 @@ Not included yet:
 ## Pipeline Overview
 
 1. `scripts/ingest-fec.ts` loads `.env.local`, migrates the schema and starts an ingestion run.
-2. `src/lib/sources/fec/` fetches 2026 House/Senate candidates, candidate committees, reports, receipts and independent expenditures from the FEC API.
+2. `src/lib/sources/fec/` fetches 2026 House/Senate candidates, aggregate totals, candidate committees, reports and independent expenditures from the FEC API.
 3. `src/lib/normalization/` maps raw FEC records into internal entities.
 4. `src/lib/validation/` flags missing names, dates, IDs, source URLs, unmatched races and suspicious amounts.
 5. `src/lib/db/` upserts normalized records into Postgres.
@@ -61,6 +65,7 @@ Core tables:
 - `source_records`
 - `signals`
 - `ingestion_runs`
+- `ingestion_endpoint_runs`
 - `validation_issues`
 
 The schema is Neon-compatible Postgres and uses raw SQL. Prisma is intentionally not used.
@@ -73,6 +78,8 @@ Tables use unique constraints on source/source ID pairs. Signals use a `dedupe_k
 
 Upserts update changed metadata without creating duplicate feed entries.
 
+Cycle guardrails prevent old FEC records from being surfaced as current-cycle alerts. For 2026 race shells, filing and Schedule E records must fall inside the 2025-01-01 through 2026-12-31 cycle window before they are stored, displayed or converted into signals. `npm run repair:cycles` prunes legacy cross-cycle rows if a local database was populated before this guardrail existed.
+
 ## Validation Rules
 
 Current validation checks:
@@ -84,6 +91,8 @@ Current validation checks:
 - Suspiciously large amount
 - Broken or missing FEC source URL
 - Unmatched race
+- Cross-cycle filings or independent expenditures attached to a current race
+- Possible duplicate Schedule E records with the same spender, target, date, amount and support/oppose marker
 
 Issues are stored in `validation_issues` during ingestion.
 
@@ -102,13 +111,16 @@ Each signal includes a type, headline, why-it-matters explanation, related candi
 
 Backfill mode generates historical signals from the requested date window. Those signals preserve the original event date in `signal_date` and use `status = historical` so old records do not look like fresh alerts.
 
+Independent expenditure signals are generated only from current-cycle Schedule E rows. Large current-cycle IEs of $100,000 or more are marked `review`; historical or cross-cycle records are not allowed to masquerade as review items.
+
 ## Known Limitations
 
 - Coverage is national for 2026 U.S. House and U.S. Senate races, but not presidential, state or local races.
 - FEC API results are page-limited for development ergonomics.
 - Demo data is illustrative and clearly marked as demo mode.
 - Signal thresholds are simple editorial heuristics, not statistical anomaly detection.
-- The app does not yet reconcile every outside spender committee that appears only in Schedule E.
+- Election timeline data from Wikidata/Wikipedia is sparse for House primaries and should be treated as context, not an authoritative results feed.
+- The scheduled ingest is deliberately narrow for cost control; broader national refreshes are manual until the pipeline is optimized further.
 
 ## How To Run Locally
 
@@ -179,7 +191,9 @@ Verification:
 
 ```bash
 npm run lint
+npm run test:logic
 npm run build
+npm run audit:signals
 ```
 
 ## How To Add A Source Adapter Later

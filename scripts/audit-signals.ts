@@ -69,6 +69,21 @@ async function main() {
       limit 10
     `));
 
+    checks.push(await countCheck(pool, "Possible duplicate Schedule E records", "warn", `
+      select
+        spender_committee_id,
+        candidate_id,
+        expenditure_date,
+        amount,
+        support_oppose_indicator,
+        count(*)::int as count,
+        array_agg(source_id order by source_id) as source_ids
+      from independent_expenditures
+      group by spender_committee_id, candidate_id, expenditure_date, amount, support_oppose_indicator
+      having count(*) > 1
+      limit 10
+    `));
+
     checks.push(await countCheck(pool, "Filings before race cycle window", "fail", `
       select f.source_id, f.receipt_date, cm.race_id, r.cycle
       from filings f

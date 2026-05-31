@@ -3,6 +3,7 @@ import { CoverageStrip } from "@/src/components/coverage-strip";
 import { FeedFilters } from "@/src/components/feed-filters";
 import { PageShell } from "@/src/components/page-shell";
 import { SignalCard } from "@/src/components/signal-card";
+import { SignalKeyboardNav } from "@/src/components/signal-keyboard-nav";
 import { getCoverageSummary, getRaces, getSignals, getSignalStateCounts, getSignalStateFreshness, getStateRaceBoard } from "@/src/lib/db/repository";
 import { formatDate, formatMoney, formatRelativeTime, isOlderThanHours } from "@/src/lib/format";
 import { signalFiltersFromSearchParams, sinceLabel } from "@/src/lib/signals/filters";
@@ -157,7 +158,9 @@ export default async function Home({
             targetStatus={targetStatus}
           />
           {visibleSignals.length ? (
-            visibleSignals.map((signal) => <SignalCard signal={signal} key={signal.dedupeKey} />)
+            <SignalKeyboardNav>
+              {visibleSignals.map((signal) => <SignalCard signal={signal} key={signal.dedupeKey} />)}
+            </SignalKeyboardNav>
           ) : (
             <FeedEmptyState
               isStale={isOlderThanHours(status.runs[0]?.finishedAt ?? status.runs[0]?.startedAt, 48)}

@@ -44,8 +44,11 @@ export function SignalCard({ signal }: { signal: Signal }) {
 
   return (
     <article
-      className={`grid gap-3 border-b border-l-[3px] border-b-neutral-300 bg-white px-4 py-4 md:grid-cols-[112px_1fr_190px] ${typeStripes[signal.signalType] ?? "border-l-neutral-400"}`}
+      className={`grid gap-3 border-b border-l-[3px] border-b-neutral-300 bg-white px-4 py-4 outline-none focus-visible:ring-2 focus-visible:ring-neutral-900 focus-visible:ring-offset-[-2px] md:grid-cols-[112px_1fr_190px] ${typeStripes[signal.signalType] ?? "border-l-neutral-400"}`}
+      data-signal-card="true"
+      data-source-url={signal.sourceUrl ?? undefined}
       id={anchorId}
+      tabIndex={-1}
     >
       <div className="font-mono text-xs text-neutral-600">
         <p className="flex items-center gap-1.5 text-neutral-950">

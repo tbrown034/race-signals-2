@@ -84,7 +84,7 @@ Tables use unique constraints on source/source ID pairs. Signals use a `dedupe_k
 
 Upserts update changed metadata without creating duplicate feed entries.
 
-Cycle guardrails prevent old FEC records from being surfaced as current-cycle alerts. For 2026 race shells, filing and Schedule E records must fall inside the 2025-01-01 through 2026-12-31 cycle window before they are stored, displayed or converted into signals. `npm run repair:cycles` prunes legacy cross-cycle rows if a local database was populated before this guardrail existed. `npm run repair:donors` removes legacy Schedule A donor rows from earlier experiments; current production ingest does not store donor-level receipts. `npm run repair:history` prunes old validation and ingestion diagnostic rows while preserving the latest operational status rows. `npm run repair:schedule-e-links` rewrites older Schedule E links to the narrowest FEC search URL Race Signals can construct from stored source IDs and amounts.
+Cycle guardrails prevent old FEC records from being surfaced as current-cycle alerts. For 2026 race shells, filing and Schedule E records must fall inside the 2025-01-01 through 2026-12-31 cycle window before they are stored, displayed or converted into signals. `npm run repair:cycles` prunes legacy cross-cycle rows if a local database was populated before this guardrail existed. `npm run repair:donors` removes legacy Schedule A donor rows from earlier experiments; current production ingest does not store donor-level receipts. `npm run repair:elections` refreshes bounded Wikidata/Wikipedia election timeline rows for candidates with public identifiers. `npm run repair:history` prunes old validation and ingestion diagnostic rows while preserving the latest operational status rows. `npm run repair:schedule-e-links` rewrites older Schedule E links to the narrowest FEC search URL Race Signals can construct from stored source IDs and amounts.
 
 ## Validation Rules
 
@@ -208,6 +208,7 @@ npm run test:logic
 npm run build
 npm run audit:signals
 npm run audit:cost
+npm run repair:elections
 npm run repair:history
 npm run repair:schedule-e-links
 ```

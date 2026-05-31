@@ -12,6 +12,7 @@
     "audit:signals": "tsx scripts/audit-signals.ts",
     "repair:cycles": "tsx scripts/prune-cross-cycle-records.ts",
     "repair:donors": "tsx scripts/prune-donor-transactions.ts",
+    "repair:elections": "tsx scripts/repair-elections.ts",
     "repair:history": "tsx scripts/prune-ingestion-history.ts",
     "repair:schedule-e-links": "tsx scripts/repair-schedule-e-source-links.ts",
     "repair:signals": "tsx scripts/regenerate-signals.ts",

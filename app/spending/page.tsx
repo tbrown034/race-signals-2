@@ -2,7 +2,6 @@ import Link from "next/link";
 import { CoverageStrip } from "@/src/components/coverage-strip";
 import { FeedFilters } from "@/src/components/feed-filters";
 import { PageShell } from "@/src/components/page-shell";
-import { SignalCard } from "@/src/components/signal-card";
 import { getRaces, getSignalStateCounts, getSpendingSignals, getStatus } from "@/src/lib/db/repository";
 import { formatDate, formatMoney } from "@/src/lib/format";
 import { signalFiltersFromSearchParams } from "@/src/lib/signals/filters";
@@ -145,9 +144,7 @@ export default async function SpendingPage({
               </div>
             </div>
           ) : null}
-          {visibleSignals.length ? (
-            visibleSignals.map((signal) => <SignalCard signal={signal} key={signal.dedupeKey} />)
-          ) : (
+          {!visibleSignals.length ? (
             <div className="p-5 text-sm text-neutral-700">
               <p className="font-semibold text-neutral-950">No outside-spending signals match this view.</p>
               <p className="mt-1">
@@ -167,7 +164,7 @@ export default async function SpendingPage({
                 </Link>
               </div>
             </div>
-          )}
+          ) : null}
         </section>
       </main>
     </PageShell>

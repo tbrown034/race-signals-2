@@ -81,7 +81,7 @@ export default async function CandidatePage({
           ["Cycle receipts", formatMoney(candidate.totalReceiptsCycle)],
           ["Cash on hand", formatMoney(candidate.cashOnHandLatest)],
           ["Cash as of", formatDate(candidate.cashOnHandAsOf)],
-          ["Totals updated", candidate.totalsUpdatedAt ? formatDateTime(candidate.totalsUpdatedAt) : null],
+          ["FEC totals load date", candidate.totalsUpdatedAt ? formatDateTime(candidate.totalsUpdatedAt) : null],
           ...(candidate.bioguideId ? ([["Bioguide", candidate.bioguideId]] as Array<[string, string]>) : []),
         ]}
       >

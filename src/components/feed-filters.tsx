@@ -173,15 +173,23 @@ export function FeedFilters({
   return (
     <form className="border-b border-neutral-300 bg-white p-4" onSubmit={onSubmit}>
       <div className="space-y-3">
-        <label className="block text-xs font-medium uppercase tracking-[0.12em] text-neutral-500">
-          Search
-          <input
-            className="mt-1 block h-9 w-full min-w-0 border border-neutral-300 bg-white px-3 text-sm normal-case tracking-normal text-neutral-950 outline-none focus:border-neutral-700"
-            defaultValue={q}
-            name="q"
-            placeholder="Candidate, committee, race, source ID"
-          />
-        </label>
+        <div className="min-w-0">
+          <label className="block text-xs font-medium uppercase tracking-[0.12em] text-neutral-500" htmlFor="feed-search">
+            Search
+          </label>
+          <div className="mt-1 flex min-w-0 flex-col gap-2 sm:flex-row">
+            <input
+              className="block h-9 min-w-0 flex-1 border border-neutral-300 bg-white px-3 text-sm normal-case tracking-normal text-neutral-950 outline-none focus:border-neutral-700"
+              defaultValue={q}
+              id="feed-search"
+              name="q"
+              placeholder="Candidate, committee, race, source ID"
+            />
+            <button className="h-9 shrink-0 border border-neutral-900 bg-neutral-950 px-3 text-sm font-medium text-white sm:hidden">
+              Search
+            </button>
+          </div>
+        </div>
         {activeFilterTokens.length ? (
           <div className="flex flex-wrap items-center gap-2 border border-neutral-200 bg-neutral-50 p-2 text-xs">
             <span className="font-mono uppercase tracking-[0.12em] text-neutral-500">
@@ -447,7 +455,7 @@ export function FeedFilters({
             ))}
           </select>
         </label>
-          <button className="w-full self-end border border-neutral-900 bg-neutral-950 px-4 py-2 text-sm font-medium text-white sm:w-auto xl:self-end">
+          <button className="hidden w-full self-end border border-neutral-900 bg-neutral-950 px-4 py-2 text-sm font-medium text-white sm:block sm:w-auto xl:self-end">
           Search
         </button>
         {hasFilters ? (

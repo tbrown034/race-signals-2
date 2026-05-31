@@ -130,7 +130,7 @@ export default async function Home({
                   </a>
                 </div>
                 <p className="text-xs text-neutral-600">
-                  Exports include all matching rows, capped at 10,000, with FEC source IDs.
+                  All matching rows. Cap 10,000. FEC IDs included.
                 </p>
               </div>
             </div>

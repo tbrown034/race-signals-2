@@ -7,7 +7,7 @@ import type {
   ValidationIssue,
 } from "@/src/lib/types";
 
-const SUSPICIOUS_AMOUNT = 100000;
+const LARGE_AMOUNT_REVIEW_THRESHOLD = 100000;
 
 function sourceUrlIssue(entityType: string, sourceId?: string | null, sourceUrl?: string | null) {
   if (usableFecSourceUrl(entityType, sourceId, sourceUrl)) return [];
@@ -161,13 +161,13 @@ export function validateTransaction(transaction: Transaction): ValidationIssue[]
       sourceUrl: transaction.sourceUrl,
     });
   }
-  if (transaction.amount >= SUSPICIOUS_AMOUNT) {
+  if (transaction.amount >= LARGE_AMOUNT_REVIEW_THRESHOLD) {
     issues.push({
       entityType: "transaction",
       sourceId: transaction.sourceId,
       severity: "warning",
-      rule: "suspiciously_large_amount",
-      message: "Transaction amount is large enough to require manual review.",
+      rule: "large_amount_review",
+      message: "Transaction amount meets the flat manual review threshold.",
       sourceUrl: transaction.sourceUrl,
       raw: transaction.raw,
     });
@@ -209,13 +209,13 @@ export function validateIndependentExpenditure(
       sourceUrl: expenditure.sourceUrl,
     });
   }
-  if (expenditure.amount >= SUSPICIOUS_AMOUNT) {
+  if (expenditure.amount >= LARGE_AMOUNT_REVIEW_THRESHOLD) {
     issues.push({
       entityType: "independent_expenditure",
       sourceId: expenditure.sourceId,
       severity: "warning",
-      rule: "suspiciously_large_amount",
-      message: "Independent expenditure amount is large enough to require manual review.",
+      rule: "large_amount_review",
+      message: "Independent expenditure amount meets the flat manual review threshold.",
       sourceUrl: expenditure.sourceUrl,
       raw: expenditure.raw,
     });

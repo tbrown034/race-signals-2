@@ -50,7 +50,7 @@ Not included yet:
 1. `scripts/ingest-fec.ts` loads `.env.local`, migrates the schema and starts an ingestion run.
 2. `src/lib/sources/fec/` fetches 2026 House/Senate candidates, aggregate totals, candidate committees, reports and independent expenditures from the FEC API.
 3. `src/lib/normalization/` maps raw FEC records into internal entities.
-4. `src/lib/validation/` flags missing names, dates, IDs, source URLs, unmatched races and suspicious amounts.
+4. `src/lib/validation/` flags missing names, dates, IDs, source URLs, unmatched races and records that meet the flat manual review threshold.
 5. `src/lib/db/` upserts normalized records into Postgres.
 6. `src/lib/signals/` converts records into feed-ready reporting alerts.
 7. Server Components read from Postgres, with demo fallback when `DATABASE_URL` is missing.
@@ -96,7 +96,7 @@ Current validation checks:
 - Missing committee ID
 - Missing date
 - Missing or unstable source ID
-- Suspiciously large amount
+- Large amount review threshold
 - Broken or missing FEC source URL
 - Unmatched race
 - Cross-cycle filings or independent expenditures attached to a current race

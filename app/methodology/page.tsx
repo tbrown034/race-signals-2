@@ -11,7 +11,7 @@ const steps = [
   ["Scope", "Start with generated 2026 U.S. House races across all 50 states plus 2026 Senate races."],
   ["Fetch", "Use FEC candidate, candidate totals, committee, report and independent expenditure endpoints."],
   ["Normalize", "Map FEC records into stable internal candidates, committees, filings and expenditures."],
-  ["Validate", "Flag missing names, committee IDs, dates, source URLs, unmatched races and unusually large amounts."],
+  ["Validate", "Flag missing names, committee IDs, dates, source URLs, unmatched races and records that meet the flat manual review threshold."],
   ["Signal", "Convert source records into plain-English alerts with source links, dates, confidence and freshness."],
   [
     "Photos",

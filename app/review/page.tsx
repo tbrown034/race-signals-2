@@ -132,9 +132,7 @@ export default async function ReviewPage({
                 {reviewSignals.map((signal) => <SignalCard key={signal.dedupeKey} signal={signal} />)}
               </SignalKeyboardNav>
             ) : (
-              <p className="p-5 text-sm text-neutral-600">
-                No review-flagged signals match this scope.
-              </p>
+              <ReviewEmptyState state={state} type="signals" />
             )}
             {reviewSignalCount > reviewSignals.length ? (
               <p className="border-t border-neutral-200 px-5 py-3 text-xs leading-5 text-neutral-600">
@@ -210,9 +208,7 @@ export default async function ReviewPage({
                 </table>
               </div>
             ) : (
-              <p className="p-5 text-sm text-neutral-600">
-                No aggregate-only money gaps match this scope.
-              </p>
+              <ReviewEmptyState state={state} type="aggregate-money" />
             )}
             {aggregateGaps.total > moneyGaps.length ? (
               <p className="border-t border-neutral-200 px-5 py-3 text-xs leading-5 text-neutral-600">
@@ -294,6 +290,44 @@ export default async function ReviewPage({
         </section>
       </main>
     </PageShell>
+  );
+}
+
+function ReviewEmptyState({
+  state,
+  type,
+}: {
+  state?: string;
+  type: "aggregate-money" | "signals";
+}) {
+  const allStateHref = state ? `/?state=${state}` : "/";
+  return (
+    <div className="p-5 text-sm leading-6 text-neutral-700">
+      <p className="font-semibold text-neutral-950">
+        {type === "signals"
+          ? "No review-flagged signals match this scope."
+          : "No aggregate-only money gaps match this scope."}
+      </p>
+      <p className="mt-1 max-w-3xl">
+        This is a workflow read, not proof of no activity. Broaden the scope or check freshness before treating the slice as quiet.
+      </p>
+      <div className="mt-3 flex flex-wrap gap-x-4 gap-y-2">
+        {state ? (
+          <Link className="font-medium underline underline-offset-4" href="/review">
+            Show all-state review queue
+          </Link>
+        ) : null}
+        <Link className="font-medium underline underline-offset-4" href={allStateHref}>
+          {state ? `Open ${state} feed` : "Open full feed"}
+        </Link>
+        <Link className="font-medium underline underline-offset-4" href={state ? `/spending?state=${state}` : "/spending"}>
+          Check outside spending
+        </Link>
+        <Link className="font-medium underline underline-offset-4" href="/status">
+          Check ingestion status
+        </Link>
+      </div>
+    </div>
   );
 }
 

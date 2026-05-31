@@ -317,7 +317,7 @@ export default async function RacePage({
               </table>
             </div>
           ) : (
-            <p className="p-5 text-sm text-neutral-600">No FEC candidates matched this race yet.</p>
+            <RaceCandidateEmptyState raceId={race.id} state={race.state} />
           )}
         </div>
         <ElectionTimeline
@@ -331,6 +331,31 @@ export default async function RacePage({
         />
       </EntityPage>
     </PageShell>
+  );
+}
+
+function RaceCandidateEmptyState({ raceId, state }: { raceId: string; state: string }) {
+  return (
+    <div className="p-5 text-sm leading-6 text-neutral-700">
+      <p className="font-semibold text-neutral-950">No FEC candidates matched this race yet.</p>
+      <p className="mt-1 max-w-3xl">
+        This means the current stored FEC slice has not matched candidate rows to this race shell. It is not ballot evidence and should be checked against election-office sources.
+      </p>
+      <div className="mt-3 flex flex-wrap gap-x-4 gap-y-2">
+        <Link className="font-medium underline underline-offset-4" href={`/?state=${state}`}>
+          Open {state} feed
+        </Link>
+        <Link className="font-medium underline underline-offset-4" href={`/records/schedule-e?race=${raceId}`}>
+          Check Schedule E evidence
+        </Link>
+        <Link className="font-medium underline underline-offset-4" href={`/review?state=${state}`}>
+          Check {state} review queue
+        </Link>
+        <Link className="font-medium underline underline-offset-4" href="/status#state-freshness">
+          Check coverage status
+        </Link>
+      </div>
+    </div>
   );
 }
 

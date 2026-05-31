@@ -35,7 +35,7 @@ export function signalFiltersFromSearchParams(
   return {
     q: first(params.q),
     committeeId: first(params.committee),
-    state: first(params.state),
+    state: normalizedState(first(params.state)),
     office: first(params.office),
     raceId: first(params.race),
     type: first(params.type),
@@ -54,7 +54,7 @@ export function signalFiltersFromUrl(url: URL, limit?: number): SignalFilters {
   return {
     q: url.searchParams.get("q") ?? undefined,
     committeeId: url.searchParams.get("committee") ?? undefined,
-    state: url.searchParams.get("state") ?? undefined,
+    state: normalizedState(url.searchParams.get("state") ?? undefined),
     office: url.searchParams.get("office") ?? undefined,
     raceId: url.searchParams.get("race") ?? undefined,
     type: url.searchParams.get("type") ?? undefined,
@@ -67,4 +67,9 @@ export function signalFiltersFromUrl(url: URL, limit?: number): SignalFilters {
     targetStatus: url.searchParams.get("targetStatus") ?? undefined,
     limit,
   };
+}
+
+function normalizedState(value?: string | null) {
+  if (!value) return undefined;
+  return value.length === 2 ? value.toUpperCase() : value;
 }

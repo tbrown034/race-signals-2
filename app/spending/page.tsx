@@ -22,7 +22,7 @@ export default async function SpendingPage({
   const params = await searchParams;
   const sort = params.sort === "date" ? "date" : "amount";
   const q = typeof params.q === "string" ? params.q : undefined;
-  const state = typeof params.state === "string" ? params.state : undefined;
+  const state = typeof params.state === "string" ? normalizeStateParam(params.state) : undefined;
   const office = typeof params.office === "string" ? params.office : undefined;
   const raceId = typeof params.race === "string" ? params.race : undefined;
   const statusFilter = typeof params.status === "string" ? params.status : undefined;
@@ -581,6 +581,8 @@ function spendingToggleHref(
 ) {
   const next = spendingExportQuery(params);
   next.delete("type");
+  const sort = typeof params.sort === "string" ? params.sort : "";
+  if (sort === "date") next.set("sort", sort);
   if (value) next.set(key, value);
   else next.delete(key);
   const query = next.toString();
@@ -607,7 +609,7 @@ function spendingSortHref(
   const next = new URLSearchParams();
   for (const key of ["q", "state", "office", "race", "status", "since", "ingestedSince", "committee", "minAmount", "position", "targetParty", "targetStatus"]) {
     const value = params[key];
-    if (typeof value === "string" && value) next.set(key, value);
+    if (typeof value === "string" && value) next.set(key, key === "state" ? normalizeStateParam(value) : value);
   }
   if (sort !== "amount") next.set("sort", sort);
   const query = next.toString();
@@ -618,7 +620,7 @@ function spendingExportQuery(params: { [key: string]: string | string[] | undefi
   const next = new URLSearchParams();
   for (const key of ["q", "state", "office", "race", "status", "since", "ingestedSince", "committee", "minAmount", "position", "targetParty", "targetStatus"]) {
     const value = params[key];
-    if (typeof value === "string" && value) next.set(key, value);
+    if (typeof value === "string" && value) next.set(key, key === "state" ? normalizeStateParam(value) : value);
   }
   next.set("type", "large_independent_expenditure");
   return next;
@@ -649,4 +651,8 @@ function targetStatusLabel(value?: string | null) {
   if (value === "C") return "challenger";
   if (value === "O") return "open seat";
   return null;
+}
+
+function normalizeStateParam(value: string) {
+  return value.length === 2 ? value.toUpperCase() : value;
 }

@@ -367,6 +367,7 @@ function signalEvidence(signal: Signal) {
       textMetadata(signal.metadata?.priorCoverageStartDate),
       textMetadata(signal.metadata?.priorCoverageEndDate),
     ].filter(Boolean);
+    const comparisonBasis = textMetadata(signal.metadata?.comparisonBasis) ?? filingComparisonBasis(signal.metadata);
     return [
       latestReportType ? `latest report ${reportTypeDisplay(latestReportType)}` : null,
       latest !== null ? `latest ${formatMoney(latest)}` : null,
@@ -374,6 +375,7 @@ function signalEvidence(signal: Signal) {
       priorReportType ? `prior report ${reportTypeDisplay(priorReportType)}` : null,
       prior !== null ? `prior ${formatMoney(prior)}` : null,
       priorCoverage.length === 2 ? `prior period ${priorCoverage.join(" to ")}` : null,
+      comparisonBasis ? `basis ${comparisonBasis}` : null,
       textMetadata(signal.metadata?.latestSourceId) ? `latest ${textMetadata(signal.metadata?.latestSourceId)}` : null,
       textMetadata(signal.metadata?.priorSourceId) ? `prior ${textMetadata(signal.metadata?.priorSourceId)}` : null,
     ]
@@ -441,6 +443,40 @@ function numberMetadata(value: unknown) {
     return Number.isFinite(parsed) ? parsed : null;
   }
   return null;
+}
+
+function filingComparisonBasis(metadata?: Record<string, unknown> | null) {
+  if (!metadata) return null;
+  const latestReportType = textMetadata(metadata.latestReportType);
+  const priorReportType = textMetadata(metadata.priorReportType);
+  const reportTypePart = latestReportType && priorReportType
+    ? latestReportType === priorReportType
+      ? `same report type ${latestReportType}`
+      : `different report types ${latestReportType} vs ${priorReportType}`
+    : null;
+  const latestDays = coverageDays(
+    textMetadata(metadata.latestCoverageStartDate) ?? textMetadata(metadata.coverageStartDate),
+    textMetadata(metadata.latestCoverageEndDate) ?? textMetadata(metadata.coverageEndDate),
+  );
+  const priorDays = coverageDays(
+    textMetadata(metadata.priorCoverageStartDate),
+    textMetadata(metadata.priorCoverageEndDate),
+  );
+  const coveragePart = latestDays !== null && priorDays !== null
+    ? latestDays === priorDays
+      ? `same ${latestDays}-day coverage length`
+      : `different coverage lengths ${latestDays} vs ${priorDays} days`
+    : null;
+  if (!reportTypePart && !coveragePart) return null;
+  return `Period receipts comparison; ${[reportTypePart, coveragePart].filter(Boolean).join("; ")}.`;
+}
+
+function coverageDays(start?: string | null, end?: string | null) {
+  if (!start || !end) return null;
+  const startTime = Date.parse(`${start}T00:00:00Z`);
+  const endTime = Date.parse(`${end}T00:00:00Z`);
+  if (!Number.isFinite(startTime) || !Number.isFinite(endTime) || endTime < startTime) return null;
+  return Math.round((endTime - startTime) / 86_400_000) + 1;
 }
 
 function signalAmountLabel(signal: Signal) {

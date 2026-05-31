@@ -46,7 +46,7 @@ export default async function Home({
 }) {
   const params = await searchParams;
   const q = typeof params.q === "string" ? params.q : undefined;
-  const state = typeof params.state === "string" ? params.state : undefined;
+  const state = typeof params.state === "string" ? normalizeStateParam(params.state) : undefined;
   const office = typeof params.office === "string" ? params.office : undefined;
   const raceId = typeof params.race === "string" ? params.race : undefined;
   const committeeId = typeof params.committee === "string" ? params.committee : undefined;
@@ -59,7 +59,7 @@ export default async function Home({
   const exportQuery = new URLSearchParams();
   for (const key of ["q", "state", "office", "race", "committee", "type", "status", "since", "ingestedSince", "minAmount", "position", "targetParty", "targetStatus"]) {
     const value = params[key];
-    if (typeof value === "string" && value) exportQuery.set(key, value);
+    if (typeof value === "string" && value) exportQuery.set(key, key === "state" ? normalizeStateParam(value) : value);
   }
   const exportSuffix = exportQuery.toString();
   const baseSignalFilters = signalFiltersFromSearchParams(params, 51);
@@ -75,7 +75,10 @@ export default async function Home({
   const visibleSignals = signals.slice(0, 50);
   const hasMoreSignals = signals.length > visibleSignals.length;
   const selectedRace = raceId ? races.find((race) => race.id === raceId) : null;
-  const triageSignals = feedTriageSignals(visibleSignals, newestAddedSignals[0]);
+  const triageSignals = feedTriageSignals(
+    visibleSignals,
+    visibleSignals.find((signal) => signal.dedupeKey === newestAddedSignals[0]?.dedupeKey),
+  );
   const activeFilters = [
     q ? `search "${q}"` : null,
     state ? `state ${state}` : null,
@@ -538,4 +541,8 @@ function targetStatusLabel(value: string) {
   if (value === "C") return "challenger";
   if (value === "O") return "open-seat";
   return value;
+}
+
+function normalizeStateParam(value: string) {
+  return value.length === 2 ? value.toUpperCase() : value;
 }

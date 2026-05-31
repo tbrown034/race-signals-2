@@ -47,6 +47,7 @@ export type SignalExportRow = {
   latest_source_url: string | null;
   prior_source_id: string | null;
   prior_source_url: string | null;
+  comparison_basis: string | null;
   signal_permalink: string;
   methodology_url: string;
   scope_note: string;
@@ -124,6 +125,7 @@ export function signalToExportRow(
     latest_source_url: textMetadata(signal.metadata?.latestSourceUrl),
     prior_source_id: textMetadata(signal.metadata?.priorSourceId),
     prior_source_url: textMetadata(signal.metadata?.priorSourceUrl),
+    comparison_basis: textMetadata(signal.metadata?.comparisonBasis) ?? filingComparisonBasis(signal.metadata),
     signal_permalink: `${baseUrl}/?q=${encodeURIComponent(stableSourceId ?? signal.dedupeKey)}#${signalAnchorId(signal.dedupeKey)}`,
     methodology_url: `${baseUrl}/methodology#${signal.signalType}`,
     scope_note: "Source-linked Race Signals alert generated from stored FEC records in the current database slice; not a completeness claim.",
@@ -172,6 +174,7 @@ export function rowsToCsv(rows: SignalExportRow[]) {
     "latest_source_url",
     "prior_source_id",
     "prior_source_url",
+    "comparison_basis",
     "signal_permalink",
     "methodology_url",
     "scope_note",
@@ -239,4 +242,38 @@ function numberMetadata(value: unknown) {
   if (typeof value !== "string" || !value) return null;
   const parsed = Number(value);
   return Number.isFinite(parsed) ? parsed : null;
+}
+
+function filingComparisonBasis(metadata?: Record<string, unknown> | null) {
+  if (!metadata) return null;
+  const latestReportType = textMetadata(metadata.latestReportType);
+  const priorReportType = textMetadata(metadata.priorReportType);
+  const reportTypePart = latestReportType && priorReportType
+    ? latestReportType === priorReportType
+      ? `same report type ${latestReportType}`
+      : `different report types ${latestReportType} vs ${priorReportType}`
+    : null;
+  const latestDays = coverageDays(
+    textMetadata(metadata.latestCoverageStartDate) ?? textMetadata(metadata.coverageStartDate),
+    textMetadata(metadata.latestCoverageEndDate) ?? textMetadata(metadata.coverageEndDate),
+  );
+  const priorDays = coverageDays(
+    textMetadata(metadata.priorCoverageStartDate),
+    textMetadata(metadata.priorCoverageEndDate),
+  );
+  const coveragePart = latestDays !== null && priorDays !== null
+    ? latestDays === priorDays
+      ? `same ${latestDays}-day coverage length`
+      : `different coverage lengths ${latestDays} vs ${priorDays} days`
+    : null;
+  if (!reportTypePart && !coveragePart) return null;
+  return `Period receipts comparison; ${[reportTypePart, coveragePart].filter(Boolean).join("; ")}.`;
+}
+
+function coverageDays(start?: string | null, end?: string | null) {
+  if (!start || !end) return null;
+  const startTime = Date.parse(`${start}T00:00:00Z`);
+  const endTime = Date.parse(`${end}T00:00:00Z`);
+  if (!Number.isFinite(startTime) || !Number.isFinite(endTime) || endTime < startTime) return null;
+  return Math.round((endTime - startTime) / 86_400_000) + 1;
 }

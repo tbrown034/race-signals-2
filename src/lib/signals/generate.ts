@@ -222,6 +222,7 @@ export function generateSignals(input: SignalInput): Signal[] {
       continue;
     }
     const candidate = committee?.candidateId ? candidates.get(committee.candidateId) : undefined;
+    const comparisonBasis = filingComparisonBasis(latest, prior);
     signals.push({
       dedupeKey: `fec:activity_spike:${latest.sourceId}`,
       signalType: "committee_activity_spike",
@@ -257,6 +258,7 @@ export function generateSignals(input: SignalInput): Signal[] {
         latestSourceUrl: latest.sourceUrl,
         priorSourceId: prior.sourceId,
         priorSourceUrl: prior.sourceUrl,
+        comparisonBasis,
         sourceId: latest.sourceId,
         sourceKind: "filing",
       },
@@ -292,6 +294,28 @@ function newFilingCopy(filing: Filing, committee?: Committee, versionKind = "ini
       "New reports can reveal changed cash positions, spending pace and committee activity before those shifts are visible in public campaigning.",
     versionKind: "initial_or_single",
   };
+}
+
+function filingComparisonBasis(latest: Filing, prior: Filing) {
+  const reportTypePart = latest.reportType === prior.reportType
+    ? `same report type ${latest.reportType ?? "unknown"}`
+    : `different report types ${latest.reportType ?? "unknown"} vs ${prior.reportType ?? "unknown"}`;
+  const latestDays = coverageDays(latest.coverageStartDate, latest.coverageEndDate);
+  const priorDays = coverageDays(prior.coverageStartDate, prior.coverageEndDate);
+  const coveragePart = latestDays !== null && priorDays !== null
+    ? latestDays === priorDays
+      ? `same ${latestDays}-day coverage length`
+      : `different coverage lengths ${latestDays} vs ${priorDays} days`
+    : "coverage length not fully computable";
+  return `Period receipts comparison; ${reportTypePart}; ${coveragePart}.`;
+}
+
+function coverageDays(start?: string | null, end?: string | null) {
+  if (!start || !end) return null;
+  const startTime = Date.parse(`${start}T00:00:00Z`);
+  const endTime = Date.parse(`${end}T00:00:00Z`);
+  if (!Number.isFinite(startTime) || !Number.isFinite(endTime) || endTime < startTime) return null;
+  return Math.round((endTime - startTime) / 86_400_000) + 1;
 }
 
 function newCommitteeCopy(committee: Committee, candidate?: Candidate, race?: Race) {

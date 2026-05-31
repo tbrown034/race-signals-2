@@ -7,6 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
+    "audit:signals": "tsx scripts/audit-signals.ts",
+    "repair:signals": "tsx scripts/regenerate-signals.ts",
     "ingest": "tsx scripts/ingest-fec.ts"
   },
   "dependencies": {

@@ -5,6 +5,29 @@ import { SignalCard } from "@/src/components/signal-card";
 import { getRaces, getSignals, getStatus } from "@/src/lib/db/repository";
 import { signalFiltersFromSearchParams } from "@/src/lib/signals/filters";
 
+const quickViews = [
+  {
+    href: "/?state=IN",
+    label: "Indiana local desk",
+    body: "State-level congressional slice for a local politics reporter.",
+  },
+  {
+    href: "/?office=S",
+    label: "Senate watch",
+    body: "National Senate signals for campaign and money reporters.",
+  },
+  {
+    href: "/?type=large_independent_expenditure",
+    label: "Outside spending",
+    body: "Independent expenditures, the highest-leverage early alerts.",
+  },
+  {
+    href: "/?status=review",
+    label: "Needs review",
+    body: "Signals flagged for human attention before publication use.",
+  },
+];
+
 export default async function Home({
   searchParams,
 }: {
@@ -29,6 +52,14 @@ export default async function Home({
   ]);
   const visibleSignals = signals.slice(0, 50);
   const hasMoreSignals = signals.length > visibleSignals.length;
+  const activeFilters = [
+    q ? `search "${q}"` : null,
+    state ? `state ${state}` : null,
+    office ? (office === "S" ? "Senate" : office === "H" ? "House" : `office ${office}`) : null,
+    raceId ?? null,
+    type ? type.replaceAll("_", " ") : null,
+    statusFilter ? `status ${statusFilter}` : null,
+  ].filter(Boolean);
 
   return (
     <PageShell>
@@ -46,6 +77,11 @@ export default async function Home({
                 <p className="mt-2 text-sm leading-5 text-neutral-700">
                   Showing {visibleSignals.length}{hasMoreSignals ? "+" : ""} signals. Source-linked FEC records for House and Senate coverage.
                 </p>
+                {activeFilters.length ? (
+                  <p className="mt-1 font-mono text-[11px] uppercase tracking-[0.12em] text-neutral-500">
+                    Filtered by {activeFilters.join(" / ")}
+                  </p>
+                ) : null}
               </div>
               <div className="flex flex-wrap gap-2 text-sm">
               <a
@@ -64,6 +100,7 @@ export default async function Home({
             </div>
           </div>
           <FeedFilters
+            key={[q, state, office, raceId, type, statusFilter].join("|")}
             races={races}
             q={q}
             state={state}
@@ -81,8 +118,13 @@ export default async function Home({
                 The filters may be too narrow, or the current database slice may not include recent FEC activity for this race.
               </p>
               <div className="mt-3 flex gap-3">
+                {state ? (
+                  <Link className="font-medium underline underline-offset-4" href={`/?state=${state}`}>
+                    Show all {state} signals
+                  </Link>
+                ) : null}
                 <Link className="font-medium underline underline-offset-4" href="/">
-                  Reset filters
+                  Show all signals
                 </Link>
                 <Link className="font-medium underline underline-offset-4" href="/status">
                   Check ingestion status
@@ -128,6 +170,23 @@ export default async function Home({
               <dd className="mt-1">Daily ingest is capped; broader national runs are manual.</dd>
             </div>
           </dl>
+          <div className="mt-6 border-t border-neutral-300 pt-5">
+            <p className="font-mono text-xs uppercase tracking-[0.12em] text-neutral-500">
+              Start points
+            </p>
+            <div className="mt-3 space-y-3">
+              {quickViews.map((view) => (
+                <Link
+                  className="block border border-neutral-300 p-3 hover:border-neutral-900"
+                  href={view.href}
+                  key={view.href}
+                >
+                  <span className="block text-sm font-semibold">{view.label}</span>
+                  <span className="mt-1 block text-xs leading-5 text-neutral-600">{view.body}</span>
+                </Link>
+              ))}
+            </div>
+          </div>
         </aside>
       </main>
     </PageShell>

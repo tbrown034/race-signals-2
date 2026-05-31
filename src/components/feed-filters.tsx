@@ -1,6 +1,11 @@
+"use client";
+
 import type { Race } from "@/src/lib/types";
 import { STATE_SCOPES } from "@/src/lib/scope";
 import Link from "next/link";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import type { FormEvent } from "react";
+import { useState } from "react";
 
 const signalTypes = [
   ["", "All signal types"],
@@ -35,16 +40,68 @@ export function FeedFilters({
   type?: string;
   status?: string;
 }) {
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
   const hasFilters = Boolean(q || state || office || raceId || type || status);
+  const [selectedState, setSelectedState] = useState(state ?? "");
+  const [selectedOffice, setSelectedOffice] = useState(office ?? "");
+  const [selectedRaceId, setSelectedRaceId] = useState(raceId ?? "");
+  const [selectedType, setSelectedType] = useState(type ?? "");
+  const [selectedStatus, setSelectedStatus] = useState(status ?? "");
   const selectedRace = raceId ? races.find((race) => race.id === raceId) : undefined;
-  const raceOptions = state
-    ? races.filter((race) => race.state === state && (!office || race.office === office))
+  const raceOptions = selectedState
+    ? races.filter((race) => race.state === selectedState && (!selectedOffice || race.office === selectedOffice))
     : selectedRace
       ? [selectedRace]
       : [];
 
+  function updateFilter(name: string, value: string) {
+    const next = new URLSearchParams(searchParams.toString());
+    if (value) {
+      next.set(name, value);
+    } else {
+      next.delete(name);
+    }
+    if (name === "state") {
+      next.delete("race");
+      setSelectedState(value);
+      setSelectedRaceId("");
+    }
+    if (name === "office") {
+      next.delete("race");
+      setSelectedOffice(value);
+      setSelectedRaceId("");
+    }
+    if (name === "race") {
+      setSelectedRaceId(value);
+    }
+    if (name === "type") {
+      setSelectedType(value);
+    }
+    if (name === "status") {
+      setSelectedStatus(value);
+    }
+    router.replace(next.toString() ? `${pathname}?${next.toString()}` : pathname, {
+      scroll: false,
+    });
+  }
+
+  function onSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const form = new FormData(event.currentTarget);
+    const next = new URLSearchParams(searchParams.toString());
+    const query = String(form.get("q") ?? "").trim();
+    if (query) {
+      next.set("q", query);
+    } else {
+      next.delete("q");
+    }
+    router.replace(next.toString() ? `${pathname}?${next.toString()}` : pathname);
+  }
+
   return (
-    <form className="border-b border-neutral-300 bg-white p-4">
+    <form className="border-b border-neutral-300 bg-white p-4" onSubmit={onSubmit}>
       <div className="grid gap-3 md:grid-cols-[1fr_105px_110px_170px_210px_150px_auto_auto]">
         <label className="text-xs font-medium uppercase tracking-[0.12em] text-neutral-500">
           Search
@@ -59,8 +116,9 @@ export function FeedFilters({
           State
           <select
             className="mt-1 block h-9 w-full border border-neutral-300 bg-white px-2 text-sm normal-case tracking-normal text-neutral-950"
-            defaultValue={state ?? ""}
+            value={selectedState}
             name="state"
+            onChange={(event) => updateFilter("state", event.target.value)}
           >
             <option value="">All</option>
             {STATE_SCOPES.map((item) => (
@@ -74,8 +132,9 @@ export function FeedFilters({
           Office
           <select
             className="mt-1 block h-9 w-full border border-neutral-300 bg-white px-2 text-sm normal-case tracking-normal text-neutral-950"
-            defaultValue={office ?? ""}
+            value={selectedOffice}
             name="office"
+            onChange={(event) => updateFilter("office", event.target.value)}
           >
             <option value="">All</option>
             <option value="H">House</option>
@@ -86,11 +145,12 @@ export function FeedFilters({
           Race
           <select
             className="mt-1 block h-9 w-full border border-neutral-300 bg-white px-2 text-sm normal-case tracking-normal text-neutral-950"
-            defaultValue={raceId ?? ""}
+            value={selectedRaceId}
             name="race"
+            onChange={(event) => updateFilter("race", event.target.value)}
           >
             <option value="">
-              {state ? "All races" : "Select state first"}
+              {selectedState ? "All races" : "Select state first"}
             </option>
             {raceOptions.map((race) => (
               <option value={race.id} key={race.id}>
@@ -101,7 +161,12 @@ export function FeedFilters({
         </label>
         <label className="text-xs font-medium uppercase tracking-[0.12em] text-neutral-500">
           Type
-          <select className="mt-1 block h-9 w-full border border-neutral-300 bg-white px-2 text-sm normal-case tracking-normal text-neutral-950" defaultValue={type ?? ""} name="type">
+          <select
+            className="mt-1 block h-9 w-full border border-neutral-300 bg-white px-2 text-sm normal-case tracking-normal text-neutral-950"
+            value={selectedType}
+            name="type"
+            onChange={(event) => updateFilter("type", event.target.value)}
+          >
             {signalTypes.map(([value, label]) => (
               <option value={value} key={value}>
                 {label}
@@ -113,8 +178,9 @@ export function FeedFilters({
           Status
           <select
             className="mt-1 block h-9 w-full border border-neutral-300 bg-white px-2 text-sm normal-case tracking-normal text-neutral-950"
-            defaultValue={status ?? ""}
+            value={selectedStatus}
             name="status"
+            onChange={(event) => updateFilter("status", event.target.value)}
           >
             {statuses.map(([value, label]) => (
               <option value={value} key={value}>
@@ -124,7 +190,7 @@ export function FeedFilters({
           </select>
         </label>
         <button className="self-end border border-neutral-900 bg-neutral-950 px-4 py-2 text-sm font-medium text-white">
-          Apply
+          Search
         </button>
         {hasFilters ? (
           <Link className="self-end border border-neutral-300 px-4 py-2 text-center text-sm font-medium" href="/">

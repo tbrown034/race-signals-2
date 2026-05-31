@@ -60,7 +60,7 @@ export default async function SpendingPage({
                 <h1 className="mt-1 text-xl font-semibold tracking-tight">
                   Outside spending watch
                 </h1>
-                <p className="mt-2 max-w-full break-words text-sm leading-5 text-neutral-700 sm:max-w-3xl">
+                <p className="mt-2 max-w-[min(280px,100%)] break-words text-sm leading-5 text-neutral-700 [overflow-wrap:anywhere] sm:max-w-3xl">
                   Shows $25k+ Schedule E alert signals. Use Schedule E evidence for lower-dollar and uncoded source rows.
                 </p>
               </div>
@@ -119,12 +119,14 @@ export default async function SpendingPage({
             type="large_independent_expenditure"
           />
           <div className="border-b border-neutral-300 px-5 py-3 font-mono text-[11px] uppercase tracking-[0.12em] text-neutral-500">
+            <p className="max-w-[min(280px,100%)] break-words [overflow-wrap:anywhere] sm:max-w-full">
             Showing {visibleSignals.length}{hasMoreSignals ? "+" : ""} outside-spending signals
             {committeeId ? ` for ${committeeFilter?.name ?? committeeId}` : ""}
             {position ? ` / ${supportOpposeLabel(position)}` : ""}
             {targetParty ? ` / target ${targetParty}` : ""}
             {targetStatus ? ` / ${targetStatusLabel(targetStatus)} targets` : ""}
             {minAmount ? ` / $${Number(minAmount).toLocaleString("en-US")}+` : ""}
+            </p>
             {committeeId ? (
               <>
                 {" / "}
@@ -136,8 +138,8 @@ export default async function SpendingPage({
           </div>
           {visibleSignals.length ? (
             <div className="border-b border-neutral-300">
-              <div className="overflow-x-auto">
-                <table className="w-full min-w-0 text-left text-sm md:min-w-[1220px]">
+              <div className="overflow-x-hidden md:overflow-x-auto">
+                <table className="w-full min-w-0 table-fixed text-left text-sm md:min-w-[1220px] md:table-auto">
                   <thead className="bg-neutral-100 font-mono text-xs uppercase tracking-[0.12em] text-neutral-500">
                     <tr>
                       <th className="hidden px-4 py-3 font-medium md:table-cell" scope="col">Date</th>
@@ -155,8 +157,12 @@ export default async function SpendingPage({
                     {visibleSignals.map((signal) => (
                       <tr id={signalAnchorId(signal.dedupeKey)} key={`row-${signal.dedupeKey}`}>
                         <td className="hidden px-4 py-3 font-mono md:table-cell">{formatDate(signal.signalDate)}</td>
-                        <td className="px-4 py-3 md:max-w-[320px]">
-                          <Link className="font-medium underline underline-offset-4" href={signalPermalinkHref(signal)}>
+                        <td className="min-w-0 max-w-[280px] px-4 py-3 md:max-w-[320px]">
+                          <Link
+                            className="block max-w-full break-words font-medium underline underline-offset-4"
+                            href={signalPermalinkHref(signal)}
+                            style={{ overflowWrap: "anywhere", wordBreak: "break-word" }}
+                          >
                             {signal.headline}
                           </Link>
                           <p className="mt-1 text-xs leading-5 text-neutral-600">
@@ -431,8 +437,31 @@ function SpendingQuickFilters({
   const selectedMinAmount = typeof params.minAmount === "string" ? params.minAmount : "";
   const selectedTargetParty = typeof params.targetParty === "string" ? params.targetParty : "";
   const selectedTargetStatus = typeof params.targetStatus === "string" ? params.targetStatus : "";
+  const activeTokens = [
+    selectedPosition ? { key: "position" as const, label: supportOpposeLabel(selectedPosition) } : null,
+    selectedMinAmount ? { key: "minAmount" as const, label: `Amount ${formatMoney(Number(selectedMinAmount))}+` } : null,
+    selectedTargetParty ? { key: "targetParty" as const, label: `Target party ${selectedTargetParty}` } : null,
+    selectedTargetStatus ? { key: "targetStatus" as const, label: `Target ${targetStatusLabel(selectedTargetStatus)}` } : null,
+  ].filter((token): token is { key: "minAmount" | "position" | "targetParty" | "targetStatus"; label: string } => Boolean(token));
   return (
     <div className="border-b border-neutral-300 px-5 py-3 text-sm">
+      {activeTokens.length ? (
+        <div className="mb-3 flex min-w-0 flex-wrap items-center gap-2 border border-neutral-200 bg-neutral-50 p-2 text-xs">
+          <span className="shrink-0 font-mono uppercase tracking-[0.12em] text-neutral-500">
+            Spending filters
+          </span>
+          {activeTokens.map((token) => (
+            <Link
+              className="w-full max-w-full min-w-0 break-words border border-neutral-300 bg-white px-2 py-1 text-neutral-700 underline-offset-4 [overflow-wrap:anywhere] hover:border-neutral-900 hover:underline sm:w-auto sm:max-w-[32rem]"
+              href={spendingToggleHref(params, token.key, "")}
+              key={token.key}
+              title={`Remove ${token.label}`}
+            >
+              {token.label} x
+            </Link>
+          ))}
+        </div>
+      ) : null}
       <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
         <div>
           <p className="font-mono text-[11px] uppercase tracking-[0.12em] text-neutral-500">
@@ -440,8 +469,8 @@ function SpendingQuickFilters({
           </p>
           <div className="mt-2 flex flex-wrap gap-2">
             <Link className={quickFilterClass(!selectedPosition)} href={spendingToggleHref(params, "position", "")}>All</Link>
-            <Link className={quickFilterClass(selectedPosition === "S")} href={spendingToggleHref(params, "position", "S")}>FEC code: supports</Link>
-            <Link className={quickFilterClass(selectedPosition === "O")} href={spendingToggleHref(params, "position", "O")}>FEC code: opposes</Link>
+            <Link className={quickFilterClass(selectedPosition === "S")} href={spendingToggleHref(params, "position", "S")}>FEC: supports</Link>
+            <Link className={quickFilterClass(selectedPosition === "O")} href={spendingToggleHref(params, "position", "O")}>FEC: opposes</Link>
           </div>
         </div>
         <div>

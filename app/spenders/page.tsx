@@ -245,42 +245,49 @@ export default async function SpendersPage({
                           <Link className="font-medium underline underline-offset-4" href={spenderEvidenceHref(spender.committeeId, spender.latestScheduleESourceUrl)}>
                             Open evidence records
                           </Link>
-                          {spender.committeeId ? (
-                            <Link className="text-xs underline underline-offset-4" href={`/committees/${spender.committeeId}#schedule-e-records`}>
-                              Committee evidence page
-                            </Link>
-                          ) : null}
-                          <a
-                            className="text-xs underline underline-offset-4"
-                            href={spender.committeeId ? `/api/schedule-e/export.csv?committee=${spender.committeeId}` : "/api/schedule-e/export.csv"}
-                          >
-                            Export this spender
-                          </a>
-                          {spender.latestScheduleESourceUrl ? (
-                            <a
-                              className="text-xs underline underline-offset-4"
-                              href={spender.latestScheduleESourceUrl}
-                              rel="noreferrer"
-                              target="_blank"
-                            >
-                              Latest FEC source only
-                            </a>
-                          ) : (
-                            <span className="text-neutral-600">Schedule E source not stored</span>
-                          )}
                           <span className="font-mono text-[11px] uppercase tracking-[0.12em] text-neutral-500">
                             {spender.latestScheduleESourceId ?? "No Schedule E ID"}
                           </span>
-                          {spender.sourceUrl ? (
-                            <a
-                              className="text-xs underline underline-offset-4"
-                              href={spender.sourceUrl}
-                              rel="noreferrer"
-                              target="_blank"
-                            >
-                              Committee profile
-                            </a>
-                          ) : null}
+                          <details className="text-xs text-neutral-600">
+                            <summary className="cursor-pointer underline underline-offset-4">
+                              More source links
+                            </summary>
+                            <div className="mt-1 flex flex-col gap-1">
+                              {spender.committeeId ? (
+                                <Link className="underline underline-offset-4" href={`/committees/${spender.committeeId}#schedule-e-records`}>
+                                  Committee evidence page
+                                </Link>
+                              ) : null}
+                              <a
+                                className="underline underline-offset-4"
+                                href={spender.committeeId ? `/api/schedule-e/export.csv?committee=${spender.committeeId}` : "/api/schedule-e/export.csv"}
+                              >
+                                Export this spender
+                              </a>
+                              {spender.latestScheduleESourceUrl ? (
+                                <a
+                                  className="underline underline-offset-4"
+                                  href={spender.latestScheduleESourceUrl}
+                                  rel="noreferrer"
+                                  target="_blank"
+                                >
+                                  Latest FEC source only
+                                </a>
+                              ) : (
+                                <span>Schedule E source not stored</span>
+                              )}
+                              {spender.sourceUrl ? (
+                                <a
+                                  className="underline underline-offset-4"
+                                  href={spender.sourceUrl}
+                                  rel="noreferrer"
+                                  target="_blank"
+                                >
+                                  Committee profile
+                                </a>
+                              ) : null}
+                            </div>
+                          </details>
                         </div>
                       </td>
                     </tr>

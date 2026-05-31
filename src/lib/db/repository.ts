@@ -1162,33 +1162,35 @@ export async function getTopSpenders(limit = 100): Promise<TopSpender[]> {
       spending_by_race as (
         select
           ie.spender_committee_id,
+          coalesce(ie.fec_committee_id, ie.spender_committee_id) as spender_key,
           ie.race_id,
           r.name as race_name,
           sum(ie.amount) as race_amount,
           row_number() over (
-            partition by ie.spender_committee_id
+            partition by coalesce(ie.fec_committee_id, ie.spender_committee_id)
             order by sum(ie.amount) desc nulls last
           ) as rank
         from independent_expenditures ie
         left join races r on r.id = ie.race_id
         where ie.expenditure_date >= make_date(coalesce(r.cycle, $2) - 1, 1, 1)
           and ie.expenditure_date <= make_date(coalesce(r.cycle, $2), 12, 31)
-        group by ie.spender_committee_id, ie.race_id, r.name
+        group by ie.spender_committee_id, coalesce(ie.fec_committee_id, ie.spender_committee_id), ie.race_id, r.name
       ),
       top_race as (
-        select spender_committee_id, race_id, race_name, race_amount
+        select spender_key, race_id, race_name, race_amount
         from spending_by_race
         where rank = 1
       ),
       latest_record as (
-        select spender_committee_id, source_id, source_url
+        select spender_key, source_id, source_url
         from (
           select
             ie.spender_committee_id,
+            coalesce(ie.fec_committee_id, ie.spender_committee_id) as spender_key,
             ie.source_id,
             ie.source_url,
             row_number() over (
-              partition by ie.spender_committee_id
+              partition by coalesce(ie.fec_committee_id, ie.spender_committee_id)
               order by ie.expenditure_date desc nulls last, ie.amount desc, ie.source_id
             ) as rank
           from independent_expenditures ie
@@ -1219,8 +1221,8 @@ export async function getTopSpenders(limit = 100): Promise<TopSpender[]> {
         top_race.race_amount::text as top_race_amount
       from spending_by_committee s
       left join committees cm on cm.id = s.spender_committee_id
-      left join top_race on top_race.spender_committee_id = s.spender_committee_id
-      left join latest_record on latest_record.spender_committee_id = s.spender_committee_id
+      left join top_race on top_race.spender_key = s.spender_key
+      left join latest_record on latest_record.spender_key = s.spender_key
       order by s.total_amount desc nulls last
       limit $1
     `,
@@ -1364,6 +1366,13 @@ export async function getRaceStats(id: string): Promise<RaceStats> {
     return {
       totalRaised: candidates.reduce((sum, candidate) => sum + (candidate.totalReceiptsCycle ?? 0), 0),
       totalIndependentExpenditures: expenditures.reduce((sum, expenditure) => sum + expenditure.amount, 0),
+      supportIndependentExpenditures: expenditures
+        .filter((expenditure) => expenditure.supportOpposeIndicator === "S")
+        .reduce((sum, expenditure) => sum + expenditure.amount, 0),
+      opposeIndependentExpenditures: expenditures
+        .filter((expenditure) => expenditure.supportOpposeIndicator === "O")
+        .reduce((sum, expenditure) => sum + expenditure.amount, 0),
+      independentExpenditureRecordCount: expenditures.length,
       candidateCount: candidates.length,
       incumbentCount: candidates.filter((candidate) => isIncumbent(candidate.incumbentChallengeStatus)).length,
       latestIndependentExpenditureDate: expenditures.map((expenditure) => expenditure.expenditureDate).filter(Boolean).sort().at(-1) ?? null,
@@ -1373,6 +1382,9 @@ export async function getRaceStats(id: string): Promise<RaceStats> {
   const rows = await sql<{
     total_raised: string | null;
     total_independent_expenditures: string | null;
+    support_independent_expenditures: string | null;
+    oppose_independent_expenditures: string | null;
+    independent_expenditure_record_count: string;
     latest_independent_expenditure_date: string | Date | null;
     candidate_count: string;
     incumbent_count: string;
@@ -1389,6 +1401,9 @@ export async function getRaceStats(id: string): Promise<RaceStats> {
       spending_stats as (
         select
           coalesce(sum(amount), 0)::text as total_independent_expenditures,
+          coalesce(sum(amount) filter (where support_oppose_indicator = 'S'), 0)::text as support_independent_expenditures,
+          coalesce(sum(amount) filter (where support_oppose_indicator = 'O'), 0)::text as oppose_independent_expenditures,
+          count(*)::text as independent_expenditure_record_count,
           max(expenditure_date) as latest_independent_expenditure_date
         from independent_expenditures ie
         join races r on r.id = $1
@@ -1399,6 +1414,9 @@ export async function getRaceStats(id: string): Promise<RaceStats> {
       select
         candidate_stats.total_raised,
         spending_stats.total_independent_expenditures,
+        spending_stats.support_independent_expenditures,
+        spending_stats.oppose_independent_expenditures,
+        spending_stats.independent_expenditure_record_count,
         spending_stats.latest_independent_expenditure_date,
         candidate_stats.candidate_count,
         candidate_stats.incumbent_count
@@ -1411,6 +1429,9 @@ export async function getRaceStats(id: string): Promise<RaceStats> {
   return {
     totalRaised: Number(row?.total_raised ?? 0),
     totalIndependentExpenditures: Number(row?.total_independent_expenditures ?? 0),
+    supportIndependentExpenditures: Number(row?.support_independent_expenditures ?? 0),
+    opposeIndependentExpenditures: Number(row?.oppose_independent_expenditures ?? 0),
+    independentExpenditureRecordCount: Number(row?.independent_expenditure_record_count ?? 0),
     candidateCount: Number(row?.candidate_count ?? 0),
     incumbentCount: Number(row?.incumbent_count ?? 0),
     latestIndependentExpenditureDate: row?.latest_independent_expenditure_date ? toDateString(row.latest_independent_expenditure_date) : null,

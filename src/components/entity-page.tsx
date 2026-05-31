@@ -241,7 +241,7 @@ export function EntityPage({
             <h2 className="text-sm font-semibold uppercase tracking-[0.14em] text-neutral-600">
               Related signals
             </h2>
-            {hiddenSignals && allSignalsHref ? (
+            {allSignalsHref ? (
               <Link className="text-sm font-medium underline underline-offset-4" href={allSignalsHref}>
                 Open matching feed
               </Link>

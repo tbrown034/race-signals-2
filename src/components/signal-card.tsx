@@ -73,13 +73,24 @@ export function SignalCard({ signal }: { signal: Signal }) {
         <p className="mt-1 max-w-3xl text-sm leading-5 text-neutral-700">
           {signal.whyItMatters}
         </p>
+        <div className="mt-2 flex flex-wrap items-center gap-1.5 md:hidden">
+          <span className="font-mono text-sm font-semibold text-neutral-950">{amount}</span>
+          {evidenceItems.slice(0, 3).map((item) => (
+            <span
+              className="border border-neutral-300 px-1.5 py-0.5 text-xs leading-5 text-neutral-700"
+              key={`mobile-open-${item}`}
+            >
+              {item}
+            </span>
+          ))}
+        </div>
         <details className="mt-2 border border-neutral-300 px-2 py-1.5 text-xs text-neutral-700 md:hidden">
           <summary className="cursor-pointer font-mono uppercase tracking-[0.12em] text-neutral-600">
-            Record details
+            Full record details
           </summary>
-          {evidenceItems.length ? (
+          {evidenceItems.length > 3 ? (
             <div className="mt-2 flex flex-wrap gap-1.5">
-              {evidenceItems.map((item) => (
+              {evidenceItems.slice(3).map((item) => (
                 <span
                   className="border border-neutral-300 px-1.5 py-0.5 leading-5"
                   key={`mobile-${item}`}
@@ -197,7 +208,7 @@ export function SignalCard({ signal }: { signal: Signal }) {
       </div>
 
       <div className="flex flex-wrap items-start gap-2 text-xs md:flex-col md:items-end">
-        <span className="font-mono text-sm font-semibold text-neutral-950">
+        <span className="hidden font-mono text-sm font-semibold text-neutral-950 md:inline">
           {amount}
         </span>
         <Link

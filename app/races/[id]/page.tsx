@@ -107,6 +107,7 @@ export default async function RacePage({
             `${candidates.length} FEC candidates matched to this race; ${candidatesWithMoney} currently show cycle receipts in the FEC totals endpoint.`,
             `Known candidate receipts in this slice total ${formatMoney(totalReceipts) ?? "$0"}. Use this as FEC-filed activity, not a race forecast.`,
             `Schedule E independent expenditures currently total ${formatMoney(stats.totalIndependentExpenditures) ?? "$0"} in this race slice.`,
+            `${formatCount(stats.independentExpenditureRecordCount, "stored Schedule E record")} in this race: support ${formatMoney(stats.supportIndependentExpenditures) ?? "$0"}; oppose ${formatMoney(stats.opposeIndependentExpenditures) ?? "$0"}.`,
             `Latest stored signal: ${latestSignalDate ? formatDate(latestSignalDate) : "none"}; latest stored Schedule E record: ${stats.latestIndependentExpenditureDate ? formatDate(stats.latestIndependentExpenditureDate) : "none"}.`,
             `${formatCount(signals.length, "related signal")}: ${formatCount(signalCounts.filings, "filing")}, ${formatCount(signalCounts.committees, "committee record")}, ${formatCount(signalCounts.outsideSpending, "outside-spending alert")}, ${formatCount(signalCounts.review, "review flag")}.`,
             incumbentCount
@@ -114,9 +115,14 @@ export default async function RacePage({
               : "No incumbent candidate is currently matched in this slice; verify ballot and primary context with election-office sources.",
             ]}
         />
-        <div className="grid gap-px border-b border-neutral-300 bg-neutral-300 sm:grid-cols-4" id="race-stats">
+        <div className="grid gap-px border-b border-neutral-300 bg-neutral-300 sm:grid-cols-2 xl:grid-cols-5" id="race-stats">
           <RaceStat label="Cohort receipts" value={formatMoney(stats.totalRaised) ?? "$0"} />
           <RaceStat label="Outside spending" value={formatMoney(stats.totalIndependentExpenditures) ?? "$0"} />
+          <RaceStat
+            detail={`Support ${formatMoney(stats.supportIndependentExpenditures) ?? "$0"} / oppose ${formatMoney(stats.opposeIndependentExpenditures) ?? "$0"}`}
+            label="IE direction"
+            value={formatCount(stats.independentExpenditureRecordCount, "record")}
+          />
           <RaceStat label="Candidates filed" value={String(stats.candidateCount)} />
           <RaceStat label="Incumbents" value={String(stats.incumbentCount)} />
         </div>
@@ -349,11 +355,12 @@ function countSignals(signals: Awaited<ReturnType<typeof getSignalsForEntity>>) 
   };
 }
 
-function RaceStat({ label, value }: { label: string; value: string }) {
+function RaceStat({ detail, label, value }: { detail?: string; label: string; value: string }) {
   return (
     <div className="bg-white px-5 py-4">
       <p className="font-mono text-[11px] uppercase tracking-[0.12em] text-neutral-500">{label}</p>
       <p className="mt-1 text-lg font-semibold tabular-nums">{value}</p>
+      {detail ? <p className="mt-1 text-xs leading-5 text-neutral-600">{detail}</p> : null}
     </div>
   );
 }

@@ -13,7 +13,7 @@ export async function GET(request: Request) {
 
   const [rows, manifest] = await Promise.all([
     getStateRaceBoard(state),
-    exportManifest(state),
+    exportManifest(state, url.origin),
   ]);
 
   return Response.json(rows.map((row) => raceBoardToExportRow(row, state, manifest)), {
@@ -24,11 +24,12 @@ export async function GET(request: Request) {
   });
 }
 
-async function exportManifest(state: string): Promise<RaceBoardExportManifest> {
+async function exportManifest(state: string, baseUrl: string): Promise<RaceBoardExportManifest> {
   const status = await getCoverageSummary();
   return {
     exportedAt: new Date().toISOString(),
     filters: { state },
+    baseUrl,
     latestRun: status.runs[0] ?? null,
   };
 }

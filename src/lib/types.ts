@@ -156,6 +156,9 @@ export type TopSpender = {
 export type RaceStats = {
   totalRaised: number;
   totalIndependentExpenditures: number;
+  supportIndependentExpenditures: number;
+  opposeIndependentExpenditures: number;
+  independentExpenditureRecordCount: number;
   candidateCount: number;
   incumbentCount: number;
   latestIndependentExpenditureDate?: string | null;

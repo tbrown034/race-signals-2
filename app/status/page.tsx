@@ -88,20 +88,32 @@ export default async function StatusPage() {
           </p>
           {status.storageUsage.largestTables.length ? (
             <div className="mt-4 overflow-x-auto">
-              <table className="w-full min-w-[560px] text-left text-sm">
+              <table className="w-full min-w-0 text-left text-sm md:min-w-[560px]">
                 <thead className="bg-neutral-100 font-mono text-xs uppercase tracking-[0.12em] text-neutral-500">
                   <tr>
                     <th className="px-4 py-3 font-medium" scope="col">Table</th>
-                    <th className="px-4 py-3 text-right font-medium" scope="col">Size</th>
-                    <th className="px-4 py-3 text-right font-medium" scope="col">Rows</th>
+                    <th className="hidden px-4 py-3 text-right font-medium md:table-cell" scope="col">Size</th>
+                    <th className="hidden px-4 py-3 text-right font-medium md:table-cell" scope="col">Rows</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-neutral-200">
                   {status.storageUsage.largestTables.map((table) => (
                     <tr key={table.tableName}>
-                      <td className="px-4 py-3 font-mono">{table.tableName}</td>
-                      <td className="px-4 py-3 text-right font-mono">{formatBytes(table.totalBytes)}</td>
-                      <td className="px-4 py-3 text-right font-mono">{table.rowCount ?? "Estimate unavailable"}</td>
+                      <td className="px-4 py-3">
+                        <span className="font-mono">{table.tableName}</span>
+                        <dl className="mt-2 space-y-1 text-xs leading-5 text-neutral-600 md:hidden">
+                          <div>
+                            <dt className="inline font-mono uppercase tracking-[0.12em] text-neutral-500">Size </dt>
+                            <dd className="inline font-mono text-neutral-950">{formatBytes(table.totalBytes)}</dd>
+                          </div>
+                          <div>
+                            <dt className="inline font-mono uppercase tracking-[0.12em] text-neutral-500">Rows </dt>
+                            <dd className="inline">{table.rowCount ?? "Estimate unavailable"}</dd>
+                          </div>
+                        </dl>
+                      </td>
+                      <td className="hidden px-4 py-3 text-right font-mono md:table-cell">{formatBytes(table.totalBytes)}</td>
+                      <td className="hidden px-4 py-3 text-right font-mono md:table-cell">{table.rowCount ?? "Estimate unavailable"}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -196,14 +208,14 @@ export default async function StatusPage() {
               </p>
             </div>
             <div className="overflow-x-auto">
-              <table className="w-full min-w-[760px] text-left text-sm">
+              <table className="w-full min-w-0 text-left text-sm md:min-w-[760px]">
                 <thead className="bg-neutral-100 text-xs uppercase tracking-[0.12em] text-neutral-500">
                   <tr>
                     <th className="px-4 py-3 font-medium" scope="col">Candidate</th>
-                    <th className="px-4 py-3 font-medium" scope="col">Race</th>
-                    <th className="px-4 py-3 text-right font-medium" scope="col">Cycle receipts</th>
-                    <th className="px-4 py-3 font-medium" scope="col">FEC record</th>
-                    <th className="px-4 py-3 font-medium" scope="col">FEC API totals timestamp</th>
+                    <th className="hidden px-4 py-3 font-medium md:table-cell" scope="col">Race</th>
+                    <th className="hidden px-4 py-3 text-right font-medium md:table-cell" scope="col">Cycle receipts</th>
+                    <th className="hidden px-4 py-3 font-medium md:table-cell" scope="col">FEC record</th>
+                    <th className="hidden px-4 py-3 font-medium md:table-cell" scope="col">FEC API totals timestamp</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-neutral-200">
@@ -213,8 +225,46 @@ export default async function StatusPage() {
                         <Link className="font-medium underline underline-offset-4" href={`/candidates/${candidate.id}`}>
                           {candidate.name}
                         </Link>
+                        <dl className="mt-2 space-y-1 text-xs leading-5 text-neutral-600 md:hidden">
+                          <div>
+                            <dt className="inline font-mono uppercase tracking-[0.12em] text-neutral-500">Race </dt>
+                            <dd className="inline">
+                              {candidate.raceId ? (
+                                <Link className="font-medium underline underline-offset-4" href={`/races/${candidate.raceId}`}>
+                                  {candidate.raceName ?? candidate.raceId}
+                                </Link>
+                              ) : (
+                                "Race not matched"
+                              )}
+                            </dd>
+                          </div>
+                          <div>
+                            <dt className="inline font-mono uppercase tracking-[0.12em] text-neutral-500">Receipts </dt>
+                            <dd className="inline font-mono text-neutral-950">{formatMoney(candidate.totalReceiptsCycle) ?? "FEC totals not loaded"}</dd>
+                          </div>
+                          <div>
+                            <dt className="inline font-mono uppercase tracking-[0.12em] text-neutral-500">FEC ID </dt>
+                            <dd className="inline font-mono text-neutral-950">{candidate.fecCandidateId}</dd>
+                          </div>
+                          <div>
+                            <dt className="inline font-mono uppercase tracking-[0.12em] text-neutral-500">Source </dt>
+                            <dd className="inline">
+                              {candidate.sourceUrl ? (
+                                <a className="font-medium underline underline-offset-4" href={candidate.sourceUrl} rel="noreferrer" target="_blank">
+                                  Verify at FEC
+                                </a>
+                              ) : (
+                                "Source not stored"
+                              )}
+                            </dd>
+                          </div>
+                          <div>
+                            <dt className="inline font-mono uppercase tracking-[0.12em] text-neutral-500">Totals </dt>
+                            <dd className="inline">{candidate.totalsUpdatedAt ? formatDateTime(candidate.totalsUpdatedAt) : "FEC totals not loaded"}</dd>
+                          </div>
+                        </dl>
                       </td>
-                      <td className="px-4 py-3">
+                      <td className="hidden px-4 py-3 md:table-cell">
                         {candidate.raceId ? (
                           <Link className="font-medium underline underline-offset-4" href={`/races/${candidate.raceId}`}>
                             {candidate.raceName ?? candidate.raceId}
@@ -223,10 +273,10 @@ export default async function StatusPage() {
                           "Race not matched"
                         )}
                       </td>
-                      <td className="px-4 py-3 text-right font-mono">
+                      <td className="hidden px-4 py-3 text-right font-mono md:table-cell">
                         {formatMoney(candidate.totalReceiptsCycle) ?? "FEC totals not loaded"}
                       </td>
-                      <td className="px-4 py-3">
+                      <td className="hidden px-4 py-3 md:table-cell">
                         <div className="flex flex-col gap-1">
                           <span className="font-mono text-xs text-neutral-700">{candidate.fecCandidateId}</span>
                           {candidate.sourceUrl ? (
@@ -243,7 +293,7 @@ export default async function StatusPage() {
                           )}
                         </div>
                       </td>
-                      <td className="px-4 py-3 text-xs text-neutral-600">
+                      <td className="hidden px-4 py-3 text-xs text-neutral-600 md:table-cell">
                         {candidate.totalsUpdatedAt ? formatDateTime(candidate.totalsUpdatedAt) : "FEC totals not loaded"}
                       </td>
                     </tr>
@@ -256,34 +306,66 @@ export default async function StatusPage() {
 
         <section className="mt-6 border border-neutral-300 bg-white">
           <div className="overflow-x-auto">
-            <table className="w-full min-w-[980px] text-left text-sm">
+            <table className="w-full min-w-0 text-left text-sm md:min-w-[980px]">
             <thead className="bg-neutral-100 text-xs uppercase tracking-[0.12em] text-neutral-500">
               <tr>
                 <th className="px-4 py-3 font-medium" scope="col">Source</th>
-                <th className="px-4 py-3 font-medium" scope="col">Mode</th>
-                <th className="px-4 py-3 font-medium" scope="col">Scope</th>
-                <th className="px-4 py-3 font-medium" scope="col">Status</th>
-                <th className="px-4 py-3 font-medium" scope="col">Window</th>
-                <th className="px-4 py-3 font-medium" scope="col">Finished</th>
-                <th className="px-4 py-3 font-medium" scope="col">Records</th>
-                <th className="px-4 py-3 font-medium" scope="col">Run notes</th>
+                <th className="hidden px-4 py-3 font-medium md:table-cell" scope="col">Mode</th>
+                <th className="hidden px-4 py-3 font-medium md:table-cell" scope="col">Scope</th>
+                <th className="hidden px-4 py-3 font-medium md:table-cell" scope="col">Status</th>
+                <th className="hidden px-4 py-3 font-medium md:table-cell" scope="col">Window</th>
+                <th className="hidden px-4 py-3 font-medium md:table-cell" scope="col">Finished</th>
+                <th className="hidden px-4 py-3 font-medium md:table-cell" scope="col">Records</th>
+                <th className="hidden px-4 py-3 font-medium md:table-cell" scope="col">Run notes</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-neutral-200">
               {status.runs.map((run) => (
                 <tr key={run.id}>
-                  <td className="px-4 py-3">{run.source}</td>
-                  <td className="px-4 py-3">{run.mode ?? "watch"}</td>
-                  <td className="px-4 py-3">{run.scope}</td>
-                  <td className="px-4 py-3">{run.status}</td>
                   <td className="px-4 py-3">
+                    <span className="font-medium">{run.source}</span>
+                    <dl className="mt-2 space-y-1 text-xs leading-5 text-neutral-600 md:hidden">
+                      <div>
+                        <dt className="inline font-mono uppercase tracking-[0.12em] text-neutral-500">Mode </dt>
+                        <dd className="inline">{run.mode ?? "watch"}</dd>
+                      </div>
+                      <div>
+                        <dt className="inline font-mono uppercase tracking-[0.12em] text-neutral-500">Scope </dt>
+                        <dd className="inline">{run.scope}</dd>
+                      </div>
+                      <div>
+                        <dt className="inline font-mono uppercase tracking-[0.12em] text-neutral-500">Status </dt>
+                        <dd className="inline">{run.status}</dd>
+                      </div>
+                      <div>
+                        <dt className="inline font-mono uppercase tracking-[0.12em] text-neutral-500">Window </dt>
+                        <dd className="inline">{run.windowStart && run.windowEnd ? `${run.windowStart} to ${run.windowEnd}` : "Current"}</dd>
+                      </div>
+                      <div>
+                        <dt className="inline font-mono uppercase tracking-[0.12em] text-neutral-500">Finished </dt>
+                        <dd className="inline">{formatDateTime(run.finishedAt ?? run.startedAt)}</dd>
+                      </div>
+                      <div>
+                        <dt className="inline font-mono uppercase tracking-[0.12em] text-neutral-500">Records </dt>
+                        <dd className="inline">{run.recordsSeen}</dd>
+                      </div>
+                      <div>
+                        <dt className="inline font-mono uppercase tracking-[0.12em] text-neutral-500">Notes </dt>
+                        <dd className="inline">{runNotes(run)}</dd>
+                      </div>
+                    </dl>
+                  </td>
+                  <td className="hidden px-4 py-3 md:table-cell">{run.mode ?? "watch"}</td>
+                  <td className="hidden px-4 py-3 md:table-cell">{run.scope}</td>
+                  <td className="hidden px-4 py-3 md:table-cell">{run.status}</td>
+                  <td className="hidden px-4 py-3 md:table-cell">
                     {run.windowStart && run.windowEnd
                       ? `${run.windowStart} to ${run.windowEnd}`
                       : "Current"}
                   </td>
-                  <td className="px-4 py-3">{formatDateTime(run.finishedAt ?? run.startedAt)}</td>
-                  <td className="px-4 py-3">{run.recordsSeen}</td>
-                  <td className="px-4 py-3 text-xs leading-5 text-neutral-700">
+                  <td className="hidden px-4 py-3 md:table-cell">{formatDateTime(run.finishedAt ?? run.startedAt)}</td>
+                  <td className="hidden px-4 py-3 md:table-cell">{run.recordsSeen}</td>
+                  <td className="hidden px-4 py-3 text-xs leading-5 text-neutral-700 md:table-cell">
                     {runNotes(run)}
                   </td>
                 </tr>

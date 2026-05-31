@@ -366,7 +366,7 @@ function candidateReporterNotes(
       ? "FEC aggregate totals show activity, but Race Signals has not matched a committee, filing or Schedule E record that generates a source-record signal for this candidate yet."
       : null,
     independentExpenditureCount
-      ? `${formatCount(independentExpenditureCount, "stored Schedule E record")} names this candidate; records below the $25,000 alert threshold are shown as context but do not become signals.`
+      ? `Showing the latest ${formatCount(independentExpenditureCount, "stored Schedule E record")} naming this candidate; records below the $25,000 alert threshold are shown as context but do not become signals.`
       : "No stored current-cycle Schedule E records name this candidate in the current slice.",
     isIncumbent(candidate.incumbentChallengeStatus)
       ? "Incumbent context: committee records usually reflect cycle operations or continuing campaign infrastructure, not a first-time launch."
@@ -405,7 +405,7 @@ function candidateMobileNotes(
       ? "FEC totals show activity; no matched signal yet."
       : null,
     independentExpenditureCount
-      ? `${formatCount(independentExpenditureCount, "Schedule E record")} names this candidate; below-threshold records are context.`
+      ? `Latest ${formatCount(independentExpenditureCount, "Schedule E record")} naming this candidate; below-threshold records are context.`
       : "No stored Schedule E records name this candidate.",
   ].filter((note): note is string => Boolean(note));
 }
@@ -445,7 +445,7 @@ function CandidateOutsideSpendingTable({
           Outside spending records
         </h2>
         <p className="mt-1 text-sm text-neutral-600">
-          Current-cycle Schedule E records naming this candidate. Records below the $25,000 alert threshold are context, not signal cards.
+          Latest current-cycle Schedule E records naming this candidate. Records below the $25,000 alert threshold are context, not signal cards.
         </p>
       </div>
       <div className="overflow-x-auto">

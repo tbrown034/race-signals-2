@@ -104,10 +104,10 @@ export default async function CommitteePage({
               ? `Directly linked to ${linkedCandidate.name}; party context comes from that candidate record.`
               : "No direct candidate affiliation is stored for this committee, so the page does not assign a party reading.",
             independentExpenditures.length
-              ? `${formatMoney(spendingSummary.total) ?? "$0"} in ${formatCount(independentExpenditures.length, "current-cycle Schedule E independent expenditure record")} attached to this committee in this slice.`
+              ? `Showing ${formatMoney(spendingSummary.total) ?? "$0"} across the latest ${formatCount(independentExpenditures.length, "displayed current-cycle Schedule E independent expenditure record")} attached to this committee.`
               : "No current-cycle Schedule E independent expenditures are attached to this committee in this slice.",
             independentExpenditures.length
-              ? `Position split: support ${formatMoney(spendingSummary.support) ?? "$0"}; oppose ${formatMoney(spendingSummary.oppose) ?? "$0"}; not classified ${formatMoney(spendingSummary.uncoded) ?? "$0"}.`
+              ? `Displayed position split: support ${formatMoney(spendingSummary.support) ?? "$0"}; oppose ${formatMoney(spendingSummary.oppose) ?? "$0"}; not classified ${formatMoney(spendingSummary.uncoded) ?? "$0"}.`
               : null,
             spendingSummary.latestDate
               ? `Latest stored Schedule E date: ${formatDate(spendingSummary.latestDate)}.`

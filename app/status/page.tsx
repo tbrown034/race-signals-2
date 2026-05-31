@@ -547,15 +547,18 @@ function noteValue(label: string, value: unknown) {
 
 function validationRuleLabel(rule: string) {
   const labels: Record<string, string> = {
+    broken_or_missing_source_url: "Broken or missing source URL",
     broken_source_url: "Broken or missing source URL",
     missing_candidate_name: "Missing candidate name",
     missing_committee_id: "Missing committee ID",
     missing_date: "Missing date",
     missing_source_id: "Missing source ID",
     unmatched_race: "Unmatched race",
+    suspiciously_large_amount: "Suspiciously large amount",
     suspicious_amount: "Suspicious amount",
     duplicate_source_record: "Duplicate source record",
     elections_lookup: "Election timeline lookup",
+    partial_ingestion_error: "Partial ingestion error",
   };
   return labels[rule] ?? rule.replaceAll("_", " ");
 }

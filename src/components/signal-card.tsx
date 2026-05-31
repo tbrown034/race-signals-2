@@ -33,6 +33,7 @@ export function SignalCard({ signal }: { signal: Signal }) {
   const candidateLabel = candidateDisplay(signal);
   const anchorId = signalAnchorId(signal);
   const evidence = signalEvidence(signal);
+  const verifyLine = verificationLine(signal.signalType);
 
   return (
     <article
@@ -78,6 +79,10 @@ export function SignalCard({ signal }: { signal: Signal }) {
             Record: {evidence}
           </p>
         ) : null}
+        <p className="mt-1 text-xs leading-5 text-neutral-600">
+          <span className="font-mono uppercase tracking-[0.12em] text-neutral-500">Verify:</span>{" "}
+          {verifyLine}
+        </p>
         <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-xs text-neutral-600">
           {contributorNameNormalized ? (
             <span title={contributorName ?? contributorNameNormalized}>
@@ -228,4 +233,20 @@ function numberMetadata(value: unknown) {
     return Number.isFinite(parsed) ? parsed : null;
   }
   return null;
+}
+
+function verificationLine(signalType: string) {
+  if (signalType === "large_independent_expenditure") {
+    return "Open the FEC Schedule E source, confirm spender, target, support/oppose marker and race context.";
+  }
+  if (signalType === "new_filing") {
+    return "Open the FEC filing source, check report type, coverage period, totals and amendments.";
+  }
+  if (signalType === "new_committee") {
+    return "Open the FEC committee source, confirm candidate linkage and verify ballot status separately.";
+  }
+  if (signalType === "committee_activity_spike") {
+    return "Open the latest and prior filings, compare report periods and confirm totals before publication.";
+  }
+  return "Open the source record and confirm the linked candidate, committee, race and date.";
 }

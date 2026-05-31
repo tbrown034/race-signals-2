@@ -14,7 +14,7 @@ export function CoverageStrip({
   const finishedAt = latestRun?.finishedAt ?? latestRun?.startedAt ?? null;
   const isPartial = latestRun?.status === "partial";
   const isError = latestRun?.status === "failed" || latestRun?.status === "error";
-  const stateScope = latestRun?.state ? `State ${latestRun.state}` : latestRun?.scope ?? "Configured slice";
+  const latestScope = latestRun?.state ? `State ${latestRun.state}` : latestRun?.scope ?? "Configured slice";
   const statusLabel = isError ? "Needs attention" : isPartial ? "Partial ingest" : latestRun?.status ?? mode;
 
   return (
@@ -25,8 +25,8 @@ export function CoverageStrip({
             Coverage check
           </p>
           <p className="mt-1 leading-5 text-neutral-700">
-            Current readout reflects the latest stored ingest slice, not a real-time national tabulator.
-            Absence of a signal is not confirmation that no FEC activity exists.
+            Current readout reflects stored records from capped ingest runs, not a real-time national tabulator.
+            The latest ingest may be only one state or slice; absence of a signal is not confirmation that no FEC activity exists.
           </p>
         </div>
         <dl className="grid grid-cols-2 gap-x-5 gap-y-2 font-mono text-[11px] uppercase tracking-[0.12em] text-neutral-600 sm:grid-cols-4">
@@ -35,8 +35,8 @@ export function CoverageStrip({
             <dd className="mt-1 font-semibold text-neutral-950">{statusLabel}</dd>
           </div>
           <div>
-            <dt>Scope</dt>
-            <dd className="mt-1 font-semibold text-neutral-950">{stateScope}</dd>
+            <dt>Latest ingest</dt>
+            <dd className="mt-1 font-semibold text-neutral-950">{latestScope}</dd>
           </div>
           <div>
             <dt>Signals</dt>

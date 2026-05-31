@@ -132,6 +132,7 @@ export default async function Home({
           </div>
           <CoverageStrip counts={status.counts} latestRun={status.runs[0]} mode={status.mode} />
           {state ? <StateRaceBoard state={state} rows={stateRaceBoard} /> : null}
+          <StartPointStrip />
           <FeedFilters
             key={[q, state, office, raceId, committeeId, type, statusFilter, since, ingestedSince].join("|")}
             races={races}
@@ -228,6 +229,30 @@ export default async function Home({
         </aside>
       </main>
     </PageShell>
+  );
+}
+
+function StartPointStrip() {
+  return (
+    <section className="border-b border-neutral-300 px-5 py-3" aria-label="Start points">
+      <div className="flex flex-col gap-2 xl:flex-row xl:items-center">
+        <p className="shrink-0 font-mono text-[11px] uppercase tracking-[0.12em] text-neutral-500">
+          Start points
+        </p>
+        <div className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1 xl:flex-wrap xl:overflow-visible xl:pb-0">
+          {quickViews.map((view) => (
+            <Link
+              className="shrink-0 border border-neutral-300 px-3 py-2 text-sm hover:border-neutral-900"
+              href={view.href}
+              key={`main-${view.href}`}
+              title={view.body}
+            >
+              {view.label}
+            </Link>
+          ))}
+        </div>
+      </div>
+    </section>
   );
 }
 

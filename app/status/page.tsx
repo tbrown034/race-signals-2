@@ -1,6 +1,7 @@
+import Link from "next/link";
 import { PageShell } from "@/src/components/page-shell";
 import { getStatus } from "@/src/lib/db/repository";
-import { formatDateTime, isOlderThanHours } from "@/src/lib/format";
+import { formatDateTime, formatMoney, isOlderThanHours } from "@/src/lib/format";
 import { endpointHealthClass } from "@/src/lib/status-health";
 import type { Metadata } from "next";
 
@@ -163,6 +164,55 @@ export default async function StatusPage() {
             </table>
           </div>
         </section>
+
+        {status.candidateSignalGaps.length ? (
+          <section className="mt-6 border border-neutral-300 bg-white">
+            <div className="border-b border-neutral-300 px-5 py-4">
+              <h2 className="text-sm font-semibold uppercase tracking-[0.14em] text-neutral-600">
+                Candidate signal gaps
+              </h2>
+              <p className="mt-1 text-sm text-neutral-600">
+                FEC candidates in this database slice with no generated signal yet. Treat these as coverage caveats, not as proof of inactivity.
+              </p>
+            </div>
+            <div className="overflow-x-auto">
+              <table className="w-full min-w-[760px] text-left text-sm">
+                <thead className="bg-neutral-100 text-xs uppercase tracking-[0.12em] text-neutral-500">
+                  <tr>
+                    <th className="px-4 py-3 font-medium" scope="col">Candidate</th>
+                    <th className="px-4 py-3 font-medium" scope="col">Race</th>
+                    <th className="px-4 py-3 text-right font-medium" scope="col">Cycle receipts</th>
+                    <th className="px-4 py-3 font-medium" scope="col">FEC ID</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-neutral-200">
+                  {status.candidateSignalGaps.map((candidate) => (
+                    <tr key={candidate.id}>
+                      <td className="px-4 py-3">
+                        <Link className="font-medium underline underline-offset-4" href={`/candidates/${candidate.id}`}>
+                          {candidate.name}
+                        </Link>
+                      </td>
+                      <td className="px-4 py-3">
+                        {candidate.raceId ? (
+                          <Link className="font-medium underline underline-offset-4" href={`/races/${candidate.raceId}`}>
+                            {candidate.raceName ?? candidate.raceId}
+                          </Link>
+                        ) : (
+                          "Race not matched"
+                        )}
+                      </td>
+                      <td className="px-4 py-3 text-right font-mono">
+                        {formatMoney(candidate.totalReceiptsCycle) ?? "FEC totals not loaded"}
+                      </td>
+                      <td className="px-4 py-3 font-mono">{candidate.fecCandidateId}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </section>
+        ) : null}
 
         <section className="mt-6 border border-neutral-300 bg-white">
           <div className="overflow-x-auto">

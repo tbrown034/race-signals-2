@@ -236,6 +236,15 @@ export type ElectionCoverage = {
   electionRows: number;
 };
 
+export type CandidateSignalGap = {
+  id: string;
+  name: string;
+  fecCandidateId: string;
+  raceId?: string | null;
+  raceName?: string | null;
+  totalReceiptsCycle?: number | null;
+};
+
 export type StorageUsage = {
   databaseSizeBytes: number | null;
   largestTables: Array<{

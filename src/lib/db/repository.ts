@@ -10,6 +10,7 @@ import { hasDatabase, sql } from "@/src/lib/db/client";
 import type { SignalFilters } from "@/src/lib/signals/filters";
 import type {
   Candidate,
+  CandidateSignalGap,
   Committee,
   CommitteeIndependentExpenditure,
   ElectionCoverage,
@@ -972,6 +973,7 @@ export async function getStatus() {
       },
       endpoints: [],
       validationIssues: [],
+      candidateSignalGaps: [],
       electionCoverage: {
         candidates: demoCandidates.length,
         withIdentifiers: demoCandidates.filter((candidate) => candidate.wikidataId || candidate.wikipediaUrl).length,
@@ -1025,6 +1027,14 @@ export async function getStatus() {
     severity: string;
     count: string;
     latest_at: string | Date;
+  }> = [];
+  let candidateSignalGaps: Array<{
+    id: string;
+    name: string;
+    fec_candidate_id: string;
+    race_id: string | null;
+    race_name: string | null;
+    total_receipts_cycle: string | null;
   }> = [];
   try {
     endpoints = await sql<{
@@ -1095,6 +1105,29 @@ export async function getStatus() {
       throw error;
     }
   }
+  candidateSignalGaps = await sql<{
+    id: string;
+    name: string;
+    fec_candidate_id: string;
+    race_id: string | null;
+    race_name: string | null;
+    total_receipts_cycle: string | null;
+  }>(`
+    select
+      c.id,
+      c.name,
+      c.fec_candidate_id,
+      c.race_id,
+      r.name as race_name,
+      c.total_receipts_cycle::text as total_receipts_cycle
+    from candidates c
+    left join races r on r.id = c.race_id
+    left join signals s on s.candidate_id = c.id
+    group by c.id, r.name
+    having count(s.id) = 0
+    order by c.total_receipts_cycle desc nulls last, c.name
+    limit 10
+  `);
 
   return {
     runs: runs.map<IngestionRun>((run) => ({
@@ -1127,6 +1160,14 @@ export async function getStatus() {
       severity: issue.severity,
       count: Number(issue.count),
       latestAt: toIsoString(issue.latest_at),
+    })),
+    candidateSignalGaps: candidateSignalGaps.map<CandidateSignalGap>((candidate) => ({
+      id: candidate.id,
+      name: candidate.name,
+      fecCandidateId: candidate.fec_candidate_id,
+      raceId: candidate.race_id,
+      raceName: candidate.race_name,
+      totalReceiptsCycle: candidate.total_receipts_cycle === null ? null : Number(candidate.total_receipts_cycle),
     })),
     electionCoverage: {
       candidates: Number(electionCoverageRow?.candidates ?? 0),

@@ -145,7 +145,7 @@ export const demoSignals: Signal[] = [
     signalType: "large_independent_expenditure",
     headline: "Outside group reported $85,000 opposing Daniel Kline in IN-05.",
     whyItMatters:
-      "Independent expenditures can show where outside groups believe a race is worth influencing before that attention is visible in polling or public messaging.",
+      "Schedule E records show outside spending that is supposed to be independent of a campaign; verify the support/oppose code, purpose, amount and race before citing.",
     candidateId: "cand-H6IN05202",
     candidateName: "Daniel Kline",
     candidateParty: "REP",

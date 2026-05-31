@@ -155,7 +155,7 @@ export function generateSignals(input: SignalInput): Signal[] {
         candidate?.name ?? "a candidate"
       } in ${displayRace(race)}.`,
       whyItMatters:
-        "Independent expenditures can show where outside groups believe a race is worth influencing before that attention is visible in polling or public messaging.",
+        "Schedule E records show outside spending that is supposed to be independent of a campaign; verify the support/oppose code, purpose, amount and race before citing.",
       candidateId: candidate?.id ?? expenditure.candidateId ?? null,
       candidateName: candidate?.name ?? null,
       committeeId: committee?.id ?? expenditure.spenderCommitteeId ?? null,

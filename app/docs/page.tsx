@@ -14,15 +14,15 @@ const sections = [
   },
   {
     title: "Working Notes",
-    body: "The persistent project context lives in docs/agent-context.md. It stores product principles, FEC endpoint notes, Next.js caveats, schema boundaries and implementation guardrails.",
+    body: "The project reference file at docs/agent-context.md stores product principles, FEC endpoint notes, schema boundaries and implementation guardrails.",
   },
   {
     title: "FEC API",
     body: "The first adapter uses FEC candidate search, candidate totals, candidate committees, committee reports and Schedule E independent expenditures. Itemized Schedule A receipts are deferred for cost control. Source URLs and raw IDs must be preserved for verification and deduping.",
   },
   {
-    title: "Next.js",
-    body: "This repo uses Next 16 App Router. Before changing framework-specific code, agents should read the relevant local docs under node_modules/next/dist/docs and follow AGENTS.md.",
+    title: "Implementation",
+    body: "The application uses Next 16 App Router, TypeScript, Tailwind and raw SQL against Postgres. Server-rendered read routes stay separate from ingestion logic.",
   },
   {
     title: "MVP Discipline",
@@ -79,13 +79,13 @@ export default function DocsPage() {
                 <tr>
                   <td className="px-4 py-3 font-mono text-xs">docs/agent-context.md</td>
                   <td className="px-4 py-3 text-neutral-700">
-                    Long-lived agent memory and product guardrails.
+                    Product guardrails, source scope and implementation notes.
                   </td>
                 </tr>
                 <tr>
                   <td className="px-4 py-3 font-mono text-xs">AGENTS.md</td>
                   <td className="px-4 py-3 text-neutral-700">
-                    Repo-specific instruction to check local Next.js docs before edits.
+                    Local development conventions for this repository.
                   </td>
                 </tr>
                 <tr>

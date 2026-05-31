@@ -102,6 +102,14 @@ export function generateSignals(input: SignalInput): Signal[] {
       confidence: "high",
       status: eventStatus(status, filing.receiptDate, input.dataFreshness),
       dataFreshness: input.dataFreshness,
+      metadata: {
+        reportType: filing.reportType,
+        coverageStartDate: filing.coverageStartDate,
+        coverageEndDate: filing.coverageEndDate,
+        totalReceipts: filing.totalReceipts,
+        cashOnHand: filing.cashOnHand,
+        sourceId: filing.sourceId,
+      },
     });
   }
 

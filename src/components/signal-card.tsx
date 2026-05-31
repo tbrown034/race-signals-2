@@ -181,6 +181,26 @@ function signalEvidence(signal: Signal) {
       .join(" | ");
   }
 
+  if (signal.signalType === "new_filing") {
+    const receipts = numberMetadata(signal.metadata?.totalReceipts);
+    const cash = numberMetadata(signal.metadata?.cashOnHand);
+    const reportType = textMetadata(signal.metadata?.reportType);
+    const sourceId = textMetadata(signal.metadata?.sourceId);
+    const coverage = [
+      textMetadata(signal.metadata?.coverageStartDate),
+      textMetadata(signal.metadata?.coverageEndDate),
+    ].filter(Boolean);
+    return [
+      reportType ? `report ${reportType}` : null,
+      receipts ? `receipts ${formatMoney(receipts)}` : null,
+      cash ? `cash ${formatMoney(cash)}` : null,
+      coverage.length === 2 ? `period ${coverage.join(" to ")}` : null,
+      sourceId ? `filing ${sourceId}` : null,
+    ]
+      .filter(Boolean)
+      .join(" | ");
+  }
+
   if (signal.signalType === "committee_activity_spike") {
     const latest = numberMetadata(signal.metadata?.latestTotalReceipts);
     const prior = numberMetadata(signal.metadata?.priorTotalReceipts);

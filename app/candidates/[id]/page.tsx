@@ -1,12 +1,13 @@
 import { CandidatePhoto } from "@/src/components/candidate-photo";
 import { ElectionTimeline } from "@/src/components/election-timeline";
 import { notFound } from "next/navigation";
+import Link from "next/link";
 import { EntityPage } from "@/src/components/entity-page";
 import { IncumbentBadge } from "@/src/components/incumbent-badge";
 import { PageShell } from "@/src/components/page-shell";
 import { PartySquare } from "@/src/components/party-square";
 import { ReporterRead } from "@/src/components/reporter-read";
-import { getCandidate, getCandidateElections, getSignalsForEntity } from "@/src/lib/db/repository";
+import { getCandidate, getCandidateElections, getCandidatesForRace, getSignalsForEntity } from "@/src/lib/db/repository";
 import { formatDate, formatDateTime, formatMoney } from "@/src/lib/format";
 
 export default async function CandidatePage({
@@ -22,6 +23,7 @@ export default async function CandidatePage({
   ]);
 
   if (!candidate) notFound();
+  const raceCohort = candidate.raceId ? await getCandidatesForRace(candidate.raceId) : [];
   const signalCounts = countSignals(signals);
 
   return (
@@ -72,6 +74,56 @@ export default async function CandidatePage({
           emptyText={`No election timeline available for this candidate. Wikidata and Wikipedia coverage of congressional primaries can be thin - follow the ${candidate.state} secretary of state for authoritative results.`}
           title="Election timeline"
         />
+        {raceCohort.length ? (
+          <div className="border-b border-neutral-300">
+            <div className="border-b border-neutral-300 px-5 py-4">
+              <h2 className="text-sm font-semibold uppercase tracking-[0.14em] text-neutral-600">
+                Race context
+              </h2>
+              <p className="mt-1 text-sm text-neutral-600">
+                Other FEC candidates currently matched to {candidate.raceId}. Totals come from the FEC candidate aggregate endpoint.
+              </p>
+            </div>
+            <div className="overflow-x-auto">
+              <table className="w-full min-w-[680px] text-left text-sm">
+                <thead className="bg-neutral-100 font-mono text-xs uppercase tracking-[0.12em] text-neutral-500">
+                  <tr>
+                    <th className="px-4 py-3 font-medium" scope="col">Candidate</th>
+                    <th className="px-4 py-3 font-medium" scope="col">Status</th>
+                    <th className="px-4 py-3 text-right font-medium" scope="col">Receipts</th>
+                    <th className="px-4 py-3 text-right font-medium" scope="col">Cash</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-neutral-200">
+                  {raceCohort.map((otherCandidate) => (
+                    <tr className={otherCandidate.id === candidate.id ? "bg-neutral-50" : undefined} key={otherCandidate.id}>
+                      <td className="px-4 py-3">
+                        <span className="inline-flex items-center gap-2">
+                          <PartySquare party={otherCandidate.party} />
+                          <Link className="font-medium underline underline-offset-4" href={`/candidates/${otherCandidate.id}`}>
+                            {otherCandidate.name}
+                          </Link>
+                          {otherCandidate.id === candidate.id ? (
+                            <span className="font-mono text-[10px] uppercase tracking-[0.12em] text-neutral-500">
+                              This page
+                            </span>
+                          ) : null}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3">{incumbentStatus(otherCandidate.incumbentChallengeStatus) ?? "Unknown"}</td>
+                      <td className="px-4 py-3 text-right font-mono">
+                        {formatMoney(otherCandidate.totalReceiptsCycle) ?? "Unknown"}
+                      </td>
+                      <td className="px-4 py-3 text-right font-mono">
+                        {formatMoney(otherCandidate.cashOnHandLatest) ?? "Unknown"}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        ) : null}
       </EntityPage>
     </PageShell>
   );

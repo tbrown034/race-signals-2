@@ -21,84 +21,58 @@ export function SignalCard({ signal }: { signal: Signal }) {
   const amount = formatMoney(signal.amount);
 
   return (
-    <article className="border-b border-neutral-300 bg-white px-5 py-5">
-      <div className="flex flex-wrap items-center gap-2 text-xs">
-        <span className="border border-neutral-400 px-2 py-1 font-mono uppercase tracking-[0.12em] text-neutral-700">
+    <article className="grid gap-3 border-b border-neutral-300 bg-white px-4 py-4 md:grid-cols-[112px_1fr_190px]">
+      <div className="font-mono text-xs text-neutral-600">
+        <p className="text-neutral-950">{formatDate(signal.signalDate)}</p>
+        <p className="mt-1 uppercase tracking-[0.12em]">
           {typeLabels[signal.signalType] ?? signal.signalType}
+        </p>
+      </div>
+
+      <div className="min-w-0">
+        <div className="flex flex-wrap items-center gap-2">
+          <h2 className="text-base font-semibold leading-snug tracking-tight">
+            {signal.headline}
+          </h2>
+          {signal.status !== "new" ? (
+            <span className="border border-neutral-400 px-1.5 py-0.5 font-mono text-[10px] uppercase tracking-[0.12em] text-neutral-700">
+              {signal.status}
+            </span>
+          ) : null}
+        </div>
+        <p className="mt-1 max-w-3xl text-sm leading-5 text-neutral-700">
+          {signal.whyItMatters}
+        </p>
+        <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-xs text-neutral-600">
+          {signal.candidateId ? (
+            <Link className="font-medium underline underline-offset-4" href={`/candidates/${signal.candidateId}`}>
+              {signal.candidateName ?? signal.candidateId}
+            </Link>
+          ) : null}
+          {signal.committeeId ? (
+            <Link className="underline underline-offset-4" href={`/committees/${signal.committeeId}`}>
+              {signal.committeeName ?? signal.committeeId}
+            </Link>
+          ) : null}
+          {signal.raceId ? (
+            <Link className="underline underline-offset-4" href={`/races/${signal.raceId}`}>
+              {signal.raceName ?? signal.raceId}
+            </Link>
+          ) : (
+            <span>Unmatched race</span>
+          )}
+        </div>
+      </div>
+
+      <div className="flex flex-wrap items-start gap-2 text-xs md:flex-col md:items-end">
+        <span className="font-mono text-sm font-semibold text-neutral-950">
+          {amount ?? "Non-monetary"}
         </span>
         <span
           className={`border px-2 py-1 font-mono uppercase tracking-[0.12em] ${confidenceStyles[signal.confidence]}`}
         >
           {signal.confidence}
         </span>
-        {signal.status !== "new" ? (
-          <span className="border border-neutral-400 px-2 py-1 font-mono uppercase tracking-[0.12em] text-neutral-700">
-            {signal.status}
-          </span>
-        ) : null}
-      </div>
-
-      <h2 className="mt-3 text-xl font-semibold leading-snug tracking-tight">
-        {signal.headline}
-      </h2>
-      <p className="mt-2 max-w-3xl text-sm leading-6 text-neutral-700">
-        {signal.whyItMatters}
-      </p>
-
-      <dl className="mt-4 grid gap-3 text-sm sm:grid-cols-2 lg:grid-cols-4">
-        <div>
-          <dt className="font-mono text-xs uppercase tracking-[0.12em] text-neutral-500">
-            Date
-          </dt>
-          <dd className="mt-1">{formatDate(signal.signalDate)}</dd>
-        </div>
-        <div>
-          <dt className="font-mono text-xs uppercase tracking-[0.12em] text-neutral-500">
-            Race
-          </dt>
-          <dd className="mt-1">
-            {signal.raceId ? (
-              <Link className="underline underline-offset-4" href={`/races/${signal.raceId}`}>
-                {signal.raceName ?? signal.raceId}
-              </Link>
-            ) : (
-              "Unmatched"
-            )}
-          </dd>
-        </div>
-        <div>
-          <dt className="font-mono text-xs uppercase tracking-[0.12em] text-neutral-500">
-            Subject
-          </dt>
-          <dd className="mt-1">
-            {signal.candidateId ? (
-              <Link
-                className="underline underline-offset-4"
-                href={`/candidates/${signal.candidateId}`}
-              >
-                {signal.candidateName ?? signal.candidateId}
-              </Link>
-            ) : signal.committeeId ? (
-              <Link
-                className="underline underline-offset-4"
-                href={`/committees/${signal.committeeId}`}
-              >
-                {signal.committeeName ?? signal.committeeId}
-              </Link>
-            ) : (
-              "Not specified"
-            )}
-          </dd>
-        </div>
-        <div>
-          <dt className="font-mono text-xs uppercase tracking-[0.12em] text-neutral-500">
-            Amount
-          </dt>
-          <dd className="mt-1">{amount ?? "Not monetary"}</dd>
-        </div>
-      </dl>
-
-      <div className="mt-4 flex flex-wrap gap-x-4 gap-y-2 text-xs text-neutral-600">
         {signal.sourceUrl ? (
           <a className="font-medium underline underline-offset-4" href={signal.sourceUrl}>
             FEC source
@@ -106,12 +80,7 @@ export function SignalCard({ signal }: { signal: Signal }) {
         ) : (
           <span>Source URL missing</span>
         )}
-        <span>Freshness: {formatDateTime(signal.dataFreshness)}</span>
-        {signal.committeeId ? (
-          <Link className="underline underline-offset-4" href={`/committees/${signal.committeeId}`}>
-            Committee record
-          </Link>
-        ) : null}
+        <span className="text-neutral-500">Fresh {formatDateTime(signal.dataFreshness)}</span>
       </div>
     </article>
   );

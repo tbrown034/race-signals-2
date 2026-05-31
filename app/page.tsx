@@ -3,6 +3,7 @@ import { PageShell } from "@/src/components/page-shell";
 import { SignalCard } from "@/src/components/signal-card";
 import { getRaces, getSignals, getStatus } from "@/src/lib/db/repository";
 import { signalFiltersFromSearchParams } from "@/src/lib/signals/filters";
+import Link from "next/link";
 
 export default async function Home({
   searchParams,
@@ -32,18 +33,19 @@ export default async function Home({
       <main className="mx-auto grid max-w-7xl gap-6 px-5 py-6 sm:px-8 lg:grid-cols-[1fr_320px]">
         <section className="border border-neutral-300 bg-white">
           <div className="border-b border-neutral-300 px-5 py-5">
-            <p className="font-mono text-xs uppercase tracking-[0.18em] text-neutral-500">
-              Chronological signal feed
-            </p>
-            <h1 className="mt-2 text-3xl font-semibold tracking-tight">
-              What changed in the money trail?
-            </h1>
-            <p className="mt-3 max-w-3xl text-sm leading-6 text-neutral-700">
-              A national FEC-first feed for 2026 U.S. House and Senate races. Each alert links
-              back to source records so a reporter can verify, contextualize and
-              decide whether to follow up.
-            </p>
-            <div className="mt-4 flex flex-wrap gap-2 text-sm">
+            <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
+              <div>
+                <p className="font-mono text-xs uppercase tracking-[0.18em] text-neutral-500">
+                  Signal feed
+                </p>
+                <h1 className="mt-1 text-xl font-semibold tracking-tight">
+                  Federal campaign-finance alerts
+                </h1>
+                <p className="mt-2 text-sm leading-5 text-neutral-700">
+                  {signals.length} visible signals. Source-linked FEC records for House and Senate coverage.
+                </p>
+              </div>
+              <div className="flex flex-wrap gap-2 text-sm">
               <a
                 className="border border-neutral-400 px-3 py-2 font-medium hover:border-neutral-900"
                 href={`/api/signals/export.csv?${exportQuery.toString()}`}
@@ -56,6 +58,7 @@ export default async function Home({
               >
                 Export JSON
               </a>
+              </div>
             </div>
           </div>
           <FeedFilters
@@ -70,9 +73,20 @@ export default async function Home({
           {signals.length ? (
             signals.map((signal) => <SignalCard signal={signal} key={signal.dedupeKey} />)
           ) : (
-            <p className="p-5 text-sm text-neutral-600">
-              No signals match the current filters.
-            </p>
+            <div className="p-5 text-sm text-neutral-700">
+              <p className="font-semibold text-neutral-950">No signals match this view.</p>
+              <p className="mt-1">
+                The filters may be too narrow, or the current database slice may not include recent FEC activity for this race.
+              </p>
+              <div className="mt-3 flex gap-3">
+                <Link className="font-medium underline underline-offset-4" href="/">
+                  Reset filters
+                </Link>
+                <Link className="font-medium underline underline-offset-4" href="/status">
+                  Check ingestion status
+                </Link>
+              </div>
+            </div>
           )}
         </section>
 

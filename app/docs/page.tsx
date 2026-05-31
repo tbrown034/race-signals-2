@@ -34,6 +34,25 @@ const sections = [
   },
 ];
 
+const canonicalFiles = [
+  {
+    file: "docs/agent-context.md",
+    purpose: "Product guardrails, source scope and implementation notes.",
+  },
+  {
+    file: "AGENTS.md",
+    purpose: "Local development conventions for this repository.",
+  },
+  {
+    file: "db/schema.sql",
+    purpose: "Neon-compatible schema for normalized FEC data and signals.",
+  },
+  {
+    file: "src/lib/scope.ts",
+    purpose: "Generated 2026 U.S. House and Senate scope.",
+  },
+];
+
 export default function DocsPage() {
   return (
     <PageShell>
@@ -70,7 +89,15 @@ export default function DocsPage() {
           <h2 className="text-sm font-semibold uppercase tracking-[0.14em] text-neutral-600">
             Canonical Files
           </h2>
-          <div className="mt-4 border border-neutral-300 bg-white">
+          <dl className="mt-4 divide-y divide-neutral-200 border border-neutral-300 bg-white md:hidden">
+            {canonicalFiles.map((item) => (
+              <div className="p-4" key={item.file}>
+                <dt className="font-mono text-xs text-neutral-950">{item.file}</dt>
+                <dd className="mt-2 text-sm leading-6 text-neutral-700">{item.purpose}</dd>
+              </div>
+            ))}
+          </dl>
+          <div className="mt-4 hidden border border-neutral-300 bg-white md:block">
             <div className="overflow-x-auto">
               <table className="w-full min-w-[620px] text-left text-sm">
               <thead className="bg-neutral-100 text-xs uppercase tracking-[0.12em] text-neutral-500">
@@ -80,30 +107,12 @@ export default function DocsPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-neutral-200">
-                <tr>
-                  <td className="px-4 py-3 font-mono text-xs">docs/agent-context.md</td>
-                  <td className="px-4 py-3 text-neutral-700">
-                    Product guardrails, source scope and implementation notes.
-                  </td>
-                </tr>
-                <tr>
-                  <td className="px-4 py-3 font-mono text-xs">AGENTS.md</td>
-                  <td className="px-4 py-3 text-neutral-700">
-                    Local development conventions for this repository.
-                  </td>
-                </tr>
-                <tr>
-                  <td className="px-4 py-3 font-mono text-xs">db/schema.sql</td>
-                  <td className="px-4 py-3 text-neutral-700">
-                    Neon-compatible schema for normalized FEC data and signals.
-                  </td>
-                </tr>
-                <tr>
-                  <td className="px-4 py-3 font-mono text-xs">src/lib/scope.ts</td>
-                  <td className="px-4 py-3 text-neutral-700">
-                    Generated 2026 U.S. House and Senate scope.
-                  </td>
-                </tr>
+                {canonicalFiles.map((item) => (
+                  <tr key={item.file}>
+                    <td className="px-4 py-3 font-mono text-xs">{item.file}</td>
+                    <td className="px-4 py-3 text-neutral-700">{item.purpose}</td>
+                  </tr>
+                ))}
               </tbody>
               </table>
             </div>

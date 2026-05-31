@@ -155,10 +155,10 @@ export default async function SpendingPage({
                   </thead>
                   <tbody className="divide-y divide-neutral-200">
                     {visibleSignals.map((signal) => (
-                      <tr key={`row-${signal.dedupeKey}`}>
+                      <tr id={signalAnchorId(signal.dedupeKey)} key={`row-${signal.dedupeKey}`}>
                         <td className="hidden px-4 py-3 font-mono md:table-cell">{formatDate(signal.signalDate)}</td>
                         <td className="px-4 py-3 md:max-w-[320px]">
-                          <Link className="font-medium underline underline-offset-4" href={`/#${signalAnchorId(signal.dedupeKey)}`}>
+                          <Link className="font-medium underline underline-offset-4" href={signalPermalinkHref(signal)}>
                             {signal.headline}
                           </Link>
                           <dl className="mt-2 space-y-1 text-xs leading-5 text-neutral-600 md:hidden">
@@ -450,6 +450,15 @@ function spendingToggleHref(
 
 function signalAnchorId(dedupeKey: string) {
   return `signal-${dedupeKey.replace(/[^a-zA-Z0-9_-]/g, "-")}`;
+}
+
+function signalPermalinkHref(signal: { dedupeKey: string; metadata?: Record<string, unknown> }) {
+  const sourceId = typeof signal.metadata?.sourceId === "string" ? signal.metadata.sourceId : signal.dedupeKey;
+  const params = new URLSearchParams({
+    q: sourceId,
+    type: "large_independent_expenditure",
+  });
+  return `/?${params.toString()}#${signalAnchorId(signal.dedupeKey)}`;
 }
 
 function spendingSortHref(

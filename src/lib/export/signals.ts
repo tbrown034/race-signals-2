@@ -59,6 +59,7 @@ export function signalToExportRow(
   baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://race-signals.vercel.app",
   manifest: ExportManifest = { exportedAt: new Date().toISOString(), filters: {}, latestRun: null },
 ): SignalExportRow {
+  const stableSourceId = sourceId(signal);
   return {
     exported_at: manifest.exportedAt,
     filters: JSON.stringify(manifest.filters),
@@ -88,10 +89,10 @@ export function signalToExportRow(
     confidence: signal.confidence,
     status: signal.status,
     source_url: signal.sourceUrl ?? null,
-    source_id: sourceId(signal),
+    source_id: stableSourceId,
     source_kind: sourceKind(signal),
     total_receipts_basis: textMetadata(signal.metadata?.totalReceiptsBasis),
-    signal_permalink: `${baseUrl}/#${signalAnchorId(signal.dedupeKey)}`,
+    signal_permalink: `${baseUrl}/?q=${encodeURIComponent(stableSourceId ?? signal.dedupeKey)}#${signalAnchorId(signal.dedupeKey)}`,
     data_freshness: signal.dataFreshness,
     dedupe_key: signal.dedupeKey,
     metadata_json: JSON.stringify(signal.metadata ?? {}),

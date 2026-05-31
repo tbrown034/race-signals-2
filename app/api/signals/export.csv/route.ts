@@ -25,7 +25,7 @@ export async function GET(request: Request) {
     );
   }
 
-  const csv = rowsToCsv(signals.map((signal) => signalToExportRow(signal, undefined, manifest)));
+  const csv = rowsToCsv(signals.map((signal) => signalToExportRow(signal, url.origin, manifest)));
   return new Response(csv, {
     headers: {
       ...headers,

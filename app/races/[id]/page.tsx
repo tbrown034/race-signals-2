@@ -86,7 +86,7 @@ export default async function RacePage({
           ["State", race.state],
           ["District", race.office === "S" ? "Statewide" : race.district],
           ["Office", officeLabel(race.office)],
-          ["Competitiveness", race.competitiveness],
+          ["Scope", raceScopeLabel(race.competitiveness)],
         ]}
       >
         <nav
@@ -296,6 +296,11 @@ function officeLabel(office?: string | null) {
   if (office === "H") return "U.S. House";
   if (office === "S") return "U.S. Senate";
   return office;
+}
+
+function raceScopeLabel(scope?: string | null) {
+  if (scope === "national") return "Configured 2026 federal race shell";
+  return scope ?? "Configured race shell";
 }
 
 function partyLabel(party?: string | null) {

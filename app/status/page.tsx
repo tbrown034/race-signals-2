@@ -723,11 +723,11 @@ function ReporterActionPanel({
         What this means
       </h2>
       <div className="mt-3 grid min-w-0 max-w-full gap-3 text-sm leading-6 text-neutral-700 md:grid-cols-3">
-        <p className="min-w-0 max-w-[280px] break-words [overflow-wrap:anywhere] sm:max-w-full">
+        <p className="min-w-0 max-w-full whitespace-normal break-words [overflow-wrap:anywhere] [word-break:break-word]">
           Latest usable scope: <span className="font-semibold text-neutral-950">{scope}</span>. Filter with that scope in mind.
         </p>
-        <p className="min-w-0 max-w-[280px] break-words [overflow-wrap:anywhere] sm:max-w-full">{absenceRead}</p>
-        <p className="min-w-0 max-w-[280px] break-words [overflow-wrap:anywhere] sm:max-w-full">
+        <p className="min-w-0 max-w-full whitespace-normal break-words [overflow-wrap:anywhere] [word-break:break-word]">{absenceRead}</p>
+        <p className="min-w-0 max-w-full whitespace-normal break-words [overflow-wrap:anywhere] [word-break:break-word]">
           Before publication, open the FEC source and account for {retainedValidationIssueLabel(validationIssueCount)}.
         </p>
       </div>
@@ -754,12 +754,15 @@ function PublishabilityPanel({
   const finishedAt = latestRun?.finishedAt ?? latestRun?.startedAt ?? null;
   const isPartial = latestRun?.status === "partial";
   const isError = latestRun?.status === "failed" || latestRun?.status === "error";
+  const isStale = finishedAt ? isOlderThanHours(finishedAt, 36) : false;
   const headline = !latestRun
     ? "Not usable yet: no ingest run is recorded."
     : isError
     ? "Use with caution: latest ingest recorded an error."
     : isPartial
       ? "Use with caution: latest ingest is partial."
+      : isStale
+        ? "Use with caution: latest successful ingest is stale."
       : "Usable with source checks.";
   const scope = latestRun?.state ? `State ${latestRun.state}` : latestRun?.scope ?? "No ingest run recorded";
 
@@ -769,7 +772,7 @@ function PublishabilityPanel({
         Publishability read
       </p>
       <h2 className="mt-2 min-w-0 max-w-full break-words text-lg font-semibold [overflow-wrap:anywhere]">{headline}</h2>
-      <p className="mt-2 max-w-[280px] break-words text-sm leading-6 text-neutral-700 [overflow-wrap:anywhere] sm:max-w-3xl">
+      <p className="mt-2 max-w-3xl whitespace-normal break-words text-sm leading-6 text-neutral-700 [overflow-wrap:anywhere] [word-break:break-word]">
           Race Signals finds source records. Cite linked FEC records, check ingest scope, and do not treat
           an empty result as proof of no activity.
       </p>

@@ -14,7 +14,7 @@ export function ReporterRead({
   const mobileNotes = mobileLimit ? visibleNotes.slice(0, mobileLimit) : visibleNotes;
   const hasMobileSummary = Boolean(mobileLimit && visibleNotes.length > mobileNotes.length);
   const listClassName = "min-w-0 divide-y divide-neutral-200 text-sm leading-6 text-neutral-700";
-  const itemClassName = "max-w-[min(280px,100%)] break-words px-5 py-3 [overflow-wrap:anywhere] sm:max-w-full";
+  const itemClassName = "min-w-0 max-w-full whitespace-normal break-words px-5 py-3 [overflow-wrap:anywhere] [word-break:break-word]";
 
   return (
     <div className="border-b border-neutral-300" id={id}>

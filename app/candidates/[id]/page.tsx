@@ -79,7 +79,7 @@ export default async function CandidatePage({
             sourceUrl={candidate.sourceUrl}
           />
         }
-        primaryMetaCount={11}
+        primaryMetaCount={7}
         sourceUrl={candidate.sourceUrl}
         signals={signals}
         allSignalsHref={`/?q=${encodeURIComponent(candidate.name)}`}
@@ -128,7 +128,7 @@ export default async function CandidatePage({
           className="overflow-x-auto border-b border-neutral-300 px-5 py-3 font-mono text-[11px] uppercase tracking-[0.12em] text-neutral-600"
         >
           <div className="flex min-w-max flex-nowrap gap-x-4 whitespace-nowrap">
-            <a className="underline-offset-4 hover:underline" href="#reporter-read">Reporter read</a>
+            <a className="hidden underline-offset-4 hover:underline md:inline" href="#reporter-read">Reporter read</a>
             <a className="underline-offset-4 hover:underline" href="#race-context">Race context</a>
             {filings.length ? (
               <a className="underline-offset-4 hover:underline" href="#source-filings">Filings</a>
@@ -140,10 +140,12 @@ export default async function CandidatePage({
             <a className="underline-offset-4 hover:underline" href="#election-history">Election history</a>
           </div>
         </nav>
-        <ReporterRead
-          id="reporter-read"
-          notes={reporterNotes}
-        />
+        <div className="hidden md:block">
+          <ReporterRead
+            id="reporter-read"
+            notes={reporterNotes}
+          />
+        </div>
         {isAggregateOnlyCandidate(candidate, signals.length, filings.length, independentExpenditures.length) ? (
           <AggregateOnlyNotice candidate={candidate} />
         ) : null}
@@ -524,13 +526,13 @@ function candidateMobileNotes(
 
 function MobileCandidateRead({ notes }: { notes: string[] }) {
   return (
-    <div className="min-w-0 max-w-[min(280px,100%)] overflow-hidden border border-neutral-300 bg-neutral-50 sm:max-w-full">
+    <div className="w-full min-w-0 max-w-full overflow-hidden border border-neutral-300 bg-neutral-50">
       <p className="border-b border-neutral-300 px-3 py-2 font-mono text-[11px] uppercase tracking-[0.12em] text-neutral-500">
         Reporter read
       </p>
-      <ul className="min-w-0 max-w-full divide-y divide-neutral-200 text-sm leading-5 text-neutral-700">
+      <ul className="w-full min-w-0 max-w-full divide-y divide-neutral-200 text-sm leading-5 text-neutral-700">
         {notes.map((note) => (
-          <li className="min-w-0 max-w-full break-words px-3 py-2 [overflow-wrap:anywhere] [word-break:break-word]" key={note}>
+          <li className="min-w-0 max-w-full whitespace-normal break-words px-3 py-2 [overflow-wrap:anywhere] [word-break:break-word]" key={note}>
             {note}
           </li>
         ))}

@@ -300,7 +300,7 @@ function MetaRows({ rows }: { rows: Array<[string, ReactNode | null | undefined]
       <dt className="font-mono text-xs uppercase tracking-[0.12em] text-neutral-500">
         {label}
       </dt>
-      <dd className="mt-1 min-w-0 max-w-[min(280px,100%)] break-words [overflow-wrap:anywhere] sm:max-w-full">{value ?? "Not available"}</dd>
+      <dd className="mt-1 min-w-0 max-w-full break-words [overflow-wrap:anywhere]">{value ?? "Not available"}</dd>
     </div>
   ));
 }

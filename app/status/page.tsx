@@ -117,7 +117,7 @@ export default async function StatusPage() {
             </h2>
           </div>
           <div className="overflow-x-auto">
-            <table className="w-full min-w-[760px] text-left text-sm">
+            <table className="w-full min-w-0 text-left text-sm md:min-w-[760px]">
               <caption className="border-b border-neutral-300 px-4 py-3 text-left">
                 {/* Status uses the same square shape with operational meanings, bounded to this page. */}
                 <span className="inline-flex flex-wrap items-center gap-x-4 gap-y-2 font-mono text-[11px] uppercase tracking-[0.12em] text-neutral-600">
@@ -130,10 +130,10 @@ export default async function StatusPage() {
               <thead className="bg-neutral-100 text-xs uppercase tracking-[0.12em] text-neutral-500">
                 <tr>
                   <th className="px-4 py-3 font-medium" scope="col">Endpoint</th>
-                  <th className="px-4 py-3 font-medium" scope="col">Latest run</th>
-                  <th className="px-4 py-3 font-medium" scope="col">Records fetched</th>
-                  <th className="px-4 py-3 font-medium" scope="col">Validation issues</th>
-                  <th className="px-4 py-3 font-medium" scope="col">Status</th>
+                  <th className="hidden px-4 py-3 font-medium md:table-cell" scope="col">Latest run</th>
+                  <th className="hidden px-4 py-3 font-medium md:table-cell" scope="col">Records fetched</th>
+                  <th className="hidden px-4 py-3 font-medium md:table-cell" scope="col">Validation issues</th>
+                  <th className="hidden px-4 py-3 font-medium md:table-cell" scope="col">Status</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-neutral-200">
@@ -145,11 +145,29 @@ export default async function StatusPage() {
                           <HealthSquare endpoint={endpoint} />
                           {endpointLabel(endpoint.endpoint)}
                         </span>
+                        <dl className="mt-2 space-y-1 font-sans text-xs leading-5 text-neutral-600 md:hidden">
+                          <div>
+                            <dt className="inline font-mono uppercase tracking-[0.12em] text-neutral-500">Latest </dt>
+                            <dd className="inline">{formatDateTime(endpoint.completedAt)}</dd>
+                          </div>
+                          <div>
+                            <dt className="inline font-mono uppercase tracking-[0.12em] text-neutral-500">Fetched </dt>
+                            <dd className="inline">{endpoint.recordsFetched}</dd>
+                          </div>
+                          <div>
+                            <dt className="inline font-mono uppercase tracking-[0.12em] text-neutral-500">Issues </dt>
+                            <dd className="inline">{endpoint.validationIssuesCount}</dd>
+                          </div>
+                          <div>
+                            <dt className="inline font-mono uppercase tracking-[0.12em] text-neutral-500">Status </dt>
+                            <dd className="inline">{endpoint.status}</dd>
+                          </div>
+                        </dl>
                       </td>
-                      <td className="px-4 py-3">{formatDateTime(endpoint.completedAt)}</td>
-                      <td className="px-4 py-3">{endpoint.recordsFetched}</td>
-                      <td className="px-4 py-3">{endpoint.validationIssuesCount}</td>
-                      <td className="px-4 py-3">{endpoint.status}</td>
+                      <td className="hidden px-4 py-3 md:table-cell">{formatDateTime(endpoint.completedAt)}</td>
+                      <td className="hidden px-4 py-3 md:table-cell">{endpoint.recordsFetched}</td>
+                      <td className="hidden px-4 py-3 md:table-cell">{endpoint.validationIssuesCount}</td>
+                      <td className="hidden px-4 py-3 md:table-cell">{endpoint.status}</td>
                     </tr>
                   ))
                 ) : (
@@ -285,13 +303,13 @@ export default async function StatusPage() {
             </p>
           </div>
           <div className="overflow-x-auto">
-            <table className="w-full min-w-[680px] text-left text-sm">
+            <table className="w-full min-w-0 text-left text-sm md:min-w-[680px]">
               <thead className="bg-neutral-100 text-xs uppercase tracking-[0.12em] text-neutral-500">
                 <tr>
                   <th className="px-4 py-3 font-medium" scope="col">Rule</th>
-                  <th className="px-4 py-3 font-medium" scope="col">Severity</th>
-                  <th className="px-4 py-3 text-right font-medium" scope="col">Count</th>
-                  <th className="px-4 py-3 font-medium" scope="col">Latest</th>
+                  <th className="hidden px-4 py-3 font-medium md:table-cell" scope="col">Severity</th>
+                  <th className="hidden px-4 py-3 text-right font-medium md:table-cell" scope="col">Count</th>
+                  <th className="hidden px-4 py-3 font-medium md:table-cell" scope="col">Latest</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-neutral-200">
@@ -301,10 +319,13 @@ export default async function StatusPage() {
                       <td className="px-4 py-3">
                         <span className="block font-medium">{validationRuleLabel(issue.rule)}</span>
                         <span className="mt-1 block font-mono text-xs text-neutral-500">{issue.rule}</span>
+                        <span className="mt-2 block text-xs text-neutral-600 md:hidden">
+                          {issue.severity} / {issue.count} retained / latest {formatDateTime(issue.latestAt)}
+                        </span>
                       </td>
-                      <td className="px-4 py-3">{issue.severity}</td>
-                      <td className="px-4 py-3 text-right font-mono">{issue.count}</td>
-                      <td className="px-4 py-3">{formatDateTime(issue.latestAt)}</td>
+                      <td className="hidden px-4 py-3 md:table-cell">{issue.severity}</td>
+                      <td className="hidden px-4 py-3 text-right font-mono md:table-cell">{issue.count}</td>
+                      <td className="hidden px-4 py-3 md:table-cell">{formatDateTime(issue.latestAt)}</td>
                     </tr>
                   ))
                 ) : (
@@ -329,14 +350,14 @@ export default async function StatusPage() {
             </p>
           </div>
           <div className="overflow-x-auto">
-            <table className="w-full min-w-[920px] text-left text-sm">
+            <table className="w-full min-w-0 text-left text-sm md:min-w-[920px]">
               <thead className="bg-neutral-100 text-xs uppercase tracking-[0.12em] text-neutral-500">
                 <tr>
                   <th className="px-4 py-3 font-medium" scope="col">Rule</th>
-                  <th className="px-4 py-3 font-medium" scope="col">Message</th>
-                  <th className="px-4 py-3 font-medium" scope="col">Record</th>
-                  <th className="px-4 py-3 font-medium" scope="col">Source</th>
-                  <th className="px-4 py-3 font-medium" scope="col">Opened</th>
+                  <th className="hidden px-4 py-3 font-medium md:table-cell" scope="col">Message</th>
+                  <th className="hidden px-4 py-3 font-medium md:table-cell" scope="col">Record</th>
+                  <th className="hidden px-4 py-3 font-medium md:table-cell" scope="col">Source</th>
+                  <th className="hidden px-4 py-3 font-medium md:table-cell" scope="col">Opened</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-neutral-200">
@@ -346,15 +367,41 @@ export default async function StatusPage() {
                       <td className="px-4 py-3">
                         <span className="block font-medium">{validationRuleLabel(issue.rule)}</span>
                         <span className="mt-1 block text-xs text-neutral-600">{issue.severity}</span>
+                        <dl className="mt-2 space-y-1 text-xs leading-5 text-neutral-600 md:hidden">
+                          <div>
+                            <dt className="inline font-mono uppercase tracking-[0.12em] text-neutral-500">Message </dt>
+                            <dd className="inline">{issue.message}</dd>
+                          </div>
+                          <div>
+                            <dt className="inline font-mono uppercase tracking-[0.12em] text-neutral-500">Record </dt>
+                            <dd className="inline">{issue.sourceId ?? "No source ID"} / {issue.entityType}</dd>
+                          </div>
+                          <div>
+                            <dt className="inline font-mono uppercase tracking-[0.12em] text-neutral-500">Source </dt>
+                            <dd className="inline">
+                              {issue.sourceUrl ? (
+                                <a className="font-medium underline underline-offset-4" href={issue.sourceUrl} rel="noreferrer" target="_blank">
+                                  Open source
+                                </a>
+                              ) : (
+                                "Source not stored"
+                              )}
+                            </dd>
+                          </div>
+                          <div>
+                            <dt className="inline font-mono uppercase tracking-[0.12em] text-neutral-500">Opened </dt>
+                            <dd className="inline">{formatDateTime(issue.createdAt)}</dd>
+                          </div>
+                        </dl>
                       </td>
-                      <td className="max-w-[360px] px-4 py-3 text-neutral-700">{issue.message}</td>
-                      <td className="px-4 py-3">
+                      <td className="hidden max-w-[360px] px-4 py-3 text-neutral-700 md:table-cell">{issue.message}</td>
+                      <td className="hidden px-4 py-3 md:table-cell">
                         <span className="block font-mono text-xs text-neutral-700">{issue.sourceId ?? "No source ID"}</span>
                         <span className="mt-1 block font-mono text-[11px] uppercase tracking-[0.12em] text-neutral-500">
                           {issue.entityType}
                         </span>
                       </td>
-                      <td className="px-4 py-3">
+                      <td className="hidden px-4 py-3 md:table-cell">
                         {issue.sourceUrl ? (
                           <a
                             className="font-medium underline underline-offset-4"
@@ -368,7 +415,7 @@ export default async function StatusPage() {
                           <span className="text-neutral-600">Source not stored</span>
                         )}
                       </td>
-                      <td className="px-4 py-3">{formatDateTime(issue.createdAt)}</td>
+                      <td className="hidden px-4 py-3 md:table-cell">{formatDateTime(issue.createdAt)}</td>
                     </tr>
                   ))
                 ) : (

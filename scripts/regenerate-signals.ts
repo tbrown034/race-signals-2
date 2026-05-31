@@ -20,7 +20,7 @@ async function main() {
       pool.query("select * from filings"),
       pool.query("select * from independent_expenditures"),
     ]);
-    const freshness = new Date().toISOString();
+    const freshness = await resolveSignalFreshness(pool);
     const signals = generateSignals({
       candidates: candidateRows.rows.map(mapCandidate),
       committees: committeeRows.rows.map(mapCommittee),
@@ -35,6 +35,24 @@ async function main() {
   } finally {
     await pool.end();
   }
+}
+
+async function resolveSignalFreshness(pool: ReturnType<typeof getPool>) {
+  const result = await pool.query<{ freshness: Date | string | null }>(
+    `
+      select coalesce(finished_at, started_at) as freshness
+      from ingestion_runs
+      where source = 'fec'
+        and status in ('success', 'partial')
+        and mode <> 'repair'
+      order by coalesce(finished_at, started_at) desc
+      limit 1
+    `,
+  );
+  const freshness = result.rows[0]?.freshness;
+  if (freshness instanceof Date) return freshness.toISOString();
+  if (freshness) return String(freshness);
+  return new Date().toISOString();
 }
 
 async function pruneFecSignals(pool: ReturnType<typeof getPool>, dedupeKeys: string[]) {

@@ -911,6 +911,33 @@ export async function getSignalStateFreshness(signalType?: string): Promise<Reco
   ]));
 }
 
+export async function getReviewSignalCount({ state }: { state?: string } = {}) {
+  if (!hasDatabase()) {
+    return demoSignals.filter((signal) => {
+      if (signal.status !== "review") return false;
+      if (!state) return true;
+      return signal.raceId?.split("-")[1] === state || signal.candidateState === state;
+    }).length;
+  }
+
+  const values: unknown[] = [];
+  const where = ["s.status = 'review'", currentCycleSignalPredicate];
+  if (state) {
+    values.push(state);
+    where.push(`r.state = $${values.length}`);
+  }
+  const rows = await sql<{ count: string }>(
+    `
+      select count(*)::text as count
+      from signals s
+      left join races r on r.id = s.race_id
+      where ${where.join(" and ")}
+    `,
+    values,
+  );
+  return Number(rows[0]?.count ?? 0);
+}
+
 export async function getStateCoverageBoard(): Promise<StateCoverageRow[]> {
   if (!hasDatabase()) {
     const states = [...new Set(demoRaces.map((race) => race.state))].sort();

@@ -22,6 +22,7 @@ async function main() {
       { path: "/", text: "Source-linked FEC record feed" },
       { path: "/review", text: "Records that need human attention" },
       { path: "/spending", text: "Outside spending watch" },
+      { path: "/spending", text: "Local evidence row" },
       { path: "/spenders", text: "Top stored outside spenders" },
       { path: "/records/schedule-e", text: "Schedule E records" },
       { path: "/records/schedule-e?position=O&minAmount=25000", text: "Filtered by" },

@@ -11,7 +11,7 @@ const sections = [
   },
   {
     title: "FEC API",
-    body: "The first adapter uses FEC candidate search, candidate committees, committee reports, Schedule A receipts and Schedule E independent expenditures. Source URLs and raw IDs must be preserved for verification and deduping.",
+    body: "The first adapter uses FEC candidate search, candidate totals, candidate committees, committee reports and Schedule E independent expenditures. Itemized Schedule A receipts are deferred for cost control. Source URLs and raw IDs must be preserved for verification and deduping.",
   },
   {
     title: "Next.js",

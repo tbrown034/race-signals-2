@@ -48,7 +48,12 @@ export function EntityPage({
           ))}
         </dl>
         {sourceUrl ? (
-          <a className="mt-5 inline-block text-sm font-medium underline underline-offset-4" href={sourceUrl}>
+          <a
+            className="mt-5 inline-block text-sm font-medium underline underline-offset-4"
+            href={sourceUrl}
+            rel="noreferrer"
+            target="_blank"
+          >
             FEC source
           </a>
         ) : null}
@@ -94,6 +99,7 @@ export function EntityPage({
                     <th className="px-4 py-3 font-medium">Date</th>
                     <th className="px-4 py-3 font-medium">Contributor</th>
                     <th className="px-4 py-3 font-medium">Employer</th>
+                    <th className="px-4 py-3 font-medium">Source</th>
                     <th className="px-4 py-3 text-right font-medium">Amount</th>
                   </tr>
                 </thead>
@@ -106,6 +112,20 @@ export function EntityPage({
                       </td>
                       <td className="px-4 py-3" title={transaction.contributorEmployer ?? undefined}>
                         {transaction.contributorEmployerNormalized ?? transaction.contributorEmployer ?? "Unknown"}
+                      </td>
+                      <td className="px-4 py-3">
+                        {transaction.sourceUrl ? (
+                          <a
+                            className="font-medium underline underline-offset-4"
+                            href={transaction.sourceUrl}
+                            rel="noreferrer"
+                            target="_blank"
+                          >
+                            FEC
+                          </a>
+                        ) : (
+                          "Missing"
+                        )}
                       </td>
                       <td className="px-4 py-3 text-right font-mono">
                         {formatMoney(transaction.amount)}

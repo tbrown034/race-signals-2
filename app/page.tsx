@@ -23,10 +23,12 @@ export default async function Home({
     if (typeof value === "string" && value) exportQuery.set(key, value);
   }
   const [signals, races, status] = await Promise.all([
-    getSignals(signalFiltersFromSearchParams(params, 50)),
+    getSignals(signalFiltersFromSearchParams(params, 51)),
     getRaces(),
     getStatus(),
   ]);
+  const visibleSignals = signals.slice(0, 50);
+  const hasMoreSignals = signals.length > visibleSignals.length;
 
   return (
     <PageShell>
@@ -42,7 +44,7 @@ export default async function Home({
                   Federal campaign-finance alerts
                 </h1>
                 <p className="mt-2 text-sm leading-5 text-neutral-700">
-                  {signals.length} visible signals. Source-linked FEC records for House and Senate coverage.
+                  Showing {visibleSignals.length}{hasMoreSignals ? "+" : ""} signals. Source-linked FEC records for House and Senate coverage.
                 </p>
               </div>
               <div className="flex flex-wrap gap-2 text-sm">
@@ -70,8 +72,8 @@ export default async function Home({
             type={type}
             status={statusFilter}
           />
-          {signals.length ? (
-            signals.map((signal) => <SignalCard signal={signal} key={signal.dedupeKey} />)
+          {visibleSignals.length ? (
+            visibleSignals.map((signal) => <SignalCard signal={signal} key={signal.dedupeKey} />)
           ) : (
             <div className="p-5 text-sm text-neutral-700">
               <p className="font-semibold text-neutral-950">No signals match this view.</p>

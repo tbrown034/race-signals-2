@@ -52,8 +52,8 @@ export default async function RacePage({
           ["Race ID", race.id],
           ["Cycle", race.cycle],
           ["State", race.state],
-          ["District", race.district],
-          ["Office", race.office],
+          ["District", race.office === "S" ? "Statewide" : race.district],
+          ["Office", officeLabel(race.office)],
           ["Competitiveness", race.competitiveness],
         ]}
       >
@@ -132,4 +132,10 @@ export default async function RacePage({
 
 function isIncumbent(status?: string | null) {
   return status === "I" || status === "Incumbent";
+}
+
+function officeLabel(office?: string | null) {
+  if (office === "H") return "U.S. House";
+  if (office === "S") return "U.S. Senate";
+  return office;
 }

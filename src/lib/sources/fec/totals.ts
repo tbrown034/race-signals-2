@@ -1,7 +1,5 @@
-import { fecCandidateUrl } from "@/src/lib/sources/fec/client";
+import { fecCandidateUrl, fecGet } from "@/src/lib/sources/fec/client";
 import type { Candidate } from "@/src/lib/types";
-
-const FEC_BASE_URL = "https://api.open.fec.gov/v1";
 
 type FecCandidateTotal = {
   candidate_id: string;
@@ -16,20 +14,11 @@ type FecCandidateTotal = {
 };
 
 export async function fetchCandidateTotal(candidateId: string, cycle: number) {
-  const key = process.env.FEC_API_KEY;
-  if (!key) throw new Error("FEC_API_KEY is not configured.");
-  const url = new URL(`${FEC_BASE_URL}/candidates/totals/`);
-  url.searchParams.set("api_key", key);
-  url.searchParams.set("candidate_id", candidateId);
-  url.searchParams.set("cycle", String(cycle));
-
-  const response = await fetch(url, { headers: { accept: "application/json" } });
-  if (!response.ok) {
-    throw new Error(`FEC totals request failed ${response.status}: ${candidateId}`);
-  }
-
-  const data = (await response.json()) as { results?: FecCandidateTotal[] };
-  return data.results?.[0] ?? null;
+  const data = await fecGet<FecCandidateTotal>("/candidates/totals/", {
+    candidate_id: candidateId,
+    cycle,
+  });
+  return data.results[0] ?? null;
 }
 
 export async function applyCandidateTotals(candidate: Candidate, cycle: number) {

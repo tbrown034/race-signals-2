@@ -6,7 +6,7 @@ import { IncumbentBadge } from "@/src/components/incumbent-badge";
 import { PageShell } from "@/src/components/page-shell";
 import { PartySquare } from "@/src/components/party-square";
 import { getCandidate, getCandidateElections, getSignalsForEntity } from "@/src/lib/db/repository";
-import { formatDate, formatMoney } from "@/src/lib/format";
+import { formatDate, formatDateTime, formatMoney } from "@/src/lib/format";
 
 export default async function CandidatePage({
   params,
@@ -46,10 +46,11 @@ export default async function CandidatePage({
           ["Office", officeLabel(candidate.office)],
           ["Race", candidate.raceId],
           ["Status", incumbentStatus(candidate.incumbentChallengeStatus)],
-          ["Filed", `Filed with FEC for the ${candidate.electionYear ?? "current"} cycle.`],
+          ["FEC cycle", `Filed with FEC for the ${candidate.electionYear ?? "current"} cycle.`],
           ["Cycle receipts", formatMoney(candidate.totalReceiptsCycle)],
           ["Cash on hand", formatMoney(candidate.cashOnHandLatest)],
           ["Cash as of", formatDate(candidate.cashOnHandAsOf)],
+          ["Totals updated", candidate.totalsUpdatedAt ? formatDateTime(candidate.totalsUpdatedAt) : null],
           ...(candidate.bioguideId ? ([["Bioguide", candidate.bioguideId]] as Array<[string, string]>) : []),
         ]}
       >

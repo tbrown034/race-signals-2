@@ -3,6 +3,14 @@ import { getStatus } from "@/src/lib/db/repository";
 import { formatDateTime } from "@/src/lib/format";
 import { endpointHealthClass } from "@/src/lib/status-health";
 
+const countLabels: Record<string, string> = {
+  races: "Race shells",
+  candidates: "Candidates",
+  committees: "Committees",
+  independentExpenditures: "Independent expenditures",
+  signals: "Signals",
+};
+
 export default async function StatusPage() {
   const status = await getStatus();
 
@@ -25,7 +33,7 @@ export default async function StatusPage() {
           {Object.entries(status.counts).map(([name, count]) => (
             <div className="border border-neutral-300 bg-white p-4" key={name}>
               <p className="font-mono text-xs uppercase tracking-[0.12em] text-neutral-500">
-                {name}
+                {countLabels[name] ?? name}
               </p>
               <p className="mt-2 text-2xl font-semibold">{count}</p>
             </div>
@@ -98,6 +106,7 @@ export default async function StatusPage() {
                 <th className="px-4 py-3 font-medium">Window</th>
                 <th className="px-4 py-3 font-medium">Finished</th>
                 <th className="px-4 py-3 font-medium">Records</th>
+                <th className="px-4 py-3 font-medium">Run notes</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-neutral-200">
@@ -114,6 +123,9 @@ export default async function StatusPage() {
                   </td>
                   <td className="px-4 py-3">{formatDateTime(run.finishedAt ?? run.startedAt)}</td>
                   <td className="px-4 py-3">{run.recordsSeen}</td>
+                  <td className="px-4 py-3 text-xs leading-5 text-neutral-700">
+                    {runNotes(run)}
+                  </td>
                 </tr>
               ))}
             </tbody>
@@ -139,4 +151,27 @@ function HealthSquare({
   endpoint: { completedAt: string; status: string };
 }) {
   return <span aria-hidden="true" className={`inline-block h-2 w-2 ${endpointHealthClass(endpoint)}`} />;
+}
+
+function runNotes(run: {
+  recordsInserted: number;
+  recordsUpdated: number;
+  errors: unknown[];
+  metadata: Record<string, unknown>;
+  state?: string | null;
+}) {
+  const caps = [
+    noteValue("state", run.state),
+    noteValue("max candidates", run.metadata.maxCandidates),
+    noteValue("candidate pages", run.metadata.maxCandidatePages),
+    noteValue("delay", run.metadata.requestDelayMs ? `${run.metadata.requestDelayMs}ms` : null),
+  ].filter(Boolean);
+  const changes = `${run.recordsInserted} inserted, ${run.recordsUpdated} updated`;
+  const errorCount = Array.isArray(run.errors) ? run.errors.length : 0;
+  return [changes, ...caps, errorCount ? `${errorCount} errors` : null].filter(Boolean).join(" | ");
+}
+
+function noteValue(label: string, value: unknown) {
+  if (value === null || value === undefined || value === "") return null;
+  return `${label}: ${String(value)}`;
 }

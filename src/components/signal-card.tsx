@@ -14,6 +14,15 @@ const typeLabels: Record<string, string> = {
   committee_activity_spike: "Activity spike",
 };
 
+const typeStripes: Record<string, string> = {
+  new_committee: "border-l-neutral-700",
+  new_filing: "border-l-neutral-500",
+  large_contribution: "border-l-blue-700",
+  large_independent_expenditure: "border-l-red-700",
+  outside_spending_increase: "border-l-red-700",
+  committee_activity_spike: "border-l-amber-700",
+};
+
 export function SignalCard({ signal }: { signal: Signal }) {
   const amount = formatMoney(signal.amount);
   const contributorName = textMetadata(signal.metadata?.contributorName);
@@ -21,17 +30,24 @@ export function SignalCard({ signal }: { signal: Signal }) {
   const contributorEmployerNormalized = textMetadata(signal.metadata?.contributorEmployerNormalized);
   const isIncumbent = isIncumbentStatus(signal.candidateIncumbentChallengeStatus);
   const candidateLabel = candidateDisplay(signal);
+  const anchorId = signalAnchorId(signal);
 
   return (
-    <article className="grid gap-3 border-b border-neutral-300 bg-white px-4 py-4 md:grid-cols-[112px_1fr_190px]">
+    <article
+      className={`grid gap-3 border-b border-l-[3px] border-b-neutral-300 bg-white px-4 py-4 md:grid-cols-[112px_1fr_190px] ${typeStripes[signal.signalType] ?? "border-l-neutral-400"}`}
+      id={anchorId}
+    >
       <div className="font-mono text-xs text-neutral-600">
         <p className="flex items-center gap-1.5 text-neutral-950">
           <FreshMark signalDate={signal.signalDate} status={signal.status} />
-          {formatDate(signal.signalDate)}
+          Event {formatDate(signal.signalDate)}
         </p>
-        <p className="mt-1 uppercase tracking-[0.12em]">
+        <Link
+          className="mt-1 block uppercase tracking-[0.12em] underline-offset-4 hover:underline"
+          href={`/methodology#${signal.signalType}`}
+        >
           {typeLabels[signal.signalType] ?? signal.signalType}
-        </p>
+        </Link>
       </div>
 
       <div className="min-w-0">
@@ -93,12 +109,20 @@ export function SignalCard({ signal }: { signal: Signal }) {
           Confidence: {signal.confidence}
         </span>
         {signal.sourceUrl ? (
-          <a className="font-medium underline underline-offset-4" href={signal.sourceUrl}>
+          <a
+            className="font-medium underline underline-offset-4"
+            href={signal.sourceUrl}
+            rel="noreferrer"
+            target="_blank"
+          >
             FEC source
           </a>
         ) : (
           <span>Source URL missing</span>
         )}
+        <a className="font-medium underline underline-offset-4" href={`#${anchorId}`} title="Signal permalink">
+          #
+        </a>
         <span className="text-neutral-500">Ingested {formatDateTime(signal.dataFreshness)}</span>
       </div>
     </article>
@@ -121,4 +145,8 @@ function candidateDisplay(signal: Signal) {
 
 function isIncumbentStatus(status?: string | null) {
   return status === "I" || status === "Incumbent";
+}
+
+function signalAnchorId(signal: Signal) {
+  return `signal-${signal.dedupeKey.replace(/[^a-zA-Z0-9_-]/g, "-")}`;
 }

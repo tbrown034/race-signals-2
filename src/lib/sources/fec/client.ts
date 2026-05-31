@@ -97,7 +97,7 @@ function retryDelay(response: Response, attempt: number) {
   return Math.min(60000, 2000 * 2 ** attempt);
 }
 
-async function fecGet<T>(path: string, params: Record<string, string | number | undefined>) {
+export async function fecGet<T>(path: string, params: Record<string, string | number | undefined>) {
   const key = process.env.FEC_API_KEY;
   if (!key) throw new Error("FEC_API_KEY is not configured.");
 

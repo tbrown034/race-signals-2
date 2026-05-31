@@ -17,6 +17,34 @@ const steps = [
   ],
 ];
 
+const signalTypes = [
+  [
+    "new_committee",
+    "New committee",
+    "A new candidate-linked committee can be the first durable paperwork signal that a campaign is moving from exploration to execution.",
+  ],
+  [
+    "new_filing",
+    "New filing",
+    "A new report can reveal changed cash position, spending pace and committee activity before those shifts show up in public campaigning.",
+  ],
+  [
+    "large_independent_expenditure",
+    "Independent expenditure",
+    "A large outside-spending report can show where groups think a race or candidate is worth influencing.",
+  ],
+  [
+    "committee_activity_spike",
+    "Activity spike",
+    "A filing-level spike flags a committee whose latest receipts crossed the flat review threshold and doubled the prior comparable report.",
+  ],
+  [
+    "large_contribution",
+    "Large receipt",
+    "Kept for historical compatibility. Production ingest does not currently store itemized Schedule A receipts under the low-cost MVP.",
+  ],
+];
+
 export default function MethodologyPage() {
   return (
     <PageShell>
@@ -39,6 +67,25 @@ export default function MethodologyPage() {
           {steps.map(([title, body]) => (
             <div className="border-b border-neutral-300 p-5 last:border-b-0" key={title}>
               <h2 className="text-base font-semibold">{title}</h2>
+              <p className="mt-2 text-sm leading-6 text-neutral-700">{body}</p>
+            </div>
+          ))}
+        </section>
+
+        <section className="mt-6 border border-neutral-300 bg-white">
+          <div className="border-b border-neutral-300 p-5">
+            <h2 className="text-base font-semibold">Signal types</h2>
+            <p className="mt-2 max-w-3xl text-sm leading-6 text-neutral-700">
+              Signal thresholds are intentionally flat and stable. Race Signals does
+              not use adaptive scoring, percentile baselines or statistical anomaly
+              detection in this MVP.
+            </p>
+          </div>
+          {signalTypes.map(([id, title, body]) => (
+            <div className="border-b border-neutral-300 p-5 last:border-b-0" id={id} key={id}>
+              <h3 className="font-mono text-xs uppercase tracking-[0.14em] text-neutral-500">
+                {title}
+              </h3>
               <p className="mt-2 text-sm leading-6 text-neutral-700">{body}</p>
             </div>
           ))}

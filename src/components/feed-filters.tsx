@@ -207,6 +207,9 @@ export function FeedFilters({
             ))}
           </div>
         ) : null}
+        <p className="max-w-[min(280px,100%)] break-words text-xs leading-5 text-neutral-600 [overflow-wrap:anywhere] sm:max-w-3xl">
+          Event date is the FEC record date. Added to feed is when Race Signals stored the source record.
+        </p>
         <div className="grid min-w-0 grid-cols-1 gap-3 sm:grid-cols-2 xl:flex xl:flex-wrap">
           <div className="min-w-0 text-xs font-medium uppercase tracking-[0.12em] text-neutral-500 xl:min-w-[96px] xl:flex-none">
             <label htmlFor="state-filter">State</label>

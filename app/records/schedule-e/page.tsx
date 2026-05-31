@@ -34,6 +34,12 @@ export default async function ScheduleERecordsPage({
     committeeId ? `spender ${committeeId}` : null,
     candidateId ? `candidate ${candidateId}` : null,
   ].filter(Boolean);
+  const exportQuery = new URLSearchParams();
+  if (state) exportQuery.set("state", state);
+  if (raceId) exportQuery.set("race", raceId);
+  if (committeeId) exportQuery.set("committee", committeeId);
+  if (candidateId) exportQuery.set("candidate", candidateId);
+  const exportSuffix = exportQuery.toString();
 
   return (
     <PageShell>
@@ -58,6 +64,18 @@ export default async function ScheduleERecordsPage({
                 ) : null}
               </div>
               <div className="flex flex-wrap gap-2 text-sm">
+                <a
+                  className="border border-neutral-400 px-3 py-2 font-medium hover:border-neutral-900"
+                  href={`/api/schedule-e/export.csv${exportSuffix ? `?${exportSuffix}` : ""}`}
+                >
+                  Export CSV
+                </a>
+                <a
+                  className="border border-neutral-400 px-3 py-2 font-medium hover:border-neutral-900"
+                  href={`/api/schedule-e/export.json${exportSuffix ? `?${exportSuffix}` : ""}`}
+                >
+                  Export JSON
+                </a>
                 <Link className="border border-neutral-400 px-3 py-2 font-medium hover:border-neutral-900" href="/spending">
                   Signal watch
                 </Link>

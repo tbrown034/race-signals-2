@@ -26,6 +26,9 @@ export type SpenderExportRow = {
   top_race_id: string | null;
   top_race_name: string | null;
   top_race_amount: number | null;
+  top_race_share: number | null;
+  oppose_share: number | null;
+  support_share: number | null;
   committee_source_url: string | null;
   exported_at: string;
   filters: string;
@@ -41,6 +44,10 @@ export function spenderToExportRow(
   spender: TopSpender,
   manifest: SpenderExportManifest,
 ): SpenderExportRow {
+  const topRaceShare = ratio(spender.topRaceAmount ?? null, spender.totalAmount);
+  const opposeShare = ratio(spender.opposeAmount, spender.totalAmount);
+  const supportShare = ratio(spender.supportAmount, spender.totalAmount);
+
   return {
     committee_id: spender.committeeId,
     fec_committee_id: spender.fecCommitteeId,
@@ -59,6 +66,9 @@ export function spenderToExportRow(
     top_race_id: spender.topRaceId ?? null,
     top_race_name: spender.topRaceName ?? null,
     top_race_amount: spender.topRaceAmount ?? null,
+    top_race_share: topRaceShare,
+    oppose_share: opposeShare,
+    support_share: supportShare,
     committee_source_url: spender.sourceUrl ?? null,
     exported_at: manifest.exportedAt,
     filters: JSON.stringify(manifest.filters),
@@ -90,6 +100,9 @@ export function spenderRowsToCsv(rows: SpenderExportRow[]) {
     "top_race_id",
     "top_race_name",
     "top_race_amount",
+    "top_race_share",
+    "oppose_share",
+    "support_share",
     "committee_source_url",
     "exported_at",
     "filters",
@@ -112,4 +125,9 @@ function csvCell(value: string | number | null) {
   const text = String(value);
   if (!/[",\n\r]/.test(text)) return text;
   return `"${text.replaceAll('"', '""')}"`;
+}
+
+function ratio(numerator: number | null, denominator: number) {
+  if (numerator === null || denominator <= 0) return null;
+  return Number((numerator / denominator).toFixed(4));
 }

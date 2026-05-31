@@ -308,7 +308,9 @@ async function main() {
             dateWindow,
           );
           endpointCounts.reports += fecReports.length;
-          const normalizedFilings = fecReports.map(normalizeFiling);
+          const normalizedFilings = fecReports
+            .filter((record) => isCurrentCycleFiling(record.receipt_date, cycle))
+            .map(normalizeFiling);
           filings.push(...normalizedFilings);
           normalizedFilings.forEach((filing) => issues.push(...validateFiling(filing)));
         }
@@ -387,6 +389,11 @@ function endpointForIssue(entityType: string) {
 }
 
 function isCurrentCycleExpenditure(date: string | undefined, cycle: number) {
+  if (!date) return false;
+  return date >= `${cycle - 1}-01-01` && date <= `${cycle}-12-31`;
+}
+
+function isCurrentCycleFiling(date: string | undefined, cycle: number) {
   if (!date) return false;
   return date >= `${cycle - 1}-01-01` && date <= `${cycle}-12-31`;
 }

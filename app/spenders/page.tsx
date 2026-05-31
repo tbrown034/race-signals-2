@@ -107,7 +107,14 @@ export default async function SpendersPage({
               </thead>
               <tbody className="divide-y divide-neutral-200">
                 {visibleSpenders.length ? (
-                  visibleSpenders.map((spender) => (
+                  visibleSpenders.map((spender) => {
+                    const topRaceShare = share(spender.topRaceAmount ?? null, spender.totalAmount);
+                    const supportShare = share(spender.supportAmount, spender.totalAmount);
+                    const opposeShare = share(spender.opposeAmount, spender.totalAmount);
+                    const positionNote = positionConcentrationNote(supportShare, opposeShare);
+                    const raceNote = topRaceShare >= 0.75 ? `Single-race focus (${formatPercent(topRaceShare)})` : null;
+
+                    return (
                     <tr key={spender.committeeId ?? spender.fecCommitteeId ?? spender.committeeName}>
                       <td className="px-4 py-3">
                         {spender.committeeId ? (
@@ -143,6 +150,12 @@ export default async function SpendersPage({
                             <dt className="inline font-mono uppercase tracking-[0.12em] text-neutral-500">Oppose </dt>
                             <dd className="inline font-mono text-neutral-950">{formatMoney(spender.opposeAmount) ?? "$0"}</dd>
                           </div>
+                          {positionNote ? (
+                            <div>
+                              <dt className="inline font-mono uppercase tracking-[0.12em] text-neutral-500">Split </dt>
+                              <dd className="inline">{positionNote}</dd>
+                            </div>
+                          ) : null}
                           <div>
                             <dt className="inline font-mono uppercase tracking-[0.12em] text-neutral-500">Total IE </dt>
                             <dd className="inline font-mono font-semibold text-neutral-950">{formatMoney(spender.totalAmount)}</dd>
@@ -165,6 +178,7 @@ export default async function SpendersPage({
                               ) : (
                                 "Unmatched race"
                               )}
+                              {raceNote ? ` / ${raceNote}` : ""}
                             </dd>
                           </div>
                           <div>
@@ -196,6 +210,11 @@ export default async function SpendersPage({
                           {spender.raceCount > 1 ? ` / ${spender.raceCount} races` : ""}
                           {spender.topRaceAmount ? ` / top race ${formatMoney(spender.topRaceAmount)}` : ""}
                         </p>
+                        {raceNote ? (
+                          <p className="mt-1 font-mono text-[11px] uppercase tracking-[0.12em] text-neutral-700">
+                            {raceNote}
+                          </p>
+                        ) : null}
                       </td>
                       <td className="hidden px-4 py-3 font-mono md:table-cell">
                         {formatDate(spender.lastExpenditureDate)}
@@ -203,6 +222,11 @@ export default async function SpendersPage({
                       <td className="hidden px-4 py-3 text-xs leading-5 text-neutral-700 md:table-cell">
                         <span className="block">Support {formatMoney(spender.supportAmount) ?? "$0"}</span>
                         <span className="block">Oppose {formatMoney(spender.opposeAmount) ?? "$0"}</span>
+                        {positionNote ? (
+                          <span className="mt-1 block font-mono text-[11px] uppercase tracking-[0.12em] text-neutral-700">
+                            {positionNote}
+                          </span>
+                        ) : null}
                       </td>
                       <td className="hidden px-4 py-3 text-right font-mono font-semibold md:table-cell">
                         {formatMoney(spender.totalAmount)}
@@ -245,7 +269,8 @@ export default async function SpendersPage({
                         </div>
                       </td>
                     </tr>
-                  ))
+                    );
+                  })
                 ) : (
                   <tr>
                     <td className="px-4 py-4 text-neutral-600" colSpan={8}>
@@ -262,6 +287,21 @@ export default async function SpendersPage({
       </main>
     </PageShell>
   );
+}
+
+function share(numerator: number | null, denominator: number) {
+  if (numerator === null || denominator <= 0) return 0;
+  return numerator / denominator;
+}
+
+function formatPercent(value: number) {
+  return `${Math.round(value * 100)}%`;
+}
+
+function positionConcentrationNote(supportShare: number, opposeShare: number) {
+  if (opposeShare >= 0.75) return `Mostly oppose (${formatPercent(opposeShare)})`;
+  if (supportShare >= 0.75) return `Mostly support (${formatPercent(supportShare)})`;
+  return null;
 }
 
 function spenderRecordsHref(committeeId?: string | null, latestSourceUrl?: string | null) {

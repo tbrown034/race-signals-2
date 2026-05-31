@@ -399,8 +399,8 @@ function candidateMobileNotes(
   return [
     `${candidateMoney(candidate.totalReceiptsCycle, candidate.totalsFetchedAt)} raised; ${candidateMoney(candidate.cashOnHandLatest, candidate.totalsFetchedAt)} cash${candidate.cashOnHandAsOf ? ` as of ${formatDate(candidate.cashOnHandAsOf)}` : ""}.`,
     totalSignals
-      ? `${formatCount(totalSignals, "signal")}: ${signalCounts.filings} filings, ${signalCounts.committees} committees, ${signalCounts.outsideSpending} IE alerts, ${signalCounts.review} reviews.`
-      : "No filing, committee, IE-alert or review signals yet.",
+      ? `${formatCount(totalSignals, "signal")}: ${signalCounts.filings} filings, ${signalCounts.committees} committees, ${signalCounts.outsideSpending} IE, ${signalCounts.review} review.`
+      : "No filing, committee, IE or review signals yet.",
     candidate.totalReceiptsCycle && candidate.totalReceiptsCycle > 0 && totalSignals === 0
       ? "FEC totals show activity; no matched signal yet."
       : null,
@@ -412,7 +412,7 @@ function candidateMobileNotes(
 
 function MobileCandidateRead({ notes }: { notes: string[] }) {
   return (
-    <div className="min-w-0 max-w-full border border-neutral-300 bg-neutral-50">
+    <div className="min-w-0 max-w-[calc(100vw-5rem)] overflow-hidden border border-neutral-300 bg-neutral-50 sm:max-w-full">
       <p className="border-b border-neutral-300 px-3 py-2 font-mono text-[11px] uppercase tracking-[0.12em] text-neutral-500">
         Reporter read
       </p>

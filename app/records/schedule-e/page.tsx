@@ -52,15 +52,15 @@ export default async function ScheduleERecordsPage({
         <section className="border border-neutral-300 bg-white">
           <div className="border-b border-neutral-300 px-5 py-5">
             <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
-              <div>
+              <div className="min-w-0 max-w-[calc(100vw-5rem)] sm:max-w-none">
                 <p className="font-mono text-xs uppercase tracking-[0.18em] text-neutral-500">
                   Schedule E evidence
                 </p>
-                <h1 className="mt-1 text-xl font-semibold tracking-tight">
-                  Stored independent expenditure records
+                <h1 className="mt-1 max-w-full whitespace-normal break-words text-xl font-semibold tracking-tight [overflow-wrap:anywhere]">
+                  Schedule E records
                 </h1>
-                <p className="mt-2 max-w-3xl text-sm leading-6 text-neutral-700">
-                  All stored current-cycle Schedule E rows matching this scope, including records below the $25,000 alert threshold. Use this table to reconcile outside-spending totals before citing a signal or export.
+                <p className="mt-2 max-w-full whitespace-normal break-words text-sm leading-6 text-neutral-700 [overflow-wrap:anywhere] sm:max-w-3xl">
+                  Stored Schedule E rows. Includes records below the $25,000 alert threshold, with source links for checking totals before publication.
                 </p>
                 {activeScope.length ? (
                   <p className="mt-2 font-mono text-[11px] uppercase tracking-[0.12em] text-neutral-500">
@@ -68,23 +68,23 @@ export default async function ScheduleERecordsPage({
                   </p>
                 ) : null}
               </div>
-              <div className="flex flex-wrap gap-2 text-sm">
+              <div className="grid max-w-[calc(100vw-5rem)] grid-cols-1 gap-2 text-sm sm:flex sm:max-w-none sm:flex-wrap">
                 <a
-                  className="border border-neutral-400 px-3 py-2 font-medium hover:border-neutral-900"
+                  className="w-[280px] max-w-full border border-neutral-400 px-3 py-2 font-medium hover:border-neutral-900 sm:w-auto"
                   href={`/api/schedule-e/export.csv${exportSuffix ? `?${exportSuffix}` : ""}`}
                 >
                   Export CSV
                 </a>
                 <a
-                  className="border border-neutral-400 px-3 py-2 font-medium hover:border-neutral-900"
+                  className="w-[280px] max-w-full border border-neutral-400 px-3 py-2 font-medium hover:border-neutral-900 sm:w-auto"
                   href={`/api/schedule-e/export.json${exportSuffix ? `?${exportSuffix}` : ""}`}
                 >
                   Export JSON
                 </a>
-                <Link className="border border-neutral-400 px-3 py-2 font-medium hover:border-neutral-900" href="/spending">
-                  Signal watch
+                <Link className="w-[280px] max-w-full border border-neutral-400 px-3 py-2 font-medium hover:border-neutral-900 sm:w-auto" href="/spending">
+                  Signals
                 </Link>
-                <Link className="border border-neutral-400 px-3 py-2 font-medium hover:border-neutral-900" href="/spenders">
+                <Link className="w-[280px] max-w-full border border-neutral-400 px-3 py-2 font-medium hover:border-neutral-900 sm:w-auto" href="/spenders">
                   Top spenders
                 </Link>
               </div>
@@ -99,8 +99,8 @@ export default async function ScheduleERecordsPage({
             <RecordStat label="Not classified" value={formatMoney(summary.uncodedAmount) ?? "$0"} />
           </div>
 
-          <div className="border-b border-neutral-300 px-5 py-3 text-sm text-neutral-600">
-            The table displays the latest {formatCount(records.length, "record")} for fast page load. Summary totals cover the full stored scope; use CSV or JSON export for up to 10,000 scoped rows.
+          <div className="max-w-[calc(100vw-2.5rem)] border-b border-neutral-300 px-5 py-3 text-sm text-neutral-600 sm:max-w-none">
+            Latest {formatCount(records.length, "record")} shown. Summary totals cover the full stored scope; exports return up to 10,000 scoped rows.
           </div>
 
           {records.length ? (

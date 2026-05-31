@@ -47,13 +47,13 @@ export function EntityPage({
 
   return (
     <main className="mx-auto grid w-full max-w-full grid-cols-1 gap-6 overflow-hidden px-5 py-6 sm:px-8 lg:max-w-7xl lg:grid-cols-[320px_1fr]">
-      <aside className="h-fit w-full min-w-0 max-w-[calc(100vw-2.5rem)] overflow-hidden border border-neutral-300 bg-white p-5 sm:max-w-full">
+      <aside className="h-fit w-full min-w-0 max-w-[calc(100vw-2.5rem)] border border-neutral-300 bg-white p-5 sm:max-w-full">
         {asideMedia ? <div className="mb-4">{asideMedia}</div> : null}
         <p className="font-mono text-xs uppercase tracking-[0.18em] text-neutral-500">
           {eyebrow}
         </p>
         <h1 className="mt-2 flex min-w-0 flex-wrap items-center gap-2 text-2xl font-semibold tracking-tight">
-          <span className="min-w-0 max-w-full flex-1 basis-full whitespace-normal break-words sm:basis-auto">
+          <span className="min-w-0 max-w-full flex-1 basis-full whitespace-normal break-words [overflow-wrap:anywhere] sm:basis-auto">
             {title}
           </span>
           {titleAccessory}
@@ -113,7 +113,7 @@ export function EntityPage({
           </div>
         ) : null}
       </aside>
-      <section className="w-full min-w-0 max-w-[calc(100vw-2.5rem)] overflow-hidden border border-neutral-300 bg-white sm:max-w-full">
+      <section className="w-full min-w-0 max-w-[calc(100vw-2.5rem)] border border-neutral-300 bg-white sm:max-w-full">
         {children}
         {independentExpenditures.length ? (
           <div className="border-b border-neutral-300" id="schedule-e-records">
@@ -285,7 +285,7 @@ function MetaRows({ rows }: { rows: Array<[string, ReactNode | null | undefined]
       <dt className="font-mono text-xs uppercase tracking-[0.12em] text-neutral-500">
         {label}
       </dt>
-      <dd className="mt-1 min-w-0 max-w-full break-words">{value ?? "Not available"}</dd>
+      <dd className="mt-1 min-w-0 max-w-full break-words [overflow-wrap:anywhere]">{value ?? "Not available"}</dd>
     </div>
   ));
 }

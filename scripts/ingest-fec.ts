@@ -315,34 +315,46 @@ async function main() {
         normalizedCommittees.forEach((committee) => knownCommitteeIds.add(committee.fecCommitteeId));
         normalizedCommittees.forEach((committee) => issues.push(...validateCommittee(committee)));
 
-        const fecIes = await fetchIndependentExpendituresForCandidate(
-          candidate.fecCandidateId,
-          cycle,
-          dateWindow,
-        );
-        const ieTruncation = getPaginationTruncation(fecIes);
-        if (ieTruncation) {
-          issues.push(paginationIssue("independent_expenditure", candidate.fecCandidateId, ieTruncation, candidate.sourceUrl));
-        }
-        endpointCounts.schedule_e += fecIes.length;
-        sourceRecords.push(
-          ...fecIes
-            .filter((record) => record.sub_id)
-            .map((record) =>
-              sourceRecord(
-                "fec",
-                "schedule_e",
-                String(record.sub_id),
-                record,
-                normalizeIndependentExpenditure(record, candidate.raceId, cycle).sourceUrl,
+        let normalizedIes: IndependentExpenditure[] = [];
+        try {
+          const fecIes = await fetchIndependentExpendituresForCandidate(
+            candidate.fecCandidateId,
+            cycle,
+            dateWindow,
+          );
+          const ieTruncation = getPaginationTruncation(fecIes);
+          if (ieTruncation) {
+            issues.push(paginationIssue("independent_expenditure", candidate.fecCandidateId, ieTruncation, candidate.sourceUrl));
+          }
+          endpointCounts.schedule_e += fecIes.length;
+          sourceRecords.push(
+            ...fecIes
+              .filter((record) => record.sub_id)
+              .map((record) =>
+                sourceRecord(
+                  "fec",
+                  "schedule_e",
+                  String(record.sub_id),
+                  record,
+                  normalizeIndependentExpenditure(record, candidate.raceId, cycle).sourceUrl,
+                ),
               ),
-            ),
-        );
-        const normalizedIes = fecIes
-          .filter((record) => isCurrentCycleExpenditure(record.expenditure_date, cycle))
-          .map((record) => normalizeIndependentExpenditure(record, candidate.raceId, cycle));
-        independentExpenditures.push(...normalizedIes);
-        normalizedIes.forEach((ie) => issues.push(...validateIndependentExpenditure(ie)));
+          );
+          normalizedIes = fecIes
+            .filter((record) => isCurrentCycleExpenditure(record.expenditure_date, cycle))
+            .map((record) => normalizeIndependentExpenditure(record, candidate.raceId, cycle));
+          independentExpenditures.push(...normalizedIes);
+          normalizedIes.forEach((ie) => issues.push(...validateIndependentExpenditure(ie)));
+        } catch (error) {
+          recordPartialIngestionError({
+            endpoint: "schedule_e",
+            errors,
+            issues,
+            message: errorMessage(error),
+            sourceId: candidate.fecCandidateId,
+            sourceUrl: candidate.sourceUrl,
+          });
+        }
 
         const orphanSpenderIds = [
           ...new Set(
@@ -353,57 +365,77 @@ async function main() {
         ].filter((committeeId) => !knownCommitteeIds.has(committeeId));
 
         for (const committeeId of orphanSpenderIds) {
-          const spender = await fetchCommittee(committeeId);
-          if (!spender) continue;
-          sourceRecords.push(
-            sourceRecord("fec", "committees", spender.committee_id, spender, `https://www.fec.gov/data/committee/${spender.committee_id}/`),
-          );
-          endpointCounts.committees += 1;
-          const normalizedSpender = normalizeCommittee(spender);
-          committees.push(normalizedSpender);
-          knownCommitteeIds.add(normalizedSpender.fecCommitteeId);
-          issues.push(...validateCommittee(normalizedSpender));
+          try {
+            const spender = await fetchCommittee(committeeId);
+            if (!spender) continue;
+            sourceRecords.push(
+              sourceRecord("fec", "committees", spender.committee_id, spender, `https://www.fec.gov/data/committee/${spender.committee_id}/`),
+            );
+            endpointCounts.committees += 1;
+            const normalizedSpender = normalizeCommittee(spender);
+            committees.push(normalizedSpender);
+            knownCommitteeIds.add(normalizedSpender.fecCommitteeId);
+            issues.push(...validateCommittee(normalizedSpender));
+          } catch (error) {
+            recordPartialIngestionError({
+              endpoint: "committees",
+              errors,
+              issues,
+              message: errorMessage(error),
+              sourceId: committeeId,
+              sourceUrl: `https://www.fec.gov/data/committee/${committeeId}/`,
+            });
+          }
         }
 
         for (const committee of normalizedCommittees) {
-          const fecReports = await fetchReportsForCommittee(
-            committee.fecCommitteeId,
-            cycle,
-            dateWindow,
-          );
-          sourceRecords.push(
-            ...fecReports
-              .filter((record) => record.beginning_image_number || record.file_number)
-              .map((record) =>
-                sourceRecord(
-                  "fec",
-                  "filings",
-                  String(record.beginning_image_number ?? record.file_number),
-                  record,
-                  normalizeFiling(record).sourceUrl,
+          try {
+            const fecReports = await fetchReportsForCommittee(
+              committee.fecCommitteeId,
+              cycle,
+              dateWindow,
+            );
+            sourceRecords.push(
+              ...fecReports
+                .filter((record) => record.beginning_image_number || record.file_number)
+                .map((record) =>
+                  sourceRecord(
+                    "fec",
+                    "filings",
+                    String(record.beginning_image_number ?? record.file_number),
+                    record,
+                    normalizeFiling(record).sourceUrl,
+                  ),
                 ),
-              ),
-          );
-          const reportTruncation = getPaginationTruncation(fecReports);
-          if (reportTruncation) {
-            issues.push(paginationIssue("filing", committee.fecCommitteeId, reportTruncation, committee.sourceUrl));
+            );
+            const reportTruncation = getPaginationTruncation(fecReports);
+            if (reportTruncation) {
+              issues.push(paginationIssue("filing", committee.fecCommitteeId, reportTruncation, committee.sourceUrl));
+            }
+            endpointCounts.reports += fecReports.length;
+            const normalizedFilings = fecReports
+              .filter((record) => isCurrentCycleFiling(record.receipt_date, cycle))
+              .map(normalizeFiling);
+            filings.push(...normalizedFilings);
+            normalizedFilings.forEach((filing) => issues.push(...validateFiling(filing)));
+          } catch (error) {
+            recordPartialIngestionError({
+              endpoint: "reports",
+              errors,
+              issues,
+              message: errorMessage(error),
+              sourceId: committee.fecCommitteeId,
+              sourceUrl: committee.sourceUrl,
+            });
           }
-          endpointCounts.reports += fecReports.length;
-          const normalizedFilings = fecReports
-            .filter((record) => isCurrentCycleFiling(record.receipt_date, cycle))
-            .map(normalizeFiling);
-          filings.push(...normalizedFilings);
-          normalizedFilings.forEach((filing) => issues.push(...validateFiling(filing)));
         }
       } catch (error) {
-        const message = error instanceof Error ? error.message : String(error);
-        errors.push({ candidateId: candidate.fecCandidateId, message });
-        issues.push({
-          entityType: "candidate",
+        recordPartialIngestionError({
+          endpoint: "committees",
+          errors,
+          issues,
+          message: errorMessage(error),
           sourceId: candidate.fecCandidateId,
-          severity: "warning",
-          rule: "partial_ingestion_error",
-          message,
           sourceUrl: candidate.sourceUrl,
         });
       }
@@ -500,6 +532,36 @@ function candidateScopeTruncationIssue({
     message: `Race Signals matched ${count} in-scope ${cycle} candidates but FEC_MAX_CANDIDATES limited this ingest to ${maxCandidates}. Treat candidate coverage for this run as partial.`,
     raw: { count, cycle, maxCandidates, offices, state: state ?? null },
   };
+}
+
+function errorMessage(error: unknown) {
+  return error instanceof Error ? error.message : String(error);
+}
+
+function recordPartialIngestionError({
+  endpoint,
+  errors,
+  issues,
+  message,
+  sourceId,
+  sourceUrl,
+}: {
+  endpoint: "committees" | "reports" | "schedule_e";
+  errors: unknown[];
+  issues: ValidationIssue[];
+  message: string;
+  sourceId: string;
+  sourceUrl?: string | null;
+}) {
+  errors.push({ endpoint, sourceId, message });
+  issues.push({
+    entityType: endpoint === "schedule_e" ? "independent_expenditure" : endpoint === "reports" ? "filing" : "committee",
+    sourceId,
+    severity: "warning",
+    rule: "partial_ingestion_error",
+    message,
+    sourceUrl,
+  });
 }
 
 function compareCandidateScope(a: Candidate, b: Candidate) {

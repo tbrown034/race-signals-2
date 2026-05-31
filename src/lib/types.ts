@@ -230,6 +230,16 @@ export type ValidationIssueRollup = {
   latestAt: string;
 };
 
+export type RecentValidationIssue = {
+  entityType: string;
+  sourceId?: string | null;
+  severity: string;
+  rule: string;
+  message: string;
+  sourceUrl?: string | null;
+  createdAt: string;
+};
+
 export type ElectionCoverage = {
   candidates: number;
   withIdentifiers: number;

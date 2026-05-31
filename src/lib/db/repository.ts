@@ -20,6 +20,7 @@ import type {
   Race,
   RaceRating,
   RaceStats,
+  RecentValidationIssue,
   Signal,
   StorageUsage,
   TopSpender,
@@ -1004,6 +1005,7 @@ export async function getStatus() {
       },
       endpoints: [],
       validationIssues: [],
+      recentValidationIssues: [],
       candidateSignalGaps: [],
       electionCoverage: {
         candidates: demoCandidates.length,
@@ -1058,6 +1060,15 @@ export async function getStatus() {
     severity: string;
     count: string;
     latest_at: string | Date;
+  }> = [];
+  let recentValidationIssues: Array<{
+    entity_type: string;
+    source_id: string | null;
+    severity: string;
+    rule: string;
+    message: string;
+    source_url: string | null;
+    created_at: string | Date;
   }> = [];
   let candidateSignalGaps: Array<{
     id: string;
@@ -1133,6 +1144,25 @@ export async function getStatus() {
       order by max(created_at) desc, count(*) desc
       limit 12
     `);
+    recentValidationIssues = await sql<{
+      entity_type: string;
+      source_id: string | null;
+      severity: string;
+      rule: string;
+      message: string;
+      source_url: string | null;
+      created_at: string | Date;
+    }>(`
+      select entity_type, source_id, severity, rule, message, source_url, created_at
+      from (
+        select distinct on (rule, coalesce(source_id, ''), message)
+          entity_type, source_id, severity, rule, message, source_url, created_at
+        from validation_issues
+        order by rule, coalesce(source_id, ''), message, created_at desc
+      ) latest_examples
+      order by created_at desc
+      limit 8
+    `);
   } catch (error) {
     if (!(error instanceof Error) || !error.message.includes("validation_issues")) {
       throw error;
@@ -1197,6 +1227,15 @@ export async function getStatus() {
       severity: issue.severity,
       count: Number(issue.count),
       latestAt: toIsoString(issue.latest_at),
+    })),
+    recentValidationIssues: recentValidationIssues.map<RecentValidationIssue>((issue) => ({
+      entityType: issue.entity_type,
+      sourceId: issue.source_id,
+      severity: issue.severity,
+      rule: issue.rule,
+      message: issue.message,
+      sourceUrl: issue.source_url,
+      createdAt: toIsoString(issue.created_at),
     })),
     candidateSignalGaps: candidateSignalGaps.map<CandidateSignalGap>((candidate) => ({
       id: candidate.id,

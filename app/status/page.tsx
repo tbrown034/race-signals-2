@@ -316,6 +316,70 @@ export default async function StatusPage() {
             </table>
           </div>
         </section>
+
+        <section className="mt-6 border border-neutral-300 bg-white">
+          <div className="border-b border-neutral-300 px-5 py-4">
+            <h2 className="text-sm font-semibold uppercase tracking-[0.14em] text-neutral-600">
+              Recent validation examples
+            </h2>
+            <p className="mt-1 text-sm text-neutral-600">
+              Latest individual caveats recorded by ingest. Source links appear only when the underlying record supplied one.
+            </p>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-[920px] text-left text-sm">
+              <thead className="bg-neutral-100 text-xs uppercase tracking-[0.12em] text-neutral-500">
+                <tr>
+                  <th className="px-4 py-3 font-medium" scope="col">Rule</th>
+                  <th className="px-4 py-3 font-medium" scope="col">Message</th>
+                  <th className="px-4 py-3 font-medium" scope="col">Record</th>
+                  <th className="px-4 py-3 font-medium" scope="col">Source</th>
+                  <th className="px-4 py-3 font-medium" scope="col">Opened</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-neutral-200">
+                {status.recentValidationIssues.length ? (
+                  status.recentValidationIssues.map((issue) => (
+                    <tr key={`${issue.rule}-${issue.sourceId ?? issue.createdAt}`}>
+                      <td className="px-4 py-3">
+                        <span className="block font-medium">{validationRuleLabel(issue.rule)}</span>
+                        <span className="mt-1 block text-xs text-neutral-600">{issue.severity}</span>
+                      </td>
+                      <td className="max-w-[360px] px-4 py-3 text-neutral-700">{issue.message}</td>
+                      <td className="px-4 py-3">
+                        <span className="block font-mono text-xs text-neutral-700">{issue.sourceId ?? "No source ID"}</span>
+                        <span className="mt-1 block font-mono text-[11px] uppercase tracking-[0.12em] text-neutral-500">
+                          {issue.entityType}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3">
+                        {issue.sourceUrl ? (
+                          <a
+                            className="font-medium underline underline-offset-4"
+                            href={issue.sourceUrl}
+                            rel="noreferrer"
+                            target="_blank"
+                          >
+                            Open source
+                          </a>
+                        ) : (
+                          <span className="text-neutral-600">Source not stored</span>
+                        )}
+                      </td>
+                      <td className="px-4 py-3">{formatDateTime(issue.createdAt)}</td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td className="px-4 py-3 text-neutral-600" colSpan={5}>
+                      No individual validation issues have been recorded in this database.
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        </section>
       </main>
     </PageShell>
   );

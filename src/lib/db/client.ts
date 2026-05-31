@@ -14,6 +14,9 @@ export function getPool() {
 
   pool ??= new Pool({
     connectionString: normalizeDatabaseUrl(databaseUrl),
+    connectionTimeoutMillis: 5000,
+    idleTimeoutMillis: 10000,
+    max: 3,
     ssl: isLocalDatabaseUrl(databaseUrl) ? false : undefined,
   });
 

@@ -5,18 +5,22 @@ import { signalFiltersFromUrl } from "@/src/lib/signals/filters";
 export async function GET(request: Request) {
   const url = new URL(request.url);
   const signals = await getSignals(signalFiltersFromUrl(url, EXPORT_LIMIT + 1));
+  const headers = {
+    "x-robots-tag": "noindex, nofollow",
+  };
 
   if (signals.length > EXPORT_LIMIT) {
     return Response.json(
       {
         error: "Export exceeds 10,000 rows. Narrow the feed filters before exporting.",
       },
-      { status: 413 },
+      { status: 413, headers },
     );
   }
 
   return Response.json(signals.map((signal) => signalToExportRow(signal)), {
     headers: {
+      ...headers,
       "content-disposition": 'attachment; filename="race-signals.json"',
     },
   });

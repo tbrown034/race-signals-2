@@ -122,6 +122,29 @@ assert.equal(filingSignal.metadata?.totalReceipts, 61000);
 assert.equal(filingSignal.metadata?.cashOnHand, 25000);
 assert.equal(filingSignal.metadata?.filingVersionKind, "initial_or_single");
 
+const terminationSignals = generateSignals({
+  candidates: [candidate],
+  committees: [committee],
+  races: [race],
+  filings: [
+    {
+      ...currentFiling,
+      sourceId: "filing-termination",
+      reportType: "TER",
+      sourceUrl: "https://www.fec.gov/data/filing/filing-termination/",
+    },
+  ],
+  independentExpenditures: [],
+  dataFreshness: "2026-05-31T12:00:00.000Z",
+});
+const terminationSignal = terminationSignals.find((signal) => signal.dedupeKey === "fec:new_filing:filing-termination");
+assert.ok(terminationSignal, "termination filing should generate a filing signal");
+assert.match(
+  terminationSignal.headline,
+  /filed a termination report/,
+  "termination report copy should explain the FEC TER code",
+);
+
 const committeeSignal = signals.find((signal) => signal.dedupeKey === "fec:new_committee:C00999999");
 assert.ok(committeeSignal, "current-cycle committee should generate a signal");
 assert.equal(committeeSignal.metadata?.sourceId, "C00999999");

@@ -572,6 +572,7 @@ function reportLabel(reportType?: string | null) {
     Q3S: "October quarterly",
     YE: "Year-end",
     YES: "Year-end",
+    TER: "Termination",
     "12P": "Pre-primary",
     "12G": "Pre-general",
     "30G": "Post-general",

@@ -98,7 +98,7 @@ export default async function StatusPage() {
                     <tr key={table.tableName}>
                       <td className="px-4 py-3 font-mono">{table.tableName}</td>
                       <td className="px-4 py-3 text-right font-mono">{formatBytes(table.totalBytes)}</td>
-                      <td className="px-4 py-3 text-right font-mono">{table.rowCount ?? "Unknown"}</td>
+                      <td className="px-4 py-3 text-right font-mono">{table.rowCount ?? "Estimate unavailable"}</td>
                     </tr>
                   ))}
                 </tbody>

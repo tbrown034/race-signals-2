@@ -95,19 +95,24 @@ export default async function Home({
                   </p>
                 ) : null}
               </div>
-              <div className="flex flex-wrap gap-2 text-sm">
-              <a
-                className="border border-neutral-400 px-3 py-2 font-medium hover:border-neutral-900"
-                href={`/api/signals/export.csv${exportSuffix ? `?${exportSuffix}` : ""}`}
-              >
-                Export CSV
-              </a>
-              <a
-                className="border border-neutral-400 px-3 py-2 font-medium hover:border-neutral-900"
-                href={`/api/signals/export.json${exportSuffix ? `?${exportSuffix}` : ""}`}
-              >
-                Export JSON
-              </a>
+              <div className="flex flex-col gap-1 md:items-end">
+                <div className="flex flex-wrap gap-2 text-sm">
+                  <a
+                    className="border border-neutral-400 px-3 py-2 font-medium hover:border-neutral-900"
+                    href={`/api/signals/export.csv${exportSuffix ? `?${exportSuffix}` : ""}`}
+                  >
+                    Export CSV
+                  </a>
+                  <a
+                    className="border border-neutral-400 px-3 py-2 font-medium hover:border-neutral-900"
+                    href={`/api/signals/export.json${exportSuffix ? `?${exportSuffix}` : ""}`}
+                  >
+                    Export JSON
+                  </a>
+                </div>
+                <p className="text-xs text-neutral-600">
+                  Exports preserve filters and include FEC source IDs.
+                </p>
               </div>
             </div>
           </div>

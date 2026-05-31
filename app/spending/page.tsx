@@ -35,6 +35,8 @@ export default async function SpendingPage({
   const hasMoreSignals = signals.length > visibleSignals.length;
   const amountHref = spendingSortHref(params, "amount");
   const dateHref = spendingSortHref(params, "date");
+  const exportQuery = spendingExportQuery(params);
+  const exportSuffix = exportQuery.toString();
 
   return (
     <PageShell>
@@ -55,19 +57,38 @@ export default async function SpendingPage({
                   moves before scanning the chronology.
                 </p>
               </div>
-              <div className="flex flex-wrap gap-2 text-sm">
-                <Link
-                  className={`border px-3 py-2 font-medium ${sort === "amount" ? "border-neutral-950 bg-neutral-950 text-white" : "border-neutral-400 hover:border-neutral-900"}`}
-                  href={amountHref}
-                >
-                  Sort by amount
-                </Link>
-                <Link
-                  className={`border px-3 py-2 font-medium ${sort === "date" ? "border-neutral-950 bg-neutral-950 text-white" : "border-neutral-400 hover:border-neutral-900"}`}
-                  href={dateHref}
-                >
-                  Sort by date
-                </Link>
+              <div className="flex flex-col gap-2 md:items-end">
+                <div className="flex flex-wrap gap-2 text-sm">
+                  <Link
+                    className={`border px-3 py-2 font-medium ${sort === "amount" ? "border-neutral-950 bg-neutral-950 text-white" : "border-neutral-400 hover:border-neutral-900"}`}
+                    href={amountHref}
+                  >
+                    Sort by amount
+                  </Link>
+                  <Link
+                    className={`border px-3 py-2 font-medium ${sort === "date" ? "border-neutral-950 bg-neutral-950 text-white" : "border-neutral-400 hover:border-neutral-900"}`}
+                    href={dateHref}
+                  >
+                    Sort by date
+                  </Link>
+                </div>
+                <div className="flex flex-wrap gap-2 text-sm">
+                  <a
+                    className="border border-neutral-400 px-3 py-2 font-medium hover:border-neutral-900"
+                    href={`/api/signals/export.csv${exportSuffix ? `?${exportSuffix}` : ""}`}
+                  >
+                    Export CSV
+                  </a>
+                  <a
+                    className="border border-neutral-400 px-3 py-2 font-medium hover:border-neutral-900"
+                    href={`/api/signals/export.json${exportSuffix ? `?${exportSuffix}` : ""}`}
+                  >
+                    Export JSON
+                  </a>
+                </div>
+                <p className="text-xs text-neutral-600">
+                  Exports include only Schedule E signals in this view.
+                </p>
               </div>
             </div>
           </div>
@@ -249,4 +270,14 @@ function spendingSortHref(
   if (sort !== "amount") next.set("sort", sort);
   const query = next.toString();
   return query ? `/spending?${query}` : "/spending";
+}
+
+function spendingExportQuery(params: { [key: string]: string | string[] | undefined }) {
+  const next = new URLSearchParams();
+  for (const key of ["q", "state", "office", "race", "status", "since"]) {
+    const value = params[key];
+    if (typeof value === "string" && value) next.set(key, value);
+  }
+  next.set("type", "large_independent_expenditure");
+  return next;
 }

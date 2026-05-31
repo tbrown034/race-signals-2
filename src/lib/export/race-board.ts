@@ -22,6 +22,8 @@ export type RaceBoardExportRow = {
   candidate_fec_ids: string;
   candidate_source_urls: string;
   candidate_evidence_url: string | null;
+  methodology_url: string;
+  scope_note: string;
   candidate_totals_fetched_at_latest: string | null;
   candidate_totals_fetched_at_oldest: string | null;
   signal_count: number;
@@ -59,6 +61,9 @@ export function raceBoardToExportRow(
     candidate_fec_ids: row.candidateFecIds.join("|"),
     candidate_source_urls: row.candidateSourceUrls.join("|"),
     candidate_evidence_url: manifest.baseUrl ? `${manifest.baseUrl}/races/${row.raceId}#candidate-cohort` : null,
+    methodology_url: manifest.baseUrl ? `${manifest.baseUrl}/methodology#scope` : "/methodology#scope",
+    scope_note:
+      "Race-board totals are computed from stored Race Signals candidates, candidate totals, signals and Schedule E rows in the current database slice; they are not ballot, polling or completeness claims.",
     candidate_totals_fetched_at_latest: row.candidateTotalsFetchedAtLatest ?? null,
     candidate_totals_fetched_at_oldest: row.candidateTotalsFetchedAtOldest ?? null,
     signal_count: row.signalCount,
@@ -95,6 +100,8 @@ export function raceBoardRowsToCsv(rows: RaceBoardExportRow[]) {
     "candidate_fec_ids",
     "candidate_source_urls",
     "candidate_evidence_url",
+    "methodology_url",
+    "scope_note",
     "candidate_totals_fetched_at_latest",
     "candidate_totals_fetched_at_oldest",
     "signal_count",

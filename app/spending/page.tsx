@@ -161,6 +161,26 @@ export default async function SpendingPage({
                           <Link className="font-medium underline underline-offset-4" href={signalPermalinkHref(signal)}>
                             {signal.headline}
                           </Link>
+                          <p className="mt-1 text-xs leading-5 text-neutral-600">
+                            {signal.sourceUrl ? (
+                              <>
+                                <a
+                                  className="font-medium underline underline-offset-4"
+                                  href={signal.sourceUrl}
+                                  rel="noreferrer"
+                                  target="_blank"
+                                >
+                                  FEC Schedule E
+                                </a>
+                                <span className="font-mono uppercase tracking-[0.12em] text-neutral-500">
+                                  {" "}
+                                  / {sourceRecordLabel(signal.metadata?.sourceId)}
+                                </span>
+                              </>
+                            ) : (
+                              "Source not stored"
+                            )}
+                          </p>
                           <dl className="mt-2 space-y-1 text-xs leading-5 text-neutral-600 md:hidden">
                             <div>
                               <dt className="inline font-mono uppercase tracking-[0.12em] text-neutral-500">Date </dt>

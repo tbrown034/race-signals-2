@@ -11,7 +11,7 @@ import {
   getSignalsForEntity,
 } from "@/src/lib/db/repository";
 import { committeeContext, committeeDesignationLabel, committeeTypeLabel } from "@/src/lib/fec-codes";
-import { formatCount } from "@/src/lib/format";
+import { formatCount, formatDate, formatMoney } from "@/src/lib/format";
 import type { Metadata } from "next";
 
 export const revalidate = 21600;
@@ -45,6 +45,7 @@ export default async function CommitteePage({
   if (!committee) notFound();
   const linkedCandidate = committee.candidateId ? await getCandidate(committee.candidateId) : null;
   const touchedRaces = summarizeTouchedRaces(independentExpenditures);
+  const spendingSummary = summarizeSpending(independentExpenditures);
 
   return (
     <PageShell>
@@ -103,10 +104,21 @@ export default async function CommitteePage({
               ? `Directly linked to ${linkedCandidate.name}; party context comes from that candidate record.`
               : "No direct candidate affiliation is stored for this committee, so the page does not assign a party reading.",
             independentExpenditures.length
-              ? `${formatCount(independentExpenditures.length, "current-cycle Schedule E independent expenditure record")} attached to this committee in this slice.`
+              ? `${formatMoney(spendingSummary.total) ?? "$0"} in ${formatCount(independentExpenditures.length, "current-cycle Schedule E independent expenditure record")} attached to this committee in this slice.`
               : "No current-cycle Schedule E independent expenditures are attached to this committee in this slice.",
+            independentExpenditures.length
+              ? `Position split: support ${formatMoney(spendingSummary.support) ?? "$0"}; oppose ${formatMoney(spendingSummary.oppose) ?? "$0"}; not classified ${formatMoney(spendingSummary.uncoded) ?? "$0"}.`
+              : null,
+            spendingSummary.latestDate
+              ? `Latest stored Schedule E date: ${formatDate(spendingSummary.latestDate)}.`
+              : null,
+            touchedRaces[0]
+              ? `Largest matched race exposure: ${touchedRaces[0].name} at ${formatMoney(touchedRaces[0].amount) ?? "$0"}.`
+              : independentExpenditures.length
+                ? "No matched race exposure is available for these Schedule E records yet."
+                : null,
             "Low-cost mode does not store itemized Schedule A donor receipts; use the FEC source link for donor-level lookup.",
-          ]}
+          ].filter((note): note is string => Boolean(note))}
         />
       </EntityPage>
     </PageShell>
@@ -127,4 +139,31 @@ function summarizeTouchedRaces(
     });
   }
   return [...races.values()].sort((a, b) => b.amount - a.amount).slice(0, 3);
+}
+
+function summarizeSpending(
+  expenditures: Awaited<ReturnType<typeof getCommitteeIndependentExpenditures>>,
+) {
+  return expenditures.reduce(
+    (summary, expenditure) => {
+      summary.total += expenditure.amount;
+      if (expenditure.supportOpposeIndicator === "S") summary.support += expenditure.amount;
+      else if (expenditure.supportOpposeIndicator === "O") summary.oppose += expenditure.amount;
+      else summary.uncoded += expenditure.amount;
+      if (
+        expenditure.expenditureDate &&
+        (!summary.latestDate || expenditure.expenditureDate > summary.latestDate)
+      ) {
+        summary.latestDate = expenditure.expenditureDate;
+      }
+      return summary;
+    },
+    { latestDate: null, oppose: 0, support: 0, total: 0, uncoded: 0 } as {
+      latestDate: string | null;
+      oppose: number;
+      support: number;
+      total: number;
+      uncoded: number;
+    },
+  );
 }

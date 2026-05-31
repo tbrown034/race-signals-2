@@ -201,7 +201,7 @@ export const demoIngestionRuns: IngestionRun[] = [
   {
     id: "demo-run",
     source: "fec",
-    scope: "2026 Indiana House watchlist",
+    scope: "2026 U.S. House national demo",
     status: "demo",
     startedAt: freshness,
     finishedAt: freshness,

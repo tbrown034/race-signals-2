@@ -58,6 +58,7 @@ function mapSignal(row: SignalRow): Signal {
 export async function getSignals(filters: {
   q?: string;
   raceId?: string;
+  state?: string;
   type?: string;
   limit?: number;
 } = {}) {
@@ -65,6 +66,7 @@ export async function getSignals(filters: {
     const q = filters.q?.toLowerCase();
     return demoSignals.filter((signal) => {
       if (filters.raceId && signal.raceId !== filters.raceId) return false;
+      if (filters.state && !signal.raceId?.includes(`-${filters.state}-`)) return false;
       if (filters.type && signal.signalType !== filters.type) return false;
       if (q && !`${signal.headline} ${signal.whyItMatters}`.toLowerCase().includes(q)) {
         return false;
@@ -78,6 +80,10 @@ export async function getSignals(filters: {
   if (filters.raceId) {
     values.push(filters.raceId);
     where.push(`s.race_id = $${values.length}`);
+  }
+  if (filters.state) {
+    values.push(filters.state);
+    where.push(`r.state = $${values.length}`);
   }
   if (filters.type) {
     values.push(filters.type);

@@ -4,7 +4,7 @@ Race Signals is a serious portfolio MVP for spotting early campaign-finance sign
 
 It is built for reporters and editors who need a fast answer to: what changed, who filed, who formed a committee, where money is moving and what deserves follow-up.
 
-The MVP is intentionally narrow: FEC API only, focused on a small 2026 Indiana U.S. House race watchlist.
+The MVP is intentionally focused: FEC API only, covering 2026 U.S. House races across all 50 states.
 
 ## Why It Matters Journalistically
 
@@ -38,7 +38,7 @@ Not included yet:
 ## Pipeline Overview
 
 1. `scripts/ingest-fec.ts` loads `.env.local`, migrates the schema and starts an ingestion run.
-2. `src/lib/sources/fec/` fetches a narrow race/candidate/committee slice from the FEC API.
+2. `src/lib/sources/fec/` fetches 2026 House candidates, candidate committees, reports, receipts and independent expenditures from the FEC API.
 3. `src/lib/normalization/` maps raw FEC records into internal entities.
 4. `src/lib/validation/` flags missing names, dates, IDs, source URLs, unmatched races and suspicious amounts.
 5. `src/lib/db/` upserts normalized records into Postgres.
@@ -102,7 +102,7 @@ Each signal includes a type, headline, why-it-matters explanation, related candi
 
 ## Known Limitations
 
-- Coverage is intentionally narrow and should not be described as national.
+- Coverage is national for 2026 U.S. House races, but not for Senate, presidential, state or local races.
 - FEC API results are page-limited for development ergonomics.
 - Demo data is illustrative and clearly marked as demo mode.
 - Signal thresholds are simple editorial heuristics, not statistical anomaly detection.
@@ -136,6 +136,15 @@ Then run:
 ```bash
 npm run ingest
 ```
+
+Useful ingestion controls:
+
+```bash
+FEC_MAX_CANDIDATE_PAGES=3 npm run ingest
+FEC_MAX_CANDIDATES=25 npm run ingest
+```
+
+Without those caps, candidate discovery attempts the full 2026 House candidate search and then fetches related committee/report/receipt/expenditure records.
 
 Verification:
 

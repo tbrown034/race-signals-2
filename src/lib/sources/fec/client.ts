@@ -93,10 +93,10 @@ async function fecGet<T>(path: string, params: Record<string, string | number | 
 async function firstPages<T>(
   path: string,
   params: Record<string, string | number | undefined>,
-  maxPages = 2,
+  maxPages?: number,
 ) {
   const records: T[] = [];
-  for (let page = 1; page <= maxPages; page += 1) {
+  for (let page = 1; maxPages === undefined || page <= maxPages; page += 1) {
     const data = await fecGet<T>(path, { ...params, page });
     records.push(...data.results);
     if (!data.pagination || page >= data.pagination.pages) break;
@@ -104,43 +104,75 @@ async function firstPages<T>(
   return records;
 }
 
+export async function fetchHouseCandidates(cycle: number, maxPages?: number) {
+  return firstPages<FecCandidate>(
+    "/candidates/search/",
+    {
+      office: "H",
+      election_year: cycle,
+      sort: "name",
+    },
+    maxPages,
+  );
+}
+
 export async function fetchCandidatesForRace(state: string, district: string, cycle: number) {
-  return firstPages<FecCandidate>("/candidates/search/", {
-    office: "H",
-    state,
-    district,
-    election_year: cycle,
-    sort: "name",
-  });
+  return firstPages<FecCandidate>(
+    "/candidates/search/",
+    {
+      office: "H",
+      state,
+      district,
+      election_year: cycle,
+      sort: "name",
+    },
+    2,
+  );
 }
 
 export async function fetchCommitteesForCandidate(candidateId: string) {
-  return firstPages<FecCommittee>(`/candidate/${candidateId}/committees/`, {
-    designation: "P",
-  });
+  return firstPages<FecCommittee>(
+    `/candidate/${candidateId}/committees/`,
+    {
+      designation: "P",
+    },
+    2,
+  );
 }
 
 export async function fetchReportsForCommittee(committeeId: string, cycle: number) {
-  return firstPages<FecReport>(`/committee/${committeeId}/reports/`, {
-    report_year: cycle,
-    sort: "-receipt_date",
-  });
+  return firstPages<FecReport>(
+    `/committee/${committeeId}/reports/`,
+    {
+      report_year: cycle,
+      sort: "-receipt_date",
+    },
+    2,
+  );
 }
 
 export async function fetchReceiptsForCommittee(committeeId: string, cycle: number) {
-  return firstPages<FecScheduleA>("/schedules/schedule_a/", {
-    committee_id: committeeId,
-    two_year_transaction_period: cycle,
-    sort: "-contribution_receipt_date",
-  });
+  return firstPages<FecScheduleA>(
+    "/schedules/schedule_a/",
+    {
+      committee_id: committeeId,
+      two_year_transaction_period: cycle,
+      sort: "-contribution_receipt_date",
+    },
+    2,
+  );
 }
 
 export async function fetchIndependentExpendituresForCandidate(candidateId: string, cycle: number) {
-  return firstPages<FecScheduleE>("/schedules/schedule_e/", {
-    candidate_id: candidateId,
-    two_year_transaction_period: cycle,
-    sort: "-expenditure_date",
-  });
+  return firstPages<FecScheduleE>(
+    "/schedules/schedule_e/",
+    {
+      candidate_id: candidateId,
+      two_year_transaction_period: cycle,
+      sort: "-expenditure_date",
+    },
+    2,
+  );
 }
 
 export function fecCandidateUrl(candidateId: string) {

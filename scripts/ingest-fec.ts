@@ -21,13 +21,13 @@ import {
 } from "@/src/lib/normalization/fec";
 import { generateSignals } from "@/src/lib/signals/generate";
 import {
-  fetchCandidatesForRace,
   fetchCommitteesForCandidate,
+  fetchHouseCandidates,
   fetchIndependentExpendituresForCandidate,
   fetchReceiptsForCommittee,
   fetchReportsForCommittee,
 } from "@/src/lib/sources/fec/client";
-import { TARGET_RACES } from "@/src/lib/scope";
+import { DEFAULT_CYCLE, TARGET_RACES } from "@/src/lib/scope";
 import {
   validateCandidate,
   validateCommittee,
@@ -46,6 +46,13 @@ import type {
 
 loadEnvConfig(process.cwd());
 
+function numberFromEnv(name: string) {
+  const value = process.env[name];
+  if (!value) return undefined;
+  const parsed = Number(value);
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : undefined;
+}
+
 async function main() {
   if (!process.env.DATABASE_URL) {
     throw new Error("DATABASE_URL is required to ingest FEC data.");
@@ -55,7 +62,11 @@ async function main() {
   }
 
   await migrate();
-  const runId = await createIngestionRun("2026 Indiana House watchlist");
+  const cycle = numberFromEnv("RACE_SIGNALS_CYCLE") ?? DEFAULT_CYCLE;
+  const maxCandidatePages = numberFromEnv("FEC_MAX_CANDIDATE_PAGES");
+  const maxCandidates = numberFromEnv("FEC_MAX_CANDIDATES");
+  const runScope = `${cycle} national House candidate scope`;
+  const runId = await createIngestionRun(runScope);
   const errors: unknown[] = [];
 
   try {
@@ -66,46 +77,45 @@ async function main() {
     const independentExpenditures: IndependentExpenditure[] = [];
     const issues: ValidationIssue[] = [];
 
-    for (const race of TARGET_RACES) {
-      const fecCandidates = await fetchCandidatesForRace(race.state, race.district, race.cycle);
-      const normalizedCandidates = fecCandidates.map((record) =>
-        normalizeCandidate(record, race.cycle),
+    const raceScope = TARGET_RACES.filter((race) => race.cycle === cycle);
+    const raceIds = new Set(raceScope.map((race) => race.id));
+    const fecCandidates = await fetchHouseCandidates(cycle, maxCandidatePages);
+    const normalizedCandidates = fecCandidates
+      .map((record) => normalizeCandidate(record, cycle))
+      .filter((candidate) => candidate.raceId && raceIds.has(candidate.raceId))
+      .slice(0, maxCandidates);
+
+    candidates.push(...normalizedCandidates);
+    normalizedCandidates.forEach((candidate) => issues.push(...validateCandidate(candidate)));
+
+    for (const candidate of normalizedCandidates) {
+      const fecCommittees = await fetchCommitteesForCandidate(candidate.fecCandidateId);
+      const normalizedCommittees = fecCommittees.map((record) =>
+        normalizeCommittee(record, candidate),
       );
-      candidates.push(...normalizedCandidates);
-      normalizedCandidates.forEach((candidate) => issues.push(...validateCandidate(candidate)));
+      committees.push(...normalizedCommittees);
+      normalizedCommittees.forEach((committee) => issues.push(...validateCommittee(committee)));
 
-      for (const candidate of normalizedCandidates) {
-        const fecCommittees = await fetchCommitteesForCandidate(candidate.fecCandidateId);
-        const normalizedCommittees = fecCommittees.map((record) =>
-          normalizeCommittee(record, candidate),
-        );
-        committees.push(...normalizedCommittees);
-        normalizedCommittees.forEach((committee) => issues.push(...validateCommittee(committee)));
+      const fecIes = await fetchIndependentExpendituresForCandidate(candidate.fecCandidateId, cycle);
+      const normalizedIes = fecIes.map((record) =>
+        normalizeIndependentExpenditure(record, candidate.raceId),
+      );
+      independentExpenditures.push(...normalizedIes);
+      normalizedIes.forEach((ie) => issues.push(...validateIndependentExpenditure(ie)));
 
-        const fecIes = await fetchIndependentExpendituresForCandidate(
-          candidate.fecCandidateId,
-          race.cycle,
+      for (const committee of normalizedCommittees) {
+        const [fecReports, fecReceipts] = await Promise.all([
+          fetchReportsForCommittee(committee.fecCommitteeId, cycle),
+          fetchReceiptsForCommittee(committee.fecCommitteeId, cycle),
+        ]);
+        const normalizedFilings = fecReports.map(normalizeFiling);
+        const normalizedTransactions = fecReceipts.map(normalizeTransaction);
+        filings.push(...normalizedFilings);
+        transactions.push(...normalizedTransactions);
+        normalizedFilings.forEach((filing) => issues.push(...validateFiling(filing)));
+        normalizedTransactions.forEach((transaction) =>
+          issues.push(...validateTransaction(transaction)),
         );
-        const normalizedIes = fecIes.map((record) =>
-          normalizeIndependentExpenditure(record, candidate.raceId),
-        );
-        independentExpenditures.push(...normalizedIes);
-        normalizedIes.forEach((ie) => issues.push(...validateIndependentExpenditure(ie)));
-
-        for (const committee of normalizedCommittees) {
-          const [fecReports, fecReceipts] = await Promise.all([
-            fetchReportsForCommittee(committee.fecCommitteeId, race.cycle),
-            fetchReceiptsForCommittee(committee.fecCommitteeId, race.cycle),
-          ]);
-          const normalizedFilings = fecReports.map(normalizeFiling);
-          const normalizedTransactions = fecReceipts.map(normalizeTransaction);
-          filings.push(...normalizedFilings);
-          transactions.push(...normalizedTransactions);
-          normalizedFilings.forEach((filing) => issues.push(...validateFiling(filing)));
-          normalizedTransactions.forEach((transaction) =>
-            issues.push(...validateTransaction(transaction)),
-          );
-        }
       }
     }
 
@@ -113,14 +123,14 @@ async function main() {
     const signals = generateSignals({
       candidates,
       committees,
-      races: TARGET_RACES,
+      races: raceScope,
       filings,
       transactions,
       independentExpenditures,
       dataFreshness,
     });
 
-    await upsertRaces(TARGET_RACES);
+    await upsertRaces(raceScope);
     await upsertCandidates(candidates);
     await upsertCommittees(committees);
     await upsertFilings(filings);
@@ -139,7 +149,7 @@ async function main() {
     await finishIngestionRun(runId, "success", recordsSeen);
 
     console.log(
-      `Ingested ${recordsSeen} records/signals with ${issues.length} validation issues.`,
+      `Ingested ${recordsSeen} records/signals from ${candidates.length} House candidates with ${issues.length} validation issues.`,
     );
   } catch (error) {
     errors.push(error instanceof Error ? error.message : error);

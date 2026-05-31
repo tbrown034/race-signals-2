@@ -17,7 +17,7 @@ The core questions are:
 - Who is spending in a race?
 - What looks unusual enough to deserve a reporter's attention?
 
-The MVP starts narrow: FEC API only, focused on 2026 U.S. House races in Indiana. If Indiana is too sparse for testing, use a small configurable watchlist of competitive 2026 House races, but do not imply national coverage.
+The MVP is FEC API only and now targets 2026 U.S. House races across all 50 states. Do not imply coverage beyond U.S. House races or beyond FEC-derived records.
 
 ## Editorial Product Principles
 
@@ -83,17 +83,17 @@ Official docs note that FEC API data is updated nightly. API calls are limited t
 
 The local `.env.local` includes `FEC_API_KEY`. Keep demo fallback mode available for reviewers without credentials.
 
-## Narrow Scope
+## National House Scope
 
 Default scope lives in `src/lib/scope.ts`.
 
-Current target races:
+Current target scope:
 
-- `2026-IN-01-H`
-- `2026-IN-05-H`
-- `2026-IN-09-H`
+- All 435 U.S. House districts across the 50 states for the 2026 cycle.
+- At-large states use district `00`.
+- State/district definitions are generated from `STATE_SCOPES`.
 
-The goal is a working narrow pipeline, not broad coverage.
+The goal is a working national House MVP, not a generic all-office election dashboard.
 
 ## Data Model
 
@@ -170,8 +170,8 @@ Every signal needs:
 
 ## Agent Operating Notes
 
-- Prefer small, readable changes that preserve the narrow MVP.
-- Do not invent fake national coverage.
+- Prefer small, readable changes that preserve the national House MVP.
+- Do not invent coverage outside the FEC records currently ingested.
 - Do not add new data sources before the FEC-only MVP works.
 - Keep README and this context doc in sync when architecture changes.
 - Run `npm run lint` and, when useful, `npm run build` before finalizing.

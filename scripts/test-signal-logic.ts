@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import { generateSignals } from "@/src/lib/signals/generate";
+import { signalFiltersFromSearchParams, signalFiltersFromUrl } from "@/src/lib/signals/filters";
 import { contributionPct } from "@/src/lib/sources/fec/totals";
 import type { Candidate, Committee, Filing, IndependentExpenditure, Race } from "@/src/lib/types";
 
@@ -320,5 +321,8 @@ const zeroToMaterialSpikeSignal = zeroToMaterialSpikeSignals.find((signal) => si
 assert.ok(zeroToMaterialSpikeSignal, "a zero-to-material period receipts jump should generate an activity-spike signal");
 assert.equal(zeroToMaterialSpikeSignal.metadata?.priorTotalReceipts, 0);
 assert.equal(zeroToMaterialSpikeSignal.metadata?.priorSourceUrl, "https://www.fec.gov/data/filing/filing-prior-zero-period/");
+
+assert.equal(signalFiltersFromSearchParams({ state: "in" }).state, "IN");
+assert.equal(signalFiltersFromUrl(new URL("https://example.test/?state=me")).state, "ME");
 
 console.log("Signal logic tests passed.");

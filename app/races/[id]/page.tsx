@@ -157,10 +157,10 @@ export default async function RacePage({
                         </span>
                       </td>
                       <td className="px-4 py-3 text-right font-mono">
-                        {formatMoney(candidate.totalReceiptsCycle) ?? "Unknown"}
+                        {formatMoney(candidate.totalReceiptsCycle) ?? "Not reported"}
                       </td>
                       <td className="px-4 py-3 text-right font-mono">
-                        {formatMoney(candidate.cashOnHandLatest) ?? "Unknown"}
+                        {formatMoney(candidate.cashOnHandLatest) ?? "Not reported"}
                       </td>
                     </tr>
                   ))}

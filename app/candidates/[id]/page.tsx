@@ -136,12 +136,14 @@ export default async function CandidatePage({
                           ) : null}
                         </span>
                       </td>
-                      <td className="px-4 py-3">{incumbentStatus(otherCandidate.incumbentChallengeStatus) ?? "Unknown"}</td>
-                      <td className="px-4 py-3 text-right font-mono">
-                        {formatMoney(otherCandidate.totalReceiptsCycle) ?? "Unknown"}
+                      <td className="px-4 py-3">
+                        {incumbentStatus(otherCandidate.incumbentChallengeStatus) ?? "Not classified by FEC"}
                       </td>
                       <td className="px-4 py-3 text-right font-mono">
-                        {formatMoney(otherCandidate.cashOnHandLatest) ?? "Unknown"}
+                        {formatMoney(otherCandidate.totalReceiptsCycle) ?? "Not reported"}
+                      </td>
+                      <td className="px-4 py-3 text-right font-mono">
+                        {formatMoney(otherCandidate.cashOnHandLatest) ?? "Not reported"}
                       </td>
                     </tr>
                   ))}

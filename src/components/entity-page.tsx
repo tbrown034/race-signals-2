@@ -54,7 +54,7 @@ export function EntityPage({
               <dt className="font-mono text-xs uppercase tracking-[0.12em] text-neutral-500">
                 {label}
               </dt>
-              <dd className="mt-1">{value ?? "Unknown"}</dd>
+              <dd className="mt-1">{value ?? "Not available"}</dd>
             </div>
           ))}
         </dl>

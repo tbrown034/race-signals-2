@@ -31,6 +31,9 @@ create table if not exists candidates (
   pac_contribution_pct numeric,
   totals_updated_at timestamptz,
   general_election_status text,
+  bioguide_id text,
+  photo_url text,
+  wikipedia_url text,
   race_id text references races(id),
   source_url text,
   created_at timestamptz not null default now(),
@@ -45,6 +48,9 @@ alter table candidates add column if not exists individual_contribution_pct nume
 alter table candidates add column if not exists pac_contribution_pct numeric;
 alter table candidates add column if not exists totals_updated_at timestamptz;
 alter table candidates add column if not exists general_election_status text;
+alter table candidates add column if not exists bioguide_id text;
+alter table candidates add column if not exists photo_url text;
+alter table candidates add column if not exists wikipedia_url text;
 
 create table if not exists committees (
   id text primary key,

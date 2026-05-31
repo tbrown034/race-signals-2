@@ -1,4 +1,5 @@
 import { getSignals } from "@/src/lib/db/repository";
+import { isFresh } from "@/src/components/fresh-mark";
 import type { SavedFilter } from "@/src/lib/types";
 
 export async function buildDigest(savedFilter: SavedFilter, since?: string | null) {
@@ -14,6 +15,16 @@ export async function buildDigest(savedFilter: SavedFilter, since?: string | nul
     text: renderTextDigest(savedFilter, signals),
     rss: renderRss(savedFilter, signals),
   };
+}
+
+export async function hasNewSinceSent(savedFilter: SavedFilter) {
+  const signals = await getSignals({
+    ...savedFilter.filterJson,
+    raceId: savedFilter.filterJson.race,
+    since: savedFilter.lastSentAt ?? undefined,
+    limit: 1,
+  });
+  return signals.length > 0;
 }
 
 function renderTextDigest(savedFilter: SavedFilter, signals: Awaited<ReturnType<typeof getSignals>>) {
@@ -40,7 +51,7 @@ function renderRss(savedFilter: SavedFilter, signals: Awaited<ReturnType<typeof 
     .map(
       (signal) => `
         <item>
-          <title>${escapeXml(signal.headline)}</title>
+          <title>${escapeXml(`${isFresh(signal.signalDate, signal.status) ? "● " : ""}${signal.headline}`)}</title>
           <link>${escapeXml(signal.sourceUrl ?? `${siteUrl}/saved/${savedFilter.id}`)}</link>
           <guid isPermaLink="false">${escapeXml(signal.dedupeKey)}</guid>
           <pubDate>${new Date(signal.signalDate).toUTCString()}</pubDate>

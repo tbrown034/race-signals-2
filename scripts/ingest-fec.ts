@@ -30,6 +30,7 @@ import {
 } from "@/src/lib/sources/fec/client";
 import { DEFAULT_CYCLE, TARGET_RACES } from "@/src/lib/scope";
 import { getPublicWatchlistRatings } from "@/src/lib/ratings/public-watchlist";
+import { applyCongressLegislatorIds } from "@/src/lib/sources/congress-legislators/sync";
 import { applyCandidateTotals } from "@/src/lib/sources/fec/totals";
 import {
   validateCandidate,
@@ -137,6 +138,7 @@ async function main() {
     reports: 0,
     schedule_e: 0,
     totals: 0,
+    congress_legislators: 0,
   };
 
   try {
@@ -161,8 +163,18 @@ async function main() {
       .map((record) => normalizeCandidate(record, cycle))
       .filter((candidate) => candidate.raceId && raceIds.has(candidate.raceId))
       .slice(0, maxCandidates);
+    let candidatesWithLegislatorIds = normalizedCandidatesBase;
+    try {
+      const sync = await applyCongressLegislatorIds(normalizedCandidatesBase);
+      candidatesWithLegislatorIds = sync.candidates;
+      endpointCounts.congress_legislators = sync.matchedCount;
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      errors.push({ endpoint: "congress_legislators", message });
+    }
+
     const normalizedCandidates: Candidate[] = [];
-    for (const candidate of normalizedCandidatesBase) {
+    for (const candidate of candidatesWithLegislatorIds) {
       normalizedCandidates.push(await applyCandidateTotals(candidate, cycle));
       endpointCounts.totals += 1;
     }
@@ -290,6 +302,7 @@ function endpointForIssue(entityType: string) {
   if (entityType === "committee") return "committees";
   if (entityType === "filing") return "reports";
   if (entityType === "independent_expenditure") return "schedule_e";
+  if (entityType === "congress_legislators") return "congress_legislators";
   return "unknown";
 }
 

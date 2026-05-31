@@ -23,6 +23,7 @@ export type FecCandidate = {
   state: string;
   district?: string;
   election_years?: number[];
+  incumbent_challenge?: string;
   incumbent_challenge_full?: string;
 };
 

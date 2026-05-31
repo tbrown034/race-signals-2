@@ -28,6 +28,9 @@ export type Candidate = {
   pacContributionPct?: number | null;
   totalsUpdatedAt?: string | null;
   generalElectionStatus?: string | null;
+  bioguideId?: string | null;
+  photoUrl?: string | null;
+  wikipediaUrl?: string | null;
   raceId?: string | null;
   sourceUrl?: string | null;
 };
@@ -101,6 +104,10 @@ export type Signal = {
   whyItMatters: string;
   candidateId?: string | null;
   candidateName?: string | null;
+  candidateParty?: string | null;
+  candidateState?: string | null;
+  candidateDistrict?: string | null;
+  candidateIncumbentChallengeStatus?: string | null;
   committeeId?: string | null;
   committeeName?: string | null;
   raceId?: string | null;

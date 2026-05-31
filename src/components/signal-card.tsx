@@ -1,4 +1,7 @@
 import Link from "next/link";
+import { FreshMark } from "@/src/components/fresh-mark";
+import { IncumbentBadge } from "@/src/components/incumbent-badge";
+import { PartySquare } from "@/src/components/party-square";
 import { formatDate, formatDateTime, formatMoney } from "@/src/lib/format";
 import type { Signal } from "@/src/lib/types";
 
@@ -22,11 +25,16 @@ export function SignalCard({ signal }: { signal: Signal }) {
   const contributorName = textMetadata(signal.metadata?.contributorName);
   const contributorNameNormalized = textMetadata(signal.metadata?.contributorNameNormalized);
   const contributorEmployerNormalized = textMetadata(signal.metadata?.contributorEmployerNormalized);
+  const isIncumbent = isIncumbentStatus(signal.candidateIncumbentChallengeStatus);
+  const candidateLabel = candidateDisplay(signal);
 
   return (
     <article className="grid gap-3 border-b border-neutral-300 bg-white px-4 py-4 md:grid-cols-[112px_1fr_190px]">
       <div className="font-mono text-xs text-neutral-600">
-        <p className="text-neutral-950">{formatDate(signal.signalDate)}</p>
+        <p className="flex items-center gap-1.5 text-neutral-950">
+          <FreshMark signalDate={signal.signalDate} status={signal.status} />
+          {formatDate(signal.signalDate)}
+        </p>
         <p className="mt-1 uppercase tracking-[0.12em]">
           {typeLabels[signal.signalType] ?? signal.signalType}
         </p>
@@ -56,9 +64,13 @@ export function SignalCard({ signal }: { signal: Signal }) {
             <span>Employer: {contributorEmployerNormalized}</span>
           ) : null}
           {signal.candidateId ? (
-            <Link className="font-medium underline underline-offset-4" href={`/candidates/${signal.candidateId}`}>
-              {signal.candidateName ?? signal.candidateId}
-            </Link>
+            <span className="inline-flex flex-wrap items-center gap-1.5">
+              <PartySquare party={signal.candidateParty} />
+              <Link className="font-medium underline underline-offset-4" href={`/candidates/${signal.candidateId}`}>
+                {candidateLabel}
+              </Link>
+              {isIncumbent ? <IncumbentBadge /> : null}
+            </span>
           ) : null}
           {signal.committeeId ? (
             <Link className="underline underline-offset-4" href={`/committees/${signal.committeeId}`}>
@@ -99,4 +111,18 @@ export function SignalCard({ signal }: { signal: Signal }) {
 
 function textMetadata(value: unknown) {
   return typeof value === "string" && value ? value : null;
+}
+
+function candidateDisplay(signal: Signal) {
+  const name = signal.candidateName ?? signal.candidateId ?? "Unknown candidate";
+  const context = [
+    signal.candidateParty,
+    [signal.candidateState, signal.candidateDistrict].filter(Boolean).join("-"),
+    isIncumbentStatus(signal.candidateIncumbentChallengeStatus) ? "incumbent" : null,
+  ].filter(Boolean);
+  return context.length ? `${name} (${context.join(", ")})` : name;
+}
+
+function isIncumbentStatus(status?: string | null) {
+  return status === "I" || status === "Incumbent";
 }

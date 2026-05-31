@@ -18,6 +18,10 @@ type SignalRow = {
   why_it_matters: string;
   candidate_id: string | null;
   candidate_name: string | null;
+  candidate_party: string | null;
+  candidate_state: string | null;
+  candidate_district: string | null;
+  candidate_incumbent_challenge_status: string | null;
   committee_id: string | null;
   committee_name: string | null;
   race_id: string | null;
@@ -33,6 +37,31 @@ type SignalRow = {
   metadata: Record<string, unknown>;
 };
 
+type CandidateRow = {
+  id: string;
+  fec_candidate_id: string;
+  name: string;
+  party: string | null;
+  office: string;
+  state: string;
+  district: string | null;
+  election_year: number | null;
+  incumbent_challenge_status: string | null;
+  total_receipts_cycle: string | null;
+  total_disbursements_cycle: string | null;
+  cash_on_hand_latest: string | null;
+  cash_on_hand_as_of: string | Date | null;
+  individual_contribution_pct: string | null;
+  pac_contribution_pct: string | null;
+  totals_updated_at: string | Date | null;
+  general_election_status: string | null;
+  bioguide_id: string | null;
+  photo_url: string | null;
+  wikipedia_url: string | null;
+  race_id: string | null;
+  source_url: string | null;
+};
+
 function mapSignal(row: SignalRow): Signal {
   return {
     id: row.id,
@@ -42,6 +71,10 @@ function mapSignal(row: SignalRow): Signal {
     whyItMatters: row.why_it_matters,
     candidateId: row.candidate_id,
     candidateName: row.candidate_name,
+    candidateParty: row.candidate_party,
+    candidateState: row.candidate_state,
+    candidateDistrict: row.candidate_district,
+    candidateIncumbentChallengeStatus: row.candidate_incumbent_challenge_status,
     committeeId: row.committee_id,
     committeeName: row.committee_name,
     raceId: row.race_id,
@@ -55,6 +88,35 @@ function mapSignal(row: SignalRow): Signal {
     status: row.status,
     dataFreshness: toIsoString(row.data_freshness),
     metadata: row.metadata,
+  };
+}
+
+function mapCandidateRow(row: CandidateRow): Candidate {
+  return {
+    id: row.id,
+    fecCandidateId: row.fec_candidate_id,
+    name: row.name,
+    party: row.party,
+    office: row.office,
+    state: row.state,
+    district: row.district,
+    electionYear: row.election_year,
+    incumbentChallengeStatus: row.incumbent_challenge_status,
+    totalReceiptsCycle: row.total_receipts_cycle === null ? null : Number(row.total_receipts_cycle),
+    totalDisbursementsCycle:
+      row.total_disbursements_cycle === null ? null : Number(row.total_disbursements_cycle),
+    cashOnHandLatest: row.cash_on_hand_latest === null ? null : Number(row.cash_on_hand_latest),
+    cashOnHandAsOf: row.cash_on_hand_as_of ? toDateString(row.cash_on_hand_as_of) : null,
+    individualContributionPct:
+      row.individual_contribution_pct === null ? null : Number(row.individual_contribution_pct),
+    pacContributionPct: row.pac_contribution_pct === null ? null : Number(row.pac_contribution_pct),
+    totalsUpdatedAt: row.totals_updated_at ? toIsoString(row.totals_updated_at) : null,
+    generalElectionStatus: row.general_election_status,
+    bioguideId: row.bioguide_id,
+    photoUrl: row.photo_url,
+    wikipediaUrl: row.wikipedia_url,
+    raceId: row.race_id,
+    sourceUrl: row.source_url,
   };
 }
 
@@ -121,6 +183,10 @@ export async function getSignals(filters: SignalFilters = {}) {
       select
         s.*,
         c.name as candidate_name,
+        c.party as candidate_party,
+        c.state as candidate_state,
+        c.district as candidate_district,
+        c.incumbent_challenge_status as candidate_incumbent_challenge_status,
         cm.name as committee_name,
         r.name as race_name,
         r.state as race_state,
@@ -147,52 +213,10 @@ export async function getRaces(): Promise<Race[]> {
 
 export async function getCandidate(id: string): Promise<Candidate | null> {
   if (!hasDatabase()) return demoCandidates.find((candidate) => candidate.id === id) ?? null;
-  const rows = await sql<{
-    id: string;
-    fec_candidate_id: string;
-    name: string;
-    party: string | null;
-    office: string;
-    state: string;
-    district: string | null;
-    election_year: number | null;
-    incumbent_challenge_status: string | null;
-    total_receipts_cycle: string | null;
-    total_disbursements_cycle: string | null;
-    cash_on_hand_latest: string | null;
-    cash_on_hand_as_of: string | Date | null;
-    individual_contribution_pct: string | null;
-    pac_contribution_pct: string | null;
-    totals_updated_at: string | Date | null;
-    general_election_status: string | null;
-    race_id: string | null;
-    source_url: string | null;
-  }>("select * from candidates where id = $1", [id]);
+  const rows = await sql<CandidateRow>("select * from candidates where id = $1", [id]);
   const row = rows[0];
   if (!row) return null;
-  return {
-    id: row.id,
-    fecCandidateId: row.fec_candidate_id,
-    name: row.name,
-    party: row.party,
-    office: row.office,
-    state: row.state,
-    district: row.district,
-    electionYear: row.election_year,
-    incumbentChallengeStatus: row.incumbent_challenge_status,
-    totalReceiptsCycle: row.total_receipts_cycle === null ? null : Number(row.total_receipts_cycle),
-    totalDisbursementsCycle:
-      row.total_disbursements_cycle === null ? null : Number(row.total_disbursements_cycle),
-    cashOnHandLatest: row.cash_on_hand_latest === null ? null : Number(row.cash_on_hand_latest),
-    cashOnHandAsOf: row.cash_on_hand_as_of ? toDateString(row.cash_on_hand_as_of) : null,
-    individualContributionPct:
-      row.individual_contribution_pct === null ? null : Number(row.individual_contribution_pct),
-    pacContributionPct: row.pac_contribution_pct === null ? null : Number(row.pac_contribution_pct),
-    totalsUpdatedAt: row.totals_updated_at ? toIsoString(row.totals_updated_at) : null,
-    generalElectionStatus: row.general_election_status,
-    raceId: row.race_id,
-    sourceUrl: row.source_url,
-  };
+  return mapCandidateRow(row);
 }
 
 export async function getCommittee(id: string): Promise<Committee | null> {
@@ -323,6 +347,10 @@ export async function getSignalsForEntity(entity: "candidate" | "committee" | "r
       select
         s.*,
         c.name as candidate_name,
+        c.party as candidate_party,
+        c.state as candidate_state,
+        c.district as candidate_district,
+        c.incumbent_challenge_status as candidate_incumbent_challenge_status,
         cm.name as committee_name,
         r.name as race_name,
         r.state as race_state,
@@ -338,6 +366,37 @@ export async function getSignalsForEntity(entity: "candidate" | "committee" | "r
     [id],
   );
   return rows.map(mapSignal);
+}
+
+export async function getCandidatesForRace(id: string): Promise<Candidate[]> {
+  if (!hasDatabase()) {
+    return demoCandidates
+      .filter((candidate) => candidate.raceId === id)
+      .sort(compareCandidateStanding);
+  }
+  const rows = await sql<CandidateRow>(
+    `
+      select *
+      from candidates
+      where race_id = $1
+      order by
+        case when incumbent_challenge_status in ('I', 'Incumbent') then 0 else 1 end,
+        total_receipts_cycle desc nulls last,
+        name
+    `,
+    [id],
+  );
+  return rows.map(mapCandidateRow);
+}
+
+function compareCandidateStanding(a: Candidate, b: Candidate) {
+  if (isIncumbent(a.incumbentChallengeStatus) && !isIncumbent(b.incumbentChallengeStatus)) return -1;
+  if (isIncumbent(b.incumbentChallengeStatus) && !isIncumbent(a.incumbentChallengeStatus)) return 1;
+  return (b.totalReceiptsCycle ?? 0) - (a.totalReceiptsCycle ?? 0) || a.name.localeCompare(b.name);
+}
+
+function isIncumbent(status?: string | null) {
+  return status === "I" || status === "Incumbent";
 }
 
 export async function getStatus() {

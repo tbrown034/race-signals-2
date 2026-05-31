@@ -1,6 +1,7 @@
 import { PageShell } from "@/src/components/page-shell";
 import { getStatus } from "@/src/lib/db/repository";
 import { formatDateTime } from "@/src/lib/format";
+import { endpointHealthClass } from "@/src/lib/status-health";
 
 export default async function StatusPage() {
   const status = await getStatus();
@@ -38,6 +39,15 @@ export default async function StatusPage() {
             </h2>
           </div>
           <table className="w-full text-left text-sm">
+            <caption className="border-b border-neutral-300 px-4 py-3 text-left">
+              {/* Status uses the same square shape with operational meanings, bounded to this page. */}
+              <span className="inline-flex flex-wrap items-center gap-x-4 gap-y-2 font-mono text-[11px] uppercase tracking-[0.12em] text-neutral-600">
+                <LegendSquare className="bg-emerald-700" label="Healthy" />
+                <LegendSquare className="bg-amber-700" label="Stale" />
+                <LegendSquare className="bg-red-700" label="Error" />
+                <LegendSquare className="border border-neutral-500" label="No runs" />
+              </span>
+            </caption>
             <thead className="bg-neutral-100 text-xs uppercase tracking-[0.12em] text-neutral-500">
               <tr>
                 <th className="px-4 py-3 font-medium">Endpoint</th>
@@ -51,7 +61,12 @@ export default async function StatusPage() {
               {status.endpoints.length ? (
                 status.endpoints.map((endpoint) => (
                   <tr key={endpoint.endpoint}>
-                    <td className="px-4 py-3 font-mono">{endpoint.endpoint}</td>
+                    <td className="px-4 py-3 font-mono">
+                      <span className="inline-flex items-center gap-2">
+                        <HealthSquare endpoint={endpoint} />
+                        {endpoint.endpoint}
+                      </span>
+                    </td>
                     <td className="px-4 py-3">{formatDateTime(endpoint.completedAt)}</td>
                     <td className="px-4 py-3">{endpoint.recordsFetched}</td>
                     <td className="px-4 py-3">{endpoint.validationIssuesCount}</td>
@@ -61,7 +76,10 @@ export default async function StatusPage() {
               ) : (
                 <tr>
                   <td className="px-4 py-3 text-neutral-600" colSpan={5}>
-                    No endpoint-level freshness has been recorded yet.
+                    <span className="inline-flex items-center gap-2">
+                      <span aria-hidden="true" className="inline-block h-2 w-2 border border-neutral-500" />
+                      No endpoint-level freshness has been recorded yet.
+                    </span>
                   </td>
                 </tr>
               )}
@@ -104,4 +122,21 @@ export default async function StatusPage() {
       </main>
     </PageShell>
   );
+}
+
+function LegendSquare({ className, label }: { className: string; label: string }) {
+  return (
+    <span className="inline-flex items-center gap-1.5">
+      <span aria-hidden="true" className={`inline-block h-2 w-2 ${className}`} />
+      {label}
+    </span>
+  );
+}
+
+function HealthSquare({
+  endpoint,
+}: {
+  endpoint: { completedAt: string; status: string };
+}) {
+  return <span aria-hidden="true" className={`inline-block h-2 w-2 ${endpointHealthClass(endpoint)}`} />;
 }

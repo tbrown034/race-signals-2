@@ -1,7 +1,8 @@
 import { notFound } from "next/navigation";
 import { EntityPage } from "@/src/components/entity-page";
 import { PageShell } from "@/src/components/page-shell";
-import { getCommittee, getCommitteeTransactions, getSignalsForEntity } from "@/src/lib/db/repository";
+import { PartySquare } from "@/src/components/party-square";
+import { getCandidate, getCommittee, getCommitteeTransactions, getSignalsForEntity } from "@/src/lib/db/repository";
 
 export default async function CommitteePage({
   params,
@@ -16,12 +17,14 @@ export default async function CommitteePage({
   ]);
 
   if (!committee) notFound();
+  const linkedCandidate = committee.candidateId ? await getCandidate(committee.candidateId) : null;
 
   return (
     <PageShell>
       <EntityPage
         eyebrow="Committee"
         title={committee.name}
+        titleAccessory={linkedCandidate ? <PartySquare party={linkedCandidate.party} size="md" /> : null}
         sourceUrl={committee.sourceUrl}
         transactions={transactions}
         signals={signals}

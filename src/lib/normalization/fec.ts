@@ -27,10 +27,21 @@ export function normalizeCandidate(record: FecCandidate, cycle: number): Candida
     state: record.state,
     district: record.office === "S" ? "00" : district,
     electionYear: cycle,
-    incumbentChallengeStatus: record.incumbent_challenge_full ?? null,
+    incumbentChallengeStatus: normalizeIncumbentChallengeStatus(
+      record.incumbent_challenge ?? record.incumbent_challenge_full,
+    ),
     raceId: raceIdFor(record.state, district, cycle, record.office),
     sourceUrl: fecCandidateUrl(record.candidate_id),
   };
+}
+
+function normalizeIncumbentChallengeStatus(value?: string | null) {
+  if (!value) return null;
+  const normalized = value.trim().toUpperCase();
+  if (normalized === "I" || normalized === "INCUMBENT") return "I";
+  if (normalized === "C" || normalized === "CHALLENGER") return "C";
+  if (normalized === "O" || normalized === "OPEN SEAT") return "O";
+  return value;
 }
 
 export function normalizeCommittee(

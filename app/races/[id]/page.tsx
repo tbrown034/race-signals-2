@@ -1,7 +1,12 @@
 import { notFound } from "next/navigation";
+import Link from "next/link";
+import { CandidatePhoto } from "@/src/components/candidate-photo";
 import { EntityPage } from "@/src/components/entity-page";
+import { IncumbentBadge } from "@/src/components/incumbent-badge";
 import { PageShell } from "@/src/components/page-shell";
-import { getRace, getRaceRatings, getSignalsForEntity } from "@/src/lib/db/repository";
+import { PartySquare } from "@/src/components/party-square";
+import { getCandidatesForRace, getRace, getRaceRatings, getSignalsForEntity } from "@/src/lib/db/repository";
+import { formatMoney } from "@/src/lib/format";
 
 export default async function RacePage({
   params,
@@ -9,10 +14,11 @@ export default async function RacePage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const [race, signals, ratings] = await Promise.all([
+  const [race, signals, ratings, candidates] = await Promise.all([
     getRace(id),
     getSignalsForEntity("race", id),
     getRaceRatings(id),
+    getCandidatesForRace(id),
   ]);
 
   if (!race) notFound();
@@ -22,6 +28,22 @@ export default async function RacePage({
       <EntityPage
         eyebrow="Race"
         title={race.name}
+        titleAccessory={
+          candidates.length ? (
+            <span className="inline-flex items-center gap-1.5">
+              {candidates.map((candidate) => (
+                <Link
+                  aria-label={`${candidate.name} candidate page`}
+                  href={`/candidates/${candidate.id}`}
+                  key={candidate.id}
+                  title={candidate.name}
+                >
+                  <PartySquare party={candidate.party} />
+                </Link>
+              ))}
+            </span>
+          ) : null
+        }
         ratings={ratings}
         signals={signals}
         meta={[
@@ -32,7 +54,74 @@ export default async function RacePage({
           ["Office", race.office],
           ["Competitiveness", race.competitiveness],
         ]}
-      />
+      >
+        <div className="border-b border-neutral-300">
+          <div className="border-b border-neutral-300 px-5 py-4">
+            <h2 className="text-sm font-semibold uppercase tracking-[0.14em] text-neutral-600">
+              Candidate cohort
+            </h2>
+          </div>
+          {candidates.length ? (
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-sm">
+                <thead className="bg-neutral-100 font-mono text-xs uppercase tracking-[0.12em] text-neutral-500">
+                  <tr>
+                    <th className="px-4 py-3 font-medium">Candidate</th>
+                    <th className="px-4 py-3 font-medium">Party</th>
+                    <th className="px-4 py-3 text-right font-medium">Receipts</th>
+                    <th className="px-4 py-3 text-right font-medium">Cash</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-neutral-200">
+                  {candidates.map((candidate) => (
+                    <tr key={candidate.id}>
+                      <td className="px-4 py-3">
+                        <div className="flex items-center gap-3">
+                          {candidate.photoUrl ? (
+                            <CandidatePhoto
+                              alt={`${candidate.name} congressional portrait`}
+                              size="sm"
+                              src={candidate.photoUrl}
+                            />
+                          ) : (
+                            <span aria-hidden="true" className="block h-[30px] w-6 bg-neutral-300" />
+                          )}
+                          <div className="min-w-0">
+                            <Link className="font-medium underline underline-offset-4" href={`/candidates/${candidate.id}`}>
+                              {candidate.name}
+                            </Link>
+                            {isIncumbent(candidate.incumbentChallengeStatus) ? (
+                              <IncumbentBadge className="ml-2" />
+                            ) : null}
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-4 py-3 font-mono text-xs">
+                        <span className="inline-flex items-center gap-2">
+                          <PartySquare party={candidate.party} />
+                          {candidate.party ?? "Unknown"}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3 text-right font-mono">
+                        {formatMoney(candidate.totalReceiptsCycle) ?? "Unknown"}
+                      </td>
+                      <td className="px-4 py-3 text-right font-mono">
+                        {formatMoney(candidate.cashOnHandLatest) ?? "Unknown"}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          ) : (
+            <p className="p-5 text-sm text-neutral-600">No FEC candidates matched this race yet.</p>
+          )}
+        </div>
+      </EntityPage>
     </PageShell>
   );
+}
+
+function isIncumbent(status?: string | null) {
+  return status === "I" || status === "Incumbent";
 }

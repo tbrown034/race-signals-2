@@ -1,11 +1,16 @@
 import { PageShell } from "@/src/components/page-shell";
+import { PartySquare } from "@/src/components/party-square";
 
 const steps = [
   ["Scope", "Start with generated 2026 U.S. House races across all 50 states plus 2026 Senate races."],
-  ["Fetch", "Use FEC candidate, committee, report, receipt and independent expenditure endpoints."],
-  ["Normalize", "Map FEC records into stable internal candidates, committees, filings, transactions and expenditures."],
+  ["Fetch", "Use FEC candidate, candidate totals, committee, report and independent expenditure endpoints."],
+  ["Normalize", "Map FEC records into stable internal candidates, committees, filings and expenditures."],
   ["Validate", "Flag missing names, committee IDs, dates, source URLs, unmatched races and unusually large amounts."],
   ["Signal", "Convert source records into plain-English alerts with source links, dates, confidence and freshness."],
+  [
+    "Photos",
+    "Member photos are sourced from the U.S. Congressional Biographical Directory, public domain, mirrored via theunitedstates.io. Photos appear only for currently sitting members of Congress. Candidate identifier crosswalk comes from the unitedstates/congress-legislators project, public domain.",
+  ],
 ];
 
 export default function MethodologyPage() {
@@ -33,6 +38,33 @@ export default function MethodologyPage() {
               <p className="mt-2 text-sm leading-6 text-neutral-700">{body}</p>
             </div>
           ))}
+        </section>
+
+        <section className="mt-6 border border-neutral-300 bg-white p-5">
+          <h2 className="text-base font-semibold">Visual language</h2>
+          <p className="mt-2 max-w-3xl text-sm leading-6 text-neutral-700">
+            Small squares are scanning aids, not replacements for source-linked text:
+            Republican candidates use red, Democratic candidates use blue, all other
+            parties use a hollow neutral square, and fresh signals use emerald when
+            a new signal event is within 48 hours. The status page deliberately
+            reuses the square shape for operational health states, bounded to that
+            page only.
+          </p>
+          <div className="mt-4 flex flex-wrap gap-x-5 gap-y-2 font-mono text-[11px] uppercase tracking-[0.12em] text-neutral-600">
+            <span className="inline-flex items-center gap-1.5">
+              <PartySquare party="REP" /> Republican
+            </span>
+            <span className="inline-flex items-center gap-1.5">
+              <PartySquare party="DEM" /> Democrat
+            </span>
+            <span className="inline-flex items-center gap-1.5">
+              <PartySquare party="IND" /> Other party
+            </span>
+            <span className="inline-flex items-center gap-1.5">
+              <span aria-hidden="true" className="inline-block h-2 w-2 bg-emerald-700" />
+              Fresh signal
+            </span>
+          </div>
         </section>
       </main>
     </PageShell>

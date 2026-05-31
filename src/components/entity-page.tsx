@@ -1,18 +1,25 @@
 import { SignalCard } from "@/src/components/signal-card";
 import { formatDate, formatMoney } from "@/src/lib/format";
+import type { ReactNode } from "react";
 import type { RaceRating, Signal, Transaction } from "@/src/lib/types";
 
 export function EntityPage({
+  asideMedia,
+  children,
   eyebrow,
   title,
+  titleAccessory,
   meta,
   sourceUrl,
   ratings = [],
   transactions = [],
   signals,
 }: {
+  asideMedia?: ReactNode;
+  children?: ReactNode;
   eyebrow: string;
   title: string;
+  titleAccessory?: ReactNode;
   meta: Array<[string, string | number | null | undefined]>;
   sourceUrl?: string | null;
   ratings?: RaceRating[];
@@ -22,10 +29,14 @@ export function EntityPage({
   return (
     <main className="mx-auto grid max-w-7xl gap-6 px-5 py-6 sm:px-8 lg:grid-cols-[320px_1fr]">
       <aside className="h-fit border border-neutral-300 bg-white p-5">
+        {asideMedia ? <div className="mb-4">{asideMedia}</div> : null}
         <p className="font-mono text-xs uppercase tracking-[0.18em] text-neutral-500">
           {eyebrow}
         </p>
-        <h1 className="mt-2 text-2xl font-semibold tracking-tight">{title}</h1>
+        <h1 className="mt-2 flex flex-wrap items-center gap-2 text-2xl font-semibold tracking-tight">
+          <span>{title}</span>
+          {titleAccessory}
+        </h1>
         <dl className="mt-5 space-y-4 text-sm">
           {meta.map(([label, value]) => (
             <div key={label}>
@@ -68,6 +79,7 @@ export function EntityPage({
         ) : null}
       </aside>
       <section className="border border-neutral-300 bg-white">
+        {children}
         {transactions.length ? (
           <div className="border-b border-neutral-300">
             <div className="border-b border-neutral-300 px-5 py-4">

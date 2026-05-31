@@ -38,14 +38,16 @@ export function EntityPage({
   const hiddenSignals = Math.max(signals.length - visibleSignals.length, 0);
 
   return (
-    <main className="mx-auto grid max-w-7xl gap-6 px-5 py-6 sm:px-8 lg:grid-cols-[320px_1fr]">
+    <main className="mx-auto grid max-w-7xl grid-cols-1 gap-6 px-5 py-6 sm:px-8 lg:grid-cols-[320px_1fr]">
       <aside className="h-fit min-w-0 border border-neutral-300 bg-white p-5">
         {asideMedia ? <div className="mb-4">{asideMedia}</div> : null}
         <p className="font-mono text-xs uppercase tracking-[0.18em] text-neutral-500">
           {eyebrow}
         </p>
-        <h1 className="mt-2 flex flex-wrap items-center gap-2 text-2xl font-semibold tracking-tight">
-          <span>{title}</span>
+        <h1 className="mt-2 flex min-w-0 flex-wrap items-center gap-2 text-2xl font-semibold tracking-tight">
+          <span className="min-w-0 max-w-full flex-1 basis-full whitespace-normal break-words sm:basis-auto">
+            {title}
+          </span>
           {titleAccessory}
         </h1>
         <dl className="mt-5 space-y-4 text-sm">

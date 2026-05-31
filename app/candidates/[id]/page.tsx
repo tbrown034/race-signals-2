@@ -88,7 +88,7 @@ export default async function CandidatePage({
               FEC candidate page
             </a>,
           ]] as Array<[string, React.ReactNode]>) : []),
-          ...(candidate.bioguideId ? ([["Bioguide", candidate.bioguideId]] as Array<[string, string]>) : []),
+          ...profileSourceRows(candidate),
         ]}
       >
         <ReporterRead
@@ -185,6 +185,53 @@ function partyLabel(party?: string | null) {
   if (party === "DEM" || party === "D") return "Democratic";
   if (!party || party === "NNE") return "Other/unknown";
   return party;
+}
+
+function profileSourceRows(candidate: NonNullable<Awaited<ReturnType<typeof getCandidate>>>) {
+  const rows: Array<[string, React.ReactNode]> = [];
+  if (candidate.bioguideId) {
+    rows.push([
+      "Congress profile",
+      <a
+        className="font-medium underline underline-offset-4"
+        href={`https://bioguide.congress.gov/search/bio/${candidate.bioguideId}`}
+        key="bioguide"
+        rel="noreferrer"
+        target="_blank"
+      >
+        Bioguide {candidate.bioguideId}
+      </a>,
+    ]);
+  }
+  if (candidate.wikidataId) {
+    rows.push([
+      "Wikidata",
+      <a
+        className="font-medium underline underline-offset-4"
+        href={`https://www.wikidata.org/wiki/${candidate.wikidataId}`}
+        key="wikidata"
+        rel="noreferrer"
+        target="_blank"
+      >
+        {candidate.wikidataId}
+      </a>,
+    ]);
+  }
+  if (candidate.wikipediaUrl) {
+    rows.push([
+      "Wikipedia",
+      <a
+        className="font-medium underline underline-offset-4"
+        href={candidate.wikipediaUrl}
+        key="wikipedia"
+        rel="noreferrer"
+        target="_blank"
+      >
+        Article
+      </a>,
+    ]);
+  }
+  return rows;
 }
 
 function candidateMoney(value?: number | null, totalsUpdatedAt?: string | null) {

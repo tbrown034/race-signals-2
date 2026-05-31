@@ -11,8 +11,18 @@ export const metadata: Metadata = {
   description: "Committees ranked by independent expenditure totals in the Race Signals FEC slice.",
 };
 
-export default async function SpendersPage() {
+export default async function SpendersPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+}) {
+  const params = await searchParams;
+  const selectedState = typeof params.state === "string" ? params.state.toUpperCase() : undefined;
   const spenders = await getTopSpenders(100);
+  const stateOptions = [...new Set(spenders.flatMap((spender) => spender.states))].sort();
+  const visibleSpenders = selectedState
+    ? spenders.filter((spender) => spender.states.includes(selectedState))
+    : spenders;
 
   return (
     <PageShell>
@@ -33,6 +43,30 @@ export default async function SpendersPage() {
               publication.
             </p>
           </div>
+          {stateOptions.length ? (
+            <nav
+              aria-label="Filter spenders by state"
+              className="border-b border-neutral-300 px-5 py-3 font-mono text-[11px] uppercase tracking-[0.12em] text-neutral-600"
+            >
+              <div className="flex flex-wrap gap-x-4 gap-y-2">
+                <Link
+                  className={stateLinkClass(!selectedState)}
+                  href="/spenders"
+                >
+                  All states
+                </Link>
+                {stateOptions.map((state) => (
+                  <Link
+                    className={stateLinkClass(selectedState === state)}
+                    href={`/spenders?state=${state}`}
+                    key={state}
+                  >
+                    {state}
+                  </Link>
+                ))}
+              </div>
+            </nav>
+          ) : null}
           <div className="overflow-x-auto">
             <table className="w-full min-w-0 text-left text-sm md:min-w-[1040px]">
               <thead className="bg-neutral-100 font-mono text-xs uppercase tracking-[0.12em] text-neutral-500">
@@ -48,8 +82,8 @@ export default async function SpendersPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-neutral-200">
-                {spenders.length ? (
-                  spenders.map((spender) => (
+                {visibleSpenders.length ? (
+                  visibleSpenders.map((spender) => (
                     <tr key={spender.committeeId ?? spender.fecCommitteeId ?? spender.committeeName}>
                       <td className="px-4 py-3">
                         {spender.committeeId ? (
@@ -191,7 +225,9 @@ export default async function SpendersPage() {
                 ) : (
                   <tr>
                     <td className="px-4 py-4 text-neutral-600" colSpan={8}>
-                      No Schedule E spender records are available in the current database slice.
+                      {selectedState
+                        ? `No Schedule E spender records are available for ${selectedState} in the current database slice.`
+                        : "No Schedule E spender records are available in the current database slice."}
                     </td>
                   </tr>
                 )}
@@ -207,4 +243,10 @@ export default async function SpendersPage() {
 function spenderRecordsHref(committeeId?: string | null, latestSourceUrl?: string | null) {
   if (committeeId) return `/committees/${committeeId}#schedule-e-records`;
   return latestSourceUrl ?? "/spending?type=large_independent_expenditure";
+}
+
+function stateLinkClass(active: boolean) {
+  return active
+    ? "font-semibold text-neutral-950 underline underline-offset-4"
+    : "underline-offset-4 hover:underline";
 }

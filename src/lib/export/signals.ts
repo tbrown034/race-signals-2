@@ -34,6 +34,19 @@ export type SignalExportRow = {
   source_id: string | null;
   source_kind: string | null;
   total_receipts_basis: string | null;
+  latest_receipts: number | null;
+  prior_receipts: number | null;
+  receipts_ratio: number | null;
+  latest_report_type: string | null;
+  prior_report_type: string | null;
+  latest_coverage_start_date: string | null;
+  latest_coverage_end_date: string | null;
+  prior_coverage_start_date: string | null;
+  prior_coverage_end_date: string | null;
+  latest_source_id: string | null;
+  latest_source_url: string | null;
+  prior_source_id: string | null;
+  prior_source_url: string | null;
   signal_permalink: string;
   methodology_url: string;
   scope_note: string;
@@ -62,6 +75,8 @@ export function signalToExportRow(
   manifest: ExportManifest = { exportedAt: new Date().toISOString(), filters: {}, latestRun: null },
 ): SignalExportRow {
   const stableSourceId = sourceId(signal);
+  const latestReceipts = numberMetadata(signal.metadata?.latestTotalReceipts);
+  const priorReceipts = numberMetadata(signal.metadata?.priorTotalReceipts);
   return {
     exported_at: manifest.exportedAt,
     filters: JSON.stringify(manifest.filters),
@@ -94,6 +109,21 @@ export function signalToExportRow(
     source_id: stableSourceId,
     source_kind: sourceKind(signal),
     total_receipts_basis: textMetadata(signal.metadata?.totalReceiptsBasis),
+    latest_receipts: latestReceipts,
+    prior_receipts: priorReceipts,
+    receipts_ratio: latestReceipts !== null && priorReceipts !== null && priorReceipts > 0
+      ? Number((latestReceipts / priorReceipts).toFixed(2))
+      : null,
+    latest_report_type: textMetadata(signal.metadata?.latestReportType),
+    prior_report_type: textMetadata(signal.metadata?.priorReportType),
+    latest_coverage_start_date: textMetadata(signal.metadata?.latestCoverageStartDate),
+    latest_coverage_end_date: textMetadata(signal.metadata?.latestCoverageEndDate),
+    prior_coverage_start_date: textMetadata(signal.metadata?.priorCoverageStartDate),
+    prior_coverage_end_date: textMetadata(signal.metadata?.priorCoverageEndDate),
+    latest_source_id: textMetadata(signal.metadata?.latestSourceId),
+    latest_source_url: textMetadata(signal.metadata?.latestSourceUrl),
+    prior_source_id: textMetadata(signal.metadata?.priorSourceId),
+    prior_source_url: textMetadata(signal.metadata?.priorSourceUrl),
     signal_permalink: `${baseUrl}/?q=${encodeURIComponent(stableSourceId ?? signal.dedupeKey)}#${signalAnchorId(signal.dedupeKey)}`,
     methodology_url: `${baseUrl}/methodology#${signal.signalType}`,
     scope_note: "Source-linked Race Signals alert generated from stored FEC records in the current database slice; not a completeness claim.",
@@ -129,6 +159,19 @@ export function rowsToCsv(rows: SignalExportRow[]) {
     "source_id",
     "source_kind",
     "total_receipts_basis",
+    "latest_receipts",
+    "prior_receipts",
+    "receipts_ratio",
+    "latest_report_type",
+    "prior_report_type",
+    "latest_coverage_start_date",
+    "latest_coverage_end_date",
+    "prior_coverage_start_date",
+    "prior_coverage_end_date",
+    "latest_source_id",
+    "latest_source_url",
+    "prior_source_id",
+    "prior_source_url",
     "signal_permalink",
     "methodology_url",
     "scope_note",
@@ -189,4 +232,11 @@ function sourceKind(signal: Signal) {
 
 function textMetadata(value: unknown) {
   return typeof value === "string" && value ? value : null;
+}
+
+function numberMetadata(value: unknown) {
+  if (typeof value === "number" && Number.isFinite(value)) return value;
+  if (typeof value !== "string" || !value) return null;
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : null;
 }

@@ -189,7 +189,97 @@ export function FeedFilters({
             </details>
           ) : null}
         </label>
-          <label className="min-w-0 text-xs font-medium uppercase tracking-[0.12em] text-neutral-500 xl:min-w-[120px] xl:flex-none">
+          <details className="min-w-0 border border-neutral-300 p-3 text-xs font-medium uppercase tracking-[0.12em] text-neutral-500 sm:hidden">
+            <summary className="cursor-pointer">More filters</summary>
+            <div className="mt-3 space-y-3">
+              <label className="block min-w-0">
+                Office
+                <select
+                  className="mt-1 block h-9 w-full min-w-0 border border-neutral-300 bg-white px-2 text-sm normal-case tracking-normal text-neutral-950"
+                  value={selectedOffice}
+                  name="office-mobile"
+                  onChange={(event) => updateFilter("office", event.target.value)}
+                >
+                  <option value="">All</option>
+                  <option value="H">House</option>
+                  <option value="S">Senate</option>
+                </select>
+              </label>
+              <label className="block min-w-0">
+                Race
+                <select
+                  className="mt-1 block h-9 w-full min-w-0 border border-neutral-300 bg-white px-2 text-sm normal-case tracking-normal text-neutral-950"
+                  value={selectedRaceId}
+                  name="race-mobile"
+                  onChange={(event) => updateFilter("race", event.target.value)}
+                >
+                  <option value="">
+                    {selectedState ? "All races" : "Choose a state to list races"}
+                  </option>
+                  {raceOptions.map((race) => (
+                    <option value={race.id} key={race.id}>
+                      {race.office === "S" ? `${race.state} Senate` : `${race.state}-${race.district}`}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              {lockedType ? (
+                <div className="min-w-0">
+                  Type
+                  <div className="mt-1 flex h-9 items-center border border-neutral-300 bg-neutral-100 px-2 text-sm normal-case tracking-normal text-neutral-700">
+                    {signalTypes.find(([value]) => value === selectedType)?.[1] ?? "Locked"}
+                  </div>
+                </div>
+              ) : (
+                <label className="block min-w-0">
+                  Type
+                  <select
+                    className="mt-1 block h-9 w-full min-w-0 border border-neutral-300 bg-white px-2 text-sm normal-case tracking-normal text-neutral-950"
+                    value={selectedType}
+                    name="type-mobile"
+                    onChange={(event) => updateFilter("type", event.target.value)}
+                  >
+                    {signalTypes.map(([value, label]) => (
+                      <option value={value} key={value}>
+                        {label}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+              )}
+              <label className="block min-w-0">
+                Status
+                <select
+                  className="mt-1 block h-9 w-full min-w-0 border border-neutral-300 bg-white px-2 text-sm normal-case tracking-normal text-neutral-950"
+                  value={selectedStatus}
+                  name="status-mobile"
+                  onChange={(event) => updateFilter("status", event.target.value)}
+                >
+                  {statuses.map(([value, label]) => (
+                    <option value={value} key={value}>
+                      {label}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label className="block min-w-0">
+                Window
+                <select
+                  className="mt-1 block h-9 w-full min-w-0 border border-neutral-300 bg-white px-2 text-sm normal-case tracking-normal text-neutral-950"
+                  value={selectedSince}
+                  name="since-mobile"
+                  onChange={(event) => updateFilter("since", event.target.value)}
+                >
+                  {windows.map(([value, label]) => (
+                    <option value={value} key={value}>
+                      {label}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            </div>
+          </details>
+          <label className="hidden min-w-0 text-xs font-medium uppercase tracking-[0.12em] text-neutral-500 sm:block xl:min-w-[120px] xl:flex-none">
           Office
           <select
             className="mt-1 block h-9 w-full min-w-0 border border-neutral-300 bg-white px-2 text-sm normal-case tracking-normal text-neutral-950"
@@ -202,7 +292,7 @@ export function FeedFilters({
             <option value="S">Senate</option>
           </select>
         </label>
-          <label className="min-w-0 text-xs font-medium uppercase tracking-[0.12em] text-neutral-500 sm:col-span-2 xl:min-w-[180px] xl:flex-1">
+          <label className="hidden min-w-0 text-xs font-medium uppercase tracking-[0.12em] text-neutral-500 sm:col-span-2 sm:block xl:min-w-[180px] xl:flex-1">
           Race
           <select
             className="mt-1 block h-9 w-full min-w-0 border border-neutral-300 bg-white px-2 text-sm normal-case tracking-normal text-neutral-950"
@@ -221,14 +311,14 @@ export function FeedFilters({
           </select>
         </label>
         {lockedType ? (
-          <div className="min-w-0 text-xs font-medium uppercase tracking-[0.12em] text-neutral-500 sm:col-span-2 xl:min-w-[210px] xl:flex-none">
+          <div className="hidden min-w-0 text-xs font-medium uppercase tracking-[0.12em] text-neutral-500 sm:col-span-2 sm:block xl:min-w-[210px] xl:flex-none">
             Type
             <div className="mt-1 flex h-9 items-center border border-neutral-300 bg-neutral-100 px-2 text-sm normal-case tracking-normal text-neutral-700">
               {signalTypes.find(([value]) => value === selectedType)?.[1] ?? "Locked"}
             </div>
           </div>
         ) : (
-          <label className="min-w-0 text-xs font-medium uppercase tracking-[0.12em] text-neutral-500 sm:col-span-2 xl:min-w-[210px] xl:flex-none">
+          <label className="hidden min-w-0 text-xs font-medium uppercase tracking-[0.12em] text-neutral-500 sm:col-span-2 sm:block xl:min-w-[210px] xl:flex-none">
             Type
             <select
               className="mt-1 block h-9 w-full min-w-0 border border-neutral-300 bg-white px-2 text-sm normal-case tracking-normal text-neutral-950"
@@ -244,7 +334,7 @@ export function FeedFilters({
             </select>
           </label>
         )}
-          <label className="min-w-0 text-xs font-medium uppercase tracking-[0.12em] text-neutral-500 xl:min-w-[150px] xl:flex-none">
+          <label className="hidden min-w-0 text-xs font-medium uppercase tracking-[0.12em] text-neutral-500 sm:block xl:min-w-[150px] xl:flex-none">
           Status
           <select
             className="mt-1 block h-9 w-full min-w-0 border border-neutral-300 bg-white px-2 text-sm normal-case tracking-normal text-neutral-950"
@@ -259,7 +349,7 @@ export function FeedFilters({
             ))}
           </select>
         </label>
-          <label className="min-w-0 text-xs font-medium uppercase tracking-[0.12em] text-neutral-500 xl:min-w-[150px] xl:flex-none">
+          <label className="hidden min-w-0 text-xs font-medium uppercase tracking-[0.12em] text-neutral-500 sm:block xl:min-w-[150px] xl:flex-none">
           Window
           <select
             className="mt-1 block h-9 w-full min-w-0 border border-neutral-300 bg-white px-2 text-sm normal-case tracking-normal text-neutral-950"

@@ -5,6 +5,7 @@ export const SCHEDULE_E_EXPORT_LIMIT = 10000;
 export type ScheduleEExportManifest = {
   exportedAt: string;
   filters: Record<string, string>;
+  baseUrl?: string;
   latestRun?: IngestionRun | null;
 };
 
@@ -58,7 +59,9 @@ export function scheduleEToExportRow(
     purpose: record.purpose ?? null,
     source_url: record.sourceUrl ?? null,
     source_id: record.sourceId,
-    methodology_url: "/methodology#large_independent_expenditure",
+    methodology_url: manifest.baseUrl
+      ? `${manifest.baseUrl}/methodology#large_independent_expenditure`
+      : "/methodology#large_independent_expenditure",
     scope_note: "Stored, source-linked Schedule E rows in the current Race Signals database slice; not a completeness claim.",
     exported_at: manifest.exportedAt,
     filters: JSON.stringify(manifest.filters),

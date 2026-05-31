@@ -133,8 +133,8 @@ export default function MethodologyPage() {
             source URL. Medium means the record is useful but needs extra context,
             often because a large outside-spending record or filing-level comparison
             deserves a human check. Low is reserved for records with missing or
-            weakly matched context. Review marks unusually large amounts or records
-            that should be verified before publication.
+            weakly matched context. Review marks records that cross a flat
+            manual-review threshold or otherwise need verification before publication.
           </p>
         </section>
 

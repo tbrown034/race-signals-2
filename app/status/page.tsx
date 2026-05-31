@@ -49,6 +49,20 @@ export default async function StatusPage() {
           validationIssueCount={status.validationIssues.reduce((sum, issue) => sum + issue.count, 0)}
         />
 
+        <nav
+          aria-label="Status page sections"
+          className="mt-4 flex flex-wrap gap-x-4 gap-y-2 border border-neutral-300 bg-white px-4 py-3 font-mono text-[11px] uppercase tracking-[0.12em] text-neutral-600"
+        >
+          <a className="underline-offset-4 hover:underline" href="#storage">Storage</a>
+          <a className="underline-offset-4 hover:underline" href="#endpoint-freshness">Endpoint freshness</a>
+          {status.candidateSignalGaps.length ? (
+            <a className="underline-offset-4 hover:underline" href="#candidate-gaps">Candidate gaps</a>
+          ) : null}
+          <a className="underline-offset-4 hover:underline" href="#run-history">Run history</a>
+          <a className="underline-offset-4 hover:underline" href="#validation-rollup">Validation rollup</a>
+          <a className="underline-offset-4 hover:underline" href="#validation-examples">Validation examples</a>
+        </nav>
+
         <section className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
           {Object.entries(status.counts).map(([name, count]) => (
             <div className="border border-neutral-300 bg-white p-4" key={name}>
@@ -60,7 +74,7 @@ export default async function StatusPage() {
           ))}
         </section>
 
-        <section className="mt-6 border border-neutral-300 bg-white p-5">
+        <section className="mt-6 border border-neutral-300 bg-white p-5" id="storage">
           <h2 className="text-sm font-semibold uppercase tracking-[0.14em] text-neutral-600">
             Election timeline coverage
           </h2>
@@ -122,7 +136,7 @@ export default async function StatusPage() {
           ) : null}
         </section>
 
-        <section className="mt-6 border border-neutral-300 bg-white">
+        <section className="mt-6 border border-neutral-300 bg-white" id="endpoint-freshness">
           <div className="border-b border-neutral-300 px-5 py-4">
             <h2 className="text-sm font-semibold uppercase tracking-[0.14em] text-neutral-600">
               Endpoint freshness
@@ -198,7 +212,7 @@ export default async function StatusPage() {
         </section>
 
         {status.candidateSignalGaps.length ? (
-          <section className="mt-6 border border-neutral-300 bg-white">
+          <section className="mt-6 border border-neutral-300 bg-white" id="candidate-gaps">
             <div className="border-b border-neutral-300 px-5 py-4">
               <h2 className="text-sm font-semibold uppercase tracking-[0.14em] text-neutral-600">
                 Candidate signal gaps
@@ -304,7 +318,12 @@ export default async function StatusPage() {
           </section>
         ) : null}
 
-        <section className="mt-6 border border-neutral-300 bg-white">
+        <section className="mt-6 border border-neutral-300 bg-white" id="run-history">
+          <div className="border-b border-neutral-300 px-5 py-4">
+            <h2 className="text-sm font-semibold uppercase tracking-[0.14em] text-neutral-600">
+              Run history
+            </h2>
+          </div>
           <div className="overflow-x-auto">
             <table className="w-full min-w-0 text-left text-sm md:min-w-[980px]">
             <thead className="bg-neutral-100 text-xs uppercase tracking-[0.12em] text-neutral-500">
@@ -375,7 +394,7 @@ export default async function StatusPage() {
           </div>
         </section>
 
-        <section className="mt-6 border border-neutral-300 bg-white">
+        <section className="mt-6 border border-neutral-300 bg-white" id="validation-rollup">
           <div className="border-b border-neutral-300 px-5 py-4">
             <h2 className="text-sm font-semibold uppercase tracking-[0.14em] text-neutral-600">
               Validation issue rollup
@@ -422,7 +441,7 @@ export default async function StatusPage() {
           </div>
         </section>
 
-        <section className="mt-6 border border-neutral-300 bg-white">
+        <section className="mt-6 border border-neutral-300 bg-white" id="validation-examples">
           <div className="border-b border-neutral-300 px-5 py-4">
             <h2 className="text-sm font-semibold uppercase tracking-[0.14em] text-neutral-600">
               Recent validation examples

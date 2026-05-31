@@ -52,6 +52,15 @@ const signalTypes = [
 ];
 
 export default function MethodologyPage() {
+  const stepLinks = steps.map(([title]) => ({
+    href: `#${methodologyId(title)}`,
+    label: title,
+  }));
+  const signalLinks = signalTypes.map(([id, title]) => ({
+    href: `#${id}`,
+    label: title,
+  }));
+
   return (
     <PageShell>
       <main className="mx-auto max-w-5xl px-5 py-8 sm:px-8">
@@ -69,9 +78,20 @@ export default function MethodologyPage() {
           </p>
         </section>
 
+        <nav
+          aria-label="Methodology sections"
+          className="mt-4 flex flex-wrap gap-x-4 gap-y-2 border border-neutral-300 bg-white px-4 py-3 font-mono text-[11px] uppercase tracking-[0.12em] text-neutral-600"
+        >
+          {[...stepLinks, ...signalLinks, { href: "#confidence", label: "Confidence" }, { href: "#visual-language", label: "Visual language" }].map((item) => (
+            <a className="underline-offset-4 hover:underline" href={item.href} key={item.href}>
+              {item.label}
+            </a>
+          ))}
+        </nav>
+
         <section className="mt-6 border border-neutral-300 bg-white">
           {steps.map(([title, body]) => (
-            <div className="border-b border-neutral-300 p-5 last:border-b-0" key={title}>
+            <div className="border-b border-neutral-300 p-5 last:border-b-0" id={methodologyId(title)} key={title}>
               <h2 className="text-base font-semibold">{title}</h2>
               <p className="mt-2 text-sm leading-6 text-neutral-700">{body}</p>
             </div>
@@ -118,7 +138,7 @@ export default function MethodologyPage() {
           </p>
         </section>
 
-        <section className="mt-6 border border-neutral-300 bg-white p-5">
+        <section className="mt-6 border border-neutral-300 bg-white p-5" id="visual-language">
           <h2 className="text-base font-semibold">Visual language</h2>
           <p className="mt-2 max-w-3xl text-sm leading-6 text-neutral-700">
             Small squares are scanning aids, not replacements for source-linked text:
@@ -147,4 +167,8 @@ export default function MethodologyPage() {
       </main>
     </PageShell>
   );
+}
+
+function methodologyId(title: string) {
+  return title.toLowerCase().replaceAll(" ", "-");
 }

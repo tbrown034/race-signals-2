@@ -57,12 +57,12 @@ export default function DocsPage() {
   return (
     <PageShell>
       <main>
-        <div className="mx-auto flex w-full max-w-5xl flex-col gap-8 px-5 py-8 sm:px-8">
-          <header className="border-b border-neutral-300 pb-5">
+        <div className="mx-auto flex w-full max-w-5xl flex-col gap-6 px-5 py-6 sm:px-8">
+          <header className="border-b border-neutral-300 pb-4">
             <p className="font-mono text-xs uppercase tracking-[0.18em] text-neutral-500">
               Product notes
             </p>
-            <h1 className="mt-2 text-3xl font-semibold tracking-tight">
+            <h1 className="mt-2 text-2xl font-semibold tracking-tight">
               Race Signals source and project notes
             </h1>
             <p className="mt-3 max-w-3xl text-sm leading-6 text-neutral-700">
@@ -71,14 +71,14 @@ export default function DocsPage() {
             </p>
           </header>
 
-        <section className="grid gap-4 md:grid-cols-2">
+        <section className="divide-y divide-neutral-200 border border-neutral-300 bg-white">
           {sections.map((section) => (
             <article
-              className="border border-neutral-300 bg-white p-5"
+              className="grid gap-2 p-4 md:grid-cols-[180px_1fr] md:gap-5"
               key={section.title}
             >
-              <h2 className="text-base font-semibold">{section.title}</h2>
-              <p className="mt-2 text-sm leading-6 text-neutral-700">
+              <h2 className="text-sm font-semibold">{section.title}</h2>
+              <p className="text-sm leading-6 text-neutral-700">
                 {section.body}
               </p>
             </article>

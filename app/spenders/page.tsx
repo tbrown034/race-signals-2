@@ -98,7 +98,7 @@ export default async function SpendersPage({
                   <th className="hidden px-4 py-3 font-medium md:table-cell" scope="col">Where</th>
                   <th className="hidden px-4 py-3 font-medium md:table-cell" scope="col">Last IE</th>
                   <th className="hidden px-4 py-3 font-medium md:table-cell" scope="col">Position split</th>
-                  <th className="hidden px-4 py-3 text-right font-medium md:table-cell" scope="col">Stored IE total</th>
+                  <th className="hidden px-4 py-3 text-right font-medium md:table-cell" scope="col">Stored slice IE total</th>
                   <th className="hidden px-4 py-3 text-right font-medium md:table-cell" scope="col">Records</th>
                   <th className="hidden px-4 py-3 font-medium md:table-cell" scope="col">Source</th>
                 </tr>
@@ -129,11 +129,11 @@ export default async function SpendersPage({
                           {spender.fecCommitteeId ?? "No FEC committee ID"}
                         </p>
                         <p className="mt-1 font-mono text-sm font-semibold text-neutral-950 md:hidden">
-                          {formatMoney(spender.totalAmount)} stored IE
+                          {formatMoney(spender.totalAmount)} stored slice IE
                         </p>
                         <dl className="mt-2 max-w-full space-y-1 text-xs leading-5 text-neutral-600 [overflow-wrap:anywhere] md:hidden">
                           <div>
-                            <dt className="inline font-mono uppercase tracking-[0.12em] text-neutral-500">Stored IE </dt>
+                            <dt className="inline font-mono uppercase tracking-[0.12em] text-neutral-500">Stored slice IE </dt>
                             <dd className="inline font-mono font-semibold text-neutral-950">{formatMoney(spender.totalAmount)}</dd>
                           </div>
                           <div>

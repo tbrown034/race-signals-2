@@ -177,7 +177,7 @@ function signalEvidence(signal: Signal) {
   if (signal.signalType === "large_independent_expenditure") {
     const support = textMetadata(signal.metadata?.supportOpposeIndicator);
     return [
-      support ? `stance ${support}` : null,
+      support ? `stance ${supportOpposeLabel(support)}` : null,
       signal.amount ? `amount ${formatMoney(signal.amount)}` : null,
       signal.committeeName ? `spender ${signal.committeeName}` : null,
     ]
@@ -233,6 +233,12 @@ function numberMetadata(value: unknown) {
     return Number.isFinite(parsed) ? parsed : null;
   }
   return null;
+}
+
+function supportOpposeLabel(value: string) {
+  if (value === "S") return "supporting";
+  if (value === "O") return "opposing";
+  return value;
 }
 
 function verificationLine(signalType: string) {

@@ -82,6 +82,12 @@ export default async function CandidatePage({
           ["Cash on hand", candidateMoney(candidate.cashOnHandLatest, candidate.totalsUpdatedAt)],
           ["Cash as of", formatDate(candidate.cashOnHandAsOf)],
           ["FEC totals load date", candidate.totalsUpdatedAt ? formatDateTime(candidate.totalsUpdatedAt) : null],
+          ...(candidate.sourceUrl ? ([[
+            "Verify current totals",
+            <a className="font-medium underline underline-offset-4" href={candidate.sourceUrl} key="fec-totals" rel="noreferrer" target="_blank">
+              FEC candidate page
+            </a>,
+          ]] as Array<[string, React.ReactNode]>) : []),
           ...(candidate.bioguideId ? ([["Bioguide", candidate.bioguideId]] as Array<[string, string]>) : []),
         ]}
       >

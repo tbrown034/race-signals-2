@@ -15,6 +15,17 @@ export function ElectionTimeline({
   showCandidate?: boolean;
   title: string;
 }) {
+  if (!elections.length) {
+    return (
+      <div className="border-b border-neutral-300 px-5 py-4">
+        <p className="font-mono text-xs uppercase tracking-[0.14em] text-neutral-500">
+          {title}
+        </p>
+        <p className="mt-2 text-sm leading-6 text-neutral-600">{emptyText}</p>
+      </div>
+    );
+  }
+
   return (
     <div className="border-b border-neutral-300">
       <div className="border-b border-neutral-300 px-5 py-4">
@@ -22,8 +33,7 @@ export function ElectionTimeline({
           {title}
         </h2>
       </div>
-      {elections.length ? (
-        <div className="overflow-x-auto">
+      <div className="overflow-x-auto">
           <table className="w-full text-left text-sm">
             <thead className="bg-neutral-100 font-mono text-xs uppercase tracking-[0.12em] text-neutral-500">
               <tr>
@@ -72,10 +82,7 @@ export function ElectionTimeline({
               ))}
             </tbody>
           </table>
-        </div>
-      ) : (
-        <p className="p-5 text-sm leading-6 text-neutral-600">{emptyText}</p>
-      )}
+      </div>
     </div>
   );
 }

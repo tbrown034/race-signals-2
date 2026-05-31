@@ -120,6 +120,9 @@ export default async function CandidatePage({
           id="reporter-read"
           notes={reporterNotes}
         />
+        {isAggregateOnlyCandidate(candidate, signals.length, filings.length, independentExpenditures.length) ? (
+          <AggregateOnlyNotice candidate={candidate} />
+        ) : null}
         {raceCohort.length ? (
           <div className="border-b border-neutral-300" id="race-context">
             <div className="border-b border-neutral-300 px-5 py-4">
@@ -220,6 +223,33 @@ export default async function CandidatePage({
   );
 }
 
+function AggregateOnlyNotice({
+  candidate,
+}: {
+  candidate: NonNullable<Awaited<ReturnType<typeof getCandidate>>>;
+}) {
+  return (
+    <section className="border-b border-neutral-300 bg-neutral-50 px-5 py-4" id="aggregate-only">
+      <h2 className="text-sm font-semibold uppercase tracking-[0.14em] text-neutral-600">
+        Aggregate-only FEC activity
+      </h2>
+      <p className="mt-2 max-w-3xl text-sm leading-6 text-neutral-700">
+        FEC candidate totals show {candidateMoney(candidate.totalReceiptsCycle, candidate.totalsFetchedAt).toLowerCase()} raised this cycle, but Race Signals has not matched a committee report, committee-formation record or Schedule E record that produces a feed signal for this candidate in the current stored slice.
+      </p>
+      <div className="mt-3 flex flex-wrap gap-x-4 gap-y-2 text-sm">
+        {candidate.sourceUrl ? (
+          <a className="font-medium underline underline-offset-4" href={candidate.sourceUrl} rel="noreferrer" target="_blank">
+            Verify candidate totals at FEC
+          </a>
+        ) : null}
+        <Link className="font-medium underline underline-offset-4" href="/status#candidate-gaps">
+          See candidate coverage gaps
+        </Link>
+      </div>
+    </section>
+  );
+}
+
 function CandidateFilingsTable({
   filings,
 }: {
@@ -264,7 +294,9 @@ function CandidateFilingsTable({
                     </div>
                     <div>
                       <dt className="inline font-mono uppercase tracking-[0.12em] text-neutral-500">Receipts </dt>
-                      <dd className="inline font-mono text-neutral-950">{formatMoney(filing.totalReceipts) ?? "Not reported"}</dd>
+                      <dd className="inline font-mono text-neutral-950">
+                        {formatMoney(filing.totalReceipts) ?? "Not reported"} ({receiptBasisLabel(filing.totalReceiptsBasis)})
+                      </dd>
                     </div>
                     <div>
                       <dt className="inline font-mono uppercase tracking-[0.12em] text-neutral-500">Spent </dt>
@@ -290,7 +322,12 @@ function CandidateFilingsTable({
                     Received {formatDate(filing.receiptDate)}
                   </span>
                 </td>
-                <td className="hidden px-4 py-3 text-right font-mono md:table-cell">{formatMoney(filing.totalReceipts) ?? "Not reported"}</td>
+                <td className="hidden px-4 py-3 text-right md:table-cell">
+                  <span className="block font-mono">{formatMoney(filing.totalReceipts) ?? "Not reported"}</span>
+                  <span className="block font-mono text-[11px] uppercase tracking-[0.12em] text-neutral-500">
+                    {receiptBasisLabel(filing.totalReceiptsBasis)}
+                  </span>
+                </td>
                 <td className="hidden px-4 py-3 text-right font-mono md:table-cell">{formatMoney(filing.totalDisbursements) ?? "Not reported"}</td>
                 <td className="hidden px-4 py-3 text-right font-mono md:table-cell">{formatMoney(filing.cashOnHand) ?? "Not reported"}</td>
                 <td className="hidden px-4 py-3 md:table-cell">
@@ -338,6 +375,21 @@ function candidateReporterNotes(
   ].filter((note): note is string => Boolean(note));
 }
 
+function isAggregateOnlyCandidate(
+  candidate: NonNullable<Awaited<ReturnType<typeof getCandidate>>>,
+  signalCount: number,
+  filingCount: number,
+  independentExpenditureCount: number,
+) {
+  return Boolean(
+    candidate.totalReceiptsCycle &&
+    candidate.totalReceiptsCycle > 0 &&
+    signalCount === 0 &&
+    filingCount === 0 &&
+    independentExpenditureCount === 0
+  );
+}
+
 function candidateMobileNotes(
   candidate: NonNullable<Awaited<ReturnType<typeof getCandidate>>>,
   signalCounts: ReturnType<typeof countSignals>,
@@ -378,7 +430,7 @@ function MobileCandidateRead({ notes }: { notes: string[] }) {
 function supportLabel(value?: string | null) {
   if (value === "S") return "Support";
   if (value === "O") return "Oppose";
-  return "Mention";
+  return "Not classified by FEC";
 }
 
 function CandidateOutsideSpendingTable({
@@ -525,6 +577,13 @@ function filingPeriod(start?: string | null, end?: string | null) {
   if (!start && !end) return "Period not reported";
   if (start && end) return `${formatDate(start)} to ${formatDate(end)}`;
   return formatDate(start ?? end);
+}
+
+function receiptBasisLabel(basis?: "period" | "total" | "ytd" | null) {
+  if (basis === "period") return "period receipts";
+  if (basis === "ytd") return "YTD receipts";
+  if (basis === "total") return "total receipts";
+  return "receipt basis unknown";
 }
 
 function fundingMix(individualPct?: number | null, pacPct?: number | null) {

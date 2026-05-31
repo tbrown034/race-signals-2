@@ -136,7 +136,7 @@ export default async function StatusPage() {
                       <td className="px-4 py-3 font-mono">
                         <span className="inline-flex items-center gap-2">
                           <HealthSquare endpoint={endpoint} />
-                          {endpoint.endpoint}
+                          {endpointLabel(endpoint.endpoint)}
                         </span>
                       </td>
                       <td className="px-4 py-3">{formatDateTime(endpoint.completedAt)}</td>
@@ -365,6 +365,11 @@ function validationRuleLabel(rule: string) {
     elections_lookup: "Election timeline lookup",
   };
   return labels[rule] ?? rule.replaceAll("_", " ");
+}
+
+function endpointLabel(endpoint: string) {
+  if (endpoint === "schedule_a") return "schedule_a (disabled)";
+  return endpoint;
 }
 
 function CoverageStat({ label, value }: { label: string; value: number }) {

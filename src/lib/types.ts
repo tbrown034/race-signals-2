@@ -309,6 +309,8 @@ export type CandidateSignalGap = {
 
 export type StorageUsage = {
   databaseSizeBytes: number | null;
+  guardBytes: number | null;
+  transactionsRowCount: number | null;
   largestTables: Array<{
     tableName: string;
     totalBytes: number;

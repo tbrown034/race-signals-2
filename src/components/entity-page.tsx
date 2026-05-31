@@ -54,7 +54,7 @@ export function EntityPage({
         <p className="font-mono text-xs uppercase tracking-[0.18em] text-neutral-500">
           {eyebrow}
         </p>
-        <h1 className="mt-2 flex min-w-0 flex-wrap items-center gap-2 text-2xl font-semibold tracking-tight">
+        <h1 className="mt-2 flex min-w-0 flex-wrap items-center gap-2 text-xl font-semibold leading-tight tracking-tight sm:text-2xl">
           <span className="min-w-0 max-w-full flex-1 basis-full whitespace-normal break-words [overflow-wrap:anywhere] sm:basis-auto">
             {title}
           </span>

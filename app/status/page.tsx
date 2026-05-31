@@ -39,8 +39,8 @@ export default async function StatusPage() {
 
   return (
     <PageShell>
-      <main className="mx-auto max-w-6xl px-5 py-8 sm:px-8">
-        <section className="border border-neutral-300 bg-white p-6">
+      <main className="mx-auto w-full max-w-[calc(100vw-2.5rem)] overflow-hidden px-0 py-8 sm:max-w-6xl sm:px-8">
+        <section className="min-w-0 max-w-full border border-neutral-300 bg-white p-6">
           <p className="font-mono text-xs uppercase tracking-[0.18em] text-neutral-500">
             Data freshness
           </p>
@@ -64,7 +64,7 @@ export default async function StatusPage() {
 
         <nav
           aria-label="Status page sections"
-          className="mt-4 flex flex-wrap gap-x-4 gap-y-2 border border-neutral-300 bg-white px-4 py-3 font-mono text-[11px] uppercase tracking-[0.12em] text-neutral-600"
+          className="mt-4 flex min-w-0 max-w-full flex-wrap gap-x-4 gap-y-2 border border-neutral-300 bg-white px-4 py-3 font-mono text-[11px] uppercase tracking-[0.12em] text-neutral-600"
         >
           <a className="underline-offset-4 hover:underline" href="#election-coverage">Election coverage</a>
           <a className="underline-offset-4 hover:underline" href="#storage">Storage</a>
@@ -78,7 +78,7 @@ export default async function StatusPage() {
           <a className="underline-offset-4 hover:underline" href="#validation-examples">Validation examples</a>
         </nav>
 
-        <section className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
+        <section className="mt-6 grid min-w-0 max-w-full gap-3 sm:grid-cols-2 lg:grid-cols-5">
           {Object.entries(status.counts).map(([name, count]) => (
             <div className="border border-neutral-300 bg-white p-4" key={name}>
               <p className="font-mono text-xs uppercase tracking-[0.12em] text-neutral-500">
@@ -89,7 +89,7 @@ export default async function StatusPage() {
           ))}
         </section>
 
-        <section className="mt-6 border border-neutral-300 bg-white" id="state-freshness">
+        <section className="mt-6 min-w-0 max-w-full border border-neutral-300 bg-white" id="state-freshness">
           <div className="border-b border-neutral-300 px-5 py-4">
             <h2 className="text-sm font-semibold uppercase tracking-[0.14em] text-neutral-600">
               Stored signal freshness by state
@@ -142,7 +142,7 @@ export default async function StatusPage() {
           </div>
         </section>
 
-        <section className="mt-6 border border-neutral-300 bg-white p-5" id="election-coverage">
+        <section className="mt-6 min-w-0 max-w-full border border-neutral-300 bg-white p-5" id="election-coverage">
           <h2 className="text-sm font-semibold uppercase tracking-[0.14em] text-neutral-600">
             Election timeline coverage
           </h2>
@@ -161,7 +161,7 @@ export default async function StatusPage() {
           </dl>
         </section>
 
-        <section className="mt-6 border border-neutral-300 bg-white p-5" id="storage">
+        <section className="mt-6 min-w-0 max-w-full border border-neutral-300 bg-white p-5" id="storage">
           <h2 className="text-sm font-semibold uppercase tracking-[0.14em] text-neutral-600">
             Storage footprint
           </h2>
@@ -169,6 +169,21 @@ export default async function StatusPage() {
             Database size is {formatBytes(status.storageUsage.databaseSizeBytes)}. The target operating model is Neon free-tier compatible; large storage jumps usually mean an ingest scope changed.
             {" "}Raw source archive: {formatCount(status.sourceRecordArchive.count, "record")} with latest hash refresh {status.sourceRecordArchive.latestFetchedAt ? formatRelativeTime(status.sourceRecordArchive.latestFetchedAt) : "not yet recorded"}.
           </p>
+          <div className="mt-4 grid gap-px border border-neutral-300 bg-neutral-300 sm:grid-cols-3">
+            <StorageBudgetStat
+              label="Database guard"
+              value={storageGuardLabel(status.storageUsage.databaseSizeBytes, status.storageUsage.guardBytes)}
+            />
+            <StorageBudgetStat
+              label="Guard used"
+              value={storageGuardPct(status.storageUsage.databaseSizeBytes, status.storageUsage.guardBytes)}
+            />
+            <StorageBudgetStat
+              label="Donor rows"
+              tone={status.storageUsage.transactionsRowCount ? "warning" : "default"}
+              value={`${status.storageUsage.transactionsRowCount ?? 0} in transactions`}
+            />
+          </div>
           {status.sourceRecordArchive.tables.length ? (
             <div className="mt-4 overflow-x-auto">
               <table className="w-full min-w-0 text-left text-sm md:min-w-[680px]">
@@ -257,7 +272,7 @@ export default async function StatusPage() {
           ) : null}
         </section>
 
-        <section className="mt-6 border border-neutral-300 bg-white" id="endpoint-freshness">
+        <section className="mt-6 min-w-0 max-w-full border border-neutral-300 bg-white" id="endpoint-freshness">
           <div className="border-b border-neutral-300 px-5 py-4">
             <h2 className="text-sm font-semibold uppercase tracking-[0.14em] text-neutral-600">
               Endpoint freshness
@@ -333,7 +348,7 @@ export default async function StatusPage() {
         </section>
 
         {status.candidateSignalGaps.length ? (
-          <section className="mt-6 border border-neutral-300 bg-white" id="candidate-gaps">
+          <section className="mt-6 min-w-0 max-w-full border border-neutral-300 bg-white" id="candidate-gaps">
             <div className="border-b border-neutral-300 px-5 py-4">
               <h2 className="text-sm font-semibold uppercase tracking-[0.14em] text-neutral-600">
                 Candidate signal gaps
@@ -464,7 +479,7 @@ export default async function StatusPage() {
           </section>
         ) : null}
 
-        <section className="mt-6 border border-neutral-300 bg-white" id="run-history">
+        <section className="mt-6 min-w-0 max-w-full border border-neutral-300 bg-white" id="run-history">
           <div className="border-b border-neutral-300 px-5 py-4">
             <h2 className="text-sm font-semibold uppercase tracking-[0.14em] text-neutral-600">
               Run history
@@ -540,7 +555,7 @@ export default async function StatusPage() {
           </div>
         </section>
 
-        <section className="mt-6 border border-neutral-300 bg-white" id="validation-rollup">
+        <section className="mt-6 min-w-0 max-w-full border border-neutral-300 bg-white" id="validation-rollup">
           <div className="border-b border-neutral-300 px-5 py-4">
             <h2 className="text-sm font-semibold uppercase tracking-[0.14em] text-neutral-600">
               Validation issue rollup
@@ -587,7 +602,7 @@ export default async function StatusPage() {
           </div>
         </section>
 
-        <section className="mt-6 border border-neutral-300 bg-white" id="validation-examples">
+        <section className="mt-6 min-w-0 max-w-full border border-neutral-300 bg-white" id="validation-examples">
           <div className="border-b border-neutral-300 px-5 py-4">
             <h2 className="text-sm font-semibold uppercase tracking-[0.14em] text-neutral-600">
               Recent validation examples
@@ -702,17 +717,17 @@ function ReporterActionPanel({
     : "Absence of a signal only means no stored FEC record matched this slice and threshold.";
 
   return (
-    <section className="mt-4 border border-neutral-300 bg-white p-5">
+    <section className="mt-4 min-w-0 max-w-full border border-neutral-300 bg-white p-5">
       <h2 className="text-sm font-semibold uppercase tracking-[0.14em] text-neutral-600">
         What this means
       </h2>
-      <div className="mt-3 grid gap-3 text-sm leading-6 text-neutral-700 md:grid-cols-3">
-        <p>
-          Latest usable scope: <span className="font-semibold text-neutral-950">{scope}</span>. Use filters with that scope in mind.
+      <div className="mt-3 grid min-w-0 max-w-full gap-3 text-sm leading-6 text-neutral-700 md:grid-cols-3">
+        <p className="min-w-0 max-w-[280px] break-words [overflow-wrap:anywhere] sm:max-w-full">
+          Latest usable scope: <span className="font-semibold text-neutral-950">{scope}</span>. Filter with that scope in mind.
         </p>
-        <p>{absenceRead}</p>
-        <p>
-          Before publication, open the FEC source link and account for {retainedValidationIssueLabel(validationIssueCount)}.
+        <p className="min-w-0 max-w-[280px] break-words [overflow-wrap:anywhere] sm:max-w-full">{absenceRead}</p>
+        <p className="min-w-0 max-w-[280px] break-words [overflow-wrap:anywhere] sm:max-w-full">
+          Before publication, open the FEC source and account for {retainedValidationIssueLabel(validationIssueCount)}.
         </p>
       </div>
     </section>
@@ -748,29 +763,29 @@ function PublishabilityPanel({
   const scope = latestRun?.state ? `State ${latestRun.state}` : latestRun?.scope ?? "No ingest run recorded";
 
   return (
-    <section className="mt-6 border border-neutral-300 bg-white p-5">
+    <section className="mt-6 min-w-0 max-w-full border border-neutral-300 bg-white p-5">
       <p className="font-mono text-xs uppercase tracking-[0.18em] text-neutral-500">
         Publishability read
       </p>
-      <h2 className="mt-2 text-lg font-semibold">{headline}</h2>
-      <p className="mt-2 max-w-3xl text-sm leading-6 text-neutral-700">
-        Race Signals is a source-finding desk, not an election-night wire. Cite the linked FEC record,
-        check the current ingest scope, and do not treat an empty result as proof of no activity.
+      <h2 className="mt-2 min-w-0 max-w-full break-words text-lg font-semibold [overflow-wrap:anywhere]">{headline}</h2>
+      <p className="mt-2 max-w-[280px] break-words text-sm leading-6 text-neutral-700 [overflow-wrap:anywhere] sm:max-w-3xl">
+          Race Signals finds source records. Cite linked FEC records, check ingest scope, and do not treat
+          an empty result as proof of no activity.
       </p>
-      <dl className="mt-4 grid gap-3 text-sm sm:grid-cols-4">
-        <div>
+      <dl className="mt-4 grid min-w-0 max-w-full gap-3 text-sm sm:grid-cols-4">
+        <div className="min-w-0 break-words [overflow-wrap:anywhere]">
           <dt className="font-mono text-[11px] uppercase tracking-[0.12em] text-neutral-500">Mode</dt>
           <dd className="mt-1 font-medium">{mode}</dd>
         </div>
-        <div>
+        <div className="min-w-0 break-words [overflow-wrap:anywhere]">
           <dt className="font-mono text-[11px] uppercase tracking-[0.12em] text-neutral-500">Latest scope</dt>
           <dd className="mt-1 font-medium">{scope}</dd>
         </div>
-        <div>
+        <div className="min-w-0 break-words [overflow-wrap:anywhere]">
           <dt className="font-mono text-[11px] uppercase tracking-[0.12em] text-neutral-500">Finished</dt>
           <dd className="mt-1 font-medium">{formatDateTime(finishedAt)}</dd>
         </div>
-        <div>
+        <div className="min-w-0 break-words [overflow-wrap:anywhere]">
           <dt className="font-mono text-[11px] uppercase tracking-[0.12em] text-neutral-500">Retained caveats</dt>
           <dd className="mt-1 font-medium">{retainedValidationIssueLabel(validationIssueCount)}</dd>
         </div>
@@ -883,7 +898,9 @@ function validationRuleLabel(rule: string) {
     suspicious_amount: "Large amount review",
     duplicate_source_record: "Duplicate source record",
     candidate_totals_lookup: "Candidate totals lookup",
+    candidate_scope_truncated: "Candidate scope truncated",
     elections_lookup: "Election timeline lookup",
+    fec_pagination_truncated: "FEC pagination truncated",
     partial_ingestion_error: "Partial ingestion error",
   };
   return labels[rule] ?? rule.replaceAll("_", " ");
@@ -912,6 +929,34 @@ function CoverageStat({ label, value }: { label: string; value: number }) {
       <dd className="mt-1 text-lg font-semibold tabular-nums">{value}</dd>
     </div>
   );
+}
+
+function StorageBudgetStat({
+  label,
+  tone = "default",
+  value,
+}: {
+  label: string;
+  tone?: "default" | "warning";
+  value: string;
+}) {
+  return (
+    <div className="bg-white px-4 py-3">
+      <dt className="font-mono text-[11px] uppercase tracking-[0.12em] text-neutral-500">{label}</dt>
+      <dd className={tone === "warning" ? "mt-1 font-semibold text-red-700" : "mt-1 font-semibold text-neutral-950"}>
+        {value}
+      </dd>
+    </div>
+  );
+}
+
+function storageGuardLabel(databaseBytes?: number | null, guardBytes?: number | null) {
+  return `${formatBytes(databaseBytes)} of ${formatBytes(guardBytes)} guard`;
+}
+
+function storageGuardPct(databaseBytes?: number | null, guardBytes?: number | null) {
+  if (!databaseBytes || !guardBytes) return "Unknown";
+  return `${((databaseBytes / guardBytes) * 100).toFixed(1)}%`;
 }
 
 function formatBytes(bytes?: number | null) {

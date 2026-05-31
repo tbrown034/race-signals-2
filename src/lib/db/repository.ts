@@ -1696,6 +1696,8 @@ export async function getStatus() {
       },
       storageUsage: {
         databaseSizeBytes: null,
+        guardBytes: 400 * 1024 * 1024,
+        transactionsRowCount: 0,
         largestTables: [],
       },
       sourceRecordArchive: {
@@ -1818,7 +1820,7 @@ export async function getStatus() {
     order by pg_total_relation_size(c.oid) desc
     limit 8
   `);
-  const storageCounts = await getTableCounts(storageRows.map((row) => row.table_name));
+  const storageCounts = await getTableCounts([...new Set([...storageRows.map((row) => row.table_name), "transactions"])]);
   const databaseSizeRows = await sql<{ size: string }>("select pg_database_size(current_database())::text as size");
   const sourceRecordArchiveRows = await sql<{
     count: string;
@@ -1994,6 +1996,8 @@ export async function getStatus() {
     } satisfies ElectionCoverage,
     storageUsage: {
       databaseSizeBytes: Number(databaseSizeRows[0]?.size ?? 0),
+      guardBytes: Number(process.env.COST_AUDIT_MAX_DB_MB ?? "400") * 1024 * 1024,
+      transactionsRowCount: storageCounts.get("transactions") ?? null,
       largestTables: storageRows.map((row) => ({
         tableName: row.table_name,
         totalBytes: Number(row.total_bytes),

@@ -492,15 +492,37 @@ export async function getSignalStateCounts(signalType?: string): Promise<Record<
 export async function getSitemapEntities() {
   if (!hasDatabase()) {
     return {
-      races: demoRaces.map((race) => race.id),
-      candidates: demoCandidates.map((candidate) => candidate.id),
-      committees: demoCommittees.map((committee) => committee.id),
+      races: [...new Set(demoSignals.map((signal) => signal.raceId).filter((id): id is string => Boolean(id)))],
+      candidates: [
+        ...new Set(demoSignals.map((signal) => signal.candidateId).filter((id): id is string => Boolean(id))),
+      ],
+      committees: [
+        ...new Set(demoSignals.map((signal) => signal.committeeId).filter((id): id is string => Boolean(id))),
+      ],
     };
   }
   const [races, candidates, committees] = await Promise.all([
-    sql<{ id: string }>("select id from races order by id limit 50000"),
-    sql<{ id: string }>("select id from candidates order by id limit 50000"),
-    sql<{ id: string }>("select id from committees order by id limit 50000"),
+    sql<{ id: string }>(`
+      select distinct r.id
+      from races r
+      join signals s on s.race_id = r.id
+      order by r.id
+      limit 5000
+    `),
+    sql<{ id: string }>(`
+      select distinct c.id
+      from candidates c
+      join signals s on s.candidate_id = c.id
+      order by c.id
+      limit 5000
+    `),
+    sql<{ id: string }>(`
+      select distinct cm.id
+      from committees cm
+      join signals s on s.committee_id = cm.id
+      order by cm.id
+      limit 5000
+    `),
   ]);
   return {
     races: races.map((row) => row.id),

@@ -46,6 +46,25 @@ export default async function StatusPage() {
           ))}
         </section>
 
+        <section className="mt-6 border border-neutral-300 bg-white p-5">
+          <h2 className="text-sm font-semibold uppercase tracking-[0.14em] text-neutral-600">
+            Election timeline coverage
+          </h2>
+          <p className="mt-2 text-sm leading-6 text-neutral-700">
+            {status.electionCoverage.withRows} of {status.electionCoverage.candidates} candidates
+            currently have at least one Wikidata/Wikipedia election row. {status.electionCoverage.checked} candidates
+            have been checked; {status.electionCoverage.withIdentifiers} have a Wikidata or Wikipedia identifier.
+            Missing timelines usually mean the open sources have not been structured yet, not that no election exists.
+          </p>
+          <dl className="mt-4 grid gap-3 sm:grid-cols-5">
+            <CoverageStat label="Candidates" value={status.electionCoverage.candidates} />
+            <CoverageStat label="With IDs" value={status.electionCoverage.withIdentifiers} />
+            <CoverageStat label="Checked" value={status.electionCoverage.checked} />
+            <CoverageStat label="With rows" value={status.electionCoverage.withRows} />
+            <CoverageStat label="Rows" value={status.electionCoverage.electionRows} />
+          </dl>
+        </section>
+
         <section className="mt-6 border border-neutral-300 bg-white">
           <div className="border-b border-neutral-300 px-5 py-4">
             <h2 className="text-sm font-semibold uppercase tracking-[0.14em] text-neutral-600">
@@ -225,4 +244,13 @@ function runNotes(run: {
 function noteValue(label: string, value: unknown) {
   if (value === null || value === undefined || value === "") return null;
   return `${label}: ${String(value)}`;
+}
+
+function CoverageStat({ label, value }: { label: string; value: number }) {
+  return (
+    <div>
+      <dt className="font-mono text-[11px] uppercase tracking-[0.12em] text-neutral-500">{label}</dt>
+      <dd className="mt-1 text-lg font-semibold tabular-nums">{value}</dd>
+    </div>
+  );
 }

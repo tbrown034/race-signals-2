@@ -132,6 +132,11 @@ export type TopSpender = {
   sourceUrl?: string | null;
   totalAmount: number;
   recordCount: number;
+  raceCount: number;
+  states: string[];
+  topRaceId?: string | null;
+  topRaceName?: string | null;
+  topRaceAmount?: number | null;
 };
 
 export type RaceStats = {
@@ -218,4 +223,12 @@ export type ValidationIssueRollup = {
   severity: string;
   count: number;
   latestAt: string;
+};
+
+export type ElectionCoverage = {
+  candidates: number;
+  withIdentifiers: number;
+  checked: number;
+  withRows: number;
+  electionRows: number;
 };

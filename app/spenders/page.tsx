@@ -37,6 +37,7 @@ export default async function SpendersPage() {
                 <tr>
                   <th className="px-4 py-3 font-medium" scope="col">Committee</th>
                   <th className="px-4 py-3 font-medium" scope="col">Type</th>
+                  <th className="px-4 py-3 font-medium" scope="col">Where</th>
                   <th className="px-4 py-3 text-right font-medium" scope="col">Total IE</th>
                   <th className="px-4 py-3 text-right font-medium" scope="col">Records</th>
                   <th className="px-4 py-3 font-medium" scope="col">Source</th>
@@ -67,6 +68,20 @@ export default async function SpendersPage() {
                           {committeeDesignationLabel(spender.designation)}
                         </span>
                       </td>
+                      <td className="px-4 py-3 text-neutral-700">
+                        {spender.topRaceId ? (
+                          <Link className="font-medium underline underline-offset-4" href={`/races/${spender.topRaceId}`}>
+                            {spender.topRaceName ?? spender.topRaceId}
+                          </Link>
+                        ) : (
+                          "Unmatched race"
+                        )}
+                        <p className="mt-1 text-xs text-neutral-500">
+                          {spender.states.length ? spender.states.join(", ") : "State unknown"}
+                          {spender.raceCount > 1 ? ` / ${spender.raceCount} races` : ""}
+                          {spender.topRaceAmount ? ` / top race ${formatMoney(spender.topRaceAmount)}` : ""}
+                        </p>
+                      </td>
                       <td className="px-4 py-3 text-right font-mono font-semibold">
                         {formatMoney(spender.totalAmount)}
                       </td>
@@ -89,7 +104,7 @@ export default async function SpendersPage() {
                   ))
                 ) : (
                   <tr>
-                    <td className="px-4 py-4 text-neutral-600" colSpan={5}>
+                    <td className="px-4 py-4 text-neutral-600" colSpan={6}>
                       No Schedule E spender records are available in the current database slice.
                     </td>
                   </tr>

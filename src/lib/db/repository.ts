@@ -12,6 +12,7 @@ import type {
   Candidate,
   Committee,
   CommitteeIndependentExpenditure,
+  ElectionCoverage,
   Election,
   EndpointFreshness,
   IngestionRun,
@@ -643,6 +644,11 @@ export async function getTopSpenders(limit = 100): Promise<TopSpender[]> {
           sourceUrl: committee.sourceUrl,
           totalAmount: records.reduce((sum, record) => sum + record.amount, 0),
           recordCount: records.length,
+          raceCount: new Set(records.map((record) => record.raceId).filter(Boolean)).size,
+          states: [...new Set(records.map((record) => record.raceId?.split("-")[1]).filter(Boolean))] as string[],
+          topRaceId: records[0]?.raceId ?? null,
+          topRaceName: demoRaces.find((race) => race.id === records[0]?.raceId)?.name ?? null,
+          topRaceAmount: records[0]?.amount ?? null,
         };
       })
       .filter((spender) => spender.recordCount > 0)
@@ -659,24 +665,66 @@ export async function getTopSpenders(limit = 100): Promise<TopSpender[]> {
     source_url: string | null;
     total_amount: string;
     record_count: string;
+    race_count: string;
+    states: string[] | null;
+    top_race_id: string | null;
+    top_race_name: string | null;
+    top_race_amount: string | null;
   }>(
     `
+      with spending_by_committee as (
+        select
+          ie.spender_committee_id,
+          coalesce(ie.fec_committee_id, ie.spender_committee_id) as spender_key,
+          sum(ie.amount) as total_amount,
+          count(*) as record_count,
+          count(distinct ie.race_id) as race_count,
+          array_remove(array_agg(distinct r.state), null) as states
+        from independent_expenditures ie
+        left join races r on r.id = ie.race_id
+        where ie.expenditure_date >= make_date(coalesce(r.cycle, $2) - 1, 1, 1)
+          and ie.expenditure_date <= make_date(coalesce(r.cycle, $2), 12, 31)
+        group by ie.spender_committee_id, coalesce(ie.fec_committee_id, ie.spender_committee_id)
+      ),
+      spending_by_race as (
+        select
+          ie.spender_committee_id,
+          ie.race_id,
+          r.name as race_name,
+          sum(ie.amount) as race_amount,
+          row_number() over (
+            partition by ie.spender_committee_id
+            order by sum(ie.amount) desc nulls last
+          ) as rank
+        from independent_expenditures ie
+        left join races r on r.id = ie.race_id
+        where ie.expenditure_date >= make_date(coalesce(r.cycle, $2) - 1, 1, 1)
+          and ie.expenditure_date <= make_date(coalesce(r.cycle, $2), 12, 31)
+        group by ie.spender_committee_id, ie.race_id, r.name
+      ),
+      top_race as (
+        select spender_committee_id, race_id, race_name, race_amount
+        from spending_by_race
+        where rank = 1
+      )
       select
         cm.id as committee_id,
-        coalesce(cm.fec_committee_id, ie.fec_committee_id) as fec_committee_id,
-        coalesce(cm.name, ie.fec_committee_id, 'Unknown spender') as committee_name,
+        coalesce(cm.fec_committee_id, s.spender_key) as fec_committee_id,
+        coalesce(cm.name, s.spender_key, 'Unknown spender') as committee_name,
         cm.committee_type,
         cm.designation,
         cm.source_url,
-        sum(ie.amount)::text as total_amount,
-        count(*)::text as record_count
-      from independent_expenditures ie
-      left join committees cm on cm.id = ie.spender_committee_id
-      left join races r on r.id = ie.race_id
-      where ie.expenditure_date >= make_date(coalesce(r.cycle, $2) - 1, 1, 1)
-        and ie.expenditure_date <= make_date(coalesce(r.cycle, $2), 12, 31)
-      group by cm.id, cm.fec_committee_id, ie.fec_committee_id, cm.name, cm.committee_type, cm.designation, cm.source_url
-      order by sum(ie.amount) desc nulls last
+        s.total_amount::text as total_amount,
+        s.record_count::text as record_count,
+        s.race_count::text as race_count,
+        s.states,
+        top_race.race_id as top_race_id,
+        top_race.race_name as top_race_name,
+        top_race.race_amount::text as top_race_amount
+      from spending_by_committee s
+      left join committees cm on cm.id = s.spender_committee_id
+      left join top_race on top_race.spender_committee_id = s.spender_committee_id
+      order by s.total_amount desc nulls last
       limit $1
     `,
     [limit, CURRENT_CYCLE],
@@ -691,6 +739,11 @@ export async function getTopSpenders(limit = 100): Promise<TopSpender[]> {
     sourceUrl: row.source_url,
     totalAmount: Number(row.total_amount),
     recordCount: Number(row.record_count),
+    raceCount: Number(row.race_count),
+    states: row.states ?? [],
+    topRaceId: row.top_race_id,
+    topRaceName: row.top_race_name,
+    topRaceAmount: row.top_race_amount === null ? null : Number(row.top_race_amount),
   }));
 }
 
@@ -865,6 +918,13 @@ export async function getStatus() {
       },
       endpoints: [],
       validationIssues: [],
+      electionCoverage: {
+        candidates: demoCandidates.length,
+        withIdentifiers: demoCandidates.filter((candidate) => candidate.wikidataId || candidate.wikipediaUrl).length,
+        checked: demoCandidates.filter((candidate) => candidate.electionsCheckedAt).length,
+        withRows: 0,
+        electionRows: 0,
+      },
       mode: "demo",
     };
   }
@@ -926,6 +986,23 @@ export async function getStatus() {
       throw error;
     }
   }
+  const electionCoverageRows = await sql<{
+    candidates: string;
+    with_identifiers: string;
+    checked: string;
+    with_rows: string;
+    election_rows: string;
+  }>(`
+    select
+      count(*)::text as candidates,
+      count(*) filter (where wikidata_id is not null or wikipedia_url is not null)::text as with_identifiers,
+      count(*) filter (where elections_checked_at is not null)::text as checked,
+      count(distinct e.candidate_id)::text as with_rows,
+      count(e.*)::text as election_rows
+    from candidates c
+    left join elections e on e.candidate_id = c.id
+  `);
+  const electionCoverageRow = electionCoverageRows[0];
   try {
     validationIssues = await sql<{
       rule: string;
@@ -977,6 +1054,13 @@ export async function getStatus() {
       count: Number(issue.count),
       latestAt: toIsoString(issue.latest_at),
     })),
+    electionCoverage: {
+      candidates: Number(electionCoverageRow?.candidates ?? 0),
+      withIdentifiers: Number(electionCoverageRow?.with_identifiers ?? 0),
+      checked: Number(electionCoverageRow?.checked ?? 0),
+      withRows: Number(electionCoverageRow?.with_rows ?? 0),
+      electionRows: Number(electionCoverageRow?.election_rows ?? 0),
+    } satisfies ElectionCoverage,
     mode: "database",
   };
 }

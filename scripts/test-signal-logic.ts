@@ -128,6 +128,37 @@ assert.equal(committeeSignal.metadata?.sourceId, "C00999999");
 assert.equal(committeeSignal.metadata?.sourceKind, "committee");
 assert.equal(committeeSignal.metadata?.committeeType, "H");
 assert.equal(committeeSignal.metadata?.designation, "P");
+assert.match(
+  committeeSignal.headline,
+  /FEC lists a principal campaign committee/,
+  "new-committee copy should describe the FEC record, not imply ballot status",
+);
+assert.doesNotMatch(
+  committeeSignal.headline,
+  /formed|launched|entered/i,
+  "new-committee copy should avoid overstating what the FEC committee record proves",
+);
+assert.match(
+  committeeSignal.whyItMatters,
+  /verify candidacy and ballot status separately/,
+  "challenger committee copy should remind reporters to verify ballot context",
+);
+
+const incumbentSignals = generateSignals({
+  candidates: [{ ...candidate, incumbentChallengeStatus: "I", name: "TEST, INCUMBENT" }],
+  committees: [{ ...committee, candidateId: candidate.id, fecCommitteeId: "C00777777", id: "cmte-C00777777" }],
+  races: [race],
+  filings: [],
+  independentExpenditures: [],
+  dataFreshness: "2026-05-31T12:00:00.000Z",
+});
+const incumbentCommitteeSignal = incumbentSignals.find((signal) => signal.signalType === "new_committee");
+assert.ok(incumbentCommitteeSignal, "incumbent principal committee should still generate a source-linked signal");
+assert.match(
+  incumbentCommitteeSignal.whyItMatters,
+  /not proof of a first-time launch/,
+  "incumbent committee copy should not frame routine campaign infrastructure as a launch",
+);
 
 const mixedBasisSignals = generateSignals({
   candidates: [candidate],

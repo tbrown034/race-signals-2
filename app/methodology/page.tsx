@@ -32,17 +32,17 @@ const signalTypes = [
   [
     "new_filing",
     "New filing",
-    "A new report can reveal changed cash position, spending pace and committee activity before those shifts show up in public campaigning.",
+    "A new report can reveal changed cash position, spending pace and committee activity before those shifts show up in public campaigning. When stored filings share the same committee, report type, coverage period and totals, later versions are labeled as likely amendments or refiles rather than fresh activity.",
   ],
   [
     "large_independent_expenditure",
     "Independent expenditure",
-    "A large outside-spending report can show where groups think a race or candidate is worth influencing.",
+    "A large Schedule E independent-expenditure report can show where outside groups think a race or candidate is worth influencing. The headline names it as Schedule E so it does not read like a contribution or coordinated spend when copied out of context.",
   ],
   [
     "committee_activity_spike",
     "Activity spike",
-    "A filing-level spike flags a committee whose latest stored filing receipts crossed the flat review threshold and doubled the prior stored filing.",
+    "A filing-level spike flags a committee whose latest stored period-receipts filing crossed the flat review threshold and doubled the prior stored filing. The card carries both latest and prior filing sources and both coverage periods so the comparison can be checked.",
   ],
   [
     "large_contribution",

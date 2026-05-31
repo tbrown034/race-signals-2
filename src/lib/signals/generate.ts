@@ -7,6 +7,7 @@ import type {
   Signal,
 } from "@/src/lib/types";
 import { reportTypePhrase } from "@/src/lib/fec-report-types";
+import { displayCandidateName } from "@/src/lib/names";
 
 const LARGE_IE_THRESHOLD = 25000;
 const ACTIVITY_SPIKE_THRESHOLD = 50000;
@@ -53,6 +54,11 @@ function supportVerb(value?: string | null) {
   if (value === "S") return "supporting";
   if (value === "O") return "opposing";
   return "mentioning";
+}
+
+function candidateHeadlineName(candidate?: Candidate) {
+  if (!candidate?.name) return "a candidate";
+  return displayCandidateName(candidate.name) ?? candidate.name;
 }
 
 export function generateSignals(input: SignalInput): Signal[] {
@@ -153,7 +159,7 @@ export function generateSignals(input: SignalInput): Signal[] {
       headline: `${committee?.name ?? "An outside spender"} reported a $${Math.round(
         expenditure.amount,
       ).toLocaleString()} Schedule E independent expenditure ${supportVerb(expenditure.supportOpposeIndicator)} ${
-        candidate?.name ?? "a candidate"
+        candidateHeadlineName(candidate)
       } in ${displayRace(race)}.`,
       whyItMatters:
         "Schedule E records show outside spending that is supposed to be independent of a campaign; verify the support/oppose code, purpose, amount and race before citing.",
@@ -279,7 +285,7 @@ function newFilingCopy(filing: Filing, committee?: Committee, versionKind = "ini
 
 function newCommitteeCopy(committee: Committee, candidate?: Candidate, race?: Race) {
   const raceLabel = displayRace(race);
-  const candidateName = candidate?.name ?? "A candidate";
+  const candidateName = candidateHeadlineName(candidate);
   const fileDate = committee.firstFileDate ? ` with first-file date ${committee.firstFileDate}` : "";
   if (isIncumbent(candidate?.incumbentChallengeStatus)) {
     return {

@@ -40,6 +40,7 @@ export function SignalCard({ signal }: { signal: Signal }) {
   const comparisonSources = filingComparisonSources(signal);
   const relatedFilingSources = filingVersionSources(signal);
   const verifyLine = verificationLine(signal.signalType);
+  const nextChecks = signalNextChecks(signal);
 
   return (
     <article
@@ -145,6 +146,20 @@ export function SignalCard({ signal }: { signal: Signal }) {
           <span className="font-mono uppercase tracking-[0.12em] text-neutral-500">Verify:</span>{" "}
           {verifyLine}
         </p>
+        {nextChecks.length ? (
+          <div className="mt-2 flex flex-wrap items-center gap-2 text-xs">
+            <span className="font-mono uppercase tracking-[0.12em] text-neutral-500">Next check</span>
+            {nextChecks.map((check) => (
+              <Link
+                className="border border-neutral-300 px-2 py-1 font-medium underline-offset-4 hover:underline"
+                href={check.href}
+                key={`${check.label}-${check.href}`}
+              >
+                {check.label}
+              </Link>
+            ))}
+          </div>
+        ) : null}
         {comparisonSources.length ? (
           <div className="mt-1 hidden flex-wrap gap-2 text-xs md:flex">
             {comparisonSources.map((source) => (
@@ -447,4 +462,35 @@ function verificationLine(signalType: string) {
     return "Open the latest and prior filings, compare report periods and confirm totals before publication.";
   }
   return "Open the source record and confirm the linked candidate, committee, race and date.";
+}
+
+function signalNextChecks(signal: Signal) {
+  const checks: Array<{ label: string; href: string }> = [];
+  if (signal.signalType === "large_independent_expenditure") {
+    checks.push({ label: "Open Schedule E evidence", href: scheduleEHref(signal) });
+    if (signal.raceId) checks.push({ label: "Open race context", href: `/races/${signal.raceId}` });
+    return checks;
+  }
+  if (signal.signalType === "new_filing" || signal.signalType === "committee_activity_spike") {
+    if (signal.committeeId) checks.push({ label: "Open committee page", href: `/committees/${signal.committeeId}` });
+    if (signal.candidateId) checks.push({ label: "Open candidate page", href: `/candidates/${signal.candidateId}` });
+    return checks;
+  }
+  if (signal.signalType === "new_committee") {
+    if (signal.candidateId) checks.push({ label: "Open candidate page", href: `/candidates/${signal.candidateId}` });
+    if (signal.raceId) checks.push({ label: "Open race context", href: `/races/${signal.raceId}` });
+    return checks;
+  }
+  if (signal.candidateId) checks.push({ label: "Open candidate page", href: `/candidates/${signal.candidateId}` });
+  if (signal.committeeId) checks.push({ label: "Open committee page", href: `/committees/${signal.committeeId}` });
+  return checks.slice(0, 2);
+}
+
+function scheduleEHref(signal: Signal) {
+  const params = new URLSearchParams();
+  if (signal.raceId) params.set("race", signal.raceId);
+  if (signal.committeeId) params.set("committee", signal.committeeId);
+  if (signal.candidateId) params.set("candidate", signal.candidateId);
+  const query = params.toString();
+  return query ? `/records/schedule-e?${query}` : "/records/schedule-e";
 }

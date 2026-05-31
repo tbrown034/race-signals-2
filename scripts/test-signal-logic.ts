@@ -119,6 +119,11 @@ assert.match(
   /Schedule E independent expenditure/,
   "IE headlines should stand alone as independent-expenditure records",
 );
+assert.match(
+  currentIeSignal.headline,
+  /Candidate Test/,
+  "IE headlines should use reader-facing candidate names while raw FEC names remain on the entity record",
+);
 
 const filingSignal = signals.find((signal) => signal.dedupeKey === "fec:new_filing:filing-current");
 assert.ok(filingSignal, "current-cycle filing should generate a signal");
@@ -160,6 +165,11 @@ assert.match(
   committeeSignal.headline,
   /FEC lists a principal campaign committee/,
   "new-committee copy should describe the FEC record, not imply ballot status",
+);
+assert.match(
+  committeeSignal.headline,
+  /Candidate Test/,
+  "new-committee headlines should use reader-facing candidate names",
 );
 assert.doesNotMatch(
   committeeSignal.headline,

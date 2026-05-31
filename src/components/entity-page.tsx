@@ -126,10 +126,10 @@ export function EntityPage({
                             className="font-medium underline underline-offset-4"
                             href={`/candidates/${expenditure.candidateId}`}
                           >
-                            {expenditure.candidateName ?? expenditure.fecCandidateId ?? "Unknown candidate"}
+                            {expenditure.candidateName ?? expenditure.fecCandidateId ?? "Candidate not resolved"}
                           </Link>
                         ) : (
-                          expenditure.candidateName ?? expenditure.fecCandidateId ?? "Unknown candidate"
+                          expenditure.candidateName ?? expenditure.fecCandidateId ?? "Candidate not resolved"
                         )}
                       </td>
                       <td className="px-4 py-3">{supportLabel(expenditure.supportOpposeIndicator)}</td>
@@ -157,7 +157,7 @@ export function EntityPage({
                             FEC
                           </a>
                         ) : (
-                          "Missing"
+                          "Source not stored"
                         )}
                       </td>
                       <td className="px-4 py-3 text-right font-mono">

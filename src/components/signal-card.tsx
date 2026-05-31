@@ -137,7 +137,7 @@ export function SignalCard({ signal }: { signal: Signal }) {
             FEC source
           </a>
         ) : (
-          <span>Source URL missing</span>
+          <span>Source not publishable</span>
         )}
         <SignalCopyLink anchorId={anchorId} />
         <span className="text-neutral-500">Ingested {formatDateTime(signal.dataFreshness)}</span>
@@ -151,7 +151,7 @@ function textMetadata(value: unknown) {
 }
 
 function candidateDisplay(signal: Signal) {
-  const name = signal.candidateName ?? signal.candidateId ?? "Unknown candidate";
+  const name = signal.candidateName ?? signal.candidateId ?? "Candidate not resolved";
   const context = [
     signal.candidateParty,
     [signal.candidateState, signal.candidateDistrict].filter(Boolean).join("-"),

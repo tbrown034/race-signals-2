@@ -758,7 +758,7 @@ export async function getTopSpenders(limit = 100): Promise<TopSpender[]> {
       select
         cm.id as committee_id,
         coalesce(cm.fec_committee_id, s.spender_key) as fec_committee_id,
-        coalesce(cm.name, s.spender_key, 'Unknown spender') as committee_name,
+        coalesce(cm.name, s.spender_key, 'Spender not resolved') as committee_name,
         cm.committee_type,
         cm.designation,
         cm.source_url,
@@ -784,7 +784,7 @@ export async function getTopSpenders(limit = 100): Promise<TopSpender[]> {
   return rows.map((row) => ({
     committeeId: row.committee_id,
     fecCommitteeId: row.fec_committee_id,
-    committeeName: row.committee_name ?? "Unknown spender",
+    committeeName: row.committee_name ?? "Spender not resolved",
     committeeType: row.committee_type,
     designation: row.designation,
     sourceUrl: row.source_url,

@@ -53,8 +53,10 @@ export default async function Home({
   const statusFilter = typeof params.status === "string" ? params.status : undefined;
   const since = typeof params.since === "string" ? params.since : undefined;
   const ingestedSince = typeof params.ingestedSince === "string" ? params.ingestedSince : undefined;
+  const targetParty = typeof params.targetParty === "string" ? params.targetParty : undefined;
+  const targetStatus = typeof params.targetStatus === "string" ? params.targetStatus : undefined;
   const exportQuery = new URLSearchParams();
-  for (const key of ["q", "state", "office", "race", "committee", "type", "status", "since", "ingestedSince", "minAmount", "position"]) {
+  for (const key of ["q", "state", "office", "race", "committee", "type", "status", "since", "ingestedSince", "minAmount", "position", "targetParty", "targetStatus"]) {
     const value = params[key];
     if (typeof value === "string" && value) exportQuery.set(key, value);
   }
@@ -82,6 +84,8 @@ export default async function Home({
     ingestedSince ? `ingested ${sinceLabel(ingestedSince)}` : null,
     typeof params.minAmount === "string" ? `$${Number(params.minAmount).toLocaleString("en-US")}+` : null,
     params.position === "S" ? "support spending" : params.position === "O" ? "opposition spending" : null,
+    targetParty ? `target ${targetParty}` : null,
+    targetStatus ? `${targetStatusLabel(targetStatus)} targets` : null,
   ].filter(Boolean);
 
   return (
@@ -147,6 +151,8 @@ export default async function Home({
             status={statusFilter}
             since={since}
             ingestedSince={ingestedSince}
+            targetParty={targetParty}
+            targetStatus={targetStatus}
           />
           {visibleSignals.length ? (
             visibleSignals.map((signal) => <SignalCard signal={signal} key={signal.dedupeKey} />)
@@ -315,7 +321,7 @@ function StateRaceBoard({ rows, state }: { rows: StateRaceBoardRow[]; state: str
                         <dd className="inline font-mono text-neutral-950">
                           {race.independentExpenditureTotal > 0 ? (
                             <Link className="underline underline-offset-4" href={`/spending?race=${race.raceId}`}>
-                              {formatMoney(race.independentExpenditureTotal) ?? "$0"}
+                              {formatMoney(race.independentExpenditureTotal) ?? "$0"} signal view
                             </Link>
                           ) : (
                             "$0"
@@ -347,7 +353,7 @@ function StateRaceBoard({ rows, state }: { rows: StateRaceBoardRow[]; state: str
                   <td className="hidden px-4 py-3 text-right font-mono md:table-cell">
                     {race.independentExpenditureTotal > 0 ? (
                       <Link className="underline underline-offset-4" href={`/spending?race=${race.raceId}`}>
-                        {formatMoney(race.independentExpenditureTotal) ?? "$0"}
+                        {formatMoney(race.independentExpenditureTotal) ?? "$0"} signal view
                       </Link>
                     ) : (
                       "$0"
@@ -402,4 +408,11 @@ function raceTotalsFreshness(race: StateRaceBoardRow) {
 
 function signalAnchorId(dedupeKey: string) {
   return `signal-${dedupeKey.replace(/[^a-zA-Z0-9_-]/g, "-")}`;
+}
+
+function targetStatusLabel(value: string) {
+  if (value === "I") return "incumbent";
+  if (value === "C") return "challenger";
+  if (value === "O") return "open-seat";
+  return value;
 }

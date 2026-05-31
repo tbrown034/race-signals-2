@@ -25,6 +25,7 @@ export type SpenderExportRow = {
   latest_schedule_e_source_id: string | null;
   latest_schedule_e_source_url: string | null;
   records_table_url: string | null;
+  spending_signals_url: string | null;
   committee_evidence_url: string | null;
   top_race_id: string | null;
   top_race_name: string | null;
@@ -67,7 +68,8 @@ export function spenderToExportRow(
     last_expenditure_date: spender.lastExpenditureDate ?? null,
     latest_schedule_e_source_id: spender.latestScheduleESourceId ?? null,
     latest_schedule_e_source_url: spender.latestScheduleESourceUrl ?? null,
-    records_table_url: recordsTableUrl(spender, manifest.baseUrl),
+    records_table_url: committeeEvidenceUrl(spender, manifest.baseUrl) ?? spender.latestScheduleESourceUrl ?? null,
+    spending_signals_url: spendingSignalsUrl(spender, manifest.baseUrl),
     committee_evidence_url: spender.committeeId && manifest.baseUrl
       ? `${manifest.baseUrl}/committees/${spender.committeeId}#schedule-e-records`
       : null,
@@ -107,6 +109,7 @@ export function spenderRowsToCsv(rows: SpenderExportRow[]) {
     "latest_schedule_e_source_id",
     "latest_schedule_e_source_url",
     "records_table_url",
+    "spending_signals_url",
     "committee_evidence_url",
     "top_race_id",
     "top_race_name",
@@ -144,9 +147,14 @@ function ratio(numerator: number | null, denominator: number) {
   return Number((numerator / denominator).toFixed(4));
 }
 
-function recordsTableUrl(spender: TopSpender, baseUrl?: string) {
+function spendingSignalsUrl(spender: TopSpender, baseUrl?: string) {
   if (!baseUrl) return null;
   if (spender.committeeId) return `${baseUrl}/spending?committee=${spender.committeeId}&sort=date`;
   if (spender.latestScheduleESourceUrl) return spender.latestScheduleESourceUrl;
   return null;
+}
+
+function committeeEvidenceUrl(spender: TopSpender, baseUrl?: string) {
+  if (!baseUrl || !spender.committeeId) return null;
+  return `${baseUrl}/committees/${spender.committeeId}#schedule-e-records`;
 }

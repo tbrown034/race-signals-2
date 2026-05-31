@@ -12,7 +12,7 @@ export type RaceBoardExportRow = {
   race_id: string;
   race_name: string;
   race_url: string | null;
-  outside_spending_records_url: string | null;
+  outside_spending_signals_url: string | null;
   office: string;
   district: string | null;
   candidate_count: number;
@@ -45,7 +45,7 @@ export function raceBoardToExportRow(
     race_id: row.raceId,
     race_name: row.raceName,
     race_url: manifest.baseUrl ? `${manifest.baseUrl}/races/${row.raceId}` : null,
-    outside_spending_records_url: manifest.baseUrl ? `${manifest.baseUrl}/spending?race=${row.raceId}` : null,
+    outside_spending_signals_url: manifest.baseUrl ? `${manifest.baseUrl}/spending?race=${row.raceId}` : null,
     office: row.office,
     district: row.district ?? null,
     candidate_count: row.candidateCount,
@@ -77,7 +77,7 @@ export function raceBoardRowsToCsv(rows: RaceBoardExportRow[]) {
     "race_id",
     "race_name",
     "race_url",
-    "outside_spending_records_url",
+    "outside_spending_signals_url",
     "office",
     "district",
     "candidate_count",

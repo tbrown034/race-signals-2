@@ -42,6 +42,8 @@ export function FeedFilters({
   status,
   since,
   ingestedSince,
+  targetParty,
+  targetStatus,
   stateSignalCounts = {},
   stateSignalFreshness = {},
   lockedType,
@@ -57,6 +59,8 @@ export function FeedFilters({
   status?: string;
   since?: string;
   ingestedSince?: string;
+  targetParty?: string;
+  targetStatus?: string;
   stateSignalCounts?: Record<string, number>;
   stateSignalFreshness?: Record<string, StateSignalFreshness>;
   lockedType?: boolean;
@@ -65,7 +69,7 @@ export function FeedFilters({
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const hasFilters = Boolean(q || state || office || raceId || committeeId || status || since || ingestedSince || (!lockedType && type));
+  const hasFilters = Boolean(q || state || office || raceId || committeeId || status || since || ingestedSince || targetParty || targetStatus || (!lockedType && type));
   const [selectedState, setSelectedState] = useState(state ?? "");
   const [selectedOffice, setSelectedOffice] = useState(office ?? "");
   const [selectedRaceId, setSelectedRaceId] = useState(raceId ?? "");
@@ -98,6 +102,8 @@ export function FeedFilters({
     status ? { key: "status", label: `Status: ${statusLabel(status)}` } : null,
     since ? { key: "since", label: `Event: ${windowLabel(since)}` } : null,
     ingestedSince ? { key: "ingestedSince", label: `Added: ${windowLabel(ingestedSince)}` } : null,
+    targetParty ? { key: "targetParty", label: `Target party: ${targetParty}` } : null,
+    targetStatus ? { key: "targetStatus", label: `Target: ${targetStatusLabel(targetStatus)}` } : null,
   ].filter((token): token is { key: string; label: string } => Boolean(token));
 
   function updateFilter(name: string, value: string) {
@@ -484,4 +490,11 @@ function statusLabel(value: string) {
 
 function windowLabel(value: string) {
   return windows.find(([key]) => key === value)?.[1] ?? value;
+}
+
+function targetStatusLabel(value: string) {
+  if (value === "I") return "Incumbent";
+  if (value === "C") return "Challenger";
+  if (value === "O") return "Open seat";
+  return value;
 }

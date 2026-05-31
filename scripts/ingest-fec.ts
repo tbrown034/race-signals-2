@@ -24,6 +24,7 @@ import { generateSignals } from "@/src/lib/signals/generate";
 import {
   fetchCommitteesForCandidate,
   fetchCandidatesForOffice,
+  fetchCommittee,
   fetchIndependentExpendituresForCandidate,
   fetchReceiptsForCommittee,
   fetchReportsForCommittee,
@@ -159,6 +160,7 @@ async function main() {
 
     candidates.push(...normalizedCandidates);
     normalizedCandidates.forEach((candidate) => issues.push(...validateCandidate(candidate)));
+    const knownCommitteeIds = new Set<string>();
 
     for (const candidate of normalizedCandidates) {
       try {
@@ -167,6 +169,7 @@ async function main() {
           normalizeCommittee(record, candidate),
         );
         committees.push(...normalizedCommittees);
+        normalizedCommittees.forEach((committee) => knownCommitteeIds.add(committee.fecCommitteeId));
         normalizedCommittees.forEach((committee) => issues.push(...validateCommittee(committee)));
 
         const fecIes = await fetchIndependentExpendituresForCandidate(
@@ -179,6 +182,23 @@ async function main() {
         );
         independentExpenditures.push(...normalizedIes);
         normalizedIes.forEach((ie) => issues.push(...validateIndependentExpenditure(ie)));
+
+        const orphanSpenderIds = [
+          ...new Set(
+            normalizedIes
+              .map((ie) => ie.fecCommitteeId)
+              .filter((committeeId): committeeId is string => Boolean(committeeId)),
+          ),
+        ].filter((committeeId) => !knownCommitteeIds.has(committeeId));
+
+        for (const committeeId of orphanSpenderIds) {
+          const spender = await fetchCommittee(committeeId);
+          if (!spender) continue;
+          const normalizedSpender = normalizeCommittee(spender);
+          committees.push(normalizedSpender);
+          knownCommitteeIds.add(normalizedSpender.fecCommitteeId);
+          issues.push(...validateCommittee(normalizedSpender));
+        }
 
         for (const committee of normalizedCommittees) {
           const fecReports = await fetchReportsForCommittee(

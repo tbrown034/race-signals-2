@@ -50,6 +50,7 @@ export function normalizeCommittee(
     treasurerName: record.treasurer_name ?? null,
     candidateId: candidate?.id ?? null,
     raceId: candidate?.raceId ?? null,
+    discoveredVia: candidate ? "candidate_committee" : "schedule_e",
     sourceUrl: fecCommitteeUrl(record.committee_id),
   };
 }

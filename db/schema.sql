@@ -39,10 +39,13 @@ create table if not exists committees (
   treasurer_name text,
   candidate_id text references candidates(id),
   race_id text references races(id),
+  discovered_via text,
   source_url text,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
+
+alter table committees add column if not exists discovered_via text;
 
 create table if not exists filings (
   id uuid primary key default gen_random_uuid(),

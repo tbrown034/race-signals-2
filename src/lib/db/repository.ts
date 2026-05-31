@@ -189,6 +189,7 @@ export async function getCommittee(id: string): Promise<Committee | null> {
     treasurer_name: string | null;
     candidate_id: string | null;
     race_id: string | null;
+    discovered_via: string | null;
     source_url: string | null;
   }>("select * from committees where id = $1", [id]);
   const row = rows[0];
@@ -203,6 +204,7 @@ export async function getCommittee(id: string): Promise<Committee | null> {
     treasurerName: row.treasurer_name,
     candidateId: row.candidate_id,
     raceId: row.race_id,
+    discoveredVia: row.discovered_via,
     sourceUrl: row.source_url,
   };
 }

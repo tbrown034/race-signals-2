@@ -208,6 +208,15 @@ export async function fetchCommitteesForCandidate(candidateId: string) {
   );
 }
 
+export async function fetchCommittee(committeeId: string) {
+  const records = await firstPages<FecCommittee>(
+    `/committee/${committeeId}/`,
+    {},
+    1,
+  );
+  return records[0] ?? null;
+}
+
 export async function fetchReportsForCommittee(
   committeeId: string,
   cycle: number,

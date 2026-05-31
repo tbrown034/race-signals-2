@@ -444,7 +444,16 @@ export async function insertValidationIssues(issues: ValidationIssue[]) {
         insert into validation_issues (
           source, entity_type, source_id, severity, rule, message, source_url, raw
         )
-        values ('fec', $1, $2, $3, $4, $5, $6, $7)
+        select 'fec', $1, $2, $3, $4, $5, $6, $7
+        where not exists (
+          select 1
+          from validation_issues
+          where source = 'fec'
+            and entity_type = $1
+            and coalesce(source_id, '') = coalesce($2, '')
+            and rule = $4
+            and message = $5
+        )
       `,
       [
         issue.entityType,

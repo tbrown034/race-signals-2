@@ -5,6 +5,7 @@ export type SignalFilters = {
   office?: string;
   type?: string;
   status?: string;
+  since?: string;
   limit?: number;
 };
 
@@ -24,6 +25,7 @@ export function signalFiltersFromSearchParams(
     raceId: first(params.race),
     type: first(params.type),
     status: first(params.status),
+    since: first(params.since),
     limit,
   };
 }
@@ -36,6 +38,7 @@ export function signalFiltersFromUrl(url: URL, limit?: number): SignalFilters {
     raceId: url.searchParams.get("race") ?? undefined,
     type: url.searchParams.get("type") ?? undefined,
     status: url.searchParams.get("status") ?? undefined,
+    since: url.searchParams.get("since") ?? undefined,
     limit,
   };
 }

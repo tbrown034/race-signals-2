@@ -148,6 +148,17 @@ create table if not exists race_ratings (
   unique (race_id, source_name)
 );
 
+create table if not exists saved_filters (
+  id uuid primary key default gen_random_uuid(),
+  name text not null,
+  owner_email text not null,
+  filter_json jsonb not null default '{}'::jsonb,
+  cadence text not null default 'off',
+  last_sent_at timestamptz,
+  created_at timestamptz not null default now(),
+  constraint saved_filters_cadence_check check (cadence in ('daily', 'hourly', 'off'))
+);
+
 create table if not exists ingestion_runs (
   id uuid primary key default gen_random_uuid(),
   source text not null,
@@ -191,4 +202,5 @@ create index if not exists signals_type_idx on signals(signal_type);
 create index if not exists signals_race_idx on signals(race_id);
 create index if not exists signals_status_idx on signals(status);
 create index if not exists race_ratings_race_idx on race_ratings(race_id);
+create index if not exists saved_filters_cadence_idx on saved_filters(cadence, last_sent_at);
 create index if not exists ingestion_runs_mode_idx on ingestion_runs(mode, started_at desc);

@@ -114,6 +114,16 @@ export type RaceRating = {
   rationale?: string | null;
 };
 
+export type SavedFilter = {
+  id: string;
+  name: string;
+  ownerEmail: string;
+  filterJson: Record<string, string>;
+  cadence: "daily" | "hourly" | "off";
+  lastSentAt?: string | null;
+  createdAt: string;
+};
+
 export type ValidationIssue = {
   entityType: string;
   sourceId?: string | null;

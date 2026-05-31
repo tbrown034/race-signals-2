@@ -1,5 +1,3 @@
-import "server-only";
-
 import {
   demoCandidates,
   demoCommittees,
@@ -107,6 +105,10 @@ export async function getSignals(filters: SignalFilters = {}) {
   if (filters.status) {
     values.push(filters.status);
     where.push(`s.status = $${values.length}`);
+  }
+  if (filters.since) {
+    values.push(filters.since);
+    where.push(`s.created_at > $${values.length}`);
   }
   if (filters.q) {
     values.push(`%${filters.q}%`);

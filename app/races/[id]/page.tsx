@@ -129,7 +129,7 @@ export default async function RacePage({
                     <th className="px-4 py-3 font-medium" scope="col">FEC record</th>
                     <th className="px-4 py-3 text-right font-medium" scope="col">Receipts</th>
                     <th className="px-4 py-3 text-right font-medium" scope="col">Cash</th>
-                    <th className="px-4 py-3 font-medium" scope="col">Totals as of</th>
+                    <th className="px-4 py-3 font-medium" scope="col">FEC API totals timestamp</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-neutral-200">

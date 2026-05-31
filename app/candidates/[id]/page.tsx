@@ -81,7 +81,7 @@ export default async function CandidatePage({
           ["Cycle receipts", candidateMoney(candidate.totalReceiptsCycle, candidate.totalsUpdatedAt)],
           ["Cash on hand", candidateMoney(candidate.cashOnHandLatest, candidate.totalsUpdatedAt)],
           ["Cash as of", formatDate(candidate.cashOnHandAsOf)],
-          ["FEC totals load date", candidate.totalsUpdatedAt ? formatDateTime(candidate.totalsUpdatedAt) : null],
+          ["FEC API totals timestamp", candidate.totalsUpdatedAt ? formatDateTime(candidate.totalsUpdatedAt) : null],
           ...(candidate.sourceUrl ? ([[
             "Verify current totals",
             <a className="font-medium underline underline-offset-4" href={candidate.sourceUrl} key="fec-totals" rel="noreferrer" target="_blank">

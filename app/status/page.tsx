@@ -183,7 +183,7 @@ export default async function StatusPage() {
                     <th className="px-4 py-3 font-medium" scope="col">Race</th>
                     <th className="px-4 py-3 text-right font-medium" scope="col">Cycle receipts</th>
                     <th className="px-4 py-3 font-medium" scope="col">FEC record</th>
-                    <th className="px-4 py-3 font-medium" scope="col">Totals loaded</th>
+                    <th className="px-4 py-3 font-medium" scope="col">FEC API totals timestamp</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-neutral-200">

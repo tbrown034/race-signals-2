@@ -29,6 +29,10 @@ const sections = [
     body: "Before citing a signal, open the linked FEC source, confirm the candidate, committee, date, amount and race context, then check the status page for ingest freshness. Use the Schedule E records page to reconcile outside-spending totals against stored source rows. Missing signals do not mean no activity; they usually mean the current stored slice has not matched a report, committee record or Schedule E row that crosses the signal rules.",
   },
   {
+    title: "Exports",
+    body: "CSV and JSON exports carry methodology URLs, scope notes and source IDs. Schedule E exports include scoped local evidence links plus the FEC source URL; activity-spike signal exports flatten latest/prior filing receipts, coverage windows, source URLs and comparison basis for spreadsheet review.",
+  },
+  {
     title: "What To Cite",
     body: "For campaign-finance facts, cite the FEC source URL and stable source ID shown on the card or export. Race Signals can be cited as a monitoring layer, but it is not the legal source of record. For election timeline rows, use the Wikidata or Wikipedia citation linked from the row.",
   },

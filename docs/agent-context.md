@@ -166,6 +166,7 @@ Implemented or expected validation rules:
 - Missing signal source kind
 - Suspiciously large amount
 - Broken or missing source URL
+- FEC source URL shape by source kind, including Schedule E links with the expected `sub_id`
 - Unmatched race
 - Cross-cycle records attached to current-cycle races
 - Schedule E signals missing FEC target-position code
@@ -196,6 +197,8 @@ Every signal needs:
 - FEC source link
 - Confidence/status if needed
 - Data freshness timestamp
+
+Exports are part of the product surface. Preserve methodology URLs, scope notes, source IDs and source URLs in CSV/JSON exports. Activity-spike exports should keep latest/prior filing receipts, source URLs, coverage windows and comparison basis as flat columns so data reporters do not have to parse metadata JSON. Schedule E exports should include scoped local evidence URLs while keeping the FEC URL as the durable source of record.
 
 ## Agent Operating Notes
 

@@ -41,6 +41,42 @@ async function main() {
       limit 10
     `));
 
+    checks.push(await countCheck(pool, "Non-FEC signal source URL", "fail", `
+      select dedupe_key, signal_type, source_url, metadata->>'sourceKind' as source_kind
+      from signals
+      where source_url is not null
+        and source_url <> ''
+        and source_url not like 'https://www.fec.gov/data/%'
+      limit 10
+    `));
+
+    checks.push(await countCheck(pool, "Committee signal source URL mismatch", "fail", `
+      select dedupe_key, signal_type, source_url, metadata->>'sourceId' as source_id
+      from signals
+      where metadata->>'sourceKind' = 'committee'
+        and source_url not like 'https://www.fec.gov/data/committee/%'
+      limit 10
+    `));
+
+    checks.push(await countCheck(pool, "Filing signal source URL mismatch", "fail", `
+      select dedupe_key, signal_type, source_url, metadata->>'sourceId' as source_id
+      from signals
+      where metadata->>'sourceKind' = 'filing'
+        and source_url not like 'https://www.fec.gov/data/filing/%'
+      limit 10
+    `));
+
+    checks.push(await countCheck(pool, "Schedule E signal source URL mismatch", "fail", `
+      select dedupe_key, signal_type, source_url, metadata->>'sourceId' as source_id
+      from signals
+      where metadata->>'sourceKind' = 'schedule_e'
+        and (
+          source_url not like 'https://www.fec.gov/data/independent-expenditures/%'
+          or position(('sub_id=' || (metadata->>'sourceId')) in source_url) = 0
+        )
+      limit 10
+    `));
+
     checks.push(await countCheck(pool, "Duplicate signal keys", "fail", `
       select dedupe_key, count(*)::int as count
       from signals

@@ -39,7 +39,7 @@ export function CoverageStrip({
             <dd className="mt-1 font-semibold text-neutral-950">{latestScope}</dd>
           </div>
           <div>
-            <dt>Signals</dt>
+            <dt>Stored signals</dt>
             <dd className="mt-1 font-semibold text-neutral-950">{counts.signals ?? 0}</dd>
           </div>
           <div>

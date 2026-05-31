@@ -134,7 +134,7 @@ The `/review` page gathers review-flagged signals, aggregate-only candidate mone
 
 CSV and JSON exports are designed for source-checking, not just download volume.
 
-- Signal exports include FEC source URL, stable source ID, source kind, methodology URL, scope note and local signal permalink.
+- Signal exports include FEC source URL, stable source ID, source kind, rule text, methodology URL, scope note and local signal permalink.
 - Activity-spike signal exports flatten the comparison evidence into first-class columns: latest/prior receipts, receipts ratio, report types, coverage windows, source IDs, source URLs and comparison basis.
 - Schedule E exports include the FEC source URL plus a scoped Race Signals evidence URL back to the Schedule E records page. The FEC URL remains the durable source of record.
 - Spender and race-board exports label totals as stored database-slice totals and include scope notes so downloaded rows do not read as national completeness claims.

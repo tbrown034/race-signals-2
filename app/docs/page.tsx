@@ -30,7 +30,7 @@ const sections = [
   },
   {
     title: "Exports",
-    body: "CSV and JSON exports carry methodology URLs, scope notes and source IDs. Schedule E exports include scoped local evidence links plus the FEC source URL and preserve visible evidence filters such as state, race, target-position code, minimum amount, target party and target incumbent/challenger/open-seat status. Activity-spike signal exports flatten latest/prior filing receipts, coverage windows, source URLs and comparison basis for spreadsheet review.",
+    body: "CSV and JSON exports carry methodology URLs, scope notes, source IDs and the rule text that caused a signal to appear. Schedule E exports include scoped local evidence links plus the FEC source URL and preserve visible evidence filters such as state, race, target-position code, minimum amount, target party and target incumbent/challenger/open-seat status. Activity-spike signal exports flatten latest/prior filing receipts, coverage windows, source URLs and comparison basis for spreadsheet review.",
   },
   {
     title: "What To Cite",

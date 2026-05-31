@@ -4,19 +4,25 @@ Race Signals is a serious portfolio MVP for spotting early campaign-finance sign
 
 It is built for reporters and editors who need a fast answer to: what changed, who filed, who formed a committee, where money is moving and what deserves follow-up.
 
-The MVP is intentionally focused: FEC API only, covering 2026 U.S. House races across all 50 states plus 2026 U.S. Senate races.
+The MVP is intentionally focused: FEC API only for campaign-finance records, covering 2026 U.S. House races across all 50 states plus 2026 U.S. Senate races. Election timeline and photo context, when present, comes from attributed public sources.
 
 ## Why It Matters Journalistically
 
-Campaign-finance stories often start as paperwork before they become public campaign narratives. A new committee, a large receipt, a filing, or outside spending can show intent, momentum or outside interest earlier than speeches, polling or ads.
+Campaign-finance stories often start as paperwork before they become public campaign narratives. A new committee, a filing, or outside spending can show intent, momentum or outside interest earlier than speeches, polling or ads.
 
 Race Signals turns those records into a chronological feed of source-linked alerts with plain-English context.
 
 ## Data Sources
 
-Current source:
+Current campaign-finance source:
 
 - Federal Election Commission API
+
+Context sources used outside the campaign-finance pipeline:
+
+- Wikidata and Wikipedia for election timeline rows when available
+- Congressional Biographical Directory photos via theunitedstates.io for sitting members
+- unitedstates/congress-legislators for identifier crosswalks
 
 Initial endpoints:
 

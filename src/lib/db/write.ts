@@ -260,6 +260,12 @@ export async function upsertFilings(filings: Filing[]) {
 }
 
 export async function upsertTransactions(transactions: Transaction[]) {
+  if (transactions.length && process.env.ENABLE_DONOR_TRANSACTION_STORAGE !== "1") {
+    throw new Error(
+      "Schedule A donor transaction storage is disabled. Set ENABLE_DONOR_TRANSACTION_STORAGE=1 only for explicit donor-storage experiments.",
+    );
+  }
+
   const pool = getPool();
   for (const transaction of transactions.filter((item) => item.sourceId)) {
     await pool.query(

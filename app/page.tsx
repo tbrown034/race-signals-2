@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { CoverageStrip } from "@/src/components/coverage-strip";
 import { FeedFilters } from "@/src/components/feed-filters";
 import { PageShell } from "@/src/components/page-shell";
 import { SignalCard } from "@/src/components/signal-card";
@@ -19,8 +20,8 @@ const quickViews = [
   },
   {
     href: "/?office=S",
-    label: "Senate watch",
-    body: "National Senate signals for campaign and money reporters.",
+    label: "Senate filter",
+    body: "Shows Senate records present in the current stored slice.",
   },
   {
     href: "/?type=large_independent_expenditure",
@@ -60,11 +61,12 @@ export default async function Home({
   ]);
   const visibleSignals = signals.slice(0, 50);
   const hasMoreSignals = signals.length > visibleSignals.length;
+  const selectedRace = raceId ? races.find((race) => race.id === raceId) : null;
   const activeFilters = [
     q ? `search "${q}"` : null,
     state ? `state ${state}` : null,
     office ? (office === "S" ? "Senate" : office === "H" ? "House" : `office ${office}`) : null,
-    raceId ?? null,
+    selectedRace ? selectedRace.name : raceId,
     type ? type.replaceAll("_", " ") : null,
     statusFilter ? `status ${statusFilter}` : null,
     since ? sinceLabel(since) : null,
@@ -108,6 +110,7 @@ export default async function Home({
               </div>
             </div>
           </div>
+          <CoverageStrip counts={status.counts} latestRun={status.runs[0]} mode={status.mode} />
           <FeedFilters
             key={[q, state, office, raceId, type, statusFilter, since].join("|")}
             races={races}

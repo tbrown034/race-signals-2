@@ -30,10 +30,10 @@ async function main() {
       order by pg_total_relation_size(c.oid) desc
       limit 12
     `);
-    const exactCounts = await getExactCounts(
-      pool,
-      tables.rows.map((row) => row.table_name),
-    );
+    const exactCounts = await getExactCounts(pool, [
+      ...tables.rows.map((row) => row.table_name),
+      "transactions",
+    ]);
 
     console.log(`Database size: ${formatBytes(Number(databaseSize.rows[0]?.size ?? 0))}`);
     console.table(
@@ -43,6 +43,13 @@ async function main() {
         rows: exactCounts.get(row.table_name) ?? Number(row.row_estimate),
       })),
     );
+    const donorRows = exactCounts.get("transactions") ?? 0;
+    if (donorRows > 0) {
+      console.error(
+        `Cost guard failed: transactions contains ${donorRows} donor-level rows. Run npm run repair:donors or explicitly re-scope donor storage.`,
+      );
+      process.exitCode = 1;
+    }
   } finally {
     await pool.end();
   }
@@ -50,7 +57,7 @@ async function main() {
 
 async function getExactCounts(pool: ReturnType<typeof getPool>, tableNames: string[]) {
   const counts = new Map<string, number>();
-  const budgetSensitiveTables = tableNames.filter((name) =>
+  const budgetSensitiveTables = [...new Set(tableNames)].filter((name) =>
     [
       "candidates",
       "committees",

@@ -1,8 +1,9 @@
 import Link from "next/link";
+import { CoverageStrip } from "@/src/components/coverage-strip";
 import { FeedFilters } from "@/src/components/feed-filters";
 import { PageShell } from "@/src/components/page-shell";
 import { SignalCard } from "@/src/components/signal-card";
-import { getRaces, getSpendingSignals } from "@/src/lib/db/repository";
+import { getRaces, getSpendingSignals, getStatus } from "@/src/lib/db/repository";
 import { signalFiltersFromSearchParams } from "@/src/lib/signals/filters";
 import type { Metadata } from "next";
 
@@ -24,9 +25,10 @@ export default async function SpendingPage({
   const raceId = typeof params.race === "string" ? params.race : undefined;
   const statusFilter = typeof params.status === "string" ? params.status : undefined;
   const since = typeof params.since === "string" ? params.since : undefined;
-  const [signals, races] = await Promise.all([
+  const [signals, races, status] = await Promise.all([
     getSpendingSignals(signalFiltersFromSearchParams(params, 101), sort),
     getRaces(),
+    getStatus(),
   ]);
   const visibleSignals = signals.slice(0, 100);
   const hasMoreSignals = signals.length > visibleSignals.length;
@@ -68,6 +70,7 @@ export default async function SpendingPage({
               </div>
             </div>
           </div>
+          <CoverageStrip counts={status.counts} latestRun={status.runs[0]} mode={status.mode} />
           <FeedFilters
             clearHref="/spending"
             key={[q, state, office, raceId, statusFilter, since].join("|")}

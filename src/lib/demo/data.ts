@@ -5,7 +5,6 @@ import type {
   IngestionRun,
   Race,
   Signal,
-  Transaction,
 } from "@/src/lib/types";
 import { TARGET_RACES } from "@/src/lib/scope";
 
@@ -92,33 +91,6 @@ export const demoCommittees: Committee[] = [
   },
 ];
 
-export const demoTransactions: Transaction[] = [
-  {
-    sourceId: "demo-tx-001",
-    committeeId: "cmte-C00890501",
-    fecCommitteeId: "C00890501",
-    contributorName: "Midwest Civic Fund",
-    amount: 25000,
-    transactionDate: "2026-05-24",
-    transactionType: "15",
-    sourceUrl:
-      "https://www.fec.gov/data/receipts/individual-contributions/?committee_id=C00890501",
-    raw: {},
-  },
-  {
-    sourceId: "demo-tx-002",
-    committeeId: "cmte-C00890544",
-    fecCommitteeId: "C00890544",
-    contributorName: "Northside Builders PAC",
-    amount: 12000,
-    transactionDate: "2026-05-22",
-    transactionType: "15",
-    sourceUrl:
-      "https://www.fec.gov/data/receipts/individual-contributions/?committee_id=C00890544",
-    raw: {},
-  },
-];
-
 export const demoIndependentExpenditures: IndependentExpenditure[] = [
   {
     sourceId: "demo-ie-001",
@@ -183,31 +155,6 @@ export const demoSignals: Signal[] = [
     sourceUrl:
       "https://www.fec.gov/data/independent-expenditures/?candidate_id=H6IN05202",
     confidence: "high",
-    status: "demo",
-    dataFreshness: freshness,
-  },
-  {
-    id: "demo-signal-003",
-    dedupeKey: "demo:tx:demo-tx-001",
-    signalType: "large_contribution",
-    headline: "Ellison for Indiana received a $25,000 contribution.",
-    whyItMatters:
-      "Large receipts can reveal which campaigns are attracting early institutional support and deserve a closer look at donor networks.",
-    candidateId: "cand-H6IN05101",
-    candidateName: "Mara Ellison",
-    candidateParty: "DEM",
-    candidateState: "IN",
-    candidateDistrict: "05",
-    candidateIncumbentChallengeStatus: "I",
-    committeeId: "cmte-C00890501",
-    committeeName: "Ellison for Indiana",
-    raceId: "2026-IN-05-H",
-    raceName: "Indiana 5th Congressional District",
-    amount: 25000,
-    signalDate: "2026-05-24",
-    sourceUrl:
-      "https://www.fec.gov/data/receipts/individual-contributions/?committee_id=C00890501",
-    confidence: "medium",
     status: "demo",
     dataFreshness: freshness,
   },

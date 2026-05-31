@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 const sections = [
   {
     title: "North Star",
-    body: "Race Signals is a feed-first civic data product for spotting early campaign-finance signals before they become obvious stories. The first version is FEC API only, focused on 2026 U.S. House and Senate races.",
+    body: "Race Signals is a feed-first civic data product for spotting early campaign-finance signals before they become obvious stories. Campaign-finance records come from the FEC API; election and photo context comes from attributed public sources when available.",
   },
   {
     title: "Working Notes",

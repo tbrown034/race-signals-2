@@ -87,7 +87,8 @@ export default function MethodologyPage() {
               detection in this MVP. Large independent expenditures start at
               $25,000. Filing-level activity spikes require at least $50,000 in
               latest filing receipts and at least 2x the prior comparable filing.
-              Any monetary signal at $100,000 or more is marked for review.
+              Current-cycle Schedule E independent expenditures of $100,000 or
+              more are marked for review.
             </p>
           </div>
           {signalTypes.map(([id, title, body]) => (

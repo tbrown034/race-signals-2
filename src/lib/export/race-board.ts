@@ -22,6 +22,8 @@ export type RaceBoardExportRow = {
   candidate_totals_fetched_at_oldest: string | null;
   signal_count: number;
   latest_signal_date: string | null;
+  latest_signal_headline: string | null;
+  latest_signal_permalink: string | null;
   independent_expenditure_total: number;
   exported_at: string;
   filters: string;
@@ -53,6 +55,10 @@ export function raceBoardToExportRow(
     candidate_totals_fetched_at_oldest: row.candidateTotalsFetchedAtOldest ?? null,
     signal_count: row.signalCount,
     latest_signal_date: row.latestSignalDate ?? null,
+    latest_signal_headline: row.latestSignalHeadline ?? null,
+    latest_signal_permalink: manifest.baseUrl && row.latestSignalDedupeKey
+      ? `${manifest.baseUrl}/?race=${row.raceId}#${signalAnchorId(row.latestSignalDedupeKey)}`
+      : null,
     independent_expenditure_total: row.independentExpenditureTotal,
     exported_at: manifest.exportedAt,
     filters: JSON.stringify(manifest.filters),
@@ -81,6 +87,8 @@ export function raceBoardRowsToCsv(rows: RaceBoardExportRow[]) {
     "candidate_totals_fetched_at_oldest",
     "signal_count",
     "latest_signal_date",
+    "latest_signal_headline",
+    "latest_signal_permalink",
     "independent_expenditure_total",
     "exported_at",
     "filters",
@@ -103,4 +111,8 @@ function csvCell(value: string | number | null) {
   const text = String(value);
   if (!/[",\n\r]/.test(text)) return text;
   return `"${text.replaceAll('"', '""')}"`;
+}
+
+function signalAnchorId(dedupeKey: string) {
+  return `signal-${dedupeKey.replace(/[^a-zA-Z0-9_-]/g, "-")}`;
 }

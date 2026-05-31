@@ -15,7 +15,7 @@ import {
   getRaceStats,
   getSignalsForEntity,
 } from "@/src/lib/db/repository";
-import { formatMoney } from "@/src/lib/format";
+import { formatDateTime, formatMoney } from "@/src/lib/format";
 import type { Metadata } from "next";
 
 export async function generateMetadata({
@@ -114,16 +114,22 @@ export default async function RacePage({
             <h2 className="text-sm font-semibold uppercase tracking-[0.14em] text-neutral-600">
               Candidate cohort
             </h2>
+            <p className="mt-2 max-w-3xl text-sm text-neutral-600">
+              Cycle totals come from the FEC candidate totals endpoint. Verify the FEC record before treating
+              cohort money as current ballot context.
+            </p>
           </div>
           {candidates.length ? (
             <div className="overflow-x-auto">
-              <table className="w-full text-left text-sm">
+              <table className="w-full min-w-[920px] text-left text-sm">
                 <thead className="bg-neutral-100 font-mono text-xs uppercase tracking-[0.12em] text-neutral-500">
                   <tr>
                     <th className="px-4 py-3 font-medium" scope="col">Candidate</th>
                     <th className="px-4 py-3 font-medium" scope="col">Party</th>
+                    <th className="px-4 py-3 font-medium" scope="col">FEC record</th>
                     <th className="px-4 py-3 text-right font-medium" scope="col">Receipts</th>
                     <th className="px-4 py-3 text-right font-medium" scope="col">Cash</th>
+                    <th className="px-4 py-3 font-medium" scope="col">Totals as of</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-neutral-200">
@@ -156,11 +162,31 @@ export default async function RacePage({
                           {partyLabel(candidate.party)}
                         </span>
                       </td>
+                      <td className="px-4 py-3">
+                        <div className="flex flex-col gap-1">
+                          <span className="font-mono text-xs text-neutral-700">{candidate.fecCandidateId}</span>
+                          {candidate.sourceUrl ? (
+                            <a
+                              className="text-xs font-medium underline underline-offset-4"
+                              href={candidate.sourceUrl}
+                              rel="noreferrer"
+                              target="_blank"
+                            >
+                              Verify at FEC
+                            </a>
+                          ) : (
+                            <span className="text-xs text-neutral-500">Source not stored</span>
+                          )}
+                        </div>
+                      </td>
                       <td className="px-4 py-3 text-right font-mono">
                         {candidateMoney(candidate.totalReceiptsCycle, candidate.totalsUpdatedAt)}
                       </td>
                       <td className="px-4 py-3 text-right font-mono">
                         {candidateMoney(candidate.cashOnHandLatest, candidate.totalsUpdatedAt)}
+                      </td>
+                      <td className="px-4 py-3 text-xs text-neutral-600">
+                        {candidateTotalsAsOf(candidate.totalsUpdatedAt)}
                       </td>
                     </tr>
                   ))}
@@ -195,6 +221,10 @@ function partyLabel(party?: string | null) {
 
 function candidateMoney(value?: number | null, totalsUpdatedAt?: string | null) {
   return formatMoney(value) ?? (totalsUpdatedAt ? "Not reported by FEC" : "FEC totals not loaded");
+}
+
+function candidateTotalsAsOf(value?: string | null) {
+  return value ? formatDateTime(value) : "FEC totals not loaded";
 }
 
 function countSignals(signals: Awaited<ReturnType<typeof getSignalsForEntity>>) {

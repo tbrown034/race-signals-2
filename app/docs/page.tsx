@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { PageShell } from "@/src/components/page-shell";
 
 const sections = [
   {
@@ -6,8 +7,8 @@ const sections = [
     body: "Race Signals is a feed-first civic data product for spotting early campaign-finance signals before they become obvious stories. The first version is FEC API only, focused on 2026 U.S. House and Senate races.",
   },
   {
-    title: "Agent Memory",
-    body: "The persistent working context for agentic tools lives in docs/agent-context.md. It stores product principles, FEC endpoint notes, Next.js caveats, schema boundaries and implementation guardrails.",
+    title: "Working Notes",
+    body: "The persistent project context lives in docs/agent-context.md. It stores product principles, FEC endpoint notes, Next.js caveats, schema boundaries and implementation guardrails.",
   },
   {
     title: "FEC API",
@@ -25,20 +26,21 @@ const sections = [
 
 export default function DocsPage() {
   return (
-    <main className="min-h-screen bg-stone-50 text-neutral-950">
-      <div className="mx-auto flex w-full max-w-5xl flex-col gap-8 px-5 py-8 sm:px-8">
-        <header className="border-b border-neutral-300 pb-5">
-          <p className="font-mono text-xs uppercase tracking-[0.18em] text-neutral-500">
-            Internal documentation
-          </p>
-          <h1 className="mt-2 text-3xl font-semibold tracking-tight">
-            Race Signals Agent Context
-          </h1>
-          <p className="mt-3 max-w-3xl text-sm leading-6 text-neutral-700">
-            A compact reference page for the product north star, FEC API scope,
-            local Next.js guidance and implementation boundaries.
-          </p>
-        </header>
+    <PageShell>
+      <main>
+        <div className="mx-auto flex w-full max-w-5xl flex-col gap-8 px-5 py-8 sm:px-8">
+          <header className="border-b border-neutral-300 pb-5">
+            <p className="font-mono text-xs uppercase tracking-[0.18em] text-neutral-500">
+              Product notes
+            </p>
+            <h1 className="mt-2 text-3xl font-semibold tracking-tight">
+              Race Signals source and project notes
+            </h1>
+            <p className="mt-3 max-w-3xl text-sm leading-6 text-neutral-700">
+              A compact reference page for the product north star, FEC API scope,
+              source boundaries and implementation guardrails.
+            </p>
+          </header>
 
         <section className="grid gap-4 md:grid-cols-2">
           {sections.map((section) => (
@@ -58,12 +60,13 @@ export default function DocsPage() {
           <h2 className="text-sm font-semibold uppercase tracking-[0.14em] text-neutral-600">
             Canonical Files
           </h2>
-          <div className="mt-4 overflow-hidden border border-neutral-300 bg-white">
-            <table className="w-full text-left text-sm">
+          <div className="mt-4 border border-neutral-300 bg-white">
+            <div className="overflow-x-auto">
+              <table className="w-full min-w-[620px] text-left text-sm">
               <thead className="bg-neutral-100 text-xs uppercase tracking-[0.12em] text-neutral-500">
                 <tr>
-                  <th className="px-4 py-3 font-medium">File</th>
-                  <th className="px-4 py-3 font-medium">Purpose</th>
+                  <th className="px-4 py-3 font-medium" scope="col">File</th>
+                  <th className="px-4 py-3 font-medium" scope="col">Purpose</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-neutral-200">
@@ -92,7 +95,8 @@ export default function DocsPage() {
                   </td>
                 </tr>
               </tbody>
-            </table>
+              </table>
+            </div>
           </div>
         </section>
 
@@ -116,7 +120,8 @@ export default function DocsPage() {
             FEC API docs
           </a>
         </footer>
-      </div>
-    </main>
+        </div>
+      </main>
+    </PageShell>
   );
 }

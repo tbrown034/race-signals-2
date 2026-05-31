@@ -31,6 +31,7 @@ export function SignalCard({ signal }: { signal: Signal }) {
   const isIncumbent = isIncumbentStatus(signal.candidateIncumbentChallengeStatus);
   const candidateLabel = candidateDisplay(signal);
   const anchorId = signalAnchorId(signal);
+  const evidence = signalEvidence(signal);
 
   return (
     <article
@@ -56,8 +57,11 @@ export function SignalCard({ signal }: { signal: Signal }) {
             {signal.headline}
           </h2>
           {signal.status === "review" ? (
-            <span className="border border-red-700 px-1.5 py-0.5 font-mono text-[10px] uppercase tracking-[0.12em] text-red-700">
-              Review
+            <span
+              className="border border-red-700 px-1.5 py-0.5 font-mono text-[10px] uppercase tracking-[0.12em] text-red-700"
+              title={reviewReason(signal)}
+            >
+              Review: {reviewReason(signal)}
             </span>
           ) : signal.status !== "new" ? (
             <span className="border border-neutral-400 px-1.5 py-0.5 font-mono text-[10px] uppercase tracking-[0.12em] text-neutral-700">
@@ -68,6 +72,11 @@ export function SignalCard({ signal }: { signal: Signal }) {
         <p className="mt-1 max-w-3xl text-sm leading-5 text-neutral-700">
           {signal.whyItMatters}
         </p>
+        {evidence ? (
+          <p className="mt-1 font-mono text-[11px] uppercase tracking-[0.12em] text-neutral-500">
+            Record: {evidence}
+          </p>
+        ) : null}
         <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-xs text-neutral-600">
           {contributorNameNormalized ? (
             <span title={contributorName ?? contributorNameNormalized}>
@@ -105,9 +114,13 @@ export function SignalCard({ signal }: { signal: Signal }) {
         <span className="font-mono text-sm font-semibold text-neutral-950">
           {amount ?? "Non-monetary"}
         </span>
-        <span className="border border-neutral-400 px-2 py-1 font-mono uppercase tracking-[0.12em] text-neutral-600">
+        <Link
+          className="border border-neutral-400 px-2 py-1 font-mono uppercase tracking-[0.12em] text-neutral-600 underline-offset-4 hover:underline"
+          href="/methodology#confidence"
+          title="How Race Signals assigns confidence labels"
+        >
           Confidence: {signal.confidence}
-        </span>
+        </Link>
         {signal.sourceUrl ? (
           <a
             className="font-medium underline underline-offset-4"
@@ -149,4 +162,51 @@ function isIncumbentStatus(status?: string | null) {
 
 function signalAnchorId(signal: Signal) {
   return `signal-${signal.dedupeKey.replace(/[^a-zA-Z0-9_-]/g, "-")}`;
+}
+
+function reviewReason(signal: Signal) {
+  if (signal.amount && signal.amount >= 100000) return "large amount";
+  return "needs human check";
+}
+
+function signalEvidence(signal: Signal) {
+  if (signal.signalType === "large_independent_expenditure") {
+    const support = textMetadata(signal.metadata?.supportOpposeIndicator);
+    return [
+      support ? `stance ${support}` : null,
+      signal.amount ? `amount ${formatMoney(signal.amount)}` : null,
+      signal.committeeName ? `spender ${signal.committeeName}` : null,
+    ]
+      .filter(Boolean)
+      .join(" | ");
+  }
+
+  if (signal.signalType === "committee_activity_spike") {
+    const latest = numberMetadata(signal.metadata?.latestTotalReceipts);
+    const prior = numberMetadata(signal.metadata?.priorTotalReceipts);
+    const reportType = textMetadata(signal.metadata?.reportType);
+    const coverage = [
+      textMetadata(signal.metadata?.coverageStartDate),
+      textMetadata(signal.metadata?.coverageEndDate),
+    ].filter(Boolean);
+    return [
+      reportType ? `report ${reportType}` : null,
+      latest ? `latest ${formatMoney(latest)}` : null,
+      prior ? `prior ${formatMoney(prior)}` : null,
+      coverage.length === 2 ? `period ${coverage.join(" to ")}` : null,
+    ]
+      .filter(Boolean)
+      .join(" | ");
+  }
+
+  return null;
+}
+
+function numberMetadata(value: unknown) {
+  if (typeof value === "number") return value;
+  if (typeof value === "string") {
+    const parsed = Number(value);
+    return Number.isFinite(parsed) ? parsed : null;
+  }
+  return null;
 }

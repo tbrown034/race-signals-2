@@ -40,73 +40,76 @@ export default async function StatusPage() {
           ))}
         </section>
 
-        <section className="mt-6 overflow-hidden border border-neutral-300 bg-white">
+        <section className="mt-6 border border-neutral-300 bg-white">
           <div className="border-b border-neutral-300 px-5 py-4">
             <h2 className="text-sm font-semibold uppercase tracking-[0.14em] text-neutral-600">
               Endpoint freshness
             </h2>
           </div>
-          <table className="w-full text-left text-sm">
-            <caption className="border-b border-neutral-300 px-4 py-3 text-left">
-              {/* Status uses the same square shape with operational meanings, bounded to this page. */}
-              <span className="inline-flex flex-wrap items-center gap-x-4 gap-y-2 font-mono text-[11px] uppercase tracking-[0.12em] text-neutral-600">
-                <LegendSquare className="bg-emerald-700" label="Healthy" />
-                <LegendSquare className="bg-amber-700" label="Stale/partial" />
-                <LegendSquare className="bg-red-700" label="Error" />
-                <LegendSquare className="border border-neutral-500" label="No runs" />
-              </span>
-            </caption>
-            <thead className="bg-neutral-100 text-xs uppercase tracking-[0.12em] text-neutral-500">
-              <tr>
-                <th className="px-4 py-3 font-medium">Endpoint</th>
-                <th className="px-4 py-3 font-medium">Last successful run</th>
-                <th className="px-4 py-3 font-medium">Records fetched</th>
-                <th className="px-4 py-3 font-medium">Validation issues</th>
-                <th className="px-4 py-3 font-medium">Status</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-neutral-200">
-              {status.endpoints.length ? (
-                status.endpoints.map((endpoint) => (
-                  <tr key={endpoint.endpoint}>
-                    <td className="px-4 py-3 font-mono">
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-[760px] text-left text-sm">
+              <caption className="border-b border-neutral-300 px-4 py-3 text-left">
+                {/* Status uses the same square shape with operational meanings, bounded to this page. */}
+                <span className="inline-flex flex-wrap items-center gap-x-4 gap-y-2 font-mono text-[11px] uppercase tracking-[0.12em] text-neutral-600">
+                  <LegendSquare className="bg-emerald-700" label="Healthy" />
+                  <LegendSquare className="bg-amber-700" label="Stale/partial" />
+                  <LegendSquare className="bg-red-700" label="Error" />
+                  <LegendSquare className="border border-neutral-500" label="No runs" />
+                </span>
+              </caption>
+              <thead className="bg-neutral-100 text-xs uppercase tracking-[0.12em] text-neutral-500">
+                <tr>
+                  <th className="px-4 py-3 font-medium" scope="col">Endpoint</th>
+                  <th className="px-4 py-3 font-medium" scope="col">Last successful run</th>
+                  <th className="px-4 py-3 font-medium" scope="col">Records fetched</th>
+                  <th className="px-4 py-3 font-medium" scope="col">Validation issues</th>
+                  <th className="px-4 py-3 font-medium" scope="col">Status</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-neutral-200">
+                {status.endpoints.length ? (
+                  status.endpoints.map((endpoint) => (
+                    <tr key={endpoint.endpoint}>
+                      <td className="px-4 py-3 font-mono">
+                        <span className="inline-flex items-center gap-2">
+                          <HealthSquare endpoint={endpoint} />
+                          {endpoint.endpoint}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3">{formatDateTime(endpoint.completedAt)}</td>
+                      <td className="px-4 py-3">{endpoint.recordsFetched}</td>
+                      <td className="px-4 py-3">{endpoint.validationIssuesCount}</td>
+                      <td className="px-4 py-3">{endpoint.status}</td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td className="px-4 py-3 text-neutral-600" colSpan={5}>
                       <span className="inline-flex items-center gap-2">
-                        <HealthSquare endpoint={endpoint} />
-                        {endpoint.endpoint}
+                        <span aria-hidden="true" className="inline-block h-2 w-2 border border-neutral-500" />
+                        No endpoint-level freshness has been recorded yet.
                       </span>
                     </td>
-                    <td className="px-4 py-3">{formatDateTime(endpoint.completedAt)}</td>
-                    <td className="px-4 py-3">{endpoint.recordsFetched}</td>
-                    <td className="px-4 py-3">{endpoint.validationIssuesCount}</td>
-                    <td className="px-4 py-3">{endpoint.status}</td>
                   </tr>
-                ))
-              ) : (
-                <tr>
-                  <td className="px-4 py-3 text-neutral-600" colSpan={5}>
-                    <span className="inline-flex items-center gap-2">
-                      <span aria-hidden="true" className="inline-block h-2 w-2 border border-neutral-500" />
-                      No endpoint-level freshness has been recorded yet.
-                    </span>
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
+                )}
+              </tbody>
+            </table>
+          </div>
         </section>
 
-        <section className="mt-6 overflow-hidden border border-neutral-300 bg-white">
-          <table className="w-full text-left text-sm">
+        <section className="mt-6 border border-neutral-300 bg-white">
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-[980px] text-left text-sm">
             <thead className="bg-neutral-100 text-xs uppercase tracking-[0.12em] text-neutral-500">
               <tr>
-                <th className="px-4 py-3 font-medium">Source</th>
-                <th className="px-4 py-3 font-medium">Mode</th>
-                <th className="px-4 py-3 font-medium">Scope</th>
-                <th className="px-4 py-3 font-medium">Status</th>
-                <th className="px-4 py-3 font-medium">Window</th>
-                <th className="px-4 py-3 font-medium">Finished</th>
-                <th className="px-4 py-3 font-medium">Records</th>
-                <th className="px-4 py-3 font-medium">Run notes</th>
+                <th className="px-4 py-3 font-medium" scope="col">Source</th>
+                <th className="px-4 py-3 font-medium" scope="col">Mode</th>
+                <th className="px-4 py-3 font-medium" scope="col">Scope</th>
+                <th className="px-4 py-3 font-medium" scope="col">Status</th>
+                <th className="px-4 py-3 font-medium" scope="col">Window</th>
+                <th className="px-4 py-3 font-medium" scope="col">Finished</th>
+                <th className="px-4 py-3 font-medium" scope="col">Records</th>
+                <th className="px-4 py-3 font-medium" scope="col">Run notes</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-neutral-200">
@@ -129,7 +132,8 @@ export default async function StatusPage() {
                 </tr>
               ))}
             </tbody>
-          </table>
+            </table>
+          </div>
         </section>
       </main>
     </PageShell>

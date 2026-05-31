@@ -3,6 +3,7 @@ import { EntityPage } from "@/src/components/entity-page";
 import { PageShell } from "@/src/components/page-shell";
 import { PartySquare } from "@/src/components/party-square";
 import { getCandidate, getCommittee, getCommitteeTransactions, getSignalsForEntity } from "@/src/lib/db/repository";
+import { committeeContext, committeeDesignationLabel, committeeTypeLabel } from "@/src/lib/fec-codes";
 
 export default async function CommitteePage({
   params,
@@ -30,8 +31,9 @@ export default async function CommitteePage({
         signals={signals}
         meta={[
           ["FEC ID", committee.fecCommitteeId],
-          ["Type", committee.committeeType],
-          ["Designation", committee.designation],
+          ["Type", committeeTypeLabel(committee.committeeType)],
+          ["Designation", committeeDesignationLabel(committee.designation)],
+          ["Context", committeeContext(committee)],
           ["Party", committee.party],
           ["Race", committee.raceId],
           ["Treasurer", committee.treasurerName],

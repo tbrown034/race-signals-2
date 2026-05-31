@@ -78,7 +78,10 @@ export default function MethodologyPage() {
             <p className="mt-2 max-w-3xl text-sm leading-6 text-neutral-700">
               Signal thresholds are intentionally flat and stable. Race Signals does
               not use adaptive scoring, percentile baselines or statistical anomaly
-              detection in this MVP.
+              detection in this MVP. Large independent expenditures start at
+              $25,000. Filing-level activity spikes require at least $50,000 in
+              latest filing receipts and at least 2x the prior comparable filing.
+              Any monetary signal at $100,000 or more is marked for review.
             </p>
           </div>
           {signalTypes.map(([id, title, body]) => (
@@ -89,6 +92,19 @@ export default function MethodologyPage() {
               <p className="mt-2 text-sm leading-6 text-neutral-700">{body}</p>
             </div>
           ))}
+        </section>
+
+        <section className="mt-6 border border-neutral-300 bg-white p-5" id="confidence">
+          <h2 className="text-base font-semibold">Confidence and review labels</h2>
+          <p className="mt-2 max-w-3xl text-sm leading-6 text-neutral-700">
+            Confidence is a data-quality label, not an importance score. High means
+            the source record links cleanly to a candidate, committee, race and FEC
+            source URL. Medium means the record is useful but needs extra context,
+            often because a large outside-spending record or filing-level comparison
+            deserves a human check. Low is reserved for records with missing or
+            weakly matched context. Review marks unusually large amounts or records
+            that should be verified before publication.
+          </p>
         </section>
 
         <section className="mt-6 border border-neutral-300 bg-white p-5">

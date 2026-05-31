@@ -31,8 +31,8 @@ const signalTypes = [
   ],
   [
     "new_filing",
-    "New filing",
-    "A new report can reveal changed cash position, spending pace and committee activity before those shifts show up in public campaigning. When stored filings share the same committee, report type and coverage period, later versions are labeled as likely amendments or refiles rather than fresh activity.",
+    "Filing record",
+    "A stored filing record can reveal changed cash position, spending pace and committee activity before those shifts show up in public campaigning. The freshness marker and status show whether Race Signals added it recently. When stored filings share the same committee, report type and coverage period, later versions are labeled as likely amendments or refiles rather than fresh activity.",
   ],
   [
     "large_independent_expenditure",

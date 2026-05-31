@@ -173,7 +173,7 @@ export function generateSignals(input: SignalInput): Signal[] {
       signalDate: expenditure.expenditureDate,
       sourceUrl: expenditure.sourceUrl,
       confidence: "high",
-      status: expenditure.amount >= 100000 && computedStatus !== "historical" ? "review" : computedStatus,
+      status: expenditure.amount >= 100000 ? "review" : computedStatus,
       dataFreshness: input.dataFreshness,
       metadata: {
         supportOpposeIndicator: expenditure.supportOpposeIndicator,

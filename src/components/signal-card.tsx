@@ -11,7 +11,7 @@ import type { Signal } from "@/src/lib/types";
 
 const typeLabels: Record<string, string> = {
   new_committee: "Committee record",
-  new_filing: "New filing",
+  new_filing: "Filing record",
   large_contribution: "Large receipt",
   large_independent_expenditure: "Independent expenditure",
   outside_spending_increase: "Outside spending",

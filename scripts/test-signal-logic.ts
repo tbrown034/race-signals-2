@@ -126,6 +126,26 @@ assert.match(
   "IE headlines should use reader-facing candidate names while raw FEC names remain on the entity record",
 );
 
+const oldButCurrentCycleIeSignals = generateSignals({
+  candidates: [candidate],
+  committees: [committee],
+  races: [race],
+  filings: [],
+  independentExpenditures: [
+    {
+      ...currentIe,
+      sourceId: "ie-current-cycle-old-event",
+      expenditureDate: "2025-02-01",
+    },
+  ],
+  dataFreshness: "2026-05-31T12:00:00.000Z",
+});
+assert.equal(
+  oldButCurrentCycleIeSignals.find((signal) => signal.dedupeKey === "fec:large_ie:ie-current-cycle-old-event")?.status,
+  "review",
+  "current-cycle IE over $100k should stay reviewable even when older than the freshness window",
+);
+
 const filingSignal = signals.find((signal) => signal.dedupeKey === "fec:new_filing:filing-current");
 assert.ok(filingSignal, "current-cycle filing should generate a signal");
 assert.equal(filingSignal.metadata?.reportType, "Q1");

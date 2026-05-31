@@ -534,9 +534,16 @@ function signalNextChecks(signal: Signal) {
 
 function scheduleEHref(signal: Signal) {
   const params = new URLSearchParams();
+  const sourceId = textMetadata(signal.metadata?.sourceId);
   if (signal.raceId) params.set("race", signal.raceId);
   if (signal.committeeId) params.set("committee", signal.committeeId);
   if (signal.candidateId) params.set("candidate", signal.candidateId);
+  if (sourceId) params.set("sourceId", sourceId);
   const query = params.toString();
-  return query ? `/records/schedule-e?${query}` : "/records/schedule-e";
+  const hash = sourceId ? `#${scheduleEAnchorId(sourceId)}` : "";
+  return `${query ? `/records/schedule-e?${query}` : "/records/schedule-e"}${hash}`;
+}
+
+function scheduleEAnchorId(sourceId: string) {
+  return `schedule-e-${sourceId.replace(/[^a-zA-Z0-9_-]/g, "-")}`;
 }

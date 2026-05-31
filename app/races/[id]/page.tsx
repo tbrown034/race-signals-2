@@ -229,6 +229,18 @@ export default async function RacePage({
                                 <dd className="inline">{sourceRecordSummary(candidate)}</dd>
                               </div>
                               <div>
+                                <dt className="inline font-mono uppercase tracking-[0.12em] text-neutral-500">Next checks </dt>
+                                <dd className="inline">
+                                  <Link className="font-medium underline underline-offset-4" href={candidateFeedHref(candidate.name)}>
+                                    Signals
+                                  </Link>
+                                  {" / "}
+                                  <Link className="font-medium underline underline-offset-4" href={`/records/schedule-e?candidate=${candidate.id}`}>
+                                    Schedule E
+                                  </Link>
+                                </dd>
+                              </div>
+                              <div>
                                 <dt className="inline font-mono uppercase tracking-[0.12em] text-neutral-500">Fetched </dt>
                                 <dd className="inline">{candidateTotalsFetched(candidate.totalsFetchedAt)}</dd>
                               </div>
@@ -274,6 +286,14 @@ export default async function RacePage({
                       </td>
                       <td className="hidden px-4 py-3 text-xs leading-5 text-neutral-600 md:table-cell">
                         <span className="block">{sourceRecordSummary(candidate)}</span>
+                        <span className="mt-1 flex flex-wrap gap-x-3 gap-y-1">
+                          <Link className="font-medium underline underline-offset-4" href={candidateFeedHref(candidate.name)}>
+                            Signals
+                          </Link>
+                          <Link className="font-medium underline underline-offset-4" href={`/records/schedule-e?candidate=${candidate.id}`}>
+                            Schedule E
+                          </Link>
+                        </span>
                         {isAggregateOnly(candidate) ? (
                           <span className="mt-1 block font-mono text-[11px] uppercase tracking-[0.12em] text-neutral-700">
                             Totals only
@@ -327,6 +347,10 @@ function partyLabel(party?: string | null) {
   if (party === "DEM" || party === "D") return "Democratic";
   if (!party || party === "NNE") return "Other/unknown";
   return party;
+}
+
+function candidateFeedHref(candidateName: string) {
+  return `/?q=${encodeURIComponent(candidateName)}`;
 }
 
 function sourceRecordSummary(candidate: {

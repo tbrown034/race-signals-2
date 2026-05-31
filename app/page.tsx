@@ -4,7 +4,7 @@ import { FeedFilters } from "@/src/components/feed-filters";
 import { PageShell } from "@/src/components/page-shell";
 import { SignalCard } from "@/src/components/signal-card";
 import { getCoverageSummary, getRaces, getSignals, getSignalStateCounts, getSignalStateFreshness, getStateRaceBoard } from "@/src/lib/db/repository";
-import { formatDate, formatMoney } from "@/src/lib/format";
+import { formatDate, formatMoney, formatRelativeTime } from "@/src/lib/format";
 import { signalFiltersFromSearchParams, sinceLabel } from "@/src/lib/signals/filters";
 import type { StateRaceBoardRow } from "@/src/lib/types";
 import type { Metadata } from "next";
@@ -261,7 +261,7 @@ function StateRaceBoard({ rows, state }: { rows: StateRaceBoardRow[]; state: str
         </div>
       </div>
       <div className="overflow-x-auto">
-        <table className="w-full min-w-0 text-left text-sm md:min-w-[760px]">
+        <table className="w-full min-w-0 text-left text-sm md:min-w-[860px]">
           <thead className="bg-neutral-100 font-mono text-xs uppercase tracking-[0.12em] text-neutral-500">
             <tr>
               <th className="px-4 py-3 font-medium" scope="col">Race</th>
@@ -270,6 +270,7 @@ function StateRaceBoard({ rows, state }: { rows: StateRaceBoardRow[]; state: str
               <th className="hidden px-4 py-3 text-right font-medium md:table-cell" scope="col">Raised</th>
               <th className="hidden px-4 py-3 text-right font-medium md:table-cell" scope="col">Signals</th>
               <th className="hidden px-4 py-3 text-right font-medium md:table-cell" scope="col">IE total</th>
+              <th className="hidden px-4 py-3 font-medium md:table-cell" scope="col">Totals fetched</th>
               <th className="hidden px-4 py-3 font-medium md:table-cell" scope="col">Latest signal</th>
             </tr>
           </thead>
@@ -311,6 +312,10 @@ function StateRaceBoard({ rows, state }: { rows: StateRaceBoardRow[]; state: str
                         </dd>
                       </div>
                       <div>
+                        <dt className="inline font-mono uppercase tracking-[0.12em] text-neutral-500">Totals fetched </dt>
+                        <dd className="inline">{raceTotalsFreshness(race)}</dd>
+                      </div>
+                      <div>
                         <dt className="inline font-mono uppercase tracking-[0.12em] text-neutral-500">Latest </dt>
                         <dd className="inline">{race.latestSignalDate ? formatDate(race.latestSignalDate) : "No stored signal"}</dd>
                       </div>
@@ -329,12 +334,13 @@ function StateRaceBoard({ rows, state }: { rows: StateRaceBoardRow[]; state: str
                       "$0"
                     )}
                   </td>
+                  <td className="hidden px-4 py-3 text-xs text-neutral-600 md:table-cell">{raceTotalsFreshness(race)}</td>
                   <td className="hidden px-4 py-3 md:table-cell">{race.latestSignalDate ? formatDate(race.latestSignalDate) : "No stored signal"}</td>
                 </tr>
               ))
             ) : (
               <tr>
-                <td className="px-4 py-3 text-neutral-600" colSpan={7}>
+                <td className="px-4 py-3 text-neutral-600" colSpan={8}>
                   No configured race shells are available for {state}.
                 </td>
               </tr>
@@ -344,4 +350,16 @@ function StateRaceBoard({ rows, state }: { rows: StateRaceBoardRow[]; state: str
       </div>
     </section>
   );
+}
+
+function raceTotalsFreshness(race: StateRaceBoardRow) {
+  if (!race.candidateTotalsFetchedAtLatest) return "Totals not loaded";
+  const latest = formatRelativeTime(race.candidateTotalsFetchedAtLatest);
+  if (
+    race.candidateTotalsFetchedAtOldest &&
+    race.candidateTotalsFetchedAtOldest !== race.candidateTotalsFetchedAtLatest
+  ) {
+    return `${latest}; oldest ${formatRelativeTime(race.candidateTotalsFetchedAtOldest)}`;
+  }
+  return latest;
 }

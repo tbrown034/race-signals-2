@@ -15,6 +15,8 @@ export type RaceBoardExportRow = {
   candidate_count: number;
   incumbent_count: number;
   candidate_receipts_total: number;
+  candidate_totals_fetched_at_latest: string | null;
+  candidate_totals_fetched_at_oldest: string | null;
   signal_count: number;
   latest_signal_date: string | null;
   independent_expenditure_total: number;
@@ -42,6 +44,8 @@ export function raceBoardToExportRow(
     candidate_count: row.candidateCount,
     incumbent_count: row.incumbentCount,
     candidate_receipts_total: row.candidateReceiptsTotal,
+    candidate_totals_fetched_at_latest: row.candidateTotalsFetchedAtLatest ?? null,
+    candidate_totals_fetched_at_oldest: row.candidateTotalsFetchedAtOldest ?? null,
     signal_count: row.signalCount,
     latest_signal_date: row.latestSignalDate ?? null,
     independent_expenditure_total: row.independentExpenditureTotal,
@@ -66,6 +70,8 @@ export function raceBoardRowsToCsv(rows: RaceBoardExportRow[]) {
     "candidate_count",
     "incumbent_count",
     "candidate_receipts_total",
+    "candidate_totals_fetched_at_latest",
+    "candidate_totals_fetched_at_oldest",
     "signal_count",
     "latest_signal_date",
     "independent_expenditure_total",

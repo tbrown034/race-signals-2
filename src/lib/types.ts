@@ -169,6 +169,8 @@ export type StateRaceBoardRow = {
   candidateCount: number;
   incumbentCount: number;
   candidateReceiptsTotal: number;
+  candidateTotalsFetchedAtLatest?: string | null;
+  candidateTotalsFetchedAtOldest?: string | null;
   signalCount: number;
   latestSignalDate?: string | null;
   independentExpenditureTotal: number;

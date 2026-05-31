@@ -609,6 +609,18 @@ export async function getStateRaceBoard(state: string): Promise<StateRaceBoardRo
           candidateReceiptsTotal: demoCandidates
             .filter((candidate) => candidate.raceId === race.id)
             .reduce((sum, candidate) => sum + (candidate.totalReceiptsCycle ?? 0), 0),
+          candidateTotalsFetchedAtLatest: demoCandidates
+            .filter((candidate) => candidate.raceId === race.id)
+            .map((candidate) => candidate.totalsFetchedAt)
+            .filter(Boolean)
+            .sort()
+            .at(-1) ?? null,
+          candidateTotalsFetchedAtOldest: demoCandidates
+            .filter((candidate) => candidate.raceId === race.id)
+            .map((candidate) => candidate.totalsFetchedAt)
+            .filter(Boolean)
+            .sort()
+            .at(0) ?? null,
           signalCount: raceSignals.length,
           latestSignalDate: raceSignals.map((signal) => signal.signalDate).sort().at(-1) ?? null,
           independentExpenditureTotal: expenditures.reduce((sum, expenditure) => sum + expenditure.amount, 0),
@@ -624,6 +636,8 @@ export async function getStateRaceBoard(state: string): Promise<StateRaceBoardRo
     candidate_count: string;
     incumbent_count: string;
     candidate_receipts_total: string;
+    candidate_totals_fetched_at_latest: string | Date | null;
+    candidate_totals_fetched_at_oldest: string | Date | null;
     signal_count: string;
     latest_signal_date: string | Date | null;
     independent_expenditure_total: string;
@@ -650,6 +664,17 @@ export async function getStateRaceBoard(state: string): Promise<StateRaceBoardRo
           from candidates c
           where c.race_id = r.id
         ) as candidate_receipts_total,
+        (
+          select max(c.totals_fetched_at)
+          from candidates c
+          where c.race_id = r.id
+        ) as candidate_totals_fetched_at_latest,
+        (
+          select min(c.totals_fetched_at)
+          from candidates c
+          where c.race_id = r.id
+            and c.totals_fetched_at is not null
+        ) as candidate_totals_fetched_at_oldest,
         (
           select count(*)::text
           from signals s
@@ -684,6 +709,8 @@ export async function getStateRaceBoard(state: string): Promise<StateRaceBoardRo
     candidateCount: Number(row.candidate_count),
     incumbentCount: Number(row.incumbent_count),
     candidateReceiptsTotal: Number(row.candidate_receipts_total),
+    candidateTotalsFetchedAtLatest: row.candidate_totals_fetched_at_latest ? toIsoString(row.candidate_totals_fetched_at_latest) : null,
+    candidateTotalsFetchedAtOldest: row.candidate_totals_fetched_at_oldest ? toIsoString(row.candidate_totals_fetched_at_oldest) : null,
     signalCount: Number(row.signal_count),
     latestSignalDate: row.latest_signal_date ? toDateString(row.latest_signal_date) : null,
     independentExpenditureTotal: Number(row.independent_expenditure_total),

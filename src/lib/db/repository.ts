@@ -1630,7 +1630,9 @@ export async function getCandidatesForRace(id: string): Promise<Candidate[]> {
       from candidates c
       left join committees cm on cm.candidate_id = c.id
       left join filings f on f.committee_id = cm.id
+      left join races r on r.id = c.race_id
       left join signals s on s.candidate_id = c.id
+        and ${currentCycleSignalPredicate}
       where c.race_id = $1
       group by c.id
       order by
@@ -1986,6 +1988,7 @@ export async function getStatus() {
     left join filings f on f.committee_id = cm.id
     left join independent_expenditures ie on ie.candidate_id = c.id
     left join signals s on s.candidate_id = c.id
+      and ${currentCycleSignalPredicate}
     group by c.id, r.name
     having count(s.id) = 0
     order by c.total_receipts_cycle desc nulls last, c.name

@@ -44,13 +44,13 @@ export function SignalCard({ signal }: { signal: Signal }) {
 
   return (
     <article
-      className={`grid gap-3 border-b border-l-[3px] border-b-neutral-300 bg-white px-4 py-4 outline-none focus-visible:ring-2 focus-visible:ring-neutral-900 focus-visible:ring-offset-[-2px] md:grid-cols-[112px_1fr_190px] ${typeStripes[signal.signalType] ?? "border-l-neutral-400"}`}
+      className={`grid max-w-full gap-3 overflow-hidden border-b border-l-[3px] border-b-neutral-300 bg-white px-4 py-4 outline-none focus-visible:ring-2 focus-visible:ring-neutral-900 focus-visible:ring-offset-[-2px] md:grid-cols-[112px_1fr_190px] ${typeStripes[signal.signalType] ?? "border-l-neutral-400"}`}
       data-signal-card="true"
       data-source-url={signal.sourceUrl ?? undefined}
       id={anchorId}
       tabIndex={-1}
     >
-      <div className="font-mono text-xs text-neutral-600">
+      <div className="min-w-0 max-w-full font-mono text-xs text-neutral-600">
         <p className="flex items-center gap-1.5 text-neutral-950">
           <FreshMark signalDate={signal.signalDate} status={signal.status} />
           FEC date {formatDate(signal.signalDate)}
@@ -63,9 +63,9 @@ export function SignalCard({ signal }: { signal: Signal }) {
         </Link>
       </div>
 
-      <div className="min-w-0">
-        <div className="flex flex-wrap items-center gap-2">
-          <h2 className="min-w-0 break-words text-base font-semibold leading-snug tracking-tight">
+      <div className="min-w-0 max-w-full overflow-hidden">
+        <div className="flex max-w-full flex-wrap items-center gap-2 overflow-hidden">
+          <h2 className="min-w-0 max-w-full break-words text-base font-semibold leading-snug tracking-tight [overflow-wrap:anywhere]">
             {displaySignalHeadline(signal.headline, signal.candidateName)}
           </h2>
           {signal.status === "review" ? (
@@ -77,7 +77,7 @@ export function SignalCard({ signal }: { signal: Signal }) {
             </span>
           ) : null}
         </div>
-        <p className="mt-1 max-w-3xl text-sm leading-5 text-neutral-700">
+        <p className="mt-1 max-w-full break-words text-sm leading-5 text-neutral-700 [overflow-wrap:anywhere] sm:max-w-3xl">
           {signal.whyItMatters}
         </p>
         <div className="mt-2 flex flex-wrap items-center gap-1.5 md:hidden">
@@ -238,7 +238,7 @@ export function SignalCard({ signal }: { signal: Signal }) {
         </div>
       </div>
 
-      <div className="flex flex-wrap items-start gap-2 text-xs md:flex-col md:items-end">
+      <div className="flex min-w-0 max-w-full flex-wrap items-start gap-2 text-xs md:flex-col md:items-end">
         <span className="hidden font-mono text-sm font-semibold text-neutral-950 md:inline">
           {amount}
         </span>

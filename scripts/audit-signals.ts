@@ -200,6 +200,15 @@ async function main() {
       limit 10
     `));
 
+    checks.push(await countCheck(pool, "Historical filings use fresh-report copy", "warn", `
+      select dedupe_key, headline, why_it_matters, metadata->>'sourceId' as source_id
+      from signals
+      where signal_type = 'new_filing'
+        and status = 'historical'
+        and why_it_matters ilike '%New reports can reveal%'
+      limit 10
+    `));
+
     checks.push(await countCheck(pool, "Activity spikes missing comparison evidence", "fail", `
       select dedupe_key, headline, metadata
       from signals

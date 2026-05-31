@@ -82,6 +82,7 @@ export default async function CandidatePage({
         mobileLead={<MobileCandidateRead notes={candidateMobileNotes(candidate, signalCounts, signals.length, independentExpenditures.length)} />}
         quickActions={
           <CandidateSourceActions
+            candidateId={candidate.id}
             candidateName={candidate.name}
             raceId={race?.id ?? null}
             sourceUrl={candidate.sourceUrl}
@@ -341,10 +342,12 @@ function CandidateNoSignalsMessage({
 }
 
 function CandidateSourceActions({
+  candidateId,
   candidateName,
   raceId,
   sourceUrl,
 }: {
+  candidateId: string;
   candidateName: string;
   raceId?: string | null;
   sourceUrl?: string | null;
@@ -367,6 +370,9 @@ function CandidateSourceActions({
         ) : null}
         <Link className="underline-offset-4 hover:underline" href={`/?q=${encodeURIComponent(candidateName)}`}>
           Matching feed
+        </Link>
+        <Link className="underline-offset-4 hover:underline" href={`/records/schedule-e?candidate=${candidateId}`}>
+          Schedule E evidence
         </Link>
       </div>
     </nav>

@@ -274,12 +274,12 @@ function FeedTriageStrip({
 }: {
   signals: ReturnType<typeof feedTriageSignals>;
 }) {
-  const items = [
+  const items = distinctTriageItems([
     { label: "Newest added in this view", signal: signals.newestAdded },
     { label: "Largest outside spend in this view", signal: signals.largestIe, empty: "No IE alerts in this view" },
     { label: "Incumbent named in this view", signal: signals.incumbentNamed, empty: "No incumbent-linked signals in this view" },
     { label: "Needs review in this view", signal: signals.review, empty: "No review flags in this view" },
-  ];
+  ]);
 
   return (
     <section className="border-b border-neutral-300 px-5 py-3" aria-label="Feed triage">
@@ -313,6 +313,28 @@ function FeedTriageStrip({
       </div>
     </section>
   );
+}
+
+function distinctTriageItems(
+  items: Array<{ empty?: string; label: string; signal?: Signal }>,
+) {
+  const bySignal = new Map<string, { empty?: string; label: string; signal?: Signal }>();
+  const emptyItems: Array<{ empty?: string; label: string; signal?: Signal }> = [];
+
+  for (const item of items) {
+    if (!item.signal) {
+      emptyItems.push(item);
+      continue;
+    }
+    const existing = bySignal.get(item.signal.dedupeKey);
+    if (existing) {
+      existing.label = `${existing.label.replace(" in this view", "")} / ${item.label.replace(" in this view", "")} in this view`;
+      continue;
+    }
+    bySignal.set(item.signal.dedupeKey, { ...item });
+  }
+
+  return [...bySignal.values(), ...emptyItems].slice(0, items.length);
 }
 
 function TriageItem({

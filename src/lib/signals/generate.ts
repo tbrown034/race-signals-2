@@ -291,7 +291,7 @@ function newFilingCopy(filing: Filing, committee?: Committee, versionKind = "ini
   return {
     headline: `${committeeName} filed ${label}.`,
     whyItMatters:
-      "New reports can reveal changed cash positions, spending pace and committee activity before those shifts are visible in public campaigning.",
+      "FEC reports can reveal changed cash positions, spending pace and committee activity before those shifts are visible in public campaigning.",
     versionKind: "initial_or_single",
   };
 }

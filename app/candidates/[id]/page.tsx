@@ -7,7 +7,7 @@ import { IncumbentBadge } from "@/src/components/incumbent-badge";
 import { PageShell } from "@/src/components/page-shell";
 import { PartySquare } from "@/src/components/party-square";
 import { ReporterRead } from "@/src/components/reporter-read";
-import { getCandidate, getCandidateElections, getCandidatesForRace, getSignalsForEntity } from "@/src/lib/db/repository";
+import { getCandidate, getCandidateElections, getCandidatesForRace, getRace, getSignalsForEntity } from "@/src/lib/db/repository";
 import { formatDate, formatDateTime, formatMoney } from "@/src/lib/format";
 import type { Metadata } from "next";
 
@@ -38,7 +38,9 @@ export default async function CandidatePage({
   ]);
 
   if (!candidate) notFound();
-  const raceCohort = candidate.raceId ? await getCandidatesForRace(candidate.raceId) : [];
+  const [raceCohort, race] = candidate.raceId
+    ? await Promise.all([getCandidatesForRace(candidate.raceId), getRace(candidate.raceId)])
+    : [[], null] as const;
   const signalCounts = countSignals(signals);
 
   return (
@@ -64,7 +66,16 @@ export default async function CandidatePage({
           ["FEC ID", candidate.fecCandidateId],
           ["Party", partyLabel(candidate.party)],
           ["Office", officeLabel(candidate.office)],
-          ["Race", candidate.raceId],
+          [
+            "Race",
+            race ? (
+              <Link className="font-medium underline underline-offset-4" href={`/races/${race.id}`}>
+                {race.name}
+              </Link>
+            ) : (
+              candidate.raceId
+            ),
+          ],
           ["Status", incumbentStatus(candidate.incumbentChallengeStatus)],
           ["FEC cycle", `Filed with FEC for the ${candidate.electionYear ?? "current"} cycle.`],
           ["Cycle receipts", formatMoney(candidate.totalReceiptsCycle)],
@@ -96,7 +107,7 @@ export default async function CandidatePage({
                 Race context
               </h2>
               <p className="mt-1 text-sm text-neutral-600">
-                Other FEC candidates currently matched to {candidate.raceId}. Totals come from the FEC candidate aggregate endpoint.
+                Other FEC candidates currently matched to {race?.name ?? candidate.raceId}. Totals come from the FEC candidate aggregate endpoint.
               </p>
             </div>
             <div className="overflow-x-auto">

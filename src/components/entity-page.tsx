@@ -22,7 +22,7 @@ export function EntityPage({
   eyebrow: string;
   title: string;
   titleAccessory?: ReactNode;
-  meta: Array<[string, string | number | null | undefined]>;
+  meta: Array<[string, ReactNode | null | undefined]>;
   sourceUrl?: string | null;
   ratings?: RaceRating[];
   independentExpenditures?: CommitteeIndependentExpenditure[];
@@ -110,6 +110,7 @@ export function EntityPage({
                     <th className="px-4 py-3 font-medium" scope="col">Date</th>
                     <th className="px-4 py-3 font-medium" scope="col">Target</th>
                     <th className="px-4 py-3 font-medium" scope="col">Position</th>
+                    <th className="px-4 py-3 font-medium" scope="col">Race</th>
                     <th className="px-4 py-3 font-medium" scope="col">Purpose</th>
                     <th className="px-4 py-3 font-medium" scope="col">Source</th>
                     <th className="px-4 py-3 text-right font-medium" scope="col">Amount</th>
@@ -132,6 +133,18 @@ export function EntityPage({
                         )}
                       </td>
                       <td className="px-4 py-3">{supportLabel(expenditure.supportOpposeIndicator)}</td>
+                      <td className="px-4 py-3">
+                        {expenditure.raceId ? (
+                          <Link
+                            className="font-medium underline underline-offset-4"
+                            href={`/races/${expenditure.raceId}`}
+                          >
+                            {expenditure.raceName ?? expenditure.raceId}
+                          </Link>
+                        ) : (
+                          "Unmatched"
+                        )}
+                      </td>
                       <td className="px-4 py-3 text-neutral-700">{expenditure.purpose ?? "Not specified"}</td>
                       <td className="px-4 py-3">
                         {expenditure.sourceUrl ? (

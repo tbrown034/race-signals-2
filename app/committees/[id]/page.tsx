@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation";
+import Link from "next/link";
 import { EntityPage } from "@/src/components/entity-page";
 import { PageShell } from "@/src/components/page-shell";
 import { PartySquare } from "@/src/components/party-square";
@@ -40,6 +41,7 @@ export default async function CommitteePage({
 
   if (!committee) notFound();
   const linkedCandidate = committee.candidateId ? await getCandidate(committee.candidateId) : null;
+  const touchedRaces = summarizeTouchedRaces(independentExpenditures);
 
   return (
     <PageShell>
@@ -57,7 +59,25 @@ export default async function CommitteePage({
           ["Designation", committeeDesignationLabel(committee.designation)],
           ["Context", committeeContext(committee)],
           ["Party", committee.party],
-          ["Race", committee.raceId],
+          [
+            "Race",
+            committee.raceId ? (
+              <Link className="font-medium underline underline-offset-4" href={`/races/${committee.raceId}`}>
+                {committee.raceId}
+              </Link>
+            ) : touchedRaces.length ? (
+              <span>
+                {touchedRaces.map((race, index) => (
+                  <span key={race.id}>
+                    {index ? ", " : ""}
+                    <Link className="font-medium underline underline-offset-4" href={`/races/${race.id}`}>
+                      {race.name}
+                    </Link>
+                  </span>
+                ))}
+              </span>
+            ) : null,
+          ],
           ["Treasurer", committee.treasurerName],
         ]}
       >
@@ -75,4 +95,20 @@ export default async function CommitteePage({
       </EntityPage>
     </PageShell>
   );
+}
+
+function summarizeTouchedRaces(
+  expenditures: Awaited<ReturnType<typeof getCommitteeIndependentExpenditures>>,
+) {
+  const races = new Map<string, { id: string; name: string; amount: number }>();
+  for (const expenditure of expenditures) {
+    if (!expenditure.raceId) continue;
+    const current = races.get(expenditure.raceId);
+    races.set(expenditure.raceId, {
+      id: expenditure.raceId,
+      name: expenditure.raceName ?? expenditure.raceId,
+      amount: (current?.amount ?? 0) + expenditure.amount,
+    });
+  }
+  return [...races.values()].sort((a, b) => b.amount - a.amount).slice(0, 3);
 }

@@ -63,7 +63,7 @@ export async function PageShell({ children }: { children: ReactNode }) {
       </header>
       {children}
       <footer className="border-t border-neutral-300 bg-white px-5 py-3 text-xs leading-5 text-neutral-600 sm:px-8">
-        FEC records via the Federal Election Commission API. Election timeline data, when available, cites Wikidata (CC0) and Wikipedia (CC BY-SA 4.0). Member photos use public-domain Bioguide images mirrored by theunitedstates.io. Identifier crosswalks use unitedstates/congress-legislators.
+        FEC records via the Federal Election Commission API. Election timeline data, when available, cites Wikidata (CC0) and Wikipedia (CC BY-SA 4.0). Member photos use public-domain Bioguide images mirrored by unitedstates/images. Identifier crosswalks use unitedstates/congress-legislators.
       </footer>
     </div>
   );

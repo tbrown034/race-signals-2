@@ -15,7 +15,7 @@ const steps = [
   ["Signal", "Convert source records into plain-English alerts with source links, dates, confidence and freshness."],
   [
     "Photos",
-    "Member photos are sourced from the U.S. Congressional Biographical Directory, public domain, mirrored via theunitedstates.io. Photos appear only for currently sitting members of Congress. Candidate identifier crosswalk comes from the unitedstates/congress-legislators project, public domain.",
+    "Member photos are sourced from the U.S. Congressional Biographical Directory, public domain, mirrored via the unitedstates/images project. Photos appear only for currently sitting members of Congress. Candidate identifier crosswalk comes from the unitedstates/congress-legislators project, public domain.",
   ],
   [
     "Election timeline",

@@ -22,12 +22,13 @@ export function CandidatePhoto({
   const [failed, setFailed] = useState(false);
   if (!src) return null;
   const dimensions = sizes[size];
+  const resolvedSrc = publicCongressPhotoUrl(src);
 
   if (failed) {
     return (
       <span
         aria-hidden="true"
-        className={`block bg-neutral-300 ${dimensions.className} ${className}`}
+        className={`block h-px w-px bg-neutral-300 ${className}`}
       />
     );
   }
@@ -43,8 +44,15 @@ export function CandidatePhoto({
       loading="lazy"
       onError={() => setFailed(true)}
       referrerPolicy="no-referrer"
-      src={src}
+      src={resolvedSrc}
       width={dimensions.width}
     />
+  );
+}
+
+function publicCongressPhotoUrl(src: string) {
+  return src.replace(
+    "https://theunitedstates.io/images/congress/225x275/",
+    "https://raw.githubusercontent.com/unitedstates/images/gh-pages/congress/225x275/",
   );
 }

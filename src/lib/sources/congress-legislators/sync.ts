@@ -3,7 +3,7 @@ import type { Candidate } from "@/src/lib/types";
 
 const LEGISLATORS_CURRENT_URL =
   "https://unitedstates.github.io/congress-legislators/legislators-current.yaml";
-const PHOTO_CDN_BASE = "https://theunitedstates.io/images/congress/225x275";
+const PHOTO_CDN_BASE = "https://raw.githubusercontent.com/unitedstates/images/gh-pages/congress/225x275";
 
 type LegislatorRecord = {
   id?: {

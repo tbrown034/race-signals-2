@@ -21,7 +21,7 @@ Current campaign-finance source:
 Context sources used outside the campaign-finance pipeline:
 
 - Wikidata and Wikipedia for election timeline rows when available
-- Congressional Biographical Directory photos via theunitedstates.io for sitting members
+- Congressional Biographical Directory photos via the public-domain unitedstates/images mirror for sitting members
 - unitedstates/congress-legislators for identifier crosswalks
 
 Initial endpoints:

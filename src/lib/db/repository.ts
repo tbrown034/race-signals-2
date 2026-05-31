@@ -328,6 +328,66 @@ export async function getCandidateFilings(candidateId: string): Promise<Candidat
   }));
 }
 
+export async function getCommitteeFilings(committeeId: string): Promise<CandidateFiling[]> {
+  if (!hasDatabase()) return [];
+  const rows = await sql<{
+    source_id: string;
+    cycle: number | null;
+    committee_id: string | null;
+    fec_committee_id: string | null;
+    committee_name: string | null;
+    report_type: string | null;
+    coverage_start_date: string | Date | null;
+    coverage_end_date: string | Date | null;
+    receipt_date: string | Date | null;
+    total_receipts: string | null;
+    total_disbursements: string | null;
+    cash_on_hand: string | null;
+    source_url: string | null;
+    raw: unknown;
+  }>(
+    `
+      select
+        f.source_id,
+        f.cycle,
+        f.committee_id,
+        f.fec_committee_id,
+        c.name as committee_name,
+        f.report_type,
+        f.coverage_start_date,
+        f.coverage_end_date,
+        f.receipt_date,
+        f.total_receipts,
+        f.total_disbursements,
+        f.cash_on_hand,
+        f.source_url,
+        f.raw
+      from filings f
+      left join committees c on c.id = f.committee_id
+      where f.committee_id = $1
+      order by f.receipt_date desc nulls last, f.source_id desc
+    `,
+    [committeeId],
+  );
+  return rows.map((row) => ({
+    sourceId: row.source_id,
+    cycle: row.cycle,
+    committeeId: row.committee_id,
+    fecCommitteeId: row.fec_committee_id,
+    committeeName: row.committee_name,
+    reportType: row.report_type,
+    coverageStartDate: row.coverage_start_date ? toDateString(row.coverage_start_date) : null,
+    coverageEndDate: row.coverage_end_date ? toDateString(row.coverage_end_date) : null,
+    receiptDate: row.receipt_date ? toDateString(row.receipt_date) : null,
+    totalReceipts: row.total_receipts === null ? null : Number(row.total_receipts),
+    totalReceiptsBasis: receiptBasis(row.raw),
+    totalDisbursements: row.total_disbursements === null ? null : Number(row.total_disbursements),
+    cashOnHand: row.cash_on_hand === null ? null : Number(row.cash_on_hand),
+    sourceUrl: row.source_url,
+    raw: row.raw ?? {},
+  }));
+}
+
 function toDateString(value: string | Date) {
   if (value instanceof Date) return value.toISOString().slice(0, 10);
   return String(value).slice(0, 10);

@@ -8,6 +8,7 @@ import { PageShell } from "@/src/components/page-shell";
 import { PartySquare } from "@/src/components/party-square";
 import { ReporterRead } from "@/src/components/reporter-read";
 import { getCandidate, getCandidateElections, getCandidateFilings, getCandidateIndependentExpenditures, getCandidatesForRace, getRace, getSignalsForEntity } from "@/src/lib/db/repository";
+import { reportTypeDisplay } from "@/src/lib/fec-report-types";
 import { formatCount, formatDate, formatDateTime, formatMoney } from "@/src/lib/format";
 import type { Metadata } from "next";
 
@@ -281,7 +282,7 @@ function CandidateFilingsTable({
             {filings.map((filing) => (
               <tr key={filing.sourceId}>
                 <td className="px-4 py-3">
-                  <span className="font-medium">{reportLabel(filing.reportType)}</span>
+                  <span className="font-medium">{reportTypeDisplay(filing.reportType)}</span>
                   <p className="mt-1 text-xs text-neutral-600">{filing.committeeName ?? filing.fecCommitteeId ?? "Committee not resolved"}</p>
                   <dl className="mt-2 space-y-1 text-xs leading-5 text-neutral-600 md:hidden">
                     <div>
@@ -560,25 +561,6 @@ function partyLabel(party?: string | null) {
   if (party === "DEM" || party === "D") return "Democratic";
   if (!party || party === "NNE") return "Other/unknown";
   return party;
-}
-
-function reportLabel(reportType?: string | null) {
-  const labels: Record<string, string> = {
-    Q1: "April quarterly",
-    Q1S: "April quarterly",
-    Q2: "July quarterly",
-    Q2S: "July quarterly",
-    Q3: "October quarterly",
-    Q3S: "October quarterly",
-    YE: "Year-end",
-    YES: "Year-end",
-    TER: "Termination",
-    "12P": "Pre-primary",
-    "12G": "Pre-general",
-    "30G": "Post-general",
-  };
-  if (!reportType) return "Report";
-  return labels[reportType] ?? `${reportType} report`;
 }
 
 function filingPeriod(start?: string | null, end?: string | null) {

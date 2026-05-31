@@ -6,6 +6,7 @@ import type {
   Race,
   Signal,
 } from "@/src/lib/types";
+import { reportTypePhrase } from "@/src/lib/fec-report-types";
 
 const LARGE_IE_THRESHOLD = 25000;
 const ACTIVITY_SPIKE_THRESHOLD = 50000;
@@ -257,27 +258,8 @@ export function generateSignals(input: SignalInput): Signal[] {
   return signals.sort((a, b) => b.signalDate.localeCompare(a.signalDate));
 }
 
-function reportLabel(reportType?: string | null) {
-  const labels: Record<string, string> = {
-    Q1: "an April quarterly report",
-    Q1S: "an April quarterly report",
-    Q2: "a July quarterly report",
-    Q2S: "a July quarterly report",
-    Q3: "an October quarterly report",
-    Q3S: "an October quarterly report",
-    YE: "a year-end report",
-    YES: "a year-end report",
-    TER: "a termination report",
-    "12P": "a pre-primary report",
-    "12G": "a pre-general report",
-    "30G": "a post-general report",
-  };
-  if (!reportType) return "a new report";
-  return labels[reportType] ?? `${reportType} report`;
-}
-
 function newFilingCopy(filing: Filing, committee?: Committee, versionKind = "initial_or_single") {
-  const label = reportLabel(filing.reportType);
+  const label = reportTypePhrase(filing.reportType);
   const committeeName = committee?.name ?? "A committee";
   if (versionKind === "likely_refile") {
     return {

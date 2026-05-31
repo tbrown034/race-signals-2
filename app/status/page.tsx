@@ -79,7 +79,7 @@ export default async function StatusPage() {
                   <tr>
                     <th className="px-4 py-3 font-medium" scope="col">Table</th>
                     <th className="px-4 py-3 text-right font-medium" scope="col">Size</th>
-                    <th className="px-4 py-3 text-right font-medium" scope="col">Rows est.</th>
+                    <th className="px-4 py-3 text-right font-medium" scope="col">Rows</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-neutral-200">
@@ -87,7 +87,7 @@ export default async function StatusPage() {
                     <tr key={table.tableName}>
                       <td className="px-4 py-3 font-mono">{table.tableName}</td>
                       <td className="px-4 py-3 text-right font-mono">{formatBytes(table.totalBytes)}</td>
-                      <td className="px-4 py-3 text-right font-mono">{table.rowEstimate ?? "Unknown"}</td>
+                      <td className="px-4 py-3 text-right font-mono">{table.rowCount ?? "Unknown"}</td>
                     </tr>
                   ))}
                 </tbody>

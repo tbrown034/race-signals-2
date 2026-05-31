@@ -238,6 +238,6 @@ export type StorageUsage = {
   largestTables: Array<{
     tableName: string;
     totalBytes: number;
-    rowEstimate: number | null;
+    rowCount: number | null;
   }>;
 };

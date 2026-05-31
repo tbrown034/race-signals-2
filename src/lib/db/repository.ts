@@ -1011,12 +1011,10 @@ export async function getStatus() {
   const storageRows = await sql<{
     table_name: string;
     total_bytes: string;
-    row_estimate: string | null;
   }>(`
     select
       relname as table_name,
-      pg_total_relation_size(c.oid)::text as total_bytes,
-      reltuples::bigint::text as row_estimate
+      pg_total_relation_size(c.oid)::text as total_bytes
     from pg_class c
     join pg_namespace n on n.oid = c.relnamespace
     where n.nspname = 'public'
@@ -1024,6 +1022,7 @@ export async function getStatus() {
     order by pg_total_relation_size(c.oid) desc
     limit 8
   `);
+  const storageCounts = await getTableCounts(storageRows.map((row) => row.table_name));
   const databaseSizeRows = await sql<{ size: string }>("select pg_database_size(current_database())::text as size");
   try {
     validationIssues = await sql<{
@@ -1088,9 +1087,26 @@ export async function getStatus() {
       largestTables: storageRows.map((row) => ({
         tableName: row.table_name,
         totalBytes: Number(row.total_bytes),
-        rowEstimate: row.row_estimate === null ? null : Number(row.row_estimate),
+        rowCount: storageCounts.get(row.table_name) ?? null,
       })),
     } satisfies StorageUsage,
     mode: "database",
   };
+}
+
+async function getTableCounts(tableNames: string[]) {
+  const counts = new Map<string, number>();
+
+  for (const tableName of tableNames) {
+    const rows = await sql<{ count: string }>(
+      `select count(*)::text as count from ${quoteIdentifier(tableName)}`,
+    );
+    counts.set(tableName, Number(rows[0]?.count ?? 0));
+  }
+
+  return counts;
+}
+
+function quoteIdentifier(identifier: string) {
+  return `"${identifier.replaceAll('"', '""')}"`;
 }

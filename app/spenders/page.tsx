@@ -305,9 +305,7 @@ export default async function SpendersPage({
                 ) : (
                   <tr>
                     <td className="px-4 py-4 text-neutral-600" colSpan={8}>
-                      {selectedState
-                        ? `No Schedule E spender records are available for ${selectedState} in the current database slice.`
-                        : "No Schedule E spender records are available in the current database slice."}
+                      <SpendersEmptyState state={selectedState} />
                     </td>
                   </tr>
                 )}
@@ -317,6 +315,32 @@ export default async function SpendersPage({
         </section>
       </main>
     </PageShell>
+  );
+}
+
+function SpendersEmptyState({ state }: { state?: string }) {
+  return (
+    <div className="max-w-3xl text-sm leading-6">
+      <p>
+        {state
+          ? `No Schedule E spender records are available for ${state} in the current database slice.`
+          : "No Schedule E spender records are available in the current database slice."}
+      </p>
+      <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1">
+        {state ? (
+          <>
+            <Link className="font-medium underline underline-offset-4" href={`/spending?state=${state}`}>Check {state} spending watch</Link>
+            <Link className="font-medium underline underline-offset-4" href={`/records/schedule-e?state=${state}`}>Open {state} Schedule E evidence</Link>
+          </>
+        ) : (
+          <>
+            <Link className="font-medium underline underline-offset-4" href="/spending">Check spending watch</Link>
+            <Link className="font-medium underline underline-offset-4" href="/records/schedule-e">Open Schedule E evidence</Link>
+          </>
+        )}
+        <Link className="font-medium underline underline-offset-4" href="/status">Check ingestion status</Link>
+      </div>
+    </div>
   );
 }
 

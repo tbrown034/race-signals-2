@@ -25,6 +25,18 @@ const sections = [
     body: "The schema can represent national 2026 House and Senate race shells, but the scheduled ingest is capped to a small daily slice. Stored signal counts should be read as current database coverage, not a national activity total.",
   },
   {
+    title: "Reporter Verification",
+    body: "Before citing a signal, open the linked FEC source, confirm the candidate, committee, date, amount and race context, then check the status page for ingest freshness. Missing signals do not mean no activity; they usually mean the current stored slice has not matched a report, committee record or Schedule E row that crosses the signal rules.",
+  },
+  {
+    title: "What To Cite",
+    body: "For campaign-finance facts, cite the FEC source URL and stable source ID shown on the card or export. Race Signals can be cited as a monitoring layer, but it is not the legal source of record. For election timeline rows, use the Wikidata or Wikipedia citation linked from the row.",
+  },
+  {
+    title: "What Is Excluded",
+    body: "The low-cost MVP does not store itemized donor receipts, ad-library records, FCC files, nonprofit filings, state campaign-finance records or paid race ratings. Use FEC links for donor-level lookup and official election offices for ballot and results context.",
+  },
+  {
     title: "Implementation",
     body: "The application uses Next 16 App Router, TypeScript, Tailwind and raw SQL against Postgres. Server-rendered read routes stay separate from ingestion logic.",
   },

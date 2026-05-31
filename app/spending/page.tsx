@@ -4,6 +4,7 @@ import { FeedFilters } from "@/src/components/feed-filters";
 import { PageShell } from "@/src/components/page-shell";
 import { getCommittee, getCoverageSummary, getRaces, getSignalStateCounts, getSignalStateFreshness, getSpendingSignals } from "@/src/lib/db/repository";
 import { formatDate, formatMoney, isOlderThanHours } from "@/src/lib/format";
+import { displayCandidateName } from "@/src/lib/names";
 import { signalFiltersFromSearchParams } from "@/src/lib/signals/filters";
 import type { Metadata } from "next";
 
@@ -163,7 +164,11 @@ export default async function SpendingPage({
                             href={signalPermalinkHref(signal)}
                             style={{ overflowWrap: "anywhere", wordBreak: "break-word" }}
                           >
-                            {signal.headline}
+                            {spendingAlertHeadline(signal).map((part, index) => (
+                              <span className={index ? "block" : undefined} key={`${signal.dedupeKey}-headline-${index}`}>
+                                {part}
+                              </span>
+                            ))}
                           </Link>
                           <p className="mt-1 text-xs leading-5 text-neutral-600">
                             {signal.sourceUrl ? (
@@ -383,6 +388,21 @@ function supportOpposeLabel(value: unknown) {
   return "Not coded by FEC";
 }
 
+function spendingAlertHeadline(signal: Awaited<ReturnType<typeof getSpendingSignals>>[number]) {
+  const amount = formatMoney(signal.amount) ?? "an amount";
+  const target = displayCandidateName(signal.candidateName) ?? signal.candidateName ?? "a target";
+  const spender = signal.committeeName ?? "A spender";
+  const position = signal.metadata?.supportOpposeIndicator === "S"
+    ? "supporting"
+    : signal.metadata?.supportOpposeIndicator === "O"
+      ? "opposing"
+      : "naming";
+  const race = signal.raceName ?? signal.raceId;
+  return race
+    ? [`${spender} reported a ${amount} IE.`, `${position} ${target}.`, race]
+    : [`${spender} reported a ${amount} IE.`, `${position} ${target}.`];
+}
+
 function EntityLink({
   fallback,
   hrefBase,
@@ -394,10 +414,11 @@ function EntityLink({
   id?: string | null;
   label?: string | null;
 }) {
-  if (!id) return label ?? fallback;
+  const displayLabel = hrefBase === "/candidates" ? displayCandidateName(label) : label;
+  if (!id) return displayLabel ?? fallback;
   return (
     <Link className="font-medium underline underline-offset-4" href={`${hrefBase}/${id}`}>
-      {label ?? id}
+      {displayLabel ?? id}
     </Link>
   );
 }

@@ -65,7 +65,7 @@ export function SignalCard({ signal }: { signal: Signal }) {
       <div className="min-w-0">
         <div className="flex flex-wrap items-center gap-2">
           <h2 className="min-w-0 break-words text-base font-semibold leading-snug tracking-tight">
-            {signal.headline}
+            {displaySignalHeadline(signal.headline, signal.candidateName)}
           </h2>
           {signal.status === "review" ? (
             <span
@@ -255,6 +255,12 @@ function candidateDisplay(signal: Signal) {
     isIncumbentStatus(signal.candidateIncumbentChallengeStatus) ? "incumbent" : null,
   ].filter(Boolean);
   return context.length ? `${name} (${context.join(", ")})` : name;
+}
+
+function displaySignalHeadline(headline: string, candidateName?: string | null) {
+  const displayName = displayCandidateName(candidateName);
+  if (!candidateName || !displayName) return headline;
+  return headline.replaceAll(candidateName, displayName);
 }
 
 function isIncumbentStatus(status?: string | null) {

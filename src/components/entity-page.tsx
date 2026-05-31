@@ -1,5 +1,6 @@
 import { SignalCard } from "@/src/components/signal-card";
 import { formatCount, formatDate, formatMoney } from "@/src/lib/format";
+import { displayCandidateName } from "@/src/lib/names";
 import Link from "next/link";
 import type { ReactNode } from "react";
 import type { CommitteeIndependentExpenditure, RaceRating, Signal } from "@/src/lib/types";
@@ -148,10 +149,10 @@ export function EntityPage({
                             className="font-medium underline underline-offset-4"
                             href={`/candidates/${expenditure.candidateId}`}
                           >
-                            {expenditure.candidateName ?? expenditure.fecCandidateId ?? "Candidate not resolved"}
+                            {displayCandidateName(expenditure.candidateName) ?? expenditure.fecCandidateId ?? "Candidate not resolved"}
                           </Link>
                         ) : (
-                          expenditure.candidateName ?? expenditure.fecCandidateId ?? "Candidate not resolved"
+                          displayCandidateName(expenditure.candidateName) ?? expenditure.fecCandidateId ?? "Candidate not resolved"
                         )}
                         <dl className="mt-2 space-y-1 text-xs leading-5 text-neutral-600 md:hidden">
                           <div>

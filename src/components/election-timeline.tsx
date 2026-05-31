@@ -2,6 +2,7 @@ import Link from "next/link";
 import { ElectionStatusSquare } from "@/src/components/election-status-square";
 import { PartySquare } from "@/src/components/party-square";
 import { formatDate } from "@/src/lib/format";
+import { displayCandidateName } from "@/src/lib/names";
 import type { Election } from "@/src/lib/types";
 
 export function ElectionTimeline({
@@ -89,7 +90,7 @@ function TimelineTable({
                             <span className="inline-flex items-center gap-1.5">
                               <PartySquare party={election.candidateParty} />
                               <Link className="font-medium underline underline-offset-4" href={`/candidates/${election.candidateId}`}>
-                                {election.candidateName ?? election.candidateId}
+                                {displayCandidateName(election.candidateName) ?? election.candidateId}
                               </Link>
                             </span>
                           </dd>
@@ -129,7 +130,7 @@ function TimelineTable({
                       <span className="inline-flex items-center gap-2">
                         <PartySquare party={election.candidateParty} />
                         <Link className="font-medium underline underline-offset-4" href={`/candidates/${election.candidateId}`}>
-                          {election.candidateName ?? election.candidateId}
+                          {displayCandidateName(election.candidateName) ?? election.candidateId}
                         </Link>
                       </span>
                     </td>

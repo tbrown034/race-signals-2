@@ -2,6 +2,7 @@ import Link from "next/link";
 import { PageShell } from "@/src/components/page-shell";
 import { getScheduleERecordSummary, getScheduleERecords } from "@/src/lib/db/repository";
 import { formatCount, formatDate, formatMoney } from "@/src/lib/format";
+import { displayCandidateName } from "@/src/lib/names";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -236,10 +237,10 @@ function supportLabel(value?: string | null) {
 }
 
 function targetLink(record: Awaited<ReturnType<typeof getScheduleERecords>>[number]) {
-  if (!record.candidateId) return record.candidateName ?? record.fecCandidateId ?? "Candidate not resolved";
+  if (!record.candidateId) return displayCandidateName(record.candidateName) ?? record.fecCandidateId ?? "Candidate not resolved";
   return (
     <Link className="font-medium underline underline-offset-4" href={`/candidates/${record.candidateId}`}>
-      {record.candidateName ?? record.fecCandidateId ?? record.candidateId}
+      {displayCandidateName(record.candidateName) ?? record.fecCandidateId ?? record.candidateId}
     </Link>
   );
 }

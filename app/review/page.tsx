@@ -2,7 +2,7 @@ import Link from "next/link";
 import { PageShell } from "@/src/components/page-shell";
 import { SignalCard } from "@/src/components/signal-card";
 import { SignalKeyboardNav } from "@/src/components/signal-keyboard-nav";
-import { getCandidateSignalGaps, getReviewSignalCount, getSignals, getStateCoverageBoard, getStatus } from "@/src/lib/db/repository";
+import { getCandidateSignalGaps, getReviewSignalCount, getReviewSignalStateCounts, getSignals, getStateCoverageBoard, getStatus } from "@/src/lib/db/repository";
 import { formatCount, formatDateTime, formatMoney } from "@/src/lib/format";
 import { displayCandidateName } from "@/src/lib/names";
 import type { Metadata } from "next";
@@ -20,9 +20,10 @@ export default async function ReviewPage({
 }) {
   const params = await searchParams;
   const state = typeof params.state === "string" ? params.state.toUpperCase() : undefined;
-  const [reviewSignals, reviewSignalCount, status, aggregateGaps, stateCoverage] = await Promise.all([
+  const [reviewSignals, reviewSignalCount, reviewStateCounts, status, aggregateGaps, stateCoverage] = await Promise.all([
     getSignals({ status: "review", state, limit: 100, sort: "amount" }),
     getReviewSignalCount({ state }),
+    getReviewSignalStateCounts(),
     getStatus(),
     getCandidateSignalGaps({ state, limit: 100 }),
     getStateCoverageBoard(),
@@ -109,9 +110,9 @@ export default async function ReviewPage({
                   className={`shrink-0 border px-2.5 py-1.5 font-mono text-[11px] uppercase tracking-[0.12em] ${state === row.state ? "border-neutral-950 bg-neutral-950 text-white" : "border-neutral-300 hover:border-neutral-900"}`}
                   href={`/review?state=${row.state}`}
                   key={row.state}
-                  title={`${row.state}: ${row.signalCount.toLocaleString("en-US")} stored signals`}
+                  title={`${row.state}: ${(reviewStateCounts[row.state] ?? 0).toLocaleString("en-US")} review signals`}
                 >
-                  {row.state}
+                  {row.state} <span className={state === row.state ? "text-neutral-200" : "text-neutral-500"}>{reviewStateCounts[row.state] ?? 0}</span>
                 </Link>
               ))}
             </nav>

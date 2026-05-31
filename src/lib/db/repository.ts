@@ -938,6 +938,31 @@ export async function getReviewSignalCount({ state }: { state?: string } = {}) {
   return Number(rows[0]?.count ?? 0);
 }
 
+export async function getReviewSignalStateCounts(): Promise<Record<string, number>> {
+  if (!hasDatabase()) {
+    return demoSignals.reduce<Record<string, number>>((counts, signal) => {
+      if (signal.status !== "review") return counts;
+      const state = signal.raceId?.split("-")[1] ?? signal.candidateState;
+      if (state) counts[state] = (counts[state] ?? 0) + 1;
+      return counts;
+    }, {});
+  }
+
+  const rows = await sql<{ state: string; count: string }>(
+    `
+      select r.state, count(*)::text as count
+      from signals s
+      join races r on r.id = s.race_id
+      where s.status = 'review'
+        and r.state is not null
+        and ${currentCycleSignalPredicate}
+      group by r.state
+      order by count(*) desc, r.state
+    `,
+  );
+  return Object.fromEntries(rows.map((row) => [row.state, Number(row.count)]));
+}
+
 export async function getStateCoverageBoard(): Promise<StateCoverageRow[]> {
   if (!hasDatabase()) {
     const states = [...new Set(demoRaces.map((race) => race.state))].sort();

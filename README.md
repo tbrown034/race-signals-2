@@ -165,6 +165,8 @@ FEC_MAX_CANDIDATES=25 FEC_REQUEST_DELAY_MS=1500 npm run ingest
 
 The default request delay is 4000 ms so uncapped national runs stay under the normal FEC API hourly limit. National ingestion should be treated as a paced background job or scheduled task, not a route handler.
 
+Coverage: 2026 cycle only, national U.S. House + Senate. Per-candidate totals come from the FEC aggregate totals endpoint. Individual contribution detail is not stored; follow source URLs to FEC for donor-level lookup. Daily ingest runs on GitHub Actions. Daily digest send runs on Vercel Cron. Read traffic is served by Vercel.
+
 Verification:
 
 ```bash

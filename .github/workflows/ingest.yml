@@ -1,0 +1,24 @@
+name: Daily FEC ingest
+
+on:
+  schedule:
+    - cron: "0 9 * * *"
+  workflow_dispatch:
+
+jobs:
+  ingest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    env:
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      FEC_API_KEY: ${{ secrets.FEC_API_KEY }}
+      RACE_SIGNALS_OFFICES: H,S
+      FEC_REQUEST_DELAY_MS: "4000"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - run: npm run ingest

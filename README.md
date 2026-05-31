@@ -62,7 +62,7 @@ Schema lives in `db/schema.sql`.
 Core tables:
 
 - `races`
-- `race_ratings`
+- `race_ratings` (reserved for source-specific or licensed ratings; not populated by the default FEC ingest)
 - `candidates`
 - `committees`
 - `filings`
@@ -248,7 +248,7 @@ Those sources should come after the FEC-only MVP works end to end.
 
 ## Race Ratings
 
-Race Signals stores race ratings separately from FEC data in `race_ratings`. Cook Political Report should not be scraped or republished without licensing; the current implementation uses a small attributed public-source watchlist and keeps source URLs visible. A licensed ratings feed can be added later as another source adapter.
+Race Signals keeps a `race_ratings` table available for future source-specific ratings, but the default FEC ingest does not populate it. Cook Political Report should not be scraped or republished without licensing, and generic public summaries are not strong enough evidence for race-level competitiveness claims. A licensed ratings feed or a carefully cited open-source adapter can be added later.
 
 ## Agent Context
 

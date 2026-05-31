@@ -1298,6 +1298,7 @@ export async function getRaceRatings(id: string): Promise<RaceRating[]> {
       select race_id, source_name, source_url, rating, rating_date, rationale
       from race_ratings
       where race_id = $1
+        and source_name <> 'Race Signals public-source watchlist'
       order by rating_date desc nulls last, source_name
     `,
     [id],

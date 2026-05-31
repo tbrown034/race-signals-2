@@ -12,7 +12,6 @@ import {
   upsertElections,
   upsertFilings,
   upsertIndependentExpenditures,
-  upsertRaceRatings,
   upsertRaces,
   upsertSignals,
   upsertSourceRecords,
@@ -35,7 +34,6 @@ import {
   type FecPaginationTruncation,
 } from "@/src/lib/sources/fec/client";
 import { DEFAULT_CYCLE, TARGET_RACES } from "@/src/lib/scope";
-import { getPublicWatchlistRatings } from "@/src/lib/ratings/public-watchlist";
 import { applyCongressLegislatorIds } from "@/src/lib/sources/congress-legislators/sync";
 import { applyCandidateTotalsWithRaw } from "@/src/lib/sources/fec/totals";
 import { fetchCandidateElections } from "@/src/lib/sources/wikidata/elections";
@@ -413,7 +411,6 @@ async function main() {
     });
 
     await upsertRaces(raceScope);
-    await upsertRaceRatings(getPublicWatchlistRatings(raceScope, cycle));
     await upsertCandidates(candidates);
     await upsertElections(elections);
     await markElectionLookupChecked(electionCheckedCandidateIds);

@@ -223,12 +223,13 @@ export async function upsertFilings(filings: Filing[]) {
     await pool.query(
       `
         insert into filings (
-          source_id, committee_id, fec_committee_id, report_type, coverage_start_date,
+          source_id, cycle, committee_id, fec_committee_id, report_type, coverage_start_date,
           coverage_end_date, receipt_date, total_receipts, total_disbursements,
           cash_on_hand, source_url, raw
         )
-        values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)
+        values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13)
         on conflict (source, source_id) do update set
+          cycle = excluded.cycle,
           committee_id = excluded.committee_id,
           report_type = excluded.report_type,
           receipt_date = excluded.receipt_date,
@@ -241,6 +242,7 @@ export async function upsertFilings(filings: Filing[]) {
       `,
       [
         filing.sourceId,
+        filing.cycle,
         filing.committeeId,
         filing.fecCommitteeId,
         filing.reportType,
@@ -308,12 +310,13 @@ export async function upsertIndependentExpenditures(expenditures: IndependentExp
     await pool.query(
       `
         insert into independent_expenditures (
-          source_id, spender_committee_id, fec_committee_id, candidate_id,
+          source_id, cycle, spender_committee_id, fec_committee_id, candidate_id,
           fec_candidate_id, race_id, support_oppose_indicator, amount,
           expenditure_date, purpose, source_url, raw
         )
-        values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)
+        values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13)
         on conflict (source, source_id) do update set
+          cycle = excluded.cycle,
           spender_committee_id = excluded.spender_committee_id,
           candidate_id = excluded.candidate_id,
           race_id = excluded.race_id,
@@ -326,6 +329,7 @@ export async function upsertIndependentExpenditures(expenditures: IndependentExp
       `,
       [
         expenditure.sourceId,
+        expenditure.cycle,
         expenditure.spenderCommitteeId,
         expenditure.fecCommitteeId,
         expenditure.candidateId,

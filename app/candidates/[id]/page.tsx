@@ -97,6 +97,7 @@ function officeLabel(office?: string | null) {
 function partyLabel(party?: string | null) {
   if (party === "REP" || party === "R") return "Republican";
   if (party === "DEM" || party === "D") return "Democratic";
+  if (!party || party === "NNE") return "Other/unknown";
   return party;
 }
 

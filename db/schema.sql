@@ -97,6 +97,7 @@ create table if not exists filings (
   id uuid primary key default gen_random_uuid(),
   source text not null default 'fec',
   source_id text not null,
+  cycle integer,
   committee_id text references committees(id),
   fec_committee_id text,
   report_type text,
@@ -112,6 +113,8 @@ create table if not exists filings (
   updated_at timestamptz not null default now(),
   unique (source, source_id)
 );
+
+alter table filings add column if not exists cycle integer;
 
 create table if not exists transactions (
   id uuid primary key default gen_random_uuid(),
@@ -141,6 +144,7 @@ create table if not exists independent_expenditures (
   id uuid primary key default gen_random_uuid(),
   source text not null default 'fec',
   source_id text not null,
+  cycle integer,
   spender_committee_id text references committees(id),
   fec_committee_id text,
   candidate_id text references candidates(id),
@@ -155,6 +159,8 @@ create table if not exists independent_expenditures (
   created_at timestamptz not null default now(),
   unique (source, source_id)
 );
+
+alter table independent_expenditures add column if not exists cycle integer;
 
 create table if not exists source_records (
   id uuid primary key default gen_random_uuid(),
@@ -250,9 +256,11 @@ create index if not exists candidates_elections_checked_idx on candidates(electi
 create index if not exists committees_candidate_idx on committees(candidate_id);
 create index if not exists committees_race_idx on committees(race_id);
 create index if not exists filings_committee_date_idx on filings(committee_id, receipt_date desc);
+create index if not exists filings_cycle_date_idx on filings(cycle, receipt_date desc);
 create index if not exists transactions_committee_date_idx on transactions(committee_id, transaction_date desc);
 create index if not exists transactions_future_dedupe_idx on transactions(committee_id, contributor_name_normalized, transaction_date, amount);
 create index if not exists independent_expenditures_race_date_idx on independent_expenditures(race_id, expenditure_date desc);
+create index if not exists independent_expenditures_cycle_date_idx on independent_expenditures(cycle, expenditure_date desc);
 create index if not exists signals_date_idx on signals(signal_date desc, created_at desc);
 create index if not exists signals_type_idx on signals(signal_type);
 create index if not exists signals_race_idx on signals(race_id);

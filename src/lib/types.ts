@@ -69,6 +69,7 @@ export type Committee = {
 
 export type Filing = {
   sourceId: string;
+  cycle?: number | null;
   committeeId?: string | null;
   fecCommitteeId?: string | null;
   reportType?: string | null;
@@ -101,6 +102,7 @@ export type Transaction = {
 
 export type IndependentExpenditure = {
   sourceId: string;
+  cycle?: number | null;
   spenderCommitteeId?: string | null;
   fecCommitteeId?: string | null;
   candidateId?: string | null;

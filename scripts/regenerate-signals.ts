@@ -29,11 +29,22 @@ async function main() {
       independentExpenditures: ieRows.rows.map(mapIndependentExpenditure),
       dataFreshness: freshness,
     });
+    await pruneFecSignals(pool, signals.map((signal) => signal.dedupeKey));
     await upsertSignals(signals);
     console.log(`Regenerated ${signals.length} signals from existing normalized records.`);
   } finally {
     await pool.end();
   }
+}
+
+async function pruneFecSignals(pool: ReturnType<typeof getPool>, dedupeKeys: string[]) {
+  if (!dedupeKeys.length) {
+    await pool.query("delete from signals where dedupe_key like 'fec:%'");
+    return;
+  }
+  await pool.query("delete from signals where dedupe_key like 'fec:%' and not (dedupe_key = any($1::text[]))", [
+    dedupeKeys,
+  ]);
 }
 
 function mapCandidate(row: Record<string, unknown>): Candidate {
@@ -97,6 +108,7 @@ function mapRace(row: Record<string, unknown>): Race {
 function mapFiling(row: Record<string, unknown>): Filing {
   return {
     sourceId: String(row.source_id),
+    cycle: numberOrNull(row.cycle),
     committeeId: text(row.committee_id),
     fecCommitteeId: text(row.fec_committee_id),
     reportType: text(row.report_type),
@@ -114,6 +126,7 @@ function mapFiling(row: Record<string, unknown>): Filing {
 function mapIndependentExpenditure(row: Record<string, unknown>): IndependentExpenditure {
   return {
     sourceId: String(row.source_id),
+    cycle: numberOrNull(row.cycle),
     spenderCommitteeId: text(row.spender_committee_id),
     fecCommitteeId: text(row.fec_committee_id),
     candidateId: text(row.candidate_id),

@@ -18,6 +18,16 @@ export async function PageShell({ children }: { children: ReactNode }) {
   const latestRun = status.runs[0];
   const latestFinishedAt = latestRun?.finishedAt ?? latestRun?.startedAt ?? null;
   const stale = isOlderThanHours(latestFinishedAt, 36);
+  const endpointStatuses = status.endpoints.map((endpoint) => endpoint.status);
+  const partial = latestRun?.status === "partial" || endpointStatuses.includes("partial");
+  const error = latestRun?.status === "failed" || latestRun?.status === "error" || endpointStatuses.includes("error");
+  const freshnessLabel = status.mode === "demo"
+    ? "Demo data"
+    : error
+      ? `Latest ingest error / ${formatRelativeTime(latestFinishedAt)}`
+      : partial
+        ? `Latest ingest partial / ${formatRelativeTime(latestFinishedAt)}`
+        : `Data as of ${formatRelativeTime(latestFinishedAt)}`;
 
   return (
     <div className="min-h-screen bg-stone-50 text-neutral-950">
@@ -46,7 +56,7 @@ export async function PageShell({ children }: { children: ReactNode }) {
               href="/status"
               title={latestFinishedAt ? `Last ingestion finished ${formatDateTime(latestFinishedAt)}` : "No ingestion run recorded"}
             >
-              {status.mode === "demo" ? "Demo data" : `Data as of ${formatRelativeTime(latestFinishedAt)}`}
+              {freshnessLabel}
             </Link>
           </div>
         </div>

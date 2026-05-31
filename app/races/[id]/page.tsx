@@ -138,7 +138,7 @@ export default async function RacePage({
                       <td className="px-4 py-3 font-mono text-xs">
                         <span className="inline-flex items-center gap-2">
                           <PartySquare party={candidate.party} />
-                          {candidate.party ?? "Unknown"}
+                          {partyLabel(candidate.party)}
                         </span>
                       </td>
                       <td className="px-4 py-3 text-right font-mono">
@@ -169,6 +169,13 @@ function officeLabel(office?: string | null) {
   if (office === "H") return "U.S. House";
   if (office === "S") return "U.S. Senate";
   return office;
+}
+
+function partyLabel(party?: string | null) {
+  if (party === "REP" || party === "R") return "Republican";
+  if (party === "DEM" || party === "D") return "Democratic";
+  if (!party || party === "NNE") return "Other/unknown";
+  return party;
 }
 
 function countSignals(signals: Awaited<ReturnType<typeof getSignalsForEntity>>) {

@@ -13,8 +13,17 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Race Signals",
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? "https://race-signals.vercel.app"),
+  title: {
+    default: "Race Signals",
+    template: "%s | Race Signals",
+  },
   description: "Campaign-finance signals for reporters covering 2026 House and Senate races.",
+  openGraph: {
+    title: "Race Signals",
+    description: "Source-linked campaign-finance alerts for 2026 House and Senate races.",
+    type: "website",
+  },
 };
 
 export default function RootLayout({

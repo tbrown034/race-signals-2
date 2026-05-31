@@ -4,6 +4,12 @@ import { PageShell } from "@/src/components/page-shell";
 import { SignalCard } from "@/src/components/signal-card";
 import { getRaces, getSpendingSignals } from "@/src/lib/db/repository";
 import { signalFiltersFromSearchParams } from "@/src/lib/signals/filters";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Outside spending watch",
+  description: "Independent expenditure alerts from FEC Schedule E records.",
+};
 
 export default async function SpendingPage({
   searchParams,

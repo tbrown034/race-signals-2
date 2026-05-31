@@ -4,6 +4,12 @@ import { PageShell } from "@/src/components/page-shell";
 import { SignalCard } from "@/src/components/signal-card";
 import { getRaces, getSignals, getStatus } from "@/src/lib/db/repository";
 import { signalFiltersFromSearchParams, sinceLabel } from "@/src/lib/signals/filters";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Federal campaign-finance alerts",
+  description: "A chronological feed of source-linked FEC campaign-finance signals.",
+};
 
 const quickViews = [
   {

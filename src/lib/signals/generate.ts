@@ -57,6 +57,7 @@ export function generateSignals(input: SignalInput): Signal[] {
     const race = committee.raceId ? races.get(committee.raceId) : undefined;
     const candidate = committee.candidateId ? candidates.get(committee.candidateId) : undefined;
     const signalDate = committee.firstFileDate ?? input.dataFreshness.slice(0, 10);
+    if (!isCurrentCycleRecord(signalDate, race)) continue;
     const committeeCopy = newCommitteeCopy(candidate, race);
     signals.push({
       dedupeKey: `fec:new_committee:${committee.fecCommitteeId}`,
@@ -81,6 +82,7 @@ export function generateSignals(input: SignalInput): Signal[] {
     if (!filing.receiptDate) continue;
     const committee = filing.committeeId ? committees.get(filing.committeeId) : undefined;
     const race = committee?.raceId ? races.get(committee.raceId) : undefined;
+    if (!isCurrentCycleRecord(filing.receiptDate, race, filing.cycle)) continue;
     const candidate = committee?.candidateId ? candidates.get(committee.candidateId) : undefined;
     signals.push({
       dedupeKey: `fec:new_filing:${filing.sourceId}`,
@@ -109,7 +111,9 @@ export function generateSignals(input: SignalInput): Signal[] {
       ? committees.get(expenditure.spenderCommitteeId)
       : undefined;
     const race = expenditure.raceId ? races.get(expenditure.raceId) : undefined;
+    if (!isCurrentCycleRecord(expenditure.expenditureDate, race, expenditure.cycle)) continue;
     const candidate = expenditure.candidateId ? candidates.get(expenditure.candidateId) : undefined;
+    const computedStatus = eventStatus(status, expenditure.expenditureDate, input.dataFreshness);
     signals.push({
       dedupeKey: `fec:large_ie:${expenditure.sourceId}`,
       signalType: "large_independent_expenditure",
@@ -130,10 +134,7 @@ export function generateSignals(input: SignalInput): Signal[] {
       signalDate: expenditure.expenditureDate,
       sourceUrl: expenditure.sourceUrl,
       confidence: expenditure.amount >= 100000 ? "medium" : "high",
-      status:
-        expenditure.amount >= 100000
-          ? "review"
-          : eventStatus(status, expenditure.expenditureDate, input.dataFreshness),
+      status: expenditure.amount >= 100000 && computedStatus !== "historical" ? "review" : computedStatus,
       dataFreshness: input.dataFreshness,
       metadata: { supportOpposeIndicator: expenditure.supportOpposeIndicator },
     });
@@ -153,17 +154,18 @@ export function generateSignals(input: SignalInput): Signal[] {
     );
     const latest = sorted[0];
     const prior = sorted[1];
+    const committee = committees.get(committeeId);
+    const race = committee?.raceId ? races.get(committee.raceId) : undefined;
     if (
       !latest?.totalReceipts ||
       !latest.receiptDate ||
       !prior?.totalReceipts ||
+      !isCurrentCycleRecord(latest.receiptDate, race, latest.cycle) ||
       latest.totalReceipts < ACTIVITY_SPIKE_THRESHOLD ||
       latest.totalReceipts < prior.totalReceipts * 2
     ) {
       continue;
     }
-    const committee = committees.get(committeeId);
-    const race = committee?.raceId ? races.get(committee.raceId) : undefined;
     const candidate = committee?.candidateId ? candidates.get(committee.candidateId) : undefined;
     signals.push({
       dedupeKey: `fec:activity_spike:${latest.sourceId}`,
@@ -253,4 +255,10 @@ function isIncumbent(status?: string | null) {
 
 function isOpenSeat(status?: string | null) {
   return status === "O" || status === "Open seat";
+}
+
+function isCurrentCycleRecord(date: string, race?: Race, cycle?: number | null) {
+  const expectedCycle = race?.cycle ?? cycle;
+  if (!expectedCycle) return true;
+  return date >= `${expectedCycle - 1}-01-01` && date <= `${expectedCycle}-12-31`;
 }

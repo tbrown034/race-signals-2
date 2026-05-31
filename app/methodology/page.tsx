@@ -1,5 +1,11 @@
 import { PageShell } from "@/src/components/page-shell";
 import { PartySquare } from "@/src/components/party-square";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Methodology",
+  description: "How Race Signals turns FEC records into source-linked campaign-finance alerts.",
+};
 
 const steps = [
   ["Scope", "Start with generated 2026 U.S. House races across all 50 states plus 2026 Senate races."],

@@ -3,8 +3,13 @@ import { PageShell } from "@/src/components/page-shell";
 import { getTopSpenders } from "@/src/lib/db/repository";
 import { committeeDesignationLabel, committeeTypeLabel } from "@/src/lib/fec-codes";
 import { formatMoney } from "@/src/lib/format";
+import type { Metadata } from "next";
 
 export const revalidate = 21600;
+export const metadata: Metadata = {
+  title: "Top outside spenders",
+  description: "Committees ranked by independent expenditure totals in the Race Signals FEC slice.",
+};
 
 export default async function SpendersPage() {
   const spenders = await getTopSpenders(100);

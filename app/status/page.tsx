@@ -2,6 +2,12 @@ import { PageShell } from "@/src/components/page-shell";
 import { getStatus } from "@/src/lib/db/repository";
 import { formatDateTime } from "@/src/lib/format";
 import { endpointHealthClass } from "@/src/lib/status-health";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Pipeline status",
+  description: "Race Signals data freshness, ingestion runs and validation issue rollups.",
+};
 
 const countLabels: Record<string, string> = {
   races: "Race shells",

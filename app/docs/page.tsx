@@ -1,5 +1,11 @@
 import Link from "next/link";
 import { PageShell } from "@/src/components/page-shell";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Product notes",
+  description: "Race Signals source notes, project scope and implementation guardrails.",
+};
 
 const sections = [
   {

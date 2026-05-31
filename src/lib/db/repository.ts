@@ -78,6 +78,8 @@ type CandidateRow = {
   source_url: string | null;
 };
 
+const CURRENT_CYCLE = 2026;
+
 function mapSignal(row: SignalRow): Signal {
   return {
     id: row.id,
@@ -292,7 +294,7 @@ export async function getSignals(filters: SignalFilters = {}) {
   }
 
   const values: unknown[] = [];
-  const where: string[] = [];
+  const where: string[] = ["(r.cycle is null or s.signal_date >= make_date(r.cycle - 1, 1, 1))"];
   if (filters.raceId) {
     values.push(filters.raceId);
     where.push(`s.race_id = $${values.length}`);
@@ -371,7 +373,10 @@ export async function getSpendingSignals(
   }
 
   const values: unknown[] = [];
-  const where: string[] = ["s.signal_type = 'large_independent_expenditure'"];
+  const where: string[] = [
+    "s.signal_type = 'large_independent_expenditure'",
+    "(r.cycle is null or s.signal_date >= make_date(r.cycle - 1, 1, 1))",
+  ];
   if (scopedFilters.raceId) {
     values.push(scopedFilters.raceId);
     where.push(`s.race_id = $${values.length}`);
@@ -563,6 +568,7 @@ export async function getCommitteeIndependentExpenditures(
   }
   const rows = await sql<{
     source_id: string;
+    cycle: number | null;
     spender_committee_id: string | null;
     fec_committee_id: string | null;
     candidate_id: string | null;
@@ -591,13 +597,18 @@ export async function getCommitteeIndependentExpenditures(
       left join committees cm on cm.id = ie.spender_committee_id
       left join races r on r.id = ie.race_id
       where ie.spender_committee_id = $1
+        and (
+          ie.expenditure_date >= make_date(coalesce(r.cycle, $3) - 1, 1, 1)
+          and ie.expenditure_date <= make_date(coalesce(r.cycle, $3), 12, 31)
+        )
       order by ie.expenditure_date desc nulls last, ie.amount desc
       limit $2
     `,
-    [id, limit],
+    [id, limit, CURRENT_CYCLE],
   );
   return rows.map((row) => ({
     sourceId: row.source_id,
+    cycle: row.cycle,
     spenderCommitteeId: row.spender_committee_id,
     fecCommitteeId: row.fec_committee_id,
     candidateId: row.candidate_id,
@@ -661,11 +672,14 @@ export async function getTopSpenders(limit = 100): Promise<TopSpender[]> {
         count(*)::text as record_count
       from independent_expenditures ie
       left join committees cm on cm.id = ie.spender_committee_id
+      left join races r on r.id = ie.race_id
+      where ie.expenditure_date >= make_date(coalesce(r.cycle, $2) - 1, 1, 1)
+        and ie.expenditure_date <= make_date(coalesce(r.cycle, $2), 12, 31)
       group by cm.id, cm.fec_committee_id, ie.fec_committee_id, cm.name, cm.committee_type, cm.designation, cm.source_url
       order by sum(ie.amount) desc nulls last
       limit $1
     `,
-    [limit],
+    [limit, CURRENT_CYCLE],
   );
 
   return rows.map((row) => ({
@@ -744,6 +758,7 @@ export async function getSignalsForEntity(entity: "candidate" | "committee" | "r
       left join committees cm on cm.id = s.committee_id
       left join races r on r.id = s.race_id
       where ${column} = $1
+        and (r.cycle is null or s.signal_date >= make_date(r.cycle - 1, 1, 1))
       order by s.signal_date desc, s.created_at desc
       limit 100
     `,
@@ -802,8 +817,11 @@ export async function getRaceStats(id: string): Promise<RaceStats> {
       ),
       spending_stats as (
         select coalesce(sum(amount), 0)::text as total_independent_expenditures
-        from independent_expenditures
-        where race_id = $1
+        from independent_expenditures ie
+        join races r on r.id = $1
+        where ie.race_id = $1
+          and ie.expenditure_date >= make_date(r.cycle - 1, 1, 1)
+          and ie.expenditure_date <= make_date(r.cycle, 12, 31)
       )
       select
         candidate_stats.total_raised,

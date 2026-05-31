@@ -68,6 +68,7 @@ export function normalizeFiling(record: FecReport): Filing {
   const sourceId = String(record.beginning_image_number ?? record.file_number ?? "");
   return {
     sourceId,
+    cycle: record.report_year ?? null,
     committeeId: record.committee_id ? `cmte-${record.committee_id}` : null,
     fecCommitteeId: record.committee_id ?? null,
     reportType: record.report_type ?? null,
@@ -93,9 +94,11 @@ function numberValue(value: number | string | null | undefined) {
 export function normalizeIndependentExpenditure(
   record: FecScheduleE,
   raceId?: string | null,
+  cycle?: number | null,
 ): IndependentExpenditure {
   return {
     sourceId: String(record.sub_id ?? ""),
+    cycle: cycle ?? null,
     spenderCommitteeId: record.committee_id ? `cmte-${record.committee_id}` : null,
     fecCommitteeId: record.committee_id ?? null,
     candidateId: record.candidate_id ? `cand-${record.candidate_id}` : null,

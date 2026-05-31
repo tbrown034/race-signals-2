@@ -252,9 +252,9 @@ async function main() {
           dateWindow,
         );
         endpointCounts.schedule_e += fecIes.length;
-        const normalizedIes = fecIes.map((record) =>
-          normalizeIndependentExpenditure(record, candidate.raceId),
-        );
+        const normalizedIes = fecIes
+          .filter((record) => isCurrentCycleExpenditure(record.expenditure_date, cycle))
+          .map((record) => normalizeIndependentExpenditure(record, candidate.raceId, cycle));
         independentExpenditures.push(...normalizedIes);
         normalizedIes.forEach((ie) => issues.push(...validateIndependentExpenditure(ie)));
 
@@ -359,6 +359,11 @@ function endpointForIssue(entityType: string) {
   if (entityType === "independent_expenditure") return "schedule_e";
   if (entityType === "congress_legislators") return "congress_legislators";
   return "unknown";
+}
+
+function isCurrentCycleExpenditure(date: string | undefined, cycle: number) {
+  if (!date) return false;
+  return date >= `${cycle - 1}-01-01` && date <= `${cycle}-12-31`;
 }
 
 function shouldRefreshElections(candidate: Candidate) {

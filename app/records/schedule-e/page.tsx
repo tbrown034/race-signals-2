@@ -86,15 +86,16 @@ export default async function ScheduleERecordsPage({
             </div>
           </div>
 
-          <div className="grid gap-px border-b border-neutral-300 bg-neutral-300 sm:grid-cols-2 lg:grid-cols-4">
-            <RecordStat label="Stored records" value={formatCount(records.length, "record")} />
-            <RecordStat label="Total IE" value={formatMoney(totals.total) ?? "$0"} />
+          <div className="grid gap-px border-b border-neutral-300 bg-neutral-300 sm:grid-cols-2 xl:grid-cols-5">
+            <RecordStat label="Displayed records" value={formatCount(records.length, "record")} />
+            <RecordStat label="Displayed IE" value={formatMoney(totals.total) ?? "$0"} />
             <RecordStat label="Support" value={formatMoney(totals.support) ?? "$0"} />
             <RecordStat label="Oppose" value={formatMoney(totals.oppose) ?? "$0"} />
+            <RecordStat label="Not classified" value={formatMoney(totals.uncoded) ?? "$0"} />
           </div>
 
           <div className="border-b border-neutral-300 px-5 py-3 text-sm text-neutral-600">
-            Showing at most 500 records to keep this read route cheap. If a scope approaches that cap, narrow by race, spender committee or candidate.
+            Displayed totals summarize the rows currently shown here. The page displays at most 500 records to keep this read route cheap; use CSV or JSON export for up to 10,000 scoped rows.
           </div>
 
           {records.length ? (
@@ -187,10 +188,11 @@ function summarizeRecords(records: Awaited<ReturnType<typeof getScheduleERecords
     (summary, record) => {
       summary.total += record.amount;
       if (record.supportOpposeIndicator === "S") summary.support += record.amount;
-      if (record.supportOpposeIndicator === "O") summary.oppose += record.amount;
+      else if (record.supportOpposeIndicator === "O") summary.oppose += record.amount;
+      else summary.uncoded += record.amount;
       return summary;
     },
-    { oppose: 0, support: 0, total: 0 },
+    { oppose: 0, support: 0, total: 0, uncoded: 0 },
   );
 }
 

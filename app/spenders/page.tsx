@@ -249,7 +249,7 @@ export default async function SpendersPage({
                           ) : null}
                           <a
                             className="text-xs underline underline-offset-4"
-                            href={`/api/signals/export.csv?type=large_independent_expenditure${spender.committeeId ? `&committee=${spender.committeeId}` : ""}`}
+                            href={spender.committeeId ? `/api/schedule-e/export.csv?committee=${spender.committeeId}` : "/api/schedule-e/export.csv"}
                           >
                             Export this spender
                           </a>

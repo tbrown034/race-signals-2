@@ -208,7 +208,7 @@ export default async function CandidatePage({
           <CandidateFilingsTable filings={filings} />
         ) : null}
         {independentExpenditures.length ? (
-          <CandidateOutsideSpendingTable expenditures={independentExpenditures} />
+          <CandidateOutsideSpendingTable candidateId={candidate.id} expenditures={independentExpenditures} />
         ) : null}
         <ElectionTimeline
           collapseOnMobile
@@ -434,8 +434,10 @@ function supportLabel(value?: string | null) {
 }
 
 function CandidateOutsideSpendingTable({
+  candidateId,
   expenditures,
 }: {
+  candidateId: string;
   expenditures: Awaited<ReturnType<typeof getCandidateIndependentExpenditures>>;
 }) {
   return (
@@ -445,7 +447,7 @@ function CandidateOutsideSpendingTable({
           <h2 className="text-sm font-semibold uppercase tracking-[0.14em] text-neutral-600">
             Outside spending records
           </h2>
-          <Link className="text-sm font-medium underline underline-offset-4" href={`/records/schedule-e?candidate=${expenditures[0]?.candidateId ?? ""}`}>
+          <Link className="text-sm font-medium underline underline-offset-4" href={`/records/schedule-e?candidate=${candidateId}`}>
             Open full Schedule E evidence
           </Link>
         </div>

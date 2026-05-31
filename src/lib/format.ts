@@ -7,6 +7,10 @@ export function formatMoney(amount?: number | null) {
   }).format(amount);
 }
 
+export function formatCount(count: number, singular: string, plural = `${singular}s`) {
+  return `${count} ${count === 1 ? singular : plural}`;
+}
+
 export function formatDate(value?: string | null) {
   if (!value) return "Unknown date";
   return new Intl.DateTimeFormat("en-US", {

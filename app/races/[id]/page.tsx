@@ -15,7 +15,7 @@ import {
   getRaceStats,
   getSignalsForEntity,
 } from "@/src/lib/db/repository";
-import { formatDateTime, formatMoney } from "@/src/lib/format";
+import { formatCount, formatDateTime, formatMoney } from "@/src/lib/format";
 import type { Metadata } from "next";
 
 export async function generateMetadata({
@@ -91,7 +91,7 @@ export default async function RacePage({
             `${candidates.length} FEC candidates matched to this race; ${candidatesWithMoney} currently show cycle receipts in the FEC totals endpoint.`,
             `Known candidate receipts in this slice total ${formatMoney(totalReceipts) ?? "$0"}. Use this as FEC-filed activity, not a race forecast.`,
             `Schedule E independent expenditures currently total ${formatMoney(stats.totalIndependentExpenditures) ?? "$0"} in this race slice.`,
-            `${signals.length} related signals: ${signalCounts.filings} filings, ${signalCounts.committees} committee records, ${signalCounts.outsideSpending} outside-spending alerts, ${signalCounts.review} review flags.`,
+            `${formatCount(signals.length, "related signal")}: ${formatCount(signalCounts.filings, "filing")}, ${formatCount(signalCounts.committees, "committee record")}, ${formatCount(signalCounts.outsideSpending, "outside-spending alert")}, ${formatCount(signalCounts.review, "review flag")}.`,
             incumbentCount
               ? `${incumbentCount} incumbent candidate${incumbentCount === 1 ? " is" : "s are"} present; compare committee and filing activity against challenger organization before treating paperwork as a launch signal.`
               : "No incumbent candidate is currently matched in this slice; verify ballot and primary context with election-office sources.",

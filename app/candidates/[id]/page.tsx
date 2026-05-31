@@ -8,7 +8,7 @@ import { PageShell } from "@/src/components/page-shell";
 import { PartySquare } from "@/src/components/party-square";
 import { ReporterRead } from "@/src/components/reporter-read";
 import { getCandidate, getCandidateElections, getCandidatesForRace, getRace, getSignalsForEntity } from "@/src/lib/db/repository";
-import { formatDate, formatDateTime, formatMoney } from "@/src/lib/format";
+import { formatCount, formatDate, formatDateTime, formatMoney } from "@/src/lib/format";
 import type { Metadata } from "next";
 
 export async function generateMetadata({
@@ -94,7 +94,7 @@ export default async function CandidatePage({
         <ReporterRead
           notes={[
             `Money position: ${candidateMoney(candidate.totalReceiptsCycle, candidate.totalsUpdatedAt).toLowerCase()} raised this cycle; ${candidateMoney(candidate.cashOnHandLatest, candidate.totalsUpdatedAt).toLowerCase()} cash on hand${candidate.cashOnHandAsOf ? ` as of ${formatDate(candidate.cashOnHandAsOf)}` : ""}.`,
-            `${signals.length} related signals in this slice: ${signalCounts.filings} filings, ${signalCounts.committees} committee records, ${signalCounts.outsideSpending} outside-spending alerts, ${signalCounts.review} review flags.`,
+            `${formatCount(signals.length, "related signal")} in this slice: ${formatCount(signalCounts.filings, "filing")}, ${formatCount(signalCounts.committees, "committee record")}, ${formatCount(signalCounts.outsideSpending, "outside-spending alert")}, ${formatCount(signalCounts.review, "review flag")}.`,
             isIncumbent(candidate.incumbentChallengeStatus)
               ? "Incumbent context: committee records usually reflect cycle operations or continuing campaign infrastructure, not a first-time launch."
               : "Non-incumbent context: a principal committee is useful early evidence of campaign organization, but ballot status still needs election-office verification.",

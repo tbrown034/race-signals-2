@@ -1100,13 +1100,15 @@ export async function getCandidateIndependentExpenditures(
   }));
 }
 
-export async function getTopSpenders(limit = 100): Promise<TopSpender[]> {
+export async function getTopSpenders(limit = 100, state?: string | null): Promise<TopSpender[]> {
   if (!hasDatabase()) {
     return demoCommittees
       .map((committee) => {
-        const records = demoIndependentExpenditures.filter(
-          (expenditure) => expenditure.spenderCommitteeId === committee.id,
-        );
+        const records = demoIndependentExpenditures.filter((expenditure) => {
+          if (expenditure.spenderCommitteeId !== committee.id) return false;
+          if (!state) return true;
+          return expenditure.raceId?.split("-")[1] === state;
+        });
         return {
           committeeId: committee.id,
           fecCommitteeId: committee.fecCommitteeId,
@@ -1181,6 +1183,7 @@ export async function getTopSpenders(limit = 100): Promise<TopSpender[]> {
         left join races r on r.id = ie.race_id
         where ie.expenditure_date >= make_date(coalesce(r.cycle, $2) - 1, 1, 1)
           and ie.expenditure_date <= make_date(coalesce(r.cycle, $2), 12, 31)
+          and ($3::text is null or r.state = $3)
         group by ie.spender_committee_id, coalesce(ie.fec_committee_id, ie.spender_committee_id)
       ),
       spending_by_race as (
@@ -1198,6 +1201,7 @@ export async function getTopSpenders(limit = 100): Promise<TopSpender[]> {
         left join races r on r.id = ie.race_id
         where ie.expenditure_date >= make_date(coalesce(r.cycle, $2) - 1, 1, 1)
           and ie.expenditure_date <= make_date(coalesce(r.cycle, $2), 12, 31)
+          and ($3::text is null or r.state = $3)
         group by ie.spender_committee_id, coalesce(ie.fec_committee_id, ie.spender_committee_id), ie.race_id, r.name
       ),
       top_race as (
@@ -1221,6 +1225,7 @@ export async function getTopSpenders(limit = 100): Promise<TopSpender[]> {
           left join races r on r.id = ie.race_id
           where ie.expenditure_date >= make_date(coalesce(r.cycle, $2) - 1, 1, 1)
             and ie.expenditure_date <= make_date(coalesce(r.cycle, $2), 12, 31)
+            and ($3::text is null or r.state = $3)
         ) ranked_records
         where rank = 1
       )
@@ -1250,7 +1255,7 @@ export async function getTopSpenders(limit = 100): Promise<TopSpender[]> {
       order by s.total_amount desc nulls last
       limit $1
     `,
-    [limit, CURRENT_CYCLE],
+    [limit, CURRENT_CYCLE, state ?? null],
   );
 
   return rows.map((row) => ({

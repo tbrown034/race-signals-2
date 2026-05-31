@@ -68,7 +68,7 @@ export function generateSignals(input: SignalInput): Signal[] {
     if (!candidate || !race) continue;
     const signalDate = committee.firstFileDate;
     if (!isCurrentCycleRecord(signalDate, race)) continue;
-    const committeeCopy = newCommitteeCopy(candidate, race);
+    const committeeCopy = newCommitteeCopy(committee, candidate, race);
     signals.push({
       dedupeKey: `fec:new_committee:${committee.fecCommitteeId}`,
       signalType: "new_committee",
@@ -165,7 +165,7 @@ export function generateSignals(input: SignalInput): Signal[] {
       amount: expenditure.amount,
       signalDate: expenditure.expenditureDate,
       sourceUrl: expenditure.sourceUrl,
-      confidence: expenditure.amount >= 100000 ? "medium" : "high",
+      confidence: "high",
       status: expenditure.amount >= 100000 && computedStatus !== "historical" ? "review" : computedStatus,
       dataFreshness: input.dataFreshness,
       metadata: {
@@ -218,7 +218,7 @@ export function generateSignals(input: SignalInput): Signal[] {
       signalType: "committee_activity_spike",
       headline: `${committee?.name ?? "A committee"} reported a filing-level receipts spike in ${displayRace(race)}.`,
       whyItMatters:
-      "A sharp increase compared with the prior stored filing can signal fundraising momentum worth source-level review.",
+        "A sharp period-receipts increase versus the prior stored filing can signal fundraising movement worth source-level review; compare coverage periods before drawing conclusions.",
       candidateId: candidate?.id ?? null,
       candidateName: candidate?.name ?? null,
       committeeId,
@@ -294,32 +294,33 @@ function newFilingCopy(filing: Filing, committee?: Committee, versionKind = "ini
   };
 }
 
-function newCommitteeCopy(candidate?: Candidate, race?: Race) {
+function newCommitteeCopy(committee: Committee, candidate?: Candidate, race?: Race) {
   const raceLabel = displayRace(race);
   const candidateName = candidate?.name ?? "A candidate";
+  const fileDate = committee.firstFileDate ? ` with first-file date ${committee.firstFileDate}` : "";
   if (isIncumbent(candidate?.incumbentChallengeStatus)) {
     return {
-      headline: `${candidateName} has a principal campaign committee on file in ${raceLabel}.`,
+      headline: `FEC lists a principal campaign committee for ${candidateName} in ${raceLabel}.`,
       whyItMatters:
         "For an incumbent, committee activity is usually campaign infrastructure or cycle paperwork, not proof of a first-time launch.",
     };
   }
   if (isOpenSeat(candidate?.incumbentChallengeStatus)) {
     return {
-      headline: `Principal campaign committee filed in open-seat ${raceLabel}.`,
+      headline: `FEC lists a principal campaign committee${fileDate} in open-seat ${raceLabel}.`,
       whyItMatters:
-        "In an open-seat race, a principal committee can be an early sign of candidate organization, but it still needs source review.",
+        "In an open-seat race, a principal committee is a paperwork signal of campaign organization; verify candidacy and ballot status separately.",
       };
   }
   if (isChallenger(candidate?.incumbentChallengeStatus)) {
     return {
-      headline: `${candidateName} filed a principal campaign committee in ${raceLabel}.`,
+      headline: `FEC lists a principal campaign committee for ${candidateName} in ${raceLabel}.`,
       whyItMatters:
-        "For a challenger, a principal committee is often an early paperwork signal that a campaign is organizing.",
+        "For a challenger, a principal committee is a paperwork signal that campaign infrastructure exists; verify candidacy and ballot status separately.",
     };
   }
   return {
-    headline: `${candidateName} filed a principal campaign committee in ${raceLabel}.`,
+    headline: `FEC lists a principal campaign committee for ${candidateName} in ${raceLabel}.`,
     whyItMatters:
       "This source-linked committee record shows campaign infrastructure, but candidate status and ballot context still need verification.",
   };

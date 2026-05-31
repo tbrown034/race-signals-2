@@ -18,11 +18,12 @@ export default async function SpendersPage({
 }) {
   const params = await searchParams;
   const selectedState = typeof params.state === "string" ? params.state.toUpperCase() : undefined;
-  const spenders = await getTopSpenders(100);
-  const stateOptions = [...new Set(spenders.flatMap((spender) => spender.states))].sort();
-  const visibleSpenders = selectedState
-    ? spenders.filter((spender) => spender.states.includes(selectedState))
-    : spenders;
+  const [spenders, stateOptionSpenders] = await Promise.all([
+    getTopSpenders(100, selectedState),
+    getTopSpenders(100),
+  ]);
+  const stateOptions = [...new Set(stateOptionSpenders.flatMap((spender) => spender.states))].sort();
+  const visibleSpenders = spenders;
   const exportSuffix = selectedState ? `?state=${selectedState}` : "";
 
   return (

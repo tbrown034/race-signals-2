@@ -18,8 +18,8 @@ export function FreshMark({
   return (
     <span
       role="img"
-      aria-label="New signal in the last 48 hours"
-      title="New in the last 48 hours"
+      aria-label="Event date within the last 48 hours"
+      title="Fresh means the event date is within the last 48 hours, not necessarily first public availability."
       className="inline-block h-2 w-2 bg-emerald-700"
     />
   );

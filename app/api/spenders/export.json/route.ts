@@ -3,11 +3,12 @@ import { SPENDER_EXPORT_LIMIT, type SpenderExportManifest, spenderToExportRow } 
 
 export async function GET(request: Request) {
   const url = new URL(request.url);
+  const state = url.searchParams.get("state")?.toUpperCase() ?? null;
   const [spenders, manifest] = await Promise.all([
-    getTopSpenders(SPENDER_EXPORT_LIMIT + 1),
+    getTopSpenders(SPENDER_EXPORT_LIMIT + 1, state),
     exportManifest(url),
   ]);
-  const rows = filterSpenders(spenders, url);
+  const rows = spenders;
   const headers = exportHeaders();
 
   if (rows.length > SPENDER_EXPORT_LIMIT) {
@@ -33,12 +34,6 @@ async function exportManifest(url: URL): Promise<SpenderExportManifest> {
     baseUrl: url.origin,
     latestRun: status.runs[0] ?? null,
   };
-}
-
-function filterSpenders<T extends { states: string[] }>(spenders: T[], url: URL) {
-  const state = url.searchParams.get("state")?.toUpperCase();
-  if (!state) return spenders;
-  return spenders.filter((spender) => spender.states.includes(state));
 }
 
 function exportFilters(url: URL) {

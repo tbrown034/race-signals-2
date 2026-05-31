@@ -27,7 +27,7 @@ const signalTypes = [
   [
     "new_committee",
     "New committee",
-    "A candidate-linked principal committee is a durable paperwork signal, but context matters: for incumbents it may reflect continuing campaign infrastructure rather than a first-time launch.",
+    "A candidate-linked principal committee is a durable FEC paperwork signal, not a ballot-status or campaign-launch claim. For incumbents it may reflect continuing campaign infrastructure; for challengers or open seats, verify candidacy and ballot context separately.",
   ],
   [
     "new_filing",
@@ -42,7 +42,7 @@ const signalTypes = [
   [
     "committee_activity_spike",
     "Activity spike",
-    "A filing-level spike flags a committee whose latest stored period-receipts filing crossed the flat review threshold and doubled the prior stored filing. The card carries both latest and prior filing sources and both coverage periods so the comparison can be checked.",
+    "A filing-level spike flags a committee whose latest stored period-receipts filing crossed the flat review threshold and doubled the prior stored filing. It is not normalized for coverage-period length or report family. The card carries both latest and prior filing sources and coverage periods so the comparison can be checked.",
   ],
   [
     "large_contribution",
@@ -131,10 +131,10 @@ export default function MethodologyPage() {
             Confidence is a data-quality label, not an importance score. High means
             the source record links cleanly to a candidate, committee, race and FEC
             source URL. Medium means the record is useful but needs extra context,
-            often because a large outside-spending record or filing-level comparison
-            deserves a human check. Low is reserved for records with missing or
-            weakly matched context. Review marks records that cross a flat
-            manual-review threshold or otherwise need verification before publication.
+            often because a filing-level comparison needs source review. Low is
+            reserved for records with missing or weakly matched context. Review marks
+            records that cross a flat manual-review threshold or otherwise need
+            verification before publication.
           </p>
         </section>
 

@@ -46,9 +46,9 @@ export function SignalCard({ signal }: { signal: Signal }) {
       <div className="font-mono text-xs text-neutral-600">
         <p className="flex items-center gap-1.5 text-neutral-950">
           <FreshMark signalDate={signal.signalDate} status={signal.status} />
-          Event {formatDate(signal.signalDate)}
+          Event date {formatDate(signal.signalDate)}
         </p>
-        <p className="mt-1 text-neutral-600" title={`Ingested ${formatDateTime(signal.dataFreshness)}`}>
+        <p className="mt-1 text-neutral-600" title={`Ingested by Race Signals ${formatDateTime(signal.dataFreshness)}`}>
           Added {formatRelativeTime(signal.dataFreshness)}
         </p>
         <Link
@@ -234,7 +234,7 @@ export function SignalCard({ signal }: { signal: Signal }) {
           <span>Source not publishable</span>
         )}
         <SignalCopyLink anchorId={anchorId} />
-        <span className="text-neutral-500">Ingested {formatDateTime(signal.dataFreshness)}</span>
+        <span className="text-neutral-500">Ingested by Race Signals {formatDateTime(signal.dataFreshness)}</span>
       </div>
     </article>
   );
@@ -407,12 +407,14 @@ function numberMetadata(value: unknown) {
 }
 
 function signalAmountLabel(signal: Signal) {
+  if (signal.signalType === "new_filing" || signal.signalType === "committee_activity_spike") {
+    const amount = formatMoney(signal.amount);
+    if (amount) return `${receiptBasisLabel(textMetadata(signal.metadata?.totalReceiptsBasis))} ${amount}`;
+    return "Receipts not reported";
+  }
   const amount = formatMoney(signal.amount);
   if (amount) return amount;
   if (signal.signalType === "new_committee") return "Non-monetary";
-  if (signal.signalType === "new_filing" || signal.signalType === "committee_activity_spike") {
-    return "Receipts not reported";
-  }
   return "Amount not stored";
 }
 

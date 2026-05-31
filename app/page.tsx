@@ -235,15 +235,15 @@ function FeedEmptyState({
   return (
     <div className="min-w-0 max-w-full border-b border-neutral-300 p-5 text-sm text-neutral-700">
       <p className="font-semibold text-neutral-950">No signals match this view.</p>
-      <p className="mt-1 max-w-[min(280px,100%)] break-words leading-6 [overflow-wrap:anywhere] sm:max-w-3xl">
+      <p className="mt-1 max-w-full break-words leading-6 [overflow-wrap:anywhere] sm:max-w-3xl">
         This is not evidence of no activity. It means no stored FEC record in the current Race Signals slice matched these filters and signal rules.
       </p>
       {isStale ? (
-        <p className="mt-2 max-w-[min(280px,100%)] break-words leading-6 text-neutral-800 [overflow-wrap:anywhere] sm:max-w-3xl">
+        <p className="mt-2 max-w-full break-words leading-6 text-neutral-800 [overflow-wrap:anywhere] sm:max-w-3xl">
           The latest ingest is older than 48 hours, so check pipeline status before treating this as a quiet race.
         </p>
       ) : null}
-      <div className="mt-3 grid max-w-[min(280px,100%)] gap-2 sm:max-w-full sm:grid-flow-col sm:auto-cols-max sm:justify-start">
+      <div className="mt-3 grid max-w-full gap-2 sm:grid-flow-col sm:auto-cols-max sm:justify-start">
         {state ? (
           <Link className="max-w-full break-words font-medium underline underline-offset-4 [overflow-wrap:anywhere]" href={`/?state=${state}`}>
             Show all {state} signals
@@ -301,7 +301,7 @@ function TriageItem({
       {signal ? (
         <>
           <Link
-            className="mt-1 block max-w-[270px] break-words text-sm font-medium leading-5 underline underline-offset-4 [overflow-wrap:anywhere] sm:max-w-full"
+            className="mt-1 block max-w-full break-words text-sm font-medium leading-5 underline underline-offset-4 [overflow-wrap:anywhere]"
             href={`#${signalAnchorId(signal.dedupeKey)}`}
             title={signal.headline}
           >

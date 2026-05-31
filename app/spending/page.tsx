@@ -61,7 +61,7 @@ export default async function SpendingPage({
                 <h1 className="mt-1 text-xl font-semibold tracking-tight">
                   Outside spending watch
                 </h1>
-                <p className="mt-2 max-w-[min(280px,100%)] break-words text-sm leading-5 text-neutral-700 [overflow-wrap:anywhere] sm:max-w-3xl">
+                <p className="mt-2 max-w-full break-words text-sm leading-5 text-neutral-700 [overflow-wrap:anywhere] sm:max-w-3xl">
                   Shows $25k+ Schedule E alert signals. Use Schedule E evidence for lower-dollar and uncoded source rows.
                 </p>
               </div>
@@ -120,7 +120,7 @@ export default async function SpendingPage({
             type="large_independent_expenditure"
           />
           <div className="border-b border-neutral-300 px-5 py-3 font-mono text-[11px] uppercase tracking-[0.12em] text-neutral-500">
-            <p className="max-w-[min(280px,100%)] break-words [overflow-wrap:anywhere] sm:max-w-full">
+            <p className="max-w-full break-words [overflow-wrap:anywhere]">
             Showing {visibleSignals.length}{hasMoreSignals ? "+" : ""} outside-spending signals
             {committeeId ? ` for ${committeeFilter?.name ?? committeeId}` : ""}
             {position ? ` / ${supportOpposeLabel(position)}` : ""}
@@ -349,15 +349,15 @@ function SpendingEmptyState({
   return (
     <div className="min-w-0 max-w-full border-b border-neutral-300 p-5 text-sm text-neutral-700">
       <p className="font-semibold text-neutral-950">No outside-spending signals match this view.</p>
-      <p className="mt-1 max-w-[min(280px,100%)] break-words leading-6 [overflow-wrap:anywhere] sm:max-w-3xl">
+      <p className="mt-1 max-w-full break-words leading-6 [overflow-wrap:anywhere] sm:max-w-3xl">
         Signal filters can hide lower-dollar Schedule E records. Check the evidence table before concluding there is no outside-spending activity in this scope.
       </p>
       {isStale ? (
-        <p className="mt-2 max-w-[min(280px,100%)] break-words leading-6 text-neutral-800 [overflow-wrap:anywhere] sm:max-w-3xl">
+        <p className="mt-2 max-w-full break-words leading-6 text-neutral-800 [overflow-wrap:anywhere] sm:max-w-3xl">
           The latest ingest is older than 48 hours, so verify pipeline status before treating this race as quiet.
         </p>
       ) : null}
-      <div className="mt-3 grid max-w-[min(280px,100%)] gap-2 sm:max-w-full sm:grid-flow-col sm:auto-cols-max sm:justify-start">
+      <div className="mt-3 grid max-w-full gap-2 sm:grid-flow-col sm:auto-cols-max sm:justify-start">
         <Link className="max-w-full break-words font-medium underline underline-offset-4 [overflow-wrap:anywhere]" href={evidenceHref}>
           Check Schedule E evidence
         </Link>

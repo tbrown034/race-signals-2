@@ -1,6 +1,7 @@
 import Link from "next/link";
+import { CoverageStrip } from "@/src/components/coverage-strip";
 import { PageShell } from "@/src/components/page-shell";
-import { getTopSpenders } from "@/src/lib/db/repository";
+import { getCoverageSummary, getTopSpenders } from "@/src/lib/db/repository";
 import { committeeDesignationLabel, committeeTypeLabel } from "@/src/lib/fec-codes";
 import { formatDate, formatMoney } from "@/src/lib/format";
 import type { Metadata } from "next";
@@ -18,9 +19,10 @@ export default async function SpendersPage({
 }) {
   const params = await searchParams;
   const selectedState = typeof params.state === "string" ? params.state.toUpperCase() : undefined;
-  const [spenders, stateOptionSpenders] = await Promise.all([
+  const [spenders, stateOptionSpenders, status] = await Promise.all([
     getTopSpenders(100, selectedState),
     getTopSpenders(100),
+    getCoverageSummary(),
   ]);
   const stateOptions = [...new Set(stateOptionSpenders.flatMap((spender) => spender.states))].sort();
   const stateCounts = stateSpenderCounts(stateOptionSpenders);
@@ -40,7 +42,7 @@ export default async function SpendersPage({
                 <h1 className="mt-1 text-xl font-semibold tracking-tight">
                   Top stored outside spenders
                 </h1>
-                <p className="mt-2 max-w-[min(280px,100%)] break-words text-sm leading-5 text-neutral-700 [overflow-wrap:anywhere] sm:max-w-3xl">
+                <p className="mt-2 max-w-full break-words text-sm leading-5 text-neutral-700 [overflow-wrap:anywhere] sm:max-w-3xl">
                   Ranked by stored Schedule E rows in the current Race Signals database slice; not a complete national outside-spending total.
                 </p>
               </div>
@@ -65,6 +67,7 @@ export default async function SpendersPage({
               </div>
             </div>
           </div>
+          <CoverageStrip counts={status.counts} latestRun={status.runs[0]} mode={status.mode} />
           {stateOptions.length ? (
             <nav
               aria-label="Filter spenders by state"

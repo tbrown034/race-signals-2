@@ -68,7 +68,7 @@ export default async function ScheduleERecordsPage({
                 <h1 className="mt-1 max-w-full whitespace-normal break-words text-xl font-semibold tracking-tight [overflow-wrap:anywhere]">
                   Schedule E records
                 </h1>
-                <p className="mt-2 max-w-[min(280px,100%)] whitespace-normal break-words text-sm leading-6 text-neutral-700 [overflow-wrap:anywhere] sm:max-w-3xl">
+                <p className="mt-2 max-w-full whitespace-normal break-words text-sm leading-6 text-neutral-700 [overflow-wrap:anywhere] sm:max-w-3xl">
                   Stored Schedule E rows. Includes records below the $25,000 alert threshold, with source links for checking totals before publication.
                 </p>
                 {activeScope.length ? (
@@ -109,10 +109,10 @@ export default async function ScheduleERecordsPage({
           </div>
 
           <div className="border-b border-neutral-300 px-5 py-3 text-sm text-neutral-600">
-            <p className="max-w-[min(280px,100%)] break-words [overflow-wrap:anywhere] sm:max-w-3xl">
+            <p className="max-w-full break-words [overflow-wrap:anywhere] sm:max-w-3xl">
               Latest {formatCount(records.length, "record")} shown. Summary totals cover the full stored scope; exports return up to 10,000 scoped rows.
             </p>
-            <p className="mt-1 max-w-[min(280px,100%)] break-words [overflow-wrap:anywhere] sm:max-w-3xl">
+            <p className="mt-1 max-w-full break-words [overflow-wrap:anywhere] sm:max-w-3xl">
               Totals are summed from stored, source-linked Schedule E rows in this database slice, not a completeness claim.
             </p>
           </div>
@@ -181,10 +181,10 @@ export default async function ScheduleERecordsPage({
           ) : (
             <div className="min-w-0 max-w-full p-5 text-sm text-neutral-700">
               <p className="font-semibold text-neutral-950">No stored Schedule E records match this scope.</p>
-              <p className="mt-1 max-w-[min(280px,100%)] break-words leading-6 [overflow-wrap:anywhere] sm:max-w-3xl">
+              <p className="mt-1 max-w-full break-words leading-6 [overflow-wrap:anywhere] sm:max-w-3xl">
                 This evidence table includes records below the alert threshold. If it is empty, broaden the scope or check whether the latest ingest covered this race, spender or candidate.
               </p>
-              <div className="mt-3 grid max-w-[min(280px,100%)] gap-2 sm:max-w-full sm:grid-flow-col sm:auto-cols-max sm:justify-start">
+              <div className="mt-3 grid max-w-full gap-2 sm:grid-flow-col sm:auto-cols-max sm:justify-start">
                 <Link className="max-w-full break-words font-medium underline underline-offset-4 [overflow-wrap:anywhere]" href="/records/schedule-e">
                   Show all stored Schedule E records
                 </Link>

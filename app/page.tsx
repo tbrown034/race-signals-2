@@ -275,10 +275,10 @@ function FeedTriageStrip({
   signals: ReturnType<typeof feedTriageSignals>;
 }) {
   const items = distinctTriageItems([
-    { label: "Newest added in this view", signal: signals.newestAdded },
-    { label: "Largest outside spend in this view", signal: signals.largestIe, empty: "No IE alerts in this view" },
-    { label: "Incumbent named in this view", signal: signals.incumbentNamed, empty: "No incumbent-linked signals in this view" },
-    { label: "Needs review in this view", signal: signals.review, empty: "No review flags in this view" },
+    { label: "Newest added matching this view", signal: signals.newestAdded },
+    { label: "Largest visible outside spend", signal: signals.largestIe, empty: "No IE alerts in visible results" },
+    { label: "Incumbent named in visible results", signal: signals.incumbentNamed, empty: "No incumbent-linked visible results" },
+    { label: "Needs review in visible results", signal: signals.review, empty: "No visible review flags" },
   ]);
 
   return (

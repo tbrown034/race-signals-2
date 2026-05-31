@@ -238,8 +238,22 @@ async function main() {
           electionCheckedCandidateIds.push(candidateWithLookupState.id);
         }
       }
-      normalizedCandidates.push(await applyCandidateTotals(candidateWithLookupState, cycle));
-      endpointCounts.totals += 1;
+      try {
+        normalizedCandidates.push(await applyCandidateTotals(candidateWithLookupState, cycle));
+        endpointCounts.totals += 1;
+      } catch (error) {
+        const message = error instanceof Error ? error.message : String(error);
+        errors.push({ endpoint: "totals", candidateId: candidateWithLookupState.fecCandidateId, message });
+        issues.push({
+          entityType: "candidate",
+          sourceId: candidateWithLookupState.fecCandidateId,
+          severity: "warning",
+          rule: "candidate_totals_lookup",
+          message,
+          sourceUrl: candidateWithLookupState.sourceUrl,
+        });
+        normalizedCandidates.push(candidateWithLookupState);
+      }
     }
 
     candidates.push(...normalizedCandidates);

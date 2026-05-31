@@ -557,6 +557,7 @@ function validationRuleLabel(rule: string) {
     suspiciously_large_amount: "Suspiciously large amount",
     suspicious_amount: "Suspicious amount",
     duplicate_source_record: "Duplicate source record",
+    candidate_totals_lookup: "Candidate totals lookup",
     elections_lookup: "Election timeline lookup",
     partial_ingestion_error: "Partial ingestion error",
   };

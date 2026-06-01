@@ -105,8 +105,8 @@ async function throttle() {
   lastRequestAt = Date.now();
 }
 
-function retryDelay(response: Response, attempt: number) {
-  const retryAfter = response.headers.get("retry-after");
+function retryDelay(response: Response | null, attempt: number) {
+  const retryAfter = response?.headers.get("retry-after");
   if (retryAfter) {
     const seconds = Number(retryAfter);
     if (Number.isFinite(seconds)) return seconds * 1000;
@@ -127,18 +127,34 @@ export async function fecGet<T>(path: string, params: Record<string, string | nu
   }
 
   const maxRetries = numberFromEnv("FEC_MAX_RETRIES", DEFAULT_MAX_RETRIES);
+  const timeoutMs = numberFromEnv("FEC_REQUEST_TIMEOUT_MS", 60000);
 
   for (let attempt = 0; attempt <= maxRetries; attempt += 1) {
     await throttle();
-    const response = await fetch(url, { headers: { accept: "application/json" } });
-    if (response.ok) {
-      return (await response.json()) as FecListResponse<T>;
+    try {
+      const response = await fetch(url, {
+        headers: { accept: "application/json" },
+        signal: AbortSignal.timeout(timeoutMs),
+      });
+      if (response.ok) {
+        return (await response.json()) as FecListResponse<T>;
+      }
+      if ((response.status === 429 || response.status >= 500) && attempt < maxRetries) {
+        await wait(retryDelay(response, attempt));
+        continue;
+      }
+      throw new Error(`FEC request failed ${response.status}: ${path}`);
+    } catch (error) {
+      // Network-level failures (socket drops, timeouts, DNS) throw rather
+      // than returning a Response. Retry on the same backoff as 5xx so a
+      // dropped TLS socket can't hang the ingest forever — which it did
+      // before the timeout was wired in.
+      const isLastAttempt = attempt >= maxRetries;
+      const isTimeout = error instanceof DOMException && error.name === "TimeoutError";
+      const isNetworkError = error instanceof TypeError || isTimeout;
+      if (!isNetworkError || isLastAttempt) throw error;
+      await wait(retryDelay(null, attempt));
     }
-    if ((response.status === 429 || response.status >= 500) && attempt < maxRetries) {
-      await wait(retryDelay(response, attempt));
-      continue;
-    }
-    throw new Error(`FEC request failed ${response.status}: ${path}`);
   }
 
   throw new Error(`FEC request failed: ${path}`);

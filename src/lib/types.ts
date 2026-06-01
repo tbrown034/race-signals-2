@@ -92,23 +92,6 @@ export type CandidateFiling = Filing & {
   committeeName?: string | null;
 };
 
-export type Transaction = {
-  sourceId: string;
-  committeeId?: string | null;
-  fecCommitteeId?: string | null;
-  contributorName?: string | null;
-  contributorNameNormalized?: string | null;
-  contributorEmployer?: string | null;
-  contributorEmployerNormalized?: string | null;
-  contributorOccupation?: string | null;
-  amount: number;
-  transactionDate?: string | null;
-  transactionType?: string | null;
-  memoText?: string | null;
-  sourceUrl?: string | null;
-  raw: unknown;
-};
-
 export type IndependentExpenditure = {
   sourceId: string;
   cycle?: number | null;

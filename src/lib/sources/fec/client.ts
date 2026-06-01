@@ -175,13 +175,6 @@ export type DateWindow = {
   endDate?: string;
 };
 
-function dateWindowParams(window?: DateWindow) {
-  return {
-    min_date: window?.startDate,
-    max_date: window?.endDate,
-  };
-}
-
 export async function fetchCandidatesForOffice(
   office: "H" | "S",
   cycle: number,
@@ -197,28 +190,6 @@ export async function fetchCandidatesForOffice(
       sort: "name",
     },
     maxPages,
-  );
-}
-
-export async function fetchHouseCandidates(
-  cycle: number,
-  maxPages?: number,
-  state?: string,
-) {
-  return fetchCandidatesForOffice("H", cycle, maxPages, state);
-}
-
-export async function fetchCandidatesForRace(state: string, district: string, cycle: number) {
-  return firstPages<FecCandidate>(
-    "/candidates/search/",
-    {
-      office: "H",
-      state,
-      district,
-      election_year: cycle,
-      sort: "name",
-    },
-    2,
   );
 }
 
@@ -269,13 +240,19 @@ export async function fetchIndependentExpendituresForCandidate(
   cycle: number,
   window?: DateWindow,
 ) {
+  // FEC's swagger documents `cycle`, `min_date`, and `max_date` on
+  // /schedules/schedule_e/. The previous `two_year_transaction_period`
+  // is an undocumented legacy alias — switched to `cycle` plus explicit
+  // date bounds so any "applicable reporting date" edge case can't slip
+  // pre-cycle expenditures through.
   return firstPages<FecScheduleE>(
     "/schedules/schedule_e/",
     {
       candidate_id: candidateId,
-      two_year_transaction_period: cycle,
+      cycle,
+      min_date: window?.startDate ?? `${cycle - 1}-01-01`,
+      max_date: window?.endDate ?? `${cycle}-12-31`,
       sort: "-expenditure_date",
-      ...dateWindowParams(window),
     },
     2,
   );

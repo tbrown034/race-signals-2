@@ -188,7 +188,7 @@ export default async function RacePage({
                               src={candidate.photoUrl}
                             />
                           ) : (
-                            <span aria-hidden="true" className="block h-[30px] w-6 bg-neutral-300" />
+                            <span aria-hidden="true" className="block h-[30px] w-6 border border-neutral-300" />
                           )}
                           <div className="min-w-0">
                             <Link className="font-medium underline underline-offset-4" href={`/candidates/${candidate.id}`}>

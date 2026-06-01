@@ -21,10 +21,6 @@ export async function fetchCandidateTotal(candidateId: string, cycle: number) {
   return data.results[0] ?? null;
 }
 
-export async function applyCandidateTotals(candidate: Candidate, cycle: number) {
-  return (await applyCandidateTotalsWithRaw(candidate, cycle)).candidate;
-}
-
 export async function applyCandidateTotalsWithRaw(candidate: Candidate, cycle: number) {
   const total = await fetchCandidateTotal(candidate.fecCandidateId, cycle);
   if (!total) return { candidate, raw: null };

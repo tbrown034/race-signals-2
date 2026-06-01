@@ -10,7 +10,6 @@ import type {
   Election,
   Signal,
   SourceRecord,
-  Transaction,
   ValidationIssue,
 } from "@/src/lib/types";
 
@@ -261,57 +260,6 @@ export async function upsertFilings(filings: Filing[]) {
         filing.cashOnHand,
         filing.sourceUrl,
         JSON.stringify(filing.raw),
-      ],
-    );
-  }
-}
-
-export async function upsertTransactions(transactions: Transaction[]) {
-  if (transactions.length && process.env.ENABLE_DONOR_TRANSACTION_STORAGE !== "1") {
-    throw new Error(
-      "Schedule A donor transaction storage is disabled. Set ENABLE_DONOR_TRANSACTION_STORAGE=1 only for explicit donor-storage experiments.",
-    );
-  }
-
-  const pool = getPool();
-  for (const transaction of transactions.filter((item) => item.sourceId)) {
-    await pool.query(
-      `
-        insert into transactions (
-          source_id, committee_id, fec_committee_id, contributor_name,
-          contributor_name_normalized, contributor_employer,
-          contributor_employer_normalized, contributor_occupation, amount, transaction_date,
-          transaction_type, memo_text, source_url, raw
-        )
-        values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14)
-        on conflict (source, source_id) do update set
-          committee_id = excluded.committee_id,
-          contributor_name = excluded.contributor_name,
-          contributor_name_normalized = excluded.contributor_name_normalized,
-          contributor_employer = excluded.contributor_employer,
-          contributor_employer_normalized = excluded.contributor_employer_normalized,
-          amount = excluded.amount,
-          transaction_date = excluded.transaction_date,
-          transaction_type = excluded.transaction_type,
-          memo_text = excluded.memo_text,
-          source_url = excluded.source_url,
-          raw = excluded.raw
-      `,
-      [
-        transaction.sourceId,
-        transaction.committeeId,
-        transaction.fecCommitteeId,
-        transaction.contributorName,
-        transaction.contributorNameNormalized,
-        transaction.contributorEmployer,
-        transaction.contributorEmployerNormalized,
-        transaction.contributorOccupation,
-        transaction.amount,
-        transaction.transactionDate,
-        transaction.transactionType,
-        transaction.memoText,
-        transaction.sourceUrl,
-        JSON.stringify(transaction.raw),
       ],
     );
   }

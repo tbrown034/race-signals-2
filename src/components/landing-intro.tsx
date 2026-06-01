@@ -7,9 +7,9 @@ export function LandingIntro() {
         <p className="flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.22em] text-neutral-400">
           Race Signals
           <span aria-hidden="true" className="inline-flex items-center gap-0.5">
-            <span className="inline-block h-2 w-2 bg-red-500" />
-            <span className="inline-block h-2 w-2 bg-blue-500" />
-            <span className="inline-block h-2 w-2 bg-emerald-500" />
+            <span className="inline-block h-2 w-2 bg-red-700" />
+            <span className="inline-block h-2 w-2 bg-blue-700" />
+            <span className="inline-block h-2 w-2 bg-emerald-700" />
           </span>
           <span className="ml-1 text-neutral-500">·</span>
           <span className="text-neutral-400">FEC alert desk</span>
@@ -157,7 +157,7 @@ function SignalAnatomy() {
         </div>
         <div className="flex flex-wrap items-start gap-2 text-xs md:flex-col md:items-end">
           <span className="font-mono text-sm font-semibold text-neutral-950">$250,000</span>
-          <span className="border border-red-700 px-2 py-1 font-mono text-[10px] uppercase tracking-[0.12em] text-red-800">
+          <span className="border border-red-700 px-2 py-1 font-mono text-[10px] uppercase tracking-[0.12em] text-red-700">
             REVIEW
           </span>
           <span className="font-mono text-[10px] uppercase tracking-[0.12em] text-neutral-500">
@@ -210,7 +210,7 @@ function SwatchGlyph({ kind }: { kind: "emerald" | "red-stripe" | "party" | "rev
   return (
     <span
       aria-hidden="true"
-      className="mt-0.5 inline-flex h-3.5 shrink-0 items-center border border-red-700 px-1 font-mono text-[8px] uppercase tracking-[0.12em] text-red-800"
+      className="mt-0.5 inline-flex h-3.5 shrink-0 items-center border border-red-700 px-1 font-mono text-[8px] uppercase tracking-[0.12em] text-red-700"
     >
       REV
     </span>

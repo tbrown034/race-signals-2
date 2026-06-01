@@ -3,7 +3,6 @@ import type {
   Committee,
   Filing,
   IndependentExpenditure,
-  Transaction,
   ValidationIssue,
 } from "@/src/lib/types";
 
@@ -137,42 +136,6 @@ export function validateFiling(filing: Filing): ValidationIssue[] {
     });
   }
   return issues.concat(sourceUrlIssue("filing", filing.sourceId, filing.sourceUrl));
-}
-
-export function validateTransaction(transaction: Transaction): ValidationIssue[] {
-  const issues: ValidationIssue[] = [];
-  if (!transaction.committeeId) {
-    issues.push({
-      entityType: "transaction",
-      sourceId: transaction.sourceId,
-      severity: "error",
-      rule: "missing_committee_id",
-      message: "Transaction cannot be matched to a committee.",
-      sourceUrl: transaction.sourceUrl,
-    });
-  }
-  if (!transaction.transactionDate) {
-    issues.push({
-      entityType: "transaction",
-      sourceId: transaction.sourceId,
-      severity: "warning",
-      rule: "missing_date",
-      message: "Transaction is missing a transaction date.",
-      sourceUrl: transaction.sourceUrl,
-    });
-  }
-  if (transaction.amount >= LARGE_AMOUNT_REVIEW_THRESHOLD) {
-    issues.push({
-      entityType: "transaction",
-      sourceId: transaction.sourceId,
-      severity: "warning",
-      rule: "large_amount_review",
-      message: "Transaction amount meets the flat manual review threshold.",
-      sourceUrl: transaction.sourceUrl,
-      raw: transaction.raw,
-    });
-  }
-  return issues.concat(sourceUrlIssue("transaction", transaction.sourceId, transaction.sourceUrl));
 }
 
 export function validateIndependentExpenditure(

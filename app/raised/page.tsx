@@ -99,7 +99,7 @@ export default async function RaisedPage({
               <table className="w-full min-w-0 text-left text-sm md:min-w-[860px]">
                 <thead className="bg-neutral-100 font-mono text-xs uppercase tracking-[0.12em] text-neutral-500">
                   <tr>
-                    <th className="px-4 py-3 font-medium" scope="col">Rank</th>
+                    <th className="hidden px-4 py-3 text-right font-medium sm:table-cell" scope="col">Rank</th>
                     <th className="px-4 py-3 font-medium" scope="col">Candidate</th>
                     <th className="px-4 py-3 font-medium" scope="col">Race</th>
                     <th className="px-4 py-3 text-right font-medium" scope="col">Cycle receipts</th>
@@ -111,7 +111,7 @@ export default async function RaisedPage({
                 <tbody className="divide-y divide-neutral-200">
                   {fundraisers.map((fundraiser, index) => (
                     <tr key={fundraiser.candidateId}>
-                      <td className="px-4 py-3 font-mono text-neutral-600">{index + 1}</td>
+                      <td className="hidden px-4 py-3 text-right font-mono text-neutral-600 sm:table-cell">{index + 1}</td>
                       <td className="px-4 py-3">
                         <div className="flex flex-wrap items-center gap-2">
                           <PartySquare party={fundraiser.party} />
@@ -210,7 +210,7 @@ function StateFilter({
   return (
     <div className="min-w-0">
       <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-neutral-500">State</p>
-      <div className="mt-2 flex max-w-full flex-wrap gap-2">
+      <div className="mt-2 -mx-5 flex max-w-[calc(100vw-1rem)] flex-nowrap gap-2 overflow-x-auto whitespace-nowrap px-5 pb-1 sm:mx-0 sm:max-w-full sm:flex-wrap sm:px-0 sm:pb-0">
         <Link
           className={`border px-2.5 py-1.5 text-sm font-medium ${!active ? "border-neutral-950 bg-neutral-950 text-white" : "border-neutral-300 hover:border-neutral-900"}`}
           href={hrefFor(undefined, office)}

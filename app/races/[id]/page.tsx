@@ -133,7 +133,7 @@ export default async function RacePage({
         />
         <CoverageWarning issues={validationWarnings} />
         <AggregateOnlyRaceNotice candidates={aggregateOnlyCandidates} />
-        <div className="grid gap-px border-b border-neutral-300 bg-neutral-300 sm:grid-cols-2 xl:grid-cols-5" id="race-stats">
+        <div className="grid scroll-mt-24 gap-px border-b border-neutral-300 bg-neutral-300 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-5" id="race-stats">
           <RaceStat
             detail="Source-linked Schedule E rows in this Race Signals slice; verify evidence before publication."
             label="Stored Schedule E total"
@@ -152,7 +152,7 @@ export default async function RacePage({
           <RaceStat label="Matched FEC candidates" value={String(stats.candidateCount)} />
           <RaceStat label="Matched incumbents" value={String(stats.incumbentCount)} />
         </div>
-        <div className="border-b border-neutral-300" id="candidate-cohort">
+        <div className="scroll-mt-24 border-b border-neutral-300" id="candidate-cohort">
           <div className="border-b border-neutral-300 px-5 py-4">
             <h2 className="text-sm font-semibold uppercase tracking-[0.14em] text-neutral-600">
               Candidate cohort

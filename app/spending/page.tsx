@@ -1,7 +1,9 @@
 import Link from "next/link";
 import { CoverageStrip } from "@/src/components/coverage-strip";
 import { FeedFilters } from "@/src/components/feed-filters";
+import { IncumbentBadge } from "@/src/components/incumbent-badge";
 import { PageShell } from "@/src/components/page-shell";
+import { PartySquare } from "@/src/components/party-square";
 import { getCommittee, getCoverageSummary, getRaces, getSignalStateCounts, getSignalStateFreshness, getSpendingSignals } from "@/src/lib/db/repository";
 import { formatDate, formatMoney, isOlderThanHours } from "@/src/lib/format";
 import { displayCandidateName } from "@/src/lib/names";
@@ -217,12 +219,18 @@ export default async function SpendingPage({
                             <div>
                               <dt className="inline font-mono uppercase tracking-[0.12em] text-neutral-500">Target </dt>
                               <dd className="inline">
-                                <EntityLink
-                                  fallback="Candidate not resolved"
-                                  hrefBase="/candidates"
-                                  id={signal.candidateId}
-                                  label={signal.candidateName}
-                                />
+                                <span className="inline-flex flex-wrap items-center gap-1.5">
+                                  <PartySquare party={signal.candidateParty} />
+                                  <EntityLink
+                                    fallback="Candidate not resolved"
+                                    hrefBase="/candidates"
+                                    id={signal.candidateId}
+                                    label={signal.candidateName}
+                                  />
+                                  {signal.candidateIncumbentChallengeStatus === "I" || signal.candidateIncumbentChallengeStatus === "Incumbent" ? (
+                                    <IncumbentBadge />
+                                  ) : null}
+                                </span>
                                 {targetContext(signal) ? ` (${targetContext(signal)})` : ""}
                               </dd>
                             </div>
@@ -280,12 +288,18 @@ export default async function SpendingPage({
                           />
                         </td>
                         <td className="hidden px-4 py-3 md:table-cell">
-                          <EntityLink
-                            fallback="Candidate not resolved"
-                            hrefBase="/candidates"
-                            id={signal.candidateId}
-                            label={signal.candidateName}
-                          />
+                          <span className="inline-flex flex-wrap items-center gap-1.5">
+                            <PartySquare party={signal.candidateParty} />
+                            <EntityLink
+                              fallback="Candidate not resolved"
+                              hrefBase="/candidates"
+                              id={signal.candidateId}
+                              label={signal.candidateName}
+                            />
+                            {signal.candidateIncumbentChallengeStatus === "I" || signal.candidateIncumbentChallengeStatus === "Incumbent" ? (
+                              <IncumbentBadge />
+                            ) : null}
+                          </span>
                           {targetContext(signal) ? (
                             <p className="mt-1 font-mono text-[11px] uppercase tracking-[0.12em] text-neutral-500">
                               {targetContext(signal)}

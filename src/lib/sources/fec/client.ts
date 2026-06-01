@@ -244,15 +244,21 @@ export async function fetchCommittee(committeeId: string) {
 export async function fetchReportsForCommittee(
   committeeId: string,
   cycle: number,
-  window?: DateWindow,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  _window?: DateWindow,
 ) {
+  // FEC's /committee/{id}/reports/ endpoint accepts `cycle` (two-year period)
+  // but silently ignores `report_year` and `min_receipt_date` — those params
+  // exist on /schedules/* endpoints, not here. Passing report_year=2026 used
+  // to return every report ever filed (including 2008 amendments touched in
+  // 2026), which the cycle audit flagged. The `cycle` filter is the correct
+  // server-side scope. The window parameter is accepted for caller
+  // compatibility but applied as no-op here.
   return firstPages<FecReport>(
     `/committee/${committeeId}/reports/`,
     {
-      report_year: cycle,
+      cycle,
       sort: "-receipt_date",
-      min_receipt_date: window?.startDate,
-      max_receipt_date: window?.endDate,
     },
     2,
   );

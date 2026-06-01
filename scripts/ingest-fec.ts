@@ -108,7 +108,7 @@ function enforceScheduledCostGuard({
   if (process.env.GITHUB_ACTIONS !== "true") {
     return;
   }
-  if (process.env.GITHUB_EVENT_NAME === "workflow_dispatch" && process.env.ALLOW_UNBOUNDED_INGEST === "1") {
+  if (process.env.ALLOW_UNBOUNDED_INGEST === "1") {
     return;
   }
   if (!maxCandidates || !maxCandidatePages) {
@@ -118,7 +118,7 @@ function enforceScheduledCostGuard({
   }
   if (process.env.GITHUB_EVENT_NAME === "schedule" && !state && maxCandidates > 100) {
     throw new Error(
-      "State-agnostic scheduled ingest must keep FEC_MAX_CANDIDATES <= 100. Use workflow_dispatch for larger runs.",
+      "State-agnostic scheduled ingest must keep FEC_MAX_CANDIDATES <= 100. Set ALLOW_UNBOUNDED_INGEST=1 for the weekly refresh, or use workflow_dispatch for larger runs.",
     );
   }
 }
@@ -265,7 +265,9 @@ async function main() {
           electionCheckedCandidateIds.push(candidateWithLookupState.id);
         }
       }
-      if (!shouldRefreshTotals(candidateWithLookupState)) {
+      // Only skip the totals fetch in `watch` mode (the daily incremental
+      // path). `backfill` and `repair` exist specifically to re-fetch.
+      if (mode === "watch" && !shouldRefreshTotals(candidateWithLookupState)) {
         normalizedCandidates.push(candidateWithLookupState);
         totalsSkipped += 1;
         continue;
@@ -708,6 +710,10 @@ async function getElectionCheckedAt(candidateIds: string[]) {
   );
 }
 
+// INVARIANT: keep this Pick narrow to the totals/timestamp fields only.
+// Adding identity fields (party, office, state, name) here would silently
+// overwrite freshly-normalized FEC data with stale DB values at the
+// candidate spread in the watch loop.
 type StoredTotals = Pick<
   Candidate,
   | "totalReceiptsCycle"

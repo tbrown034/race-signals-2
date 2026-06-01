@@ -1,0 +1,43 @@
+name: Weekly FEC totals refresh
+
+# Forces a full re-fetch of every stored candidate's totals from FEC's
+# /candidate/{id}/totals/ endpoint. The daily ingest job otherwise skips
+# candidates whose totals were fetched within TOTALS_REFRESH_HOURS (default
+# 168 = one week). Setting INGESTION_FULL_REFRESH=1 here bypasses the skip.
+
+on:
+  schedule:
+    - cron: "0 10 * * 0"  # Sundays at 10:00 UTC (06:00 ET)
+  workflow_dispatch:
+
+concurrency:
+  group: fec-ingest
+  cancel-in-progress: false
+
+jobs:
+  weekly-refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      FEC_API_KEY: ${{ secrets.FEC_API_KEY }}
+      RACE_SIGNALS_OFFICES: H,S
+      FEC_MAX_CANDIDATES: "500"
+      FEC_MAX_CANDIDATE_PAGES: "25"
+      FEC_REQUEST_DELAY_MS: "1500"
+      INGESTION_FULL_REFRESH: "1"
+      ALLOW_UNBOUNDED_INGEST: "1"
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npm run ingest
+      - run: npm run repair:schedule-e-links
+      - run: npm run repair:cycles
+      - run: SIGNAL_AUDIT_STRICT=1 npm run audit:signals
+      - run: npm run repair:history
+      - run: npm run audit:cost

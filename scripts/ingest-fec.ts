@@ -237,9 +237,13 @@ async function main() {
     const elections: Election[] = [];
     const electionCheckedCandidateIds: string[] = [];
     const checkedAtByCandidateId = await getElectionCheckedAt(candidatesWithLegislatorIds.map((candidate) => candidate.id));
+    const storedTotalsById = await getStoredTotals(candidatesWithLegislatorIds.map((candidate) => candidate.id));
+    let totalsSkipped = 0;
     for (const candidate of candidatesWithLegislatorIds) {
-      const candidateWithLookupState = {
+      const storedTotals = storedTotalsById.get(candidate.id);
+      const candidateWithLookupState: Candidate = {
         ...candidate,
+        ...(storedTotals ?? {}),
         electionsCheckedAt: checkedAtByCandidateId.get(candidate.id) ?? candidate.electionsCheckedAt,
       };
       if (shouldRefreshElections(candidateWithLookupState)) {
@@ -260,6 +264,11 @@ async function main() {
           });
           electionCheckedCandidateIds.push(candidateWithLookupState.id);
         }
+      }
+      if (!shouldRefreshTotals(candidateWithLookupState)) {
+        normalizedCandidates.push(candidateWithLookupState);
+        totalsSkipped += 1;
+        continue;
       }
       try {
         const totalsResult = await applyCandidateTotalsWithRaw(candidateWithLookupState, cycle);
@@ -485,7 +494,7 @@ async function main() {
     await finishIngestionRun(runId, errors.length ? "partial" : "success", recordsSeen, errors);
 
     console.log(
-      `Ingested ${recordsSeen} records/signals from ${candidates.length} ${officeLabel} candidates with ${issues.length} validation issues.`,
+      `Ingested ${recordsSeen} records/signals from ${candidates.length} ${officeLabel} candidates with ${issues.length} validation issues. Totals re-used from DB: ${totalsSkipped}; fetched fresh from FEC: ${endpointCounts.totals}.`,
     );
   } catch (error) {
     errors.push(error instanceof Error ? error.message : error);
@@ -672,6 +681,16 @@ function shouldRefreshElections(candidate: Candidate) {
   return Date.now() - checkedAt >= refreshHours * 60 * 60 * 1000;
 }
 
+function shouldRefreshTotals(candidate: Candidate) {
+  if (process.env.INGESTION_FULL_REFRESH === "1") return true;
+  const refreshHours = numberFromEnv("TOTALS_REFRESH_HOURS") ?? 168;
+  const fetchedAt = candidate.totalsFetchedAt ?? candidate.totalsUpdatedAt;
+  if (!fetchedAt) return true;
+  const ts = Date.parse(fetchedAt);
+  if (Number.isNaN(ts)) return true;
+  return Date.now() - ts >= refreshHours * 60 * 60 * 1000;
+}
+
 async function getElectionCheckedAt(candidateIds: string[]) {
   if (!candidateIds.length) return new Map<string, string>();
   const result = await getPool().query<{ id: string; elections_checked_at: Date | null }>(
@@ -686,6 +705,57 @@ async function getElectionCheckedAt(candidateIds: string[]) {
     result.rows
       .filter((row) => row.elections_checked_at)
       .map((row) => [row.id, row.elections_checked_at!.toISOString()]),
+  );
+}
+
+type StoredTotals = Pick<
+  Candidate,
+  | "totalReceiptsCycle"
+  | "totalDisbursementsCycle"
+  | "cashOnHandLatest"
+  | "cashOnHandAsOf"
+  | "individualContributionPct"
+  | "pacContributionPct"
+  | "totalsUpdatedAt"
+  | "totalsFetchedAt"
+>;
+
+async function getStoredTotals(candidateIds: string[]) {
+  if (!candidateIds.length) return new Map<string, StoredTotals>();
+  const result = await getPool().query<{
+    id: string;
+    total_receipts_cycle: string | null;
+    total_disbursements_cycle: string | null;
+    cash_on_hand_latest: string | null;
+    cash_on_hand_as_of: Date | null;
+    individual_contribution_pct: string | null;
+    pac_contribution_pct: string | null;
+    totals_updated_at: Date | null;
+    totals_fetched_at: Date | null;
+  }>(
+    `
+      select id, total_receipts_cycle::text, total_disbursements_cycle::text, cash_on_hand_latest::text,
+             cash_on_hand_as_of, individual_contribution_pct::text, pac_contribution_pct::text,
+             totals_updated_at, totals_fetched_at
+      from candidates
+      where id = any($1::text[])
+    `,
+    [candidateIds],
+  );
+  return new Map(
+    result.rows.map((row) => [
+      row.id,
+      {
+        totalReceiptsCycle: row.total_receipts_cycle === null ? null : Number(row.total_receipts_cycle),
+        totalDisbursementsCycle: row.total_disbursements_cycle === null ? null : Number(row.total_disbursements_cycle),
+        cashOnHandLatest: row.cash_on_hand_latest === null ? null : Number(row.cash_on_hand_latest),
+        cashOnHandAsOf: row.cash_on_hand_as_of ? row.cash_on_hand_as_of.toISOString().slice(0, 10) : null,
+        individualContributionPct: row.individual_contribution_pct === null ? null : Number(row.individual_contribution_pct),
+        pacContributionPct: row.pac_contribution_pct === null ? null : Number(row.pac_contribution_pct),
+        totalsUpdatedAt: row.totals_updated_at ? row.totals_updated_at.toISOString() : null,
+        totalsFetchedAt: row.totals_fetched_at ? row.totals_fetched_at.toISOString() : null,
+      },
+    ]),
   );
 }
 
